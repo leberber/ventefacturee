@@ -694,25 +694,6 @@
   }
 }
 
-// ---- Livraison detail page ----
-.back-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 2rem;
-  height: 2rem;
-  border-radius: var(--radius-lg);
-  background: var(--surface-100);
-  border: var(--border-width) solid var(--surface-border);
-  color: var(--text-color-secondary);
-  text-decoration: none;
-  flex-shrink: 0;
-  transition: background 0.15s, color 0.15s;
-
-  &:hover { background: var(--surface-200); color: var(--text-color); }
-
-  i { font-size: 0.8rem; }
-}
 
 .client-delivery-card {
   background: var(--surface-card);

@@ -292,6 +292,8 @@ export class MapPickerComponent implements AfterViewInit, OnDestroy {
   private map!: L.Map;
   private marker?: L.Marker;
   private resizeObserver?: ResizeObserver;
+  private mapReady = false;
+  private pendingLocation?: { lat: number; lng: number };
 
   readonly picked           = signal<MapLocation | undefined>(undefined);
   readonly isLoadingAddress = signal(false);
@@ -353,6 +355,25 @@ export class MapPickerComponent implements AfterViewInit, OnDestroy {
     if (this.initialLat() && this.initialLng()) {
       this.placeMarker(lat, lng);
       this.reverseGeocode(lat, lng);
+    }
+
+    this.mapReady = true;
+    if (this.pendingLocation) {
+      const { lat: pLat, lng: pLng } = this.pendingLocation;
+      this.pendingLocation = undefined;
+      this.map.setView([pLat, pLng], DEFAULT_ZOOM);
+      this.placeMarker(pLat, pLng);
+      this.reverseGeocode(pLat, pLng);
+    }
+  }
+
+  placeAt(lat: number, lng: number): void {
+    if (this.mapReady) {
+      this.map.setView([lat, lng], DEFAULT_ZOOM);
+      this.placeMarker(lat, lng);
+      this.reverseGeocode(lat, lng);
+    } else {
+      this.pendingLocation = { lat, lng };
     }
   }
 

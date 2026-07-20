@@ -63,12 +63,12 @@
               <th class="th-sort" (click)="sortBy('plastic_balance')"
                 [class.th-sort--asc]="sortCol==='plastic_balance'&&sortDir===1"
                 [class.th-sort--desc]="sortCol==='plastic_balance'&&sortDir===-1">
-                🔵 Plastique <i class="pi pi-sort-alt"></i>
+                <img src="assets/plastiquepallette.png" style="height:18px;vertical-align:middle;margin-right:4px" alt="">Plastique <i class="pi pi-sort-alt"></i>
               </th>
               <th class="th-sort" (click)="sortBy('wood_balance')"
                 [class.th-sort--asc]="sortCol==='wood_balance'&&sortDir===1"
                 [class.th-sort--desc]="sortCol==='wood_balance'&&sortDir===-1">
-                🟫 Bois <i class="pi pi-sort-alt"></i>
+                <img src="assets/woodpallette.png" style="height:18px;vertical-align:middle;margin-right:4px" alt="">Bois <i class="pi pi-sort-alt"></i>
               </th>
               <th style="width:7rem"></th>
             </tr>
@@ -80,7 +80,7 @@
                 <td>
                   <div class="table-item-info">
                     <span class="table-item-name">{{ c.name }}</span>
-                    @if (c.store_name) {
+                    @if (c.store_name && c.store_name !== c.name) {
                       <span class="table-item-desc">{{ c.store_name }}</span>
                     }
                   </div>

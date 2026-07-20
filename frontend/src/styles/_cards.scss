@@ -128,6 +128,7 @@
 .back-btn {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 0.4rem;
   height: 2.25rem;
   padding: 0 0.875rem;
@@ -138,6 +139,7 @@
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-medium);
   cursor: pointer;
+  text-decoration: none;
   transition: all var(--transition-fast);
   flex-shrink: 0;
   white-space: nowrap;

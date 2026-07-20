@@ -70,7 +70,7 @@ export class ClientFormComponent implements OnInit {
         this.editingId = +idParam;
         const state = history.state as { client?: Client };
         if (state?.client) {
-          this.prefill(state.client);
+          setTimeout(() => this.prefill(state.client!), 0);
         } else {
           this.router.navigate(['/clients']);
         }
@@ -79,13 +79,30 @@ export class ClientFormComponent implements OnInit {
   }
 
   private prefill(c: Client) {
-    if (c.daira) this.onDairaChange(c.daira);
+    const category = (c.category as string).toLowerCase() as ClientCategory;
+
+    // Case-insensitive lookup so DB values don't need to be an exact case match
+    const dairaEntry = this.dairasData.find(
+      d => d.daira_name.toLowerCase() === (c.daira ?? '').toLowerCase()
+    );
+    const dairaName = dairaEntry?.daira_name ?? c.daira ?? '';
+    const communeEntry = dairaEntry?.communes.find(
+      (com: any) => com.name.toLowerCase() === (c.commune ?? '').toLowerCase()
+    );
+    const communeName = communeEntry?.name ?? c.commune ?? '';
+
+    if (dairaName) this.onDairaChange(dairaName);
+
+    const store_name = c.store_name ?? ((!c.first_name && !c.last_name) ? c.name : '') ?? '';
     this.form.patchValue({
       code: c.code ?? '', first_name: c.first_name ?? '', last_name: c.last_name ?? '',
-      store_name: c.store_name ?? '', name: c.name, phone: c.phone ?? '',
-      category: c.category, daira: c.daira ?? '', commune: c.commune ?? '',
+      store_name, name: c.name, phone: c.phone ?? '',
+      category, daira: dairaName,
       address: c.address ?? '', latitude: c.latitude ?? null, longitude: c.longitude ?? null,
     });
+
+    if (communeName) setTimeout(() => this.form.patchValue({ commune: communeName }), 0);
+    if (c.latitude && c.longitude) this.mapPicker?.placeAt(c.latitude, c.longitude);
   }
 
   onDairaChange(dairaName: string) {
