@@ -1,0 +1,107 @@
+<p-toast />
+<p-confirmdialog />
+
+<div class="page-content">
+
+  <!-- Toolbar -->
+  <p-toolbar styleClass="mb-4">
+    <ng-template #start>
+      <h2 class="page-title">Clients&nbsp;<small style="font-size:14px;font-weight:400;color:#6b7280">({{ clients.length }})</small></h2>
+    </ng-template>
+    <ng-template #end>
+      <p-iconfield>
+        <p-inputicon class="pi pi-search" />
+        <input pInputText [(ngModel)]="searchQuery" (ngModelChange)="load()" placeholder="Rechercher…" style="width:200px">
+      </p-iconfield>
+      <p-button label="Ajouter" icon="pi pi-plus" (onClick)="openAdd()" styleClass="ml-2" />
+    </ng-template>
+  </p-toolbar>
+
+  <!-- Table -->
+  <p-table
+    [value]="clients"
+    [loading]="loading"
+    styleClass="p-datatable-sm p-datatable-striped"
+    [paginator]="true"
+    [rows]="20"
+    [showCurrentPageReport]="true"
+    currentPageReportTemplate="{first}–{last} sur {totalRecords}"
+  >
+    <ng-template #header>
+      <tr>
+        <th pSortableColumn="code">Code <p-sortIcon field="code" /></th>
+        <th pSortableColumn="name">Nom / Magasin <p-sortIcon field="name" /></th>
+        <th>Catégorie</th>
+        <th>Téléphone</th>
+        <th>🔵 Plt. total</th>
+        <th>Dont consig.</th>
+        <th>Dont non-consig.</th>
+        <th>🟫 Plt. total</th>
+        <th>Dont consig.</th>
+        <th>Dont non-consig.</th>
+        <th style="width:120px">Actions</th>
+      </tr>
+    </ng-template>
+    <ng-template #body let-c>
+      <tr>
+        <td><span class="font-mono">{{ c.code || '—' }}</span></td>
+        <td><strong>{{ c.name }}</strong></td>
+        <td><p-tag [value]="categoryLabel[c.category]" [severity]="categorySeverity[c.category]" /></td>
+        <td>{{ c.phone || '—' }}</td>
+        <td><p-tag [value]="(c.plastic_balance ?? 0).toString()" [severity]="(c.plastic_balance ?? 0) > 0 ? 'info' : 'success'" /></td>
+        <td><p-tag [value]="(c.plastic_consigne ?? 0).toString()" severity="info" /></td>
+        <td><p-tag [value]="(c.plastic_nc ?? 0).toString()" severity="warn" /></td>
+        <td><p-tag [value]="(c.wood_balance ?? 0).toString()" [severity]="(c.wood_balance ?? 0) > 0 ? 'warn' : 'success'" /></td>
+        <td><p-tag [value]="(c.wood_consigne ?? 0).toString()" severity="warn" /></td>
+        <td><p-tag [value]="(c.wood_nc ?? 0).toString()" severity="warn" /></td>
+        <td>
+          <div style="display:flex;gap:4px">
+            <p-button icon="pi pi-pencil" size="small" severity="secondary" (onClick)="openEdit(c)" />
+            <p-button icon="pi pi-list"   size="small" severity="secondary" [routerLink]="['/historique']" [queryParams]="{clientId: c.id}" />
+            <p-button icon="pi pi-trash"  size="small" severity="danger"    (onClick)="confirmDelete(c)" />
+          </div>
+        </td>
+      </tr>
+    </ng-template>
+    <ng-template #emptymessage>
+      <tr><td colspan="11" style="text-align:center;padding:32px;color:#9ca3af">
+        {{ searchQuery ? 'Aucun résultat pour "' + searchQuery + '"' : 'Aucun client enregistré' }}
+      </td></tr>
+    </ng-template>
+  </p-table>
+
+</div>
+
+<!-- Dialog: Add / Edit -->
+<p-dialog
+  [(visible)]="dialogVisible"
+  [header]="editingId ? 'Modifier le client' : 'Ajouter un client'"
+  [modal]="true"
+  [style]="{width:'480px'}"
+  [draggable]="false"
+>
+  <form [formGroup]="form" (ngSubmit)="save()">
+    <div class="form-grid-2">
+      <div class="field">
+        <label>Code client</label>
+        <input pInputText formControlName="code" placeholder="ex: 000146">
+      </div>
+      <div class="field">
+        <label>Catégorie <span style="color:red">*</span></label>
+        <p-select formControlName="category" [options]="categoryOptions" optionLabel="label" optionValue="value" [style]="{width:'100%'}" />
+      </div>
+    </div>
+    <div class="field">
+      <label>Nom / Magasin <span style="color:red">*</span></label>
+      <input pInputText formControlName="name" placeholder="Nom du client ou magasin" class="w-full">
+    </div>
+    <div class="field mb-0">
+      <label>Téléphone</label>
+      <input pInputText formControlName="phone" placeholder="0550 000 000" class="w-full">
+    </div>
+  </form>
+  <ng-template #footer>
+    <p-button label="Annuler"     severity="secondary" (onClick)="dialogVisible = false" />
+    <p-button label="Enregistrer" icon="pi pi-check"   (onClick)="save()" [disabled]="form.invalid" />
+  </ng-template>
+</p-dialog>

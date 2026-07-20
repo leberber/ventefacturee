@@ -1,0 +1,25 @@
+<div class="app-layout">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="logo">
+      <i class="pi pi-box logo-icon"></i>
+      <div>
+        <div class="logo-title">Pallette</div>
+        <div class="logo-sub">CLR Freha</div>
+      </div>
+    </div>
+    <nav>
+      @for (item of navItems; track item.route) {
+        <a class="nav-item" [routerLink]="item.route" routerLinkActive="active">
+          <i [class]="item.icon"></i>
+          <span>{{ item.label }}</span>
+        </a>
+      }
+    </nav>
+  </aside>
+
+  <!-- Main content -->
+  <div class="main-area">
+    <router-outlet />
+  </div>
+</div>

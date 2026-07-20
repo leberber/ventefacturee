@@ -1,0 +1,154 @@
+<p-toast />
+<p-confirmdialog />
+
+<div class="page-content">
+
+  <!-- Toolbar -->
+  <p-toolbar styleClass="mb-4">
+    <ng-template #start>
+      <h2 class="page-title">Historique des BLs&nbsp;<small style="font-size:14px;font-weight:400;color:#6b7280">({{ bons.length }})</small></h2>
+    </ng-template>
+    <ng-template #end>
+      <p-select
+        [(ngModel)]="selectedClientId"
+        [options]="clientOptions"
+        optionLabel="label"
+        optionValue="value"
+        (onChange)="load()"
+        [style]="{width:'220px'}"
+      />
+    </ng-template>
+  </p-toolbar>
+
+  <!-- Table -->
+  <p-table
+    [value]="bons"
+    [loading]="loading"
+    styleClass="p-datatable-sm p-datatable-striped"
+    [paginator]="true"
+    [rows]="25"
+    [showCurrentPageReport]="true"
+    currentPageReportTemplate="{first}–{last} sur {totalRecords}"
+    sortField="date"
+    [sortOrder]="-1"
+  >
+    <ng-template #header>
+      <tr>
+        <th pSortableColumn="bl_number">N° BL <p-sortIcon field="bl_number" /></th>
+        <th pSortableColumn="date">Date <p-sortIcon field="date" /></th>
+        <th>Client</th>
+        <th>Chauffeur</th>
+        <th>🔵 Consig.</th>
+        <th>🔵 Non-consig.</th>
+        <th>🔵 Retour</th>
+        <th>🟫 Consig.</th>
+        <th>🟫 Non-consig.</th>
+        <th>🟫 Retour</th>
+        <th>Notes</th>
+        <th style="width:100px">Actions</th>
+      </tr>
+    </ng-template>
+    <ng-template #body let-b>
+      <tr>
+        <td><span class="font-mono">{{ b.bl_number }}</span></td>
+        <td>{{ b.date | date:'dd/MM/yyyy' }}</td>
+        <td><strong>{{ b.client_name }}</strong></td>
+        <td>{{ b.chauffeur_name }}</td>
+        <td><p-tag [value]="b.consigne_plastique.toString()" severity="info" /></td>
+        <td><p-tag [value]="b.nc_plastique.toString()" severity="warn" /></td>
+        <td><p-tag [value]="b.retour_plastique.toString()" severity="success" /></td>
+        <td><p-tag [value]="b.consigne_bois.toString()" severity="warn" /></td>
+        <td><p-tag [value]="b.nc_bois.toString()" severity="warn" /></td>
+        <td><p-tag [value]="b.retour_bois.toString()" severity="success" /></td>
+        <td style="max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ b.notes || '—' }}</td>
+        <td>
+          <div style="display:flex;gap:4px">
+            <p-button icon="pi pi-pencil" size="small" severity="secondary" (onClick)="openEdit(b)" />
+            <p-button icon="pi pi-trash"  size="small" severity="danger"    (onClick)="confirmDelete(b)" />
+          </div>
+        </td>
+      </tr>
+    </ng-template>
+    <ng-template #emptymessage>
+      <tr><td colspan="12" style="text-align:center;padding:32px;color:#9ca3af">
+        Aucun BL trouvé
+      </td></tr>
+    </ng-template>
+  </p-table>
+
+</div>
+
+<!-- Dialog: Edit BL -->
+<p-dialog
+  [(visible)]="dialogVisible"
+  header="Modifier le BL"
+  [modal]="true"
+  [style]="{width:'680px'}"
+  [draggable]="false"
+>
+  <form [formGroup]="form" (ngSubmit)="save()">
+
+    <div class="form-grid-2" style="margin-bottom:0">
+      <div class="field">
+        <label>Client <span style="color:red">*</span></label>
+        <p-select formControlName="client_id" [options]="clientOptions.slice(1)" optionLabel="label" optionValue="value" [style]="{width:'100%'}" />
+      </div>
+      <div class="field">
+        <label>Chauffeur <span style="color:red">*</span></label>
+        <p-select formControlName="chauffeur_id" [options]="chauffeurOptions" optionLabel="label" optionValue="value" [style]="{width:'100%'}" />
+      </div>
+    </div>
+
+    <div class="palette-section">
+      <div class="palette-section-title">🔵 Palettes plastique</div>
+      <div class="form-grid-3">
+        <div class="field">
+          <label>Consignées</label>
+          <p-inputnumber formControlName="consigne_plastique" [min]="0" [showButtons]="true" buttonLayout="horizontal"
+            decrementButtonIcon="pi pi-minus" incrementButtonIcon="pi pi-plus" [style]="{width:'100%'}" />
+        </div>
+        <div class="field">
+          <label>Non-consignées</label>
+          <p-inputnumber formControlName="nc_plastique" [min]="0" [showButtons]="true" buttonLayout="horizontal"
+            decrementButtonIcon="pi pi-minus" incrementButtonIcon="pi pi-plus" [style]="{width:'100%'}" />
+        </div>
+        <div class="field">
+          <label>Retour</label>
+          <p-inputnumber formControlName="retour_plastique" [min]="0" [showButtons]="true" buttonLayout="horizontal"
+            decrementButtonIcon="pi pi-minus" incrementButtonIcon="pi pi-plus" [style]="{width:'100%'}" />
+        </div>
+      </div>
+    </div>
+
+    <div class="palette-section">
+      <div class="palette-section-title">🟫 Palettes bois</div>
+      <div class="form-grid-3">
+        <div class="field">
+          <label>Consignées</label>
+          <p-inputnumber formControlName="consigne_bois" [min]="0" [showButtons]="true" buttonLayout="horizontal"
+            decrementButtonIcon="pi pi-minus" incrementButtonIcon="pi pi-plus" [style]="{width:'100%'}" />
+        </div>
+        <div class="field">
+          <label>Non-consignées</label>
+          <p-inputnumber formControlName="nc_bois" [min]="0" [showButtons]="true" buttonLayout="horizontal"
+            decrementButtonIcon="pi pi-minus" incrementButtonIcon="pi pi-plus" [style]="{width:'100%'}" />
+        </div>
+        <div class="field">
+          <label>Retour</label>
+          <p-inputnumber formControlName="retour_bois" [min]="0" [showButtons]="true" buttonLayout="horizontal"
+            decrementButtonIcon="pi pi-minus" incrementButtonIcon="pi pi-plus" [style]="{width:'100%'}" />
+        </div>
+      </div>
+    </div>
+
+    <div class="field mb-0">
+      <label>Notes</label>
+      <input pInputText formControlName="notes" placeholder="Remarques…" class="w-full">
+    </div>
+
+  </form>
+  <ng-template #footer>
+    <p-button label="Annuler"     severity="secondary" (onClick)="dialogVisible = false" />
+    <p-button label="Enregistrer" icon="pi pi-check"   (onClick)="save()" [disabled]="form.invalid" />
+  </ng-template>
+</p-dialog>

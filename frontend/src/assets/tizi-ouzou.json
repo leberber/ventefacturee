@@ -1,0 +1,400 @@
+{
+  "wilaya": "TIZI-OUZOU",
+  "wilaya_code": 15,
+  "dairas": [
+    {
+      "daira_name": "AIN EL HAMMAM",
+      "daira_code": 1502,
+      "communes": [
+        {
+          "code": 1531,
+          "name": "ABI-YOUCEF"
+        },
+        {
+          "code": 1502,
+          "name": "AIN-EL-HAMMAM"
+        },
+        {
+          "code": 1527,
+          "name": "AIT-YAHIA"
+        },
+        {
+          "code": 1503,
+          "name": "AKBIL"
+        }
+      ]
+    },
+    {
+      "daira_name": "AZAZGA",
+      "daira_code": 1518,
+      "communes": [
+        {
+          "code": 1518,
+          "name": "AZAZGA"
+        },
+        {
+          "code": 1504,
+          "name": "FREHA"
+        },
+        {
+          "code": 1541,
+          "name": "IFIGHA"
+        },
+        {
+          "code": 1520,
+          "name": "YAKOURENE"
+        },
+        {
+          "code": 1523,
+          "name": "ZEKRI"
+        }
+      ]
+    },
+    {
+      "daira_name": "AZEFFOUN",
+      "daira_code": 1537,
+      "communes": [
+        {
+          "code": 1553,
+          "name": "AGHRIBS"
+        },
+        {
+          "code": 1513,
+          "name": "AIT-CHAFAA"
+        },
+        {
+          "code": 1544,
+          "name": "AKERROU"
+        },
+        {
+          "code": 1537,
+          "name": "AZEFFOUN"
+        }
+      ]
+    },
+    {
+      "daira_name": "BENI DOUALA",
+      "daira_code": 1532,
+      "communes": [
+        {
+          "code": 1528,
+          "name": "AIT-MAHMOUD"
+        },
+        {
+          "code": 1516,
+          "name": "BENI ZMENZER"
+        },
+        {
+          "code": 1515,
+          "name": "BENI-AISSI"
+        },
+        {
+          "code": 1532,
+          "name": "BENI-DOUALA"
+        }
+      ]
+    },
+    {
+      "daira_name": "BENNI YENNI",
+      "daira_code": 1552,
+      "communes": [
+        {
+          "code": 1552,
+          "name": "BENI-YENNI"
+        },
+        {
+          "code": 1560,
+          "name": "IBOUDRARENE"
+        },
+        {
+          "code": 1545,
+          "name": "YATAFENE"
+        }
+      ]
+    },
+    {
+      "daira_name": "BOGHNI",
+      "daira_code": 1540,
+      "communes": [
+        {
+          "code": 1566,
+          "name": "ASSI-YOUCEF"
+        },
+        {
+          "code": 1540,
+          "name": "BOGHNI"
+        },
+        {
+          "code": 1512,
+          "name": "BOUNOUH"
+        },
+        {
+          "code": 1506,
+          "name": "MECHTRAS"
+        }
+      ]
+    },
+    {
+      "daira_name": "BOUZEGUENE",
+      "daira_code": 1534,
+      "communes": [
+        {
+          "code": 1546,
+          "name": "BENI-ZIKKI"
+        },
+        {
+          "code": 1534,
+          "name": "BOUZEGUENE"
+        },
+        {
+          "code": 1549,
+          "name": "IDJEUR"
+        },
+        {
+          "code": 1519,
+          "name": "ILLOULA OUMALOU"
+        }
+      ]
+    },
+    {
+      "daira_name": "DRAA BEN KHEDDA",
+      "daira_code": 1547,
+      "communes": [
+        {
+          "code": 1547,
+          "name": "DRAA-BEN-KHEDDA"
+        },
+        {
+          "code": 1559,
+          "name": "SIDI NAMANE"
+        },
+        {
+          "code": 1564,
+          "name": "TADMAIT"
+        },
+        {
+          "code": 1543,
+          "name": "TIRMITINE"
+        }
+      ]
+    },
+    {
+      "daira_name": "DRAA EL MIZAN",
+      "daira_code": 1510,
+      "communes": [
+        {
+          "code": 1525,
+          "name": "AIN-ZAOUIA"
+        },
+        {
+          "code": 1556,
+          "name": "AIT YAHIA MOUSSA"
+        },
+        {
+          "code": 1510,
+          "name": "DRAA-EL-MIZAN"
+        },
+        {
+          "code": 1514,
+          "name": "FRIKAT"
+        }
+      ]
+    },
+    {
+      "daira_name": "IFERHOUNENE",
+      "daira_code": 1517,
+      "communes": [
+        {
+          "code": 1517,
+          "name": "IFERHOUNENE"
+        },
+        {
+          "code": 1533,
+          "name": "ILLILTEN"
+        },
+        {
+          "code": 1563,
+          "name": "IMSOUHAL"
+        }
+      ]
+    },
+    {
+      "daira_name": "LARBAA NATH IRATEN",
+      "daira_code": 1521,
+      "communes": [
+        {
+          "code": 1535,
+          "name": "AIT AGGOUACHA"
+        },
+        {
+          "code": 1507,
+          "name": "IRDJEN"
+        },
+        {
+          "code": 1521,
+          "name": "LARBAA NATH IRATHEN"
+        }
+      ]
+    },
+    {
+      "daira_name": "MAATKAS",
+      "daira_code": 1529,
+      "communes": [
+        {
+          "code": 1529,
+          "name": "MAATKAS"
+        },
+        {
+          "code": 1557,
+          "name": "SOUK-EL-TENINE"
+        }
+      ]
+    },
+    {
+      "daira_name": "MAKOUDA",
+      "daira_code": 1509,
+      "communes": [
+        {
+          "code": 1555,
+          "name": "BOUDJIMA"
+        },
+        {
+          "code": 1509,
+          "name": "MAKOUDA"
+        }
+      ]
+    },
+    {
+      "daira_name": "MEKLA",
+      "daira_code": 1550,
+      "communes": [
+        {
+          "code": 1558,
+          "name": "AIT KHELLILI"
+        },
+        {
+          "code": 1550,
+          "name": "MEKLA"
+        },
+        {
+          "code": 1505,
+          "name": "SOUAMA"
+        }
+      ]
+    },
+    {
+      "daira_name": "OUACIF",
+      "daira_code": 1548,
+      "communes": [
+        {
+          "code": 1530,
+          "name": "AIT BOUMAHDI"
+        },
+        {
+          "code": 1567,
+          "name": "AIT-TOUDERT"
+        },
+        {
+          "code": 1548,
+          "name": "OUACIF"
+        }
+      ]
+    },
+    {
+      "daira_name": "OUADHIAS",
+      "daira_code": 1536,
+      "communes": [
+        {
+          "code": 1561,
+          "name": "AGOUNI-GUEGHRANE"
+        },
+        {
+          "code": 1565,
+          "name": "AIT BOUADDOU"
+        },
+        {
+          "code": 1536,
+          "name": "OUADHIAS"
+        },
+        {
+          "code": 1551,
+          "name": "TIZI N'TLETA"
+        }
+      ]
+    },
+    {
+      "daira_name": "OUAGUENOUN",
+      "daira_code": 1524,
+      "communes": [
+        {
+          "code": 1539,
+          "name": "AIT-AISSA-MIMOUN"
+        },
+        {
+          "code": 1524,
+          "name": "OUAGUENOUN"
+        },
+        {
+          "code": 1508,
+          "name": "TIMIZART"
+        }
+      ]
+    },
+    {
+      "daira_name": "TIGZIRT",
+      "daira_code": 1538,
+      "communes": [
+        {
+          "code": 1554,
+          "name": "IFLISSEN"
+        },
+        {
+          "code": 1562,
+          "name": "MIZRANA"
+        },
+        {
+          "code": 1538,
+          "name": "TIGZIRT"
+        }
+      ]
+    },
+    {
+      "daira_name": "TIZI OUZOU",
+      "daira_code": 1501,
+      "communes": [
+        {
+          "code": 1501,
+          "name": "TIZI-OUZOU"
+        }
+      ]
+    },
+    {
+      "daira_name": "TIZI RACHED",
+      "daira_code": 1522,
+      "communes": [
+        {
+          "code": 1542,
+          "name": "AIT-OUMALOU"
+        },
+        {
+          "code": 1522,
+          "name": "TIZI-RACHED"
+        }
+      ]
+    },
+    {
+      "daira_name": "TIZI-GHENIF",
+      "daira_code": 1511,
+      "communes": [
+        {
+          "code": 1526,
+          "name": "M'KIRA"
+        },
+        {
+          "code": 1511,
+          "name": "TIZI-GHENIFF"
+        }
+      ]
+    }
+  ]
+}

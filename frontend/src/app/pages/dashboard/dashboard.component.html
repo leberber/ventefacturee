@@ -1,0 +1,82 @@
+<div class="page-content">
+
+  <!-- Stat Cards -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-label">Clients</div>
+      <div class="stat-value">{{ stats?.total_clients ?? '—' }}</div>
+      <div class="stat-sub">enregistrés</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Palettes plastique en circulation</div>
+      <div class="stat-value" style="color:#1a56db">{{ stats?.total_plastic_balance ?? '—' }}</div>
+      <div class="stat-sub">
+        {{ stats?.total_plastic_consigne ?? 0 }} consig. &middot; {{ stats?.total_plastic_nc ?? 0 }} non-consig.
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Palettes bois en circulation</div>
+      <div class="stat-value" style="color:#92400e">{{ stats?.total_wood_balance ?? '—' }}</div>
+      <div class="stat-sub">
+        {{ stats?.total_wood_consigne ?? 0 }} consig. &middot; {{ stats?.total_wood_nc ?? 0 }} non-consig.
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">BLs aujourd'hui</div>
+      <div class="stat-value" style="color:#057a55">{{ stats?.today_bls ?? '—' }}</div>
+      <div class="stat-sub">{{ stats?.total_bls ?? 0 }} au total</div>
+    </div>
+  </div>
+
+  <!-- Clients with balance -->
+  <p-table
+    [value]="clients"
+    [loading]="loading"
+    styleClass="p-datatable-sm"
+    [paginator]="clients.length > 15"
+    [rows]="15"
+  >
+    <ng-template #caption>
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <span style="font-size:13px;font-weight:600;color:#6b7280;text-transform:uppercase;letter-spacing:.05em">
+          Clients avec palettes en circulation
+        </span>
+        <p-button label="Voir tous les clients" icon="pi pi-users" size="small" severity="secondary" routerLink="/clients" />
+      </div>
+    </ng-template>
+    <ng-template #header>
+      <tr>
+        <th>Client</th>
+        <th>Catégorie</th>
+        <th>Code</th>
+        <th>🔵 Plt. plastique</th>
+        <th>Dont consig.</th>
+        <th>Dont non-consig.</th>
+        <th>🟫 Plt. bois</th>
+        <th>Dont consig.</th>
+        <th>Dont non-consig.</th>
+        <th></th>
+      </tr>
+    </ng-template>
+    <ng-template #body let-c>
+      <tr>
+        <td><strong>{{ c.name }}</strong><br><small class="text-muted">{{ c.phone }}</small></td>
+        <td><p-tag [value]="categoryLabel[c.category]" [severity]="categorySeverity[c.category]" /></td>
+        <td><span class="font-mono">{{ c.code || '—' }}</span></td>
+        <td><p-tag [value]="(c.plastic_balance ?? 0).toString()" severity="info" /></td>
+        <td><p-tag [value]="(c.plastic_consigne ?? 0).toString()" severity="info" /></td>
+        <td><p-tag [value]="(c.plastic_nc ?? 0).toString()" severity="warn" /></td>
+        <td><p-tag [value]="(c.wood_balance ?? 0).toString()" severity="warn" /></td>
+        <td><p-tag [value]="(c.wood_consigne ?? 0).toString()" severity="warn" /></td>
+        <td><p-tag [value]="(c.wood_nc ?? 0).toString()" severity="warn" /></td>
+        <td>
+          <p-button icon="pi pi-list" size="small" severity="secondary" [routerLink]="['/historique']" [queryParams]="{clientId: c.id}" />
+        </td>
+      </tr>
+    </ng-template>
+    <ng-template #emptymessage>
+      <tr><td colspan="10" style="text-align:center;padding:32px;color:#9ca3af">Aucune palette en circulation</td></tr>
+    </ng-template>
+  </p-table>
+
+</div>
