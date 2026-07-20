@@ -1,15 +1,24 @@
 <p-toast />
 
-<div class="page-content">
+<div class="page-content" style="padding-bottom:5rem">
 
-  <h2 class="page-title" style="margin-bottom:24px">Nouvelle expédition</h2>
+  <div class="page-header" style="max-width:680px;margin:0 auto var(--space-6)">
+    <div style="display:flex;align-items:center;gap:0.75rem">
+      <div class="page-icon"><i class="pi pi-file-plus"></i></div>
+      <div>
+        <h1 class="page-header__title">Nouvelle expédition</h1>
+        <p class="page-header__sub">Palettes chargées aujourd'hui</p>
+      </div>
+    </div>
+  </div>
 
-  <div style="max-width:760px">
-    <form [formGroup]="form" (ngSubmit)="save()">
+  <form [formGroup]="form" style="max-width:680px;margin:0 auto">
 
-      <!-- Destination type -->
-      <div class="field" style="margin-bottom:20px">
-        <label style="display:block;margin-bottom:6px">Type d'expédition <span style="color:red">*</span></label>
+    <!-- Expédition info -->
+    <div class="exp-card">
+
+      <div class="field">
+        <label class="exp-label">Type</label>
         <p-selectbutton
           formControlName="destination_type"
           [options]="destinationOptions"
@@ -18,149 +27,117 @@
         />
       </div>
 
-      <!-- Destinataire + Chauffeur -->
       <div class="form-grid-2">
         @if (isGros) {
-          <div class="field">
-            <label>Client <span style="color:red">*</span></label>
+          <div class="field mb-0">
+            <label class="exp-label">Client <span style="color:var(--color-error)">*</span></label>
             <p-select
               formControlName="client_id"
               [options]="clients"
               optionLabel="label"
               optionValue="value"
-              placeholder="Sélectionner un client"
+              placeholder="Sélectionner…"
               [filter]="true"
               filterPlaceholder="Rechercher…"
               [style]="{width:'100%'}"
+              appendTo="body"
             />
           </div>
         } @else {
-          <div class="field">
-            <label>Livreur <span style="color:red">*</span></label>
+          <div class="field mb-0">
+            <label class="exp-label">Livreur <span style="color:var(--color-error)">*</span></label>
             <p-select
               formControlName="livreur_id"
               [options]="livreurs"
               optionLabel="label"
               optionValue="value"
-              placeholder="Sélectionner un livreur"
+              placeholder="Sélectionner…"
               [filter]="true"
               filterPlaceholder="Rechercher…"
               [style]="{width:'100%'}"
+              appendTo="body"
             />
           </div>
         }
-        <div class="field">
-          <label>Chauffeur <span style="color:red">*</span></label>
+        <div class="field mb-0">
+          <label class="exp-label">Chauffeur <span style="color:var(--color-error)">*</span></label>
           <p-select
             formControlName="chauffeur_id"
             [options]="chauffeurs"
             optionLabel="label"
             optionValue="value"
-            placeholder="Sélectionner un chauffeur"
+            placeholder="Sélectionner…"
             [filter]="true"
             filterPlaceholder="Rechercher…"
             [style]="{width:'100%'}"
+            appendTo="body"
           />
         </div>
       </div>
 
-      <!-- Balance actuelle (gros only) -->
-      @if (selectedClient && isGros) {
-        <div class="balance-box" style="margin-bottom:24px">
-          <div class="balance-title">Solde actuel — {{ selectedClient.name }}</div>
-          <div class="balance-grid">
-            <div class="balance-item">
-              <span class="balance-label">🔵 Plastique total</span>
-              <p-tag [value]="plasticBalance.toString()" [severity]="plasticBalance > 0 ? 'info' : 'success'" />
-            </div>
-            <div class="balance-item">
-              <span class="balance-label">Dont consig.</span>
-              <p-tag [value]="plasticConsigne.toString()" severity="info" />
-            </div>
-            <div class="balance-item">
-              <span class="balance-label">Dont non-consig.</span>
-              <p-tag [value]="plasticNc.toString()" severity="warn" />
-            </div>
-            <div class="balance-item">
-              <span class="balance-label">🟫 Bois total</span>
-              <p-tag [value]="woodBalance.toString()" [severity]="woodBalance > 0 ? 'warn' : 'success'" />
-            </div>
-            <div class="balance-item">
-              <span class="balance-label">Dont consig.</span>
-              <p-tag [value]="woodConsigne.toString()" severity="warn" />
-            </div>
-            <div class="balance-item">
-              <span class="balance-label">Dont non-consig.</span>
-              <p-tag [value]="woodNc.toString()" severity="warn" />
-            </div>
-          </div>
-        </div>
-      }
+    </div>
 
-      <!-- Palettes plastique -->
-      <div class="palette-section">
-        <div class="palette-section-title">🔵 Palettes plastique</div>
-        <div class="form-grid-3">
-          <div class="field">
-            <label>Consignées chargées</label>
-            <p-inputnumber formControlName="consigne_plastique" [min]="0" [showButtons]="true" buttonLayout="horizontal"
-              decrementButtonIcon="pi pi-minus" incrementButtonIcon="pi pi-plus"
-              [style]="{width:'100%'}" />
+    <!-- Balance (gros client selected) -->
+    @if (selectedClient && isGros) {
+      <div class="balance-box" style="margin-bottom:1rem">
+        <div class="balance-title">Solde — {{ selectedClient.name }}</div>
+        <div class="balance-grid">
+          <div class="balance-item">
+            <span class="balance-label"><img src="assets/plastiquepallette.png" style="height:12px;vertical-align:middle;margin-right:3px" alt="">Plastique</span>
+            <span [class]="plasticBalance > 0 ? 'badge badge--info' : 'badge badge--success'">{{ plasticBalance }}</span>
           </div>
-          <div class="field">
-            <label>Non-consignées chargées</label>
-            <p-inputnumber formControlName="nc_plastique" [min]="0" [showButtons]="true" buttonLayout="horizontal"
-              decrementButtonIcon="pi pi-minus" incrementButtonIcon="pi pi-plus"
-              [style]="{width:'100%'}" />
-          </div>
-          <div class="field">
-            <label>Retournées</label>
-            <p-inputnumber formControlName="retour_plastique" [min]="0" [showButtons]="true" buttonLayout="horizontal"
-              decrementButtonIcon="pi pi-minus" incrementButtonIcon="pi pi-plus"
-              [style]="{width:'100%'}" />
+          <div class="balance-item">
+            <span class="balance-label"><img src="assets/woodpallette.png" style="height:12px;vertical-align:middle;margin-right:3px" alt="">Bois</span>
+            <span [class]="woodBalance > 0 ? 'badge badge--warning' : 'badge badge--success'">{{ woodBalance }}</span>
           </div>
         </div>
       </div>
+    }
 
-      <!-- Palettes bois -->
-      <div class="palette-section">
-        <div class="palette-section-title">🟫 Palettes bois</div>
-        <div class="form-grid-3">
-          <div class="field">
-            <label>Consignées chargées</label>
-            <p-inputnumber formControlName="consigne_bois" [min]="0" [showButtons]="true" buttonLayout="horizontal"
-              decrementButtonIcon="pi pi-minus" incrementButtonIcon="pi pi-plus"
-              [style]="{width:'100%'}" />
-          </div>
-          <div class="field">
-            <label>Non-consignées chargées</label>
-            <p-inputnumber formControlName="nc_bois" [min]="0" [showButtons]="true" buttonLayout="horizontal"
-              decrementButtonIcon="pi pi-minus" incrementButtonIcon="pi pi-plus"
-              [style]="{width:'100%'}" />
-          </div>
-          <div class="field">
-            <label>Retournées</label>
-            <p-inputnumber formControlName="retour_bois" [min]="0" [showButtons]="true" buttonLayout="horizontal"
-              decrementButtonIcon="pi pi-minus" incrementButtonIcon="pi pi-plus"
-              [style]="{width:'100%'}" />
-          </div>
+    <!-- Quantity counters -->
+    <div class="qty-grid">
+
+      <div class="qty-tile">
+        <img src="assets/plastiquepallette.png" class="qty-tile__img" alt="">
+        <span class="qty-tile__name">Plastique</span>
+        <div class="qty-tile__counter">
+          <button type="button" class="qty-btn" (click)="dec('plastique')">−</button>
+          <input type="number" class="qty-input" [value]="form.get('plastique')?.value" (change)="setQty('plastique', $event)" min="0">
+          <button type="button" class="qty-btn qty-btn--plus" (click)="inc('plastique')">+</button>
         </div>
+        <span class="qty-tile__unit">palettes chargées</span>
       </div>
 
-      <!-- Notes -->
-      <div class="field">
-        <label>Notes (optionnel)</label>
-        <input pInputText formControlName="notes" placeholder="Remarques…" class="w-full">
+      <div class="qty-tile">
+        <img src="assets/woodpallette.png" class="qty-tile__img" alt="">
+        <span class="qty-tile__name">Bois</span>
+        <div class="qty-tile__counter">
+          <button type="button" class="qty-btn" (click)="dec('bois')">−</button>
+          <input type="number" class="qty-input" [value]="form.get('bois')?.value" (change)="setQty('bois', $event)" min="0">
+          <button type="button" class="qty-btn qty-btn--plus" (click)="inc('bois')">+</button>
+        </div>
+        <span class="qty-tile__unit">palettes chargées</span>
       </div>
 
-      <!-- Actions -->
-      <div style="display:flex;gap:8px;margin-top:8px">
-        <p-button label="Annuler"     severity="secondary" type="button" (onClick)="reset()" />
-        <p-button label="Enregistrer le BL" icon="pi pi-check" type="submit"
-          [disabled]="form.invalid || saving" [loading]="saving" />
-      </div>
+    </div>
 
-    </form>
-  </div>
+    <!-- Notes -->
+    <div class="exp-notes">
+      <i class="pi pi-comment exp-notes__icon"></i>
+      <textarea
+        formControlName="notes"
+        class="exp-notes__input"
+        placeholder="Notes optionnelles…"
+        rows="2"
+      ></textarea>
+    </div>
 
+  </form>
+
+</div>
+
+<div class="form-footer">
+  <p-button label="Annuler" severity="secondary" type="button" (onClick)="reset()" />
+  <p-button label="Enregistrer" icon="pi pi-check" type="button"
+    [disabled]="form.invalid || saving" [loading]="saving" (onClick)="save()" />
 </div>

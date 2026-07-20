@@ -6,8 +6,6 @@ import { Select } from 'primeng/select';
 import { SelectButton } from 'primeng/selectbutton';
 import { Button } from 'primeng/button';
 import { Toast } from 'primeng/toast';
-import { InputNumber } from 'primeng/inputnumber';
-import { Tag } from 'primeng/tag';
 import { MessageService } from 'primeng/api';
 
 import { ClientsService } from '../../core/services/clients.service';
@@ -20,7 +18,7 @@ import { BonCreate } from '../../core/models/bon.model';
 @Component({
   selector: 'app-nouveau-bl',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, Select, SelectButton, Button, Toast, InputNumber, Tag],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, Select, SelectButton, Button, Toast],
   providers: [MessageService],
   templateUrl: './nouveau-bl.component.html',
 })
@@ -47,34 +45,40 @@ export class NouveauBLComponent implements OnInit {
   ];
 
   form = this.fb.group({
-    destination_type:   ['gros', Validators.required],
-    client_id:          [null as number | null],
-    livreur_id:         [null as number | null],
-    chauffeur_id:       [null as number | null, Validators.required],
-    consigne_plastique: [0, [Validators.required, Validators.min(0)]],
-    nc_plastique:       [0, [Validators.required, Validators.min(0)]],
-    retour_plastique:   [0, [Validators.required, Validators.min(0)]],
-    consigne_bois:      [0, [Validators.required, Validators.min(0)]],
-    nc_bois:            [0, [Validators.required, Validators.min(0)]],
-    retour_bois:        [0, [Validators.required, Validators.min(0)]],
-    notes:              [''],
+    destination_type: ['gros', Validators.required],
+    client_id:        [null as number | null],
+    livreur_id:       [null as number | null],
+    chauffeur_id:     [null as number | null, Validators.required],
+    plastique:        [0, [Validators.required, Validators.min(0)]],
+    bois:             [0, [Validators.required, Validators.min(0)]],
+    notes:            [''],
   });
 
   get isGros() { return this.form.get('destination_type')!.value === 'gros'; }
 
   get plasticBalance() { return this.selectedClient?.plastic_balance ?? 0; }
-  get plasticConsigne() { return this.selectedClient?.plastic_consigne ?? 0; }
-  get plasticNc()      { return this.selectedClient?.plastic_nc ?? 0; }
   get woodBalance()    { return this.selectedClient?.wood_balance ?? 0; }
-  get woodConsigne()   { return this.selectedClient?.wood_consigne ?? 0; }
-  get woodNc()         { return this.selectedClient?.wood_nc ?? 0; }
+
+  inc(field: 'plastique' | 'bois') {
+    const ctrl = this.form.get(field)!;
+    ctrl.setValue((ctrl.value ?? 0) + 1);
+  }
+
+  dec(field: 'plastique' | 'bois') {
+    const ctrl = this.form.get(field)!;
+    const val = ctrl.value ?? 0;
+    if (val > 0) ctrl.setValue(val - 1);
+  }
+
+  setQty(field: 'plastique' | 'bois', event: Event) {
+    const n = parseInt((event.target as HTMLInputElement).value, 10);
+    this.form.get(field)!.setValue(isNaN(n) || n < 0 ? 0 : n);
+  }
 
   ngOnInit() {
-    // Initial validators: gros requires client_id
     this.form.get('client_id')!.setValidators(Validators.required);
     this.form.get('client_id')!.updateValueAndValidity();
 
-    // Toggle validators when destination type changes
     this.form.get('destination_type')!.valueChanges.subscribe(type => {
       const clientCtrl  = this.form.get('client_id')!;
       const livreurCtrl = this.form.get('livreur_id')!;
@@ -112,24 +116,23 @@ export class NouveauBLComponent implements OnInit {
     if (this.form.invalid) return;
     this.saving = true;
     const v = this.form.value;
-    const today = new Date().toISOString().split('T')[0];
     const body: BonCreate = {
-      date:               today,
+      date:               new Date().toISOString().split('T')[0],
       destination_type:   v.destination_type!,
       chauffeur_id:       v.chauffeur_id!,
       client_id:          v.destination_type === 'gros' ? v.client_id! : null,
       livreur_id:         v.destination_type !== 'gros' ? v.livreur_id! : null,
-      consigne_plastique: v.consigne_plastique ?? 0,
-      nc_plastique:       v.nc_plastique ?? 0,
-      retour_plastique:   v.retour_plastique ?? 0,
-      consigne_bois:      v.consigne_bois ?? 0,
-      nc_bois:            v.nc_bois ?? 0,
-      retour_bois:        v.retour_bois ?? 0,
+      consigne_plastique: 0,
+      nc_plastique:       v.plastique ?? 0,
+      retour_plastique:   0,
+      consigne_bois:      0,
+      nc_bois:            v.bois ?? 0,
+      retour_bois:        0,
       notes:              v.notes || undefined,
     };
     this.bonsService.create(body).subscribe({
       next: bon => {
-        this.messageService.add({ severity: 'success', summary: 'Succès', detail: `BL ${bon.bl_number} créé`, life: 4000 });
+        this.messageService.add({ severity: 'success', summary: 'Succès', detail: `Expédition ${bon.bl_number} enregistrée`, life: 4000 });
         setTimeout(() => this.router.navigate(['/historique']), 1500);
       },
       error: e => {
@@ -143,9 +146,7 @@ export class NouveauBLComponent implements OnInit {
     this.form.reset({
       destination_type: 'gros',
       client_id: null, livreur_id: null, chauffeur_id: null,
-      consigne_plastique: 0, nc_plastique: 0, retour_plastique: 0,
-      consigne_bois: 0, nc_bois: 0, retour_bois: 0,
-      notes: '',
+      plastique: 0, bois: 0, notes: '',
     });
     this.selectedClient = null;
     this.form.get('client_id')!.setValidators(Validators.required);
