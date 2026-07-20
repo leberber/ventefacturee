@@ -28,42 +28,11 @@
       </div>
 
       <div class="form-grid-2">
-        @if (isGros) {
-          <div class="field mb-0">
-            <label class="exp-label">Client <span style="color:var(--color-error)">*</span></label>
-            <p-select
-              formControlName="client_id"
-              [options]="clients"
-              optionLabel="label"
-              optionValue="value"
-              placeholder="Sélectionner…"
-              [filter]="true"
-              filterPlaceholder="Rechercher…"
-              [style]="{width:'100%'}"
-              appendTo="body"
-            />
-          </div>
-        } @else {
-          <div class="field mb-0">
-            <label class="exp-label">Livreur <span style="color:var(--color-error)">*</span></label>
-            <p-select
-              formControlName="livreur_id"
-              [options]="livreurs"
-              optionLabel="label"
-              optionValue="value"
-              placeholder="Sélectionner…"
-              [filter]="true"
-              filterPlaceholder="Rechercher…"
-              [style]="{width:'100%'}"
-              appendTo="body"
-            />
-          </div>
-        }
-        <div class="field mb-0">
-          <label class="exp-label">Chauffeur <span style="color:var(--color-error)">*</span></label>
+        <div class="field">
+          <label class="exp-label">Client @if(isGros){<span style="color:var(--color-error)">*</span>}</label>
           <p-select
-            formControlName="chauffeur_id"
-            [options]="chauffeurs"
+            formControlName="client_id"
+            [options]="clients"
             optionLabel="label"
             optionValue="value"
             placeholder="Sélectionner…"
@@ -73,6 +42,34 @@
             appendTo="body"
           />
         </div>
+        <div class="field">
+          <label class="exp-label">Livreur @if(!isGros){<span style="color:var(--color-error)">*</span>}</label>
+          <p-select
+            formControlName="livreur_id"
+            [options]="livreurs"
+            optionLabel="label"
+            optionValue="value"
+            placeholder="Sélectionner…"
+            [filter]="true"
+            filterPlaceholder="Rechercher…"
+            [style]="{width:'100%'}"
+            appendTo="body"
+          />
+        </div>
+      </div>
+      <div class="field mb-0">
+        <label class="exp-label">Chauffeur <span style="color:var(--color-error)">*</span></label>
+        <p-select
+          formControlName="chauffeur_id"
+          [options]="chauffeurs"
+          optionLabel="label"
+          optionValue="value"
+          placeholder="Sélectionner…"
+          [filter]="true"
+          filterPlaceholder="Rechercher…"
+          [style]="{width:'100%'}"
+          appendTo="body"
+        />
       </div>
 
     </div>
