@@ -23,6 +23,7 @@ import { BonCreate } from '../../core/models/bon.model';
   imports: [CommonModule, FormsModule, ReactiveFormsModule, Select, MultiSelect, SelectButton, Button, Toast, InputText],
   providers: [MessageService],
   templateUrl: './nouveau-bl.component.html',
+  styleUrl: './nouveau-bl.component.scss',
 })
 export class NouveauBLComponent implements OnInit {
   private clientsService    = inject(ClientsService);

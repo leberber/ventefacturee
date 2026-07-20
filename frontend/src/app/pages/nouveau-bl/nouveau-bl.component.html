@@ -101,9 +101,21 @@
           </div>
 
         </div>
+
+        <!-- Notes -->
+        <div class="exp-notes">
+          <i class="pi pi-comment exp-notes__icon"></i>
+          <textarea
+            formControlName="notes"
+            class="exp-notes__input"
+            placeholder="Notes optionnelles…"
+            rows="3"
+          ></textarea>
+        </div>
+
       </div>
 
-      <!-- Right column: balance, counters, notes -->
+      <!-- Right column: balance + counters -->
       <div class="nbl-col">
 
         <!-- Balance (gros client selected) -->
@@ -124,7 +136,7 @@
         }
 
         <!-- Quantity counters -->
-        <div class="qty-grid">
+        <div class="qty-grid qty-grid--col">
 
           <div class="qty-tile">
             <img src="assets/plastiquepallette.png" class="qty-tile__img" alt="">
@@ -148,17 +160,6 @@
             <span class="qty-tile__unit">palettes chargées</span>
           </div>
 
-        </div>
-
-        <!-- Notes -->
-        <div class="exp-notes">
-          <i class="pi pi-comment exp-notes__icon"></i>
-          <textarea
-            formControlName="notes"
-            class="exp-notes__input"
-            placeholder="Notes optionnelles…"
-            rows="3"
-          ></textarea>
         </div>
 
       </div>
