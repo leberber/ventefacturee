@@ -22,6 +22,7 @@ export interface Bon {
 }
 
 export interface BonCreate {
+  bl_number: string;
   date: string;
   destination_type: string;
   chauffeur_id: number;

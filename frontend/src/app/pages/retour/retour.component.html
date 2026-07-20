@@ -17,9 +17,18 @@
     <!-- Info -->
     <div class="exp-card">
 
+      <div class="field" style="max-width:50%;margin-bottom:1.25rem">
+        <label class="exp-label"><i class="pi pi-hashtag"></i>N° Bon de livraison <span style="color:var(--color-error)">*</span></label>
+        <div class="icon-input">
+          <i class="pi pi-receipt icon-input__icon"></i>
+          <input pInputText formControlName="bl_number" placeholder="Ex: BL-2025-001"
+                 class="w-full icon-input__field" style="font-weight:600;letter-spacing:0.03em" />
+        </div>
+      </div>
+
       <div class="form-grid-2" style="margin-bottom:1.25rem">
         <div class="field mb-0">
-          <label class="exp-label">Type</label>
+          <label class="exp-label"><i class="pi pi-replay"></i>Type</label>
           <p-selectbutton
             formControlName="destination_type"
             [options]="destinationOptions"
@@ -28,7 +37,7 @@
           />
         </div>
         <div class="field mb-0">
-          <label class="exp-label">Client @if(isGros){<span style="color:var(--color-error)">*</span>}</label>
+          <label class="exp-label"><i class="pi pi-building"></i>Client @if(isGros){<span style="color:var(--color-error)">*</span>}</label>
           <p-select
             formControlName="client_id"
             [options]="clients"
@@ -44,7 +53,7 @@
       </div>
       <div class="form-grid-2">
         <div class="field mb-0">
-          <label class="exp-label">Livreur @if(!isGros){<span style="color:var(--color-error)">*</span>}</label>
+          <label class="exp-label"><i class="pi pi-truck"></i>Livreur @if(!isGros){<span style="color:var(--color-error)">*</span>}</label>
           <p-select
             formControlName="livreur_id"
             [options]="livreurs"
@@ -58,7 +67,7 @@
           />
         </div>
         <div class="field mb-0">
-          <label class="exp-label">Chauffeur <span style="color:var(--color-error)">*</span></label>
+          <label class="exp-label"><i class="pi pi-car"></i>Chauffeur <span style="color:var(--color-error)">*</span></label>
           <p-select
             formControlName="chauffeur_id"
             [options]="chauffeurs"

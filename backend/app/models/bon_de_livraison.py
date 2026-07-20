@@ -39,6 +39,7 @@ class BonDeLivraison(SQLModel, table=True):
 
 
 class BLCreate(SQLModel):
+    bl_number: str
     date: date
     destination_type: str = "gros"       # gros | detail | horeca
     chauffeur_id: int

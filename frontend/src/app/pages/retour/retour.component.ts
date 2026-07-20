@@ -6,6 +6,7 @@ import { Select } from 'primeng/select';
 import { SelectButton } from 'primeng/selectbutton';
 import { Button } from 'primeng/button';
 import { Toast } from 'primeng/toast';
+import { InputText } from 'primeng/inputtext';
 import { MessageService } from 'primeng/api';
 
 import { ClientsService } from '../../core/services/clients.service';
@@ -21,7 +22,7 @@ type RetourField = 'retour_plastique' | 'retour_bois';
 @Component({
   selector: 'app-retour',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, Select, SelectButton, Button, Toast],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, Select, SelectButton, Button, Toast, InputText],
   providers: [MessageService],
   templateUrl: './retour.component.html',
 })
@@ -63,6 +64,7 @@ export class RetourComponent implements OnInit {
   ];
 
   form = this.fb.group({
+    bl_number:          ['', Validators.required],
     destination_type:   ['gros', Validators.required],
     client_id:          [null as number | null],
     livreur_id:         [null as number | null],
@@ -176,6 +178,7 @@ export class RetourComponent implements OnInit {
     this.saving = true;
     const v = this.form.value;
     const body: BonCreate = {
+      bl_number:          v.bl_number!.trim(),
       date:               new Date().toISOString().split('T')[0],
       destination_type:   v.destination_type!,
       client_id:          v.destination_type === 'gros' ? v.client_id! : null,
@@ -203,6 +206,7 @@ export class RetourComponent implements OnInit {
 
   reset() {
     this.form.reset({
+      bl_number: '',
       destination_type: 'gros',
       client_id: null, livreur_id: null, chauffeur_id: null,
       retour_plastique: 0, consigne_plastique: 0,

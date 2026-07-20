@@ -457,8 +457,29 @@
   text-transform: uppercase;
   letter-spacing: 0.05em;
   color: var(--text-color-secondary);
-  margin-bottom: 0.4rem;
-  display: block;
+  margin-bottom: 0.05rem;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+
+  i { font-size: 0.7rem; opacity: 0.7; }
+}
+
+.icon-input {
+  position: relative;
+
+  &__icon {
+    position: absolute;
+    left: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-color-muted);
+    font-size: 0.85rem;
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  &__field { padding-left: 2.25rem !important; }
 }
 
 .qty-grid {

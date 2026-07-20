@@ -13,17 +13,6 @@ from app.models.bon_de_livraison import BonDeLivraison, BLCreate, BLUpdate, BLRe
 router = APIRouter()
 
 
-def _generate_bl_number(session: Session) -> str:
-    yy = datetime.now().strftime("%y")
-    prefix = f"BL{yy}"
-    last = session.exec(
-        select(BonDeLivraison.bl_number)
-        .where(BonDeLivraison.bl_number.startswith(prefix))
-        .order_by(BonDeLivraison.bl_number.desc())
-    ).first()
-    n = int(last[4:]) + 1 if last else 1
-    return f"{prefix}{n:06d}"
-
 
 @router.get("", response_model=List[BLRead])
 def list_bls(
@@ -66,8 +55,12 @@ def create_bl(
     if not chauffeur:
         raise HTTPException(status_code=404, detail="Chauffeur introuvable")
 
+    existing = session.exec(select(BonDeLivraison).where(BonDeLivraison.bl_number == bl_in.bl_number)).first()
+    if existing:
+        raise HTTPException(status_code=422, detail=f"Le numéro BL « {bl_in.bl_number} » existe déjà")
+
     bl_data: dict = dict(
-        bl_number=_generate_bl_number(session),
+        bl_number=bl_in.bl_number,
         date=bl_in.date,
         destination_type=bl_in.destination_type,
         chauffeur_id=bl_in.chauffeur_id,

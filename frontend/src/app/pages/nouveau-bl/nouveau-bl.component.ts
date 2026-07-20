@@ -6,6 +6,7 @@ import { Select } from 'primeng/select';
 import { SelectButton } from 'primeng/selectbutton';
 import { Button } from 'primeng/button';
 import { Toast } from 'primeng/toast';
+import { InputText } from 'primeng/inputtext';
 import { MessageService } from 'primeng/api';
 
 import { ClientsService } from '../../core/services/clients.service';
@@ -18,7 +19,7 @@ import { BonCreate } from '../../core/models/bon.model';
 @Component({
   selector: 'app-nouveau-bl',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, Select, SelectButton, Button, Toast],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, Select, SelectButton, Button, Toast, InputText],
   providers: [MessageService],
   templateUrl: './nouveau-bl.component.html',
 })
@@ -45,6 +46,7 @@ export class NouveauBLComponent implements OnInit {
   ];
 
   form = this.fb.group({
+    bl_number:        ['', Validators.required],
     destination_type: ['gros', Validators.required],
     client_id:        [null as number | null],
     livreur_id:       [null as number | null],
@@ -117,6 +119,7 @@ export class NouveauBLComponent implements OnInit {
     this.saving = true;
     const v = this.form.value;
     const body: BonCreate = {
+      bl_number:          v.bl_number!.trim(),
       date:               new Date().toISOString().split('T')[0],
       destination_type:   v.destination_type!,
       chauffeur_id:       v.chauffeur_id!,
@@ -144,6 +147,7 @@ export class NouveauBLComponent implements OnInit {
 
   reset() {
     this.form.reset({
+      bl_number: '',
       destination_type: 'gros',
       client_id: null, livreur_id: null, chauffeur_id: null,
       plastique: 0, bois: 0, notes: '',
