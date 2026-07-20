@@ -31,20 +31,16 @@ export class UtilisateurFormComponent implements OnInit {
   editingId: number | null = null;
   saving = false;
 
-  get roleOptions() {
-    const all = [
-      { label: 'Admin',   value: 'admin'   },
-      { label: 'Clerk',   value: 'clerk'   },
-      { label: 'Livreur', value: 'livreur' },
-    ];
-    return this.auth.isAdmin ? all : all.filter(o => o.value !== 'admin');
-  }
+  readonly roleOptions = [
+    { label: 'Admin',   value: 'admin'   },
+    { label: 'Employé', value: 'employe' },
+  ];
 
   form = this.fb.group({
     phone:     ['', Validators.required],
     full_name: ['', Validators.required],
     password:  [''],
-    role:      ['clerk' as UserRole, Validators.required],
+    role:      ['employe' as UserRole, Validators.required],
     is_active: [true],
   });
 

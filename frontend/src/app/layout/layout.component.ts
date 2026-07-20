@@ -14,7 +14,7 @@ export class LayoutComponent {
   auth      = inject(AuthService);
 
   get user()           { return this.auth.currentUser(); }
-  get isAdminOrClerk() { return this.auth.isAdminOrClerk; }
+  get isAdminOrEmploye() { return this.auth.isAdminOrEmploye; }
   get isAdmin()        { return this.auth.isAdmin; }
 
   logout() { this.auth.logout(); }

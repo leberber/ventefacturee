@@ -15,9 +15,9 @@ export class AuthService {
 
   get token(): string | null { return localStorage.getItem(TOKEN_KEY); }
   get isLoggedIn(): boolean  { return !!this.currentUser(); }
-  get isAdminOrClerk(): boolean {
+  get isAdminOrEmploye(): boolean {
     const r = this.currentUser()?.role;
-    return r === 'admin' || r === 'clerk';
+    return r === 'admin' || r === 'employe';
   }
   get isAdmin(): boolean { return this.currentUser()?.role === 'admin'; }
 

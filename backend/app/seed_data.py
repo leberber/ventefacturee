@@ -1,9 +1,10 @@
-"""Seed initial data: creates the admin user from .env on first startup."""
+"""Seed initial data: creates the admin user and default config on first startup."""
 from sqlmodel import Session, select
 
 from app.core.security import hash_password
 from app.core.config import settings
 from app.models.user import User, UserRole
+from app.models.config import AppConfig
 
 
 def seed_admin(session: Session) -> None:
@@ -22,5 +23,17 @@ def seed_admin(session: Session) -> None:
     print(f"[seed] Admin créé : {settings.ADMIN_PHONE} / {settings.ADMIN_PASSWORD}")
 
 
+def seed_config(session: Session) -> None:
+    if session.get(AppConfig, "pricing"):
+        return
+    session.add(AppConfig(key="pricing", value={
+        "consigne_plastique": 7500,
+        "consigne_bois": 1200,
+    }))
+    session.commit()
+    print("[seed] Config pricing créée")
+
+
 def run_all(session: Session) -> None:
     seed_admin(session)
+    seed_config(session)

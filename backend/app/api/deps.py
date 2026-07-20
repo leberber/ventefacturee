@@ -28,7 +28,7 @@ def require_admin(current_user: User = Depends(get_current_user)) -> User:
     return current_user
 
 
-def require_admin_or_clerk(current_user: User = Depends(get_current_user)) -> User:
-    if current_user.role not in (UserRole.ADMIN, UserRole.CLERK):
+def require_admin_or_employe(current_user: User = Depends(get_current_user)) -> User:
+    if current_user.role not in (UserRole.ADMIN, UserRole.EMPLOYE):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Accès non autorisé")
     return current_user

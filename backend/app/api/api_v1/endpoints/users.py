@@ -6,7 +6,7 @@ from sqlmodel import Session, select
 from app.database import get_session
 from app.models.user import User, UserCreate, UserUpdate, UserRead, UserRole
 from app.core.security import hash_password
-from app.api.deps import get_current_user, require_admin_or_clerk
+from app.api.deps import get_current_user, require_admin
 
 router = APIRouter()
 
@@ -14,7 +14,7 @@ router = APIRouter()
 @router.get("", response_model=List[UserRead])
 def list_users(
     session: Session = Depends(get_session),
-    current_user: User = Depends(require_admin_or_clerk),
+    current_user: User = Depends(require_admin),
 ) -> Any:
     return session.exec(select(User).order_by(User.full_name)).all()
 
@@ -23,10 +23,8 @@ def list_users(
 def create_user(
     user_in: UserCreate,
     session: Session = Depends(get_session),
-    current_user: User = Depends(require_admin_or_clerk),
+    current_user: User = Depends(require_admin),
 ) -> Any:
-    if current_user.role == UserRole.CLERK and user_in.role == UserRole.ADMIN:
-        raise HTTPException(status_code=403, detail="Les clercs ne peuvent pas créer des administrateurs")
     if session.exec(select(User).where(User.phone == user_in.phone)).first():
         raise HTTPException(status_code=400, detail="Ce numéro de téléphone est déjà utilisé")
     user = User(
@@ -46,16 +44,11 @@ def update_user(
     user_id: int,
     user_in: UserUpdate,
     session: Session = Depends(get_session),
-    current_user: User = Depends(require_admin_or_clerk),
+    current_user: User = Depends(require_admin),
 ) -> Any:
     user = session.get(User, user_id)
     if not user:
         raise HTTPException(status_code=404, detail="Utilisateur introuvable")
-    if current_user.role == UserRole.CLERK:
-        if user.role == UserRole.ADMIN:
-            raise HTTPException(status_code=403, detail="Accès refusé")
-        if user_in.role == UserRole.ADMIN:
-            raise HTTPException(status_code=403, detail="Les clercs ne peuvent pas attribuer le rôle admin")
     data = user_in.model_dump(exclude_unset=True)
     if "password" in data:
         data["hashed_password"] = hash_password(data.pop("password"))
@@ -71,14 +64,12 @@ def update_user(
 def delete_user(
     user_id: int,
     session: Session = Depends(get_session),
-    current_user: User = Depends(require_admin_or_clerk),
+    current_user: User = Depends(require_admin),
 ) -> None:
     if user_id == current_user.id:
         raise HTTPException(status_code=400, detail="Vous ne pouvez pas supprimer votre propre compte")
     user = session.get(User, user_id)
     if not user:
         raise HTTPException(status_code=404, detail="Utilisateur introuvable")
-    if current_user.role == UserRole.CLERK and user.role == UserRole.ADMIN:
-        raise HTTPException(status_code=403, detail="Accès refusé")
     session.delete(user)
     session.commit()

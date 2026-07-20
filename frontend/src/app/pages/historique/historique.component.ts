@@ -2,14 +2,11 @@ import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
-import { TableModule } from 'primeng/table';
 import { Button } from 'primeng/button';
 import { Dialog } from 'primeng/dialog';
-import { Tag } from 'primeng/tag';
 import { Toast } from 'primeng/toast';
 import { ConfirmDialog } from 'primeng/confirmdialog';
 import { Select } from 'primeng/select';
-import { Toolbar } from 'primeng/toolbar';
 import { InputNumber } from 'primeng/inputnumber';
 import { InputText } from 'primeng/inputtext';
 import { MessageService, ConfirmationService } from 'primeng/api';
@@ -21,13 +18,14 @@ import { Bon, BonUpdate } from '../../core/models/bon.model';
 import { Client } from '../../core/models/client.model';
 import { ChauffeursService } from '../../core/services/chauffeurs.service';
 import { Chauffeur } from '../../core/models/chauffeur.model';
+import { sortItems, toggleSort } from '../../core/utils/sort.util';
 
 @Component({
   selector: 'app-historique',
   standalone: true,
   imports: [
     CommonModule, FormsModule, ReactiveFormsModule,
-    TableModule, Button, Dialog, Tag, Toast, ConfirmDialog, Select, Toolbar, InputNumber, InputText,
+    Button, Dialog, Toast, ConfirmDialog, Select, InputNumber, InputText,
   ],
   providers: [MessageService, ConfirmationService],
   templateUrl: './historique.component.html',
@@ -46,6 +44,22 @@ export class HistoriqueComponent implements OnInit {
   loading = false;
   dialogVisible = false;
   editingId: number | null = null;
+  sortCol = 'date';
+  sortDir: 1 | -1 = -1;
+
+  readonly destinationBadge: Record<string, string> = {
+    gros:   'badge badge--info',
+    detail: 'badge badge--warning',
+    horeca: 'badge badge--success',
+  };
+  readonly destinationLabel: Record<string, string> = { gros: 'Gros', detail: 'Détail', horeca: 'Horeca' };
+
+  get sorted(): Bon[] { return sortItems(this.bons, this.sortCol as keyof Bon, this.sortDir); }
+
+  sortBy(col: string) {
+    const s = toggleSort(this.sortCol, this.sortDir, col);
+    this.sortCol = s.col; this.sortDir = s.dir;
+  }
 
   clientOptions: { label: string; value: number | null }[] = [{ label: 'Tous les clients', value: null }];
   chauffeurOptions: { label: string; value: number }[] = [];

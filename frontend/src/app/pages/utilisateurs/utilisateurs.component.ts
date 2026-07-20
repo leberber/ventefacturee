@@ -2,16 +2,10 @@ import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { TableModule } from 'primeng/table';
-import { Button } from 'primeng/button';
-import { Tag } from 'primeng/tag';
 import { Toast } from 'primeng/toast';
 import { ConfirmDialog } from 'primeng/confirmdialog';
-import { InputText } from 'primeng/inputtext';
-import { Toolbar } from 'primeng/toolbar';
-import { IconField } from 'primeng/iconfield';
-import { InputIcon } from 'primeng/inputicon';
 import { MessageService, ConfirmationService } from 'primeng/api';
+import { sortItems, toggleSort } from '../../core/utils/sort.util';
 
 import { UsersService } from '../../core/services/users.service';
 import { AuthService } from '../../core/services/auth.service';
@@ -20,10 +14,7 @@ import { User } from '../../core/models/user.model';
 @Component({
   selector: 'app-utilisateurs',
   standalone: true,
-  imports: [
-    CommonModule, FormsModule,
-    TableModule, Button, Tag, Toast, ConfirmDialog, InputText, Toolbar, IconField, InputIcon,
-  ],
+  imports: [CommonModule, FormsModule, Toast, ConfirmDialog],
   providers: [MessageService, ConfirmationService],
   templateUrl: './utilisateurs.component.html',
 })
@@ -37,15 +28,25 @@ export class UtilisateursComponent implements OnInit {
   users: User[] = [];
   loading = false;
   searchQuery = '';
+  sortCol = 'full_name';
+  sortDir: 1 | -1 = 1;
 
-  readonly roleLabel: Record<string, string> = { admin: 'Admin', clerk: 'Clerk', livreur: 'Livreur' };
-  readonly roleSeverity: Record<string, 'success' | 'info' | 'warn' | 'danger' | 'secondary' | 'contrast'> = {
-    admin: 'danger', clerk: 'warn', livreur: 'info',
+  readonly roleLabel: Record<string, string> = { admin: 'Admin', employe: 'Employé', livreur: 'Livreur' };
+  readonly roleBadge: Record<string, string> = {
+    admin:   'badge badge--danger',
+    employe: 'badge badge--warning',
+    livreur: 'badge badge--info',
   };
 
-  get filtered() {
+  get sorted(): User[] {
     const q = this.searchQuery.toLowerCase();
-    return q ? this.users.filter(u => u.full_name.toLowerCase().includes(q) || u.phone.toLowerCase().includes(q)) : this.users;
+    const filtered = q ? this.users.filter(u => u.full_name.toLowerCase().includes(q) || u.phone.toLowerCase().includes(q)) : this.users;
+    return sortItems(filtered, this.sortCol as keyof User, this.sortDir);
+  }
+
+  sortBy(col: string) {
+    const s = toggleSort(this.sortCol, this.sortDir, col);
+    this.sortCol = s.col; this.sortDir = s.dir;
   }
 
   ngOnInit() { this.load(); }

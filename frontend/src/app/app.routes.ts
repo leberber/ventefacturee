@@ -1,6 +1,6 @@
 import { Routes } from '@angular/router';
 import { LayoutComponent } from './layout/layout.component';
-import { authGuard, adminOrClerkGuard } from './core/guards/auth.guard';
+import { authGuard, adminOrEmployeGuard, adminGuard } from './core/guards/auth.guard';
 
 export const routes: Routes = [
   { path: 'login', loadComponent: () => import('./pages/login/login.component').then(m => m.LoginComponent) },
@@ -28,9 +28,11 @@ export const routes: Routes = [
       { path: 'retour',     loadComponent: () => import('./pages/retour/retour.component').then(m => m.RetourComponent) },
       { path: 'historique', loadComponent: () => import('./pages/historique/historique.component').then(m => m.HistoriqueComponent) },
 
-      { path: 'utilisateurs',              canActivate: [adminOrClerkGuard], loadComponent: () => import('./pages/utilisateurs/utilisateurs.component').then(m => m.UtilisateursComponent) },
-      { path: 'utilisateurs/nouveau',      canActivate: [adminOrClerkGuard], loadComponent: () => import('./pages/utilisateurs/utilisateur-form/utilisateur-form.component').then(m => m.UtilisateurFormComponent) },
-      { path: 'utilisateurs/:id/modifier', canActivate: [adminOrClerkGuard], loadComponent: () => import('./pages/utilisateurs/utilisateur-form/utilisateur-form.component').then(m => m.UtilisateurFormComponent) },
+      { path: 'utilisateurs',              canActivate: [adminGuard], loadComponent: () => import('./pages/utilisateurs/utilisateurs.component').then(m => m.UtilisateursComponent) },
+      { path: 'utilisateurs/nouveau',      canActivate: [adminGuard], loadComponent: () => import('./pages/utilisateurs/utilisateur-form/utilisateur-form.component').then(m => m.UtilisateurFormComponent) },
+      { path: 'utilisateurs/:id/modifier', canActivate: [adminGuard], loadComponent: () => import('./pages/utilisateurs/utilisateur-form/utilisateur-form.component').then(m => m.UtilisateurFormComponent) },
+
+      { path: 'parametres', canActivate: [adminOrEmployeGuard], loadComponent: () => import('./pages/settings/settings.component').then(m => m.SettingsComponent) },
     ],
   },
   { path: '**', redirectTo: '' },

@@ -3,83 +3,126 @@
 
 <div class="page-content">
 
-  <!-- Toolbar -->
-  <p-toolbar styleClass="mb-4">
-    <ng-template #start>
-      <h2 class="page-title">Historique des BLs&nbsp;<small style="font-size:14px;font-weight:400;color:#6b7280">({{ bons.length }})</small></h2>
-    </ng-template>
-    <ng-template #end>
-      <p-select
-        [(ngModel)]="selectedClientId"
-        [options]="clientOptions"
-        optionLabel="label"
-        optionValue="value"
-        (onChange)="load()"
-        [style]="{width:'220px'}"
-      />
-    </ng-template>
-  </p-toolbar>
+  <div class="page-header">
+    <div style="display:flex;align-items:center;gap:0.75rem">
+      <div class="page-icon"><i class="pi pi-list"></i></div>
+      <div>
+        <h1 class="page-header__title">Historique des BLs</h1>
+        <p class="page-header__sub">{{ bons.length }} bon{{ bons.length !== 1 ? 's' : '' }} de livraison</p>
+      </div>
+    </div>
+  </div>
 
-  <!-- Table -->
-  <p-table
-    [value]="bons"
-    [loading]="loading"
-    styleClass="p-datatable-sm p-datatable-striped"
-    [paginator]="true"
-    [rows]="25"
-    [showCurrentPageReport]="true"
-    currentPageReportTemplate="{first}–{last} sur {totalRecords}"
-    sortField="date"
-    [sortOrder]="-1"
-  >
-    <ng-template #header>
-      <tr>
-        <th pSortableColumn="bl_number">N° BL <p-sortIcon field="bl_number" /></th>
-        <th pSortableColumn="date">Date <p-sortIcon field="date" /></th>
-        <th>Destinataire</th>
-        <th>Chauffeur</th>
-        <th>🔵 Consig.</th>
-        <th>🔵 Non-consig.</th>
-        <th>🔵 Retour</th>
-        <th>🟫 Consig.</th>
-        <th>🟫 Non-consig.</th>
-        <th>🟫 Retour</th>
-        <th>Notes</th>
-        <th style="width:100px">Actions</th>
-      </tr>
-    </ng-template>
-    <ng-template #body let-b>
-      <tr>
-        <td><span class="font-mono">{{ b.bl_number }}</span></td>
-        <td>{{ b.date | date:'dd/MM/yyyy' }}</td>
-        <td>
-          <strong>{{ b.client_name || b.livreur_name }}</strong>
-          @if (b.destination_type !== 'gros') {
-            <p-tag [value]="b.destination_type" severity="info" styleClass="ml-1" style="font-size:0.7rem;vertical-align:middle" />
-          }
-        </td>
-        <td>{{ b.chauffeur_name }}</td>
-        <td><p-tag [value]="b.consigne_plastique.toString()" severity="info" /></td>
-        <td><p-tag [value]="b.nc_plastique.toString()" severity="warn" /></td>
-        <td><p-tag [value]="b.retour_plastique.toString()" severity="success" /></td>
-        <td><p-tag [value]="b.consigne_bois.toString()" severity="warn" /></td>
-        <td><p-tag [value]="b.nc_bois.toString()" severity="warn" /></td>
-        <td><p-tag [value]="b.retour_bois.toString()" severity="success" /></td>
-        <td style="max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ b.notes || '—' }}</td>
-        <td>
-          <div style="display:flex;gap:4px">
-            <p-button icon="pi pi-pencil" size="small" severity="secondary" (onClick)="openEdit(b)" />
-            <p-button icon="pi pi-trash"  size="small" severity="danger"    (onClick)="confirmDelete(b)" />
+  <div class="table-container">
+
+    <div class="table-header">
+      <div class="table-header-left">
+        <p-select
+          [(ngModel)]="selectedClientId"
+          [options]="clientOptions"
+          optionLabel="label"
+          optionValue="value"
+          (onChange)="load()"
+          appendTo="body"
+          [style]="{minWidth:'220px'}"
+        />
+      </div>
+    </div>
+
+    <div class="table-wrapper">
+      @if (loading) {
+        @for (_ of [1,2,3,4,5]; track $index) {
+          <div style="padding:0.65rem 1rem;border-bottom:1px solid var(--border-color-light)">
+            <div style="height:1rem;border-radius:6px;background:var(--surface-200);animation:skeleton 1.2s infinite alternate"></div>
           </div>
-        </td>
-      </tr>
-    </ng-template>
-    <ng-template #emptymessage>
-      <tr><td colspan="12" style="text-align:center;padding:32px;color:#9ca3af">
-        Aucun BL trouvé
-      </td></tr>
-    </ng-template>
-  </p-table>
+        }
+      } @else if (sorted.length === 0) {
+        <div class="table-empty">Aucun BL trouvé</div>
+      } @else {
+        <table class="table">
+          <thead>
+            <tr>
+              <th class="th-sort" (click)="sortBy('bl_number')"
+                [class.th-sort--asc]="sortCol==='bl_number'&&sortDir===1"
+                [class.th-sort--desc]="sortCol==='bl_number'&&sortDir===-1">
+                N° BL <i class="pi pi-sort-alt"></i>
+              </th>
+              <th class="th-sort" (click)="sortBy('date')"
+                [class.th-sort--asc]="sortCol==='date'&&sortDir===1"
+                [class.th-sort--desc]="sortCol==='date'&&sortDir===-1">
+                Date <i class="pi pi-sort-alt"></i>
+              </th>
+              <th>Destinataire</th>
+              <th>Chauffeur</th>
+              <th><img src="assets/plastiquepallette.png" style="height:14px;vertical-align:middle;margin-right:3px" alt="">Consig.</th>
+              <th>Non-consig.</th>
+              <th>Retour</th>
+              <th><img src="assets/woodpallette.png" style="height:14px;vertical-align:middle;margin-right:3px" alt="">Consig.</th>
+              <th>Non-consig.</th>
+              <th>Retour</th>
+              <th>Notes</th>
+              <th style="width:7rem"></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (b of sorted; track b.id; let i = $index) {
+              <tr class="table-row-animate" [style.--row-delay]="i * 20 + 'ms'">
+                <td><code class="font-mono text-muted">{{ b.bl_number }}</code></td>
+                <td class="text-muted">{{ b.date | date:'dd/MM/yyyy' }}</td>
+                <td>
+                  <div class="table-item-info">
+                    <span class="table-item-name">{{ b.client_name || b.livreur_name }}</span>
+                    @if (b.destination_type !== 'gros') {
+                      <span [class]="destinationBadge[b.destination_type]" style="align-self:flex-start">
+                        {{ destinationLabel[b.destination_type] }}
+                      </span>
+                    }
+                  </div>
+                </td>
+                <td class="text-muted">{{ b.chauffeur_name }}</td>
+                <td>
+                  @if (b.consigne_plastique > 0) { <span class="badge badge--info">{{ b.consigne_plastique }}</span> }
+                  @else { <span class="text-muted">0</span> }
+                </td>
+                <td>
+                  @if (b.nc_plastique > 0) { <span class="badge badge--warning">{{ b.nc_plastique }}</span> }
+                  @else { <span class="text-muted">0</span> }
+                </td>
+                <td>
+                  @if (b.retour_plastique > 0) { <span class="badge badge--success">{{ b.retour_plastique }}</span> }
+                  @else { <span class="text-muted">0</span> }
+                </td>
+                <td>
+                  @if (b.consigne_bois > 0) { <span class="badge badge--info">{{ b.consigne_bois }}</span> }
+                  @else { <span class="text-muted">0</span> }
+                </td>
+                <td>
+                  @if (b.nc_bois > 0) { <span class="badge badge--warning">{{ b.nc_bois }}</span> }
+                  @else { <span class="text-muted">0</span> }
+                </td>
+                <td>
+                  @if (b.retour_bois > 0) { <span class="badge badge--success">{{ b.retour_bois }}</span> }
+                  @else { <span class="text-muted">0</span> }
+                </td>
+                <td class="text-muted" style="max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">
+                  {{ b.notes || '—' }}
+                </td>
+                <td class="actions-cell">
+                  <button class="table-action-btn" title="Modifier" (click)="openEdit(b)">
+                    <i class="pi pi-pencil"></i>
+                  </button>
+                  <button class="table-action-btn table-action-btn--danger" title="Supprimer" (click)="confirmDelete(b)">
+                    <i class="pi pi-trash"></i>
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      }
+    </div>
+
+  </div>
 
 </div>
 
@@ -97,22 +140,22 @@
       @if (editingDestinationType === 'gros') {
         <div class="field">
           <label>Client</label>
-          <p-select formControlName="client_id" [options]="clientOptions.slice(1)" optionLabel="label" optionValue="value" [style]="{width:'100%'}" />
+          <p-select formControlName="client_id" [options]="clientOptions.slice(1)" optionLabel="label" optionValue="value" [style]="{width:'100%'}" appendTo="body" />
         </div>
       } @else {
         <div class="field">
           <label>Livreur</label>
-          <p-select formControlName="livreur_id" [options]="livreurOptions" optionLabel="label" optionValue="value" [style]="{width:'100%'}" />
+          <p-select formControlName="livreur_id" [options]="livreurOptions" optionLabel="label" optionValue="value" [style]="{width:'100%'}" appendTo="body" />
         </div>
       }
       <div class="field">
         <label>Chauffeur <span style="color:red">*</span></label>
-        <p-select formControlName="chauffeur_id" [options]="chauffeurOptions" optionLabel="label" optionValue="value" [style]="{width:'100%'}" />
+        <p-select formControlName="chauffeur_id" [options]="chauffeurOptions" optionLabel="label" optionValue="value" [style]="{width:'100%'}" appendTo="body" />
       </div>
     </div>
 
     <div class="palette-section">
-      <div class="palette-section-title">🔵 Palettes plastique</div>
+      <div class="palette-section-title"><img src="assets/plastiquepallette.png" style="height:16px;vertical-align:middle;margin-right:6px" alt="">Palettes plastique</div>
       <div class="form-grid-3">
         <div class="field">
           <label>Consignées</label>
@@ -133,7 +176,7 @@
     </div>
 
     <div class="palette-section">
-      <div class="palette-section-title">🟫 Palettes bois</div>
+      <div class="palette-section-title"><img src="assets/woodpallette.png" style="height:16px;vertical-align:middle;margin-right:6px" alt="">Palettes bois</div>
       <div class="form-grid-3">
         <div class="field">
           <label>Consignées</label>

@@ -14,7 +14,7 @@
         <i class="pi pi-home"></i><span>Tableau de bord</span>
       </a>
 
-      @if(isAdminOrClerk) {
+      @if(isAdminOrEmploye) {
         <a class="nav-item nav-item--accent" routerLink="/expedition" routerLinkActive="active">
           <i class="pi pi-file-plus"></i><span>Enregistrer une expédition</span>
         </a>
@@ -33,8 +33,13 @@
         <a class="nav-item" routerLink="/historique" routerLinkActive="active">
           <i class="pi pi-list"></i><span>Historique BLs</span>
         </a>
-        <a class="nav-item" routerLink="/utilisateurs" routerLinkActive="active">
-          <i class="pi pi-shield"></i><span>Utilisateurs</span>
+        @if(isAdmin) {
+          <a class="nav-item" routerLink="/utilisateurs" routerLinkActive="active">
+            <i class="pi pi-shield"></i><span>Fonctionnaires</span>
+          </a>
+        }
+        <a class="nav-item" routerLink="/parametres" routerLinkActive="active">
+          <i class="pi pi-cog"></i><span>Paramètres</span>
         </a>
       }
     </nav>
