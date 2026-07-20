@@ -1,0 +1,68 @@
+// Two-panel layout: equal columns
+.cf-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.25rem;
+  align-items: start;
+}
+
+// Left: scrollable form cards
+.cf-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  min-width: 0;
+  padding-bottom: 5rem;
+}
+
+// Right: sticky map panel — stays in view while left cards scroll
+.cf-map {
+  position: sticky;
+  top: 0;
+  height: calc(100vh - 250px);
+  border-radius: var(--radius-2xl);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  border: var(--border-width) solid var(--surface-border);
+  background: var(--surface-card);
+  padding: 0.75rem;
+}
+
+// Three-column grid (phone / code / category)
+.form-grid-3 {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 1rem;
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+// Fixed footer with action buttons
+.form-footer {
+  position: fixed;
+  bottom: 0;
+  left: var(--sidebar-w, 350px);
+  right: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  padding: 1rem 1.5rem;
+  background: var(--surface-card);
+  border-top: 1px solid var(--surface-border);
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, .06);
+}
+
+// Card entry animation
+@keyframes card-in {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.form-card--anim {
+  animation: card-in 0.3s ease both;
+  animation-delay: calc(var(--card-i, 0) * 60ms);
+}

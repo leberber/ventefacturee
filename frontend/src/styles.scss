@@ -18,6 +18,7 @@
 @use './styles/table'    as *;
 
 // 3. External CSS
+@import 'leaflet/dist/leaflet.css';
 @import 'primeicons/primeicons.css';
 
 // 4. Base reset

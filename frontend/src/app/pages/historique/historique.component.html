@@ -36,7 +36,7 @@
       <tr>
         <th pSortableColumn="bl_number">N° BL <p-sortIcon field="bl_number" /></th>
         <th pSortableColumn="date">Date <p-sortIcon field="date" /></th>
-        <th>Client</th>
+        <th>Destinataire</th>
         <th>Chauffeur</th>
         <th>🔵 Consig.</th>
         <th>🔵 Non-consig.</th>
@@ -52,7 +52,12 @@
       <tr>
         <td><span class="font-mono">{{ b.bl_number }}</span></td>
         <td>{{ b.date | date:'dd/MM/yyyy' }}</td>
-        <td><strong>{{ b.client_name }}</strong></td>
+        <td>
+          <strong>{{ b.client_name || b.livreur_name }}</strong>
+          @if (b.destination_type !== 'gros') {
+            <p-tag [value]="b.destination_type" severity="info" styleClass="ml-1" style="font-size:0.7rem;vertical-align:middle" />
+          }
+        </td>
         <td>{{ b.chauffeur_name }}</td>
         <td><p-tag [value]="b.consigne_plastique.toString()" severity="info" /></td>
         <td><p-tag [value]="b.nc_plastique.toString()" severity="warn" /></td>
@@ -89,10 +94,17 @@
   <form [formGroup]="form" (ngSubmit)="save()">
 
     <div class="form-grid-2" style="margin-bottom:0">
-      <div class="field">
-        <label>Client <span style="color:red">*</span></label>
-        <p-select formControlName="client_id" [options]="clientOptions.slice(1)" optionLabel="label" optionValue="value" [style]="{width:'100%'}" />
-      </div>
+      @if (editingDestinationType === 'gros') {
+        <div class="field">
+          <label>Client</label>
+          <p-select formControlName="client_id" [options]="clientOptions.slice(1)" optionLabel="label" optionValue="value" [style]="{width:'100%'}" />
+        </div>
+      } @else {
+        <div class="field">
+          <label>Livreur</label>
+          <p-select formControlName="livreur_id" [options]="livreurOptions" optionLabel="label" optionValue="value" [style]="{width:'100%'}" />
+        </div>
+      }
       <div class="field">
         <label>Chauffeur <span style="color:red">*</span></label>
         <p-select formControlName="chauffeur_id" [options]="chauffeurOptions" optionLabel="label" optionValue="value" [style]="{width:'100%'}" />

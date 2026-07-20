@@ -2,12 +2,14 @@ export interface Bon {
   id: number;
   bl_number: string;
   date: string;
-  client_id: number;
+  destination_type: string;  // gros | detail | horeca
   chauffeur_id: number;
-  client_name: string;
-  client_code?: string;
-  client_category: string;
   chauffeur_name: string;
+  client_id?: number;
+  client_name?: string;
+  client_code?: string;
+  livreur_id?: number;
+  livreur_name?: string;
   consigne_plastique: number;
   nc_plastique: number;
   retour_plastique: number;
@@ -21,8 +23,10 @@ export interface Bon {
 
 export interface BonCreate {
   date: string;
-  client_id: number;
+  destination_type: string;
   chauffeur_id: number;
+  client_id?: number | null;
+  livreur_id?: number | null;
   consigne_plastique: number;
   nc_plastique: number;
   retour_plastique: number;

@@ -3,71 +3,123 @@
 
 <div class="page-content">
 
-  <!-- Toolbar -->
-  <p-toolbar styleClass="mb-4">
-    <ng-template #start>
-      <h2 class="page-title">Clients&nbsp;<small style="font-size:14px;font-weight:400;color:#6b7280">({{ clients.length }})</small></h2>
-    </ng-template>
-    <ng-template #end>
-      <p-iconfield>
-        <p-inputicon class="pi pi-search" />
-        <input pInputText [(ngModel)]="searchQuery" (ngModelChange)="load()" placeholder="Rechercher…" style="width:200px">
-      </p-iconfield>
-      <p-button label="Ajouter" icon="pi pi-plus" (onClick)="openAdd()" styleClass="ml-2" />
-    </ng-template>
-  </p-toolbar>
+  <!-- Header -->
+  <div class="page-header">
+    <div style="display:flex;align-items:center;gap:0.75rem">
+      <div class="page-icon"><i class="pi pi-users"></i></div>
+      <div>
+        <h1 class="page-header__title">Clients</h1>
+        <p class="page-header__sub">{{ clients.length }} clients enregistrés</p>
+      </div>
+    </div>
+  </div>
 
-  <!-- Table -->
-  <p-table
-    [value]="clients"
-    [loading]="loading"
-    styleClass="p-datatable-sm p-datatable-striped"
-    [paginator]="true"
-    [rows]="20"
-    [showCurrentPageReport]="true"
-    currentPageReportTemplate="{first}–{last} sur {totalRecords}"
-  >
-    <ng-template #header>
-      <tr>
-        <th pSortableColumn="code">Code <p-sortIcon field="code" /></th>
-        <th pSortableColumn="name">Nom / Magasin <p-sortIcon field="name" /></th>
-        <th>Catégorie</th>
-        <th>Téléphone</th>
-        <th>🔵 Plt. total</th>
-        <th>Dont consig.</th>
-        <th>Dont non-consig.</th>
-        <th>🟫 Plt. total</th>
-        <th>Dont consig.</th>
-        <th>Dont non-consig.</th>
-        <th style="width:120px">Actions</th>
-      </tr>
-    </ng-template>
-    <ng-template #body let-c>
-      <tr>
-        <td><span class="font-mono">{{ c.code || '—' }}</span></td>
-        <td><strong>{{ c.name }}</strong></td>
-        <td><p-tag [value]="categoryLabel[c.category]" [severity]="categorySeverity[c.category]" /></td>
-        <td>{{ c.phone || '—' }}</td>
-        <td><p-tag [value]="(c.plastic_balance ?? 0).toString()" [severity]="(c.plastic_balance ?? 0) > 0 ? 'info' : 'success'" /></td>
-        <td><p-tag [value]="(c.plastic_consigne ?? 0).toString()" severity="info" /></td>
-        <td><p-tag [value]="(c.plastic_nc ?? 0).toString()" severity="warn" /></td>
-        <td><p-tag [value]="(c.wood_balance ?? 0).toString()" [severity]="(c.wood_balance ?? 0) > 0 ? 'warn' : 'success'" /></td>
-        <td><p-tag [value]="(c.wood_consigne ?? 0).toString()" severity="warn" /></td>
-        <td><p-tag [value]="(c.wood_nc ?? 0).toString()" severity="warn" /></td>
-        <td>
-          <div style="display:flex;gap:4px">
-            <p-button icon="pi pi-pencil" size="small" severity="secondary" (onClick)="openEdit(c)" />
-            <p-button icon="pi pi-list"   size="small" severity="secondary" [routerLink]="['/historique']" [queryParams]="{clientId: c.id}" />
-            <p-button icon="pi pi-trash"  size="small" severity="danger"    (onClick)="confirmDelete(c)" />
+  <div class="table-container">
+
+    <!-- Toolbar -->
+    <div class="table-header">
+      <div class="table-header-left">
+        <div class="table-search">
+          <div class="search-icon"><i class="pi pi-search"></i></div>
+          <input placeholder="Rechercher…" [(ngModel)]="searchQuery" (ngModelChange)="load()" />
+        </div>
+      </div>
+      <div class="table-actions">
+        <button class="btn-add" (click)="openAdd()">
+          <i class="pi pi-plus"></i>
+          <span>Ajouter</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Table -->
+    <div class="table-wrapper">
+      @if (loading) {
+        @for (_ of [1,2,3,4,5]; track $index) {
+          <div style="padding:0.65rem 1rem;border-bottom:1px solid var(--border-color-light)">
+            <div style="height:1rem;border-radius:6px;background:var(--surface-200);animation:skeleton 1.2s infinite alternate"></div>
           </div>
-        </td>
-      </tr>
-    </ng-template>
-    <ng-template #emptymessage>
-      <tr><td colspan="11" style="text-align:center;padding:32px;color:#9ca3af">
-        {{ searchQuery ? 'Aucun résultat pour "' + searchQuery + '"' : 'Aucun client enregistré' }}
-      </td></tr>
-    </ng-template>
-  </p-table>
+        }
+      } @else if (sorted.length === 0) {
+        <div class="table-empty">
+          {{ searchQuery ? 'Aucun résultat pour "' + searchQuery + '"' : 'Aucun client enregistré' }}
+        </div>
+      } @else {
+        <table class="table">
+          <thead>
+            <tr>
+              <th class="th-sort" (click)="sortBy('code')"
+                [class.th-sort--asc]="sortCol==='code'&&sortDir===1"
+                [class.th-sort--desc]="sortCol==='code'&&sortDir===-1">
+                Code <i class="pi pi-sort-alt"></i>
+              </th>
+              <th class="th-sort" (click)="sortBy('name')"
+                [class.th-sort--asc]="sortCol==='name'&&sortDir===1"
+                [class.th-sort--desc]="sortCol==='name'&&sortDir===-1">
+                Nom / Magasin <i class="pi pi-sort-alt"></i>
+              </th>
+              <th>Catégorie</th>
+              <th>Téléphone</th>
+              <th class="th-sort" (click)="sortBy('plastic_balance')"
+                [class.th-sort--asc]="sortCol==='plastic_balance'&&sortDir===1"
+                [class.th-sort--desc]="sortCol==='plastic_balance'&&sortDir===-1">
+                🔵 Plastique <i class="pi pi-sort-alt"></i>
+              </th>
+              <th class="th-sort" (click)="sortBy('wood_balance')"
+                [class.th-sort--asc]="sortCol==='wood_balance'&&sortDir===1"
+                [class.th-sort--desc]="sortCol==='wood_balance'&&sortDir===-1">
+                🟫 Bois <i class="pi pi-sort-alt"></i>
+              </th>
+              <th style="width:7rem"></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (c of sorted; track c.id; let i = $index) {
+              <tr class="table-row-animate" [style.--row-delay]="i * 20 + 'ms'">
+                <td><code class="font-mono text-muted">{{ c.code || '—' }}</code></td>
+                <td>
+                  <div class="table-item-info">
+                    <span class="table-item-name">{{ c.name }}</span>
+                    @if (c.store_name) {
+                      <span class="table-item-desc">{{ c.store_name }}</span>
+                    }
+                  </div>
+                </td>
+                <td><span [class]="categoryBadge[c.category]">{{ categoryLabel[c.category] }}</span></td>
+                <td class="text-muted">{{ c.phone || '—' }}</td>
+                <td>
+                  @if ((c.plastic_balance ?? 0) > 0) {
+                    <span class="badge badge--info">{{ c.plastic_balance }}</span>
+                  } @else {
+                    <span class="text-muted">0</span>
+                  }
+                </td>
+                <td>
+                  @if ((c.wood_balance ?? 0) > 0) {
+                    <span class="badge badge--warning">{{ c.wood_balance }}</span>
+                  } @else {
+                    <span class="text-muted">0</span>
+                  }
+                </td>
+                <td class="actions-cell">
+                  <button class="table-action-btn" title="Modifier" (click)="openEdit(c)">
+                    <i class="pi pi-pencil"></i>
+                  </button>
+                  <button class="table-action-btn" title="BLs"
+                    [routerLink]="['/historique']" [queryParams]="{clientId: c.id}">
+                    <i class="pi pi-list"></i>
+                  </button>
+                  <button class="table-action-btn table-action-btn--danger" title="Supprimer" (click)="confirmDelete(c)">
+                    <i class="pi pi-trash"></i>
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      }
+    </div>
+
+  </div>
 
 </div>

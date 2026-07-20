@@ -7,6 +7,7 @@ from sqlmodel import Session, select, func
 from app.database import get_session
 from app.models.client import Client
 from app.models.chauffeur import Chauffeur
+from app.models.livreur import Livreur
 from app.models.bon_de_livraison import BonDeLivraison, BLCreate, BLUpdate, BLRead
 
 router = APIRouter()
@@ -45,6 +46,7 @@ def list_bls(
         q = q.where(
             BonDeLivraison.bl_number.ilike(term)
             | BonDeLivraison.client_name.ilike(term)
+            | BonDeLivraison.livreur_name.ilike(term)
             | BonDeLivraison.chauffeur_name.ilike(term)
         )
     if date_from:
@@ -60,22 +62,15 @@ def create_bl(
     bl_in: BLCreate,
     session: Session = Depends(get_session),
 ) -> Any:
-    client = session.get(Client, bl_in.client_id)
-    if not client:
-        raise HTTPException(status_code=404, detail="Client introuvable")
-
     chauffeur = session.get(Chauffeur, bl_in.chauffeur_id)
     if not chauffeur:
         raise HTTPException(status_code=404, detail="Chauffeur introuvable")
 
-    bl = BonDeLivraison(
+    bl_data: dict = dict(
         bl_number=_generate_bl_number(session),
         date=bl_in.date,
-        client_id=bl_in.client_id,
+        destination_type=bl_in.destination_type,
         chauffeur_id=bl_in.chauffeur_id,
-        client_name=client.name,
-        client_code=client.code,
-        client_category=client.category.value,
         chauffeur_name=chauffeur.name,
         consigne_plastique=max(0, bl_in.consigne_plastique),
         nc_plastique=max(0, bl_in.nc_plastique),
@@ -85,6 +80,23 @@ def create_bl(
         retour_bois=max(0, bl_in.retour_bois),
         notes=bl_in.notes,
     )
+
+    if bl_in.destination_type == "gros":
+        if not bl_in.client_id:
+            raise HTTPException(status_code=422, detail="client_id requis pour une expédition Gros")
+        client = session.get(Client, bl_in.client_id)
+        if not client:
+            raise HTTPException(status_code=404, detail="Client introuvable")
+        bl_data.update(client_id=client.id, client_name=client.name, client_code=client.code)
+    else:
+        if not bl_in.livreur_id:
+            raise HTTPException(status_code=422, detail="livreur_id requis pour une expédition Détail/Horeca")
+        livreur = session.get(Livreur, bl_in.livreur_id)
+        if not livreur:
+            raise HTTPException(status_code=404, detail="Livreur introuvable")
+        bl_data.update(livreur_id=livreur.id, livreur_name=livreur.name)
+
+    bl = BonDeLivraison(**bl_data)
     session.add(bl)
     session.commit()
     session.refresh(bl)
@@ -104,13 +116,19 @@ def update_bl(
     data = bl_in.model_dump(exclude_unset=True)
 
     # If client changed, update snapshots
-    if "client_id" in data:
+    if "client_id" in data and data["client_id"] is not None:
         client = session.get(Client, data["client_id"])
         if not client:
             raise HTTPException(status_code=404, detail="Client introuvable")
-        bl.client_name     = client.name
-        bl.client_code     = client.code
-        bl.client_category = client.category.value
+        bl.client_name = client.name
+        bl.client_code = client.code
+
+    # If livreur changed, update snapshot
+    if "livreur_id" in data and data["livreur_id"] is not None:
+        livreur = session.get(Livreur, data["livreur_id"])
+        if not livreur:
+            raise HTTPException(status_code=404, detail="Livreur introuvable")
+        bl.livreur_name = livreur.name
 
     # If chauffeur changed, update snapshot
     if "chauffeur_id" in data:

@@ -1,98 +1,154 @@
 <p-toast />
 
 <div class="page-content">
-  <div style="max-width:680px">
 
-    <div style="display:flex;align-items:center;gap:12px;margin-bottom:24px">
-      <p-button icon="pi pi-arrow-left" severity="secondary" [text]="true" (onClick)="cancel()" />
-      <h2 class="page-title" style="margin:0">
-        {{ editingId ? 'Modifier le client' : 'Ajouter un client' }}
-      </h2>
+  <!-- Header -->
+  <div class="page-header" style="margin-bottom:1.5rem">
+    <div style="display:flex;align-items:center;gap:0.75rem">
+      <div class="page-icon"><i class="pi pi-user"></i></div>
+      <div>
+        <h1 class="page-header__title">{{ editingId ? 'Modifier le client' : 'Nouveau client' }}</h1>
+        @if (editingId) {
+          <p class="page-header__sub">{{ form.get('name')?.value || '—' }}</p>
+        }
+      </div>
+    </div>
+    <button class="back-btn" type="button" (click)="cancel()">
+      <i class="pi pi-arrow-left"></i>
+      <span>Retour</span>
+    </button>
+  </div>
+
+  <form [formGroup]="form" (ngSubmit)="save()">
+    <div class="cf-layout">
+
+      <!-- Left: stacked form cards -->
+      <div class="cf-fields">
+
+        <!-- Identification card -->
+        <div class="form-card form-card--anim" style="--card-i:0">
+          <div class="form-card__header">
+            <div class="form-card__icon form-card__icon--indigo"><i class="pi pi-user"></i></div>
+            <span class="form-card__title">Identification</span>
+          </div>
+          <div class="form-card__body">
+            <div class="form-grid-2">
+              <div class="field">
+                <label>Prénom</label>
+                <input pInputText formControlName="first_name" placeholder="Prénom" class="w-full">
+              </div>
+              <div class="field">
+                <label>Nom de famille</label>
+                <input pInputText formControlName="last_name" placeholder="Nom" class="w-full">
+              </div>
+            </div>
+            <div class="field">
+              <label>Nom du magasin</label>
+              <input pInputText formControlName="store_name" placeholder="Épicerie, commerce…" class="w-full">
+            </div>
+            <div class="form-grid-3">
+              <div class="field">
+                <label>Téléphone</label>
+                <input pInputText formControlName="phone" placeholder="0550 000 000" class="w-full">
+              </div>
+              <div class="field">
+                <label>Code client</label>
+                <input pInputText formControlName="code" placeholder="ex: 000146" class="w-full">
+              </div>
+              <div class="field">
+                <label>Catégorie <span style="color:red">*</span></label>
+                <p-select formControlName="category" [options]="categoryOptions"
+                  optionLabel="label" optionValue="value" [style]="{width:'100%'}" appendTo="body" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Localisation card (fields only) -->
+        <div class="form-card form-card--anim" style="--card-i:1">
+          <div class="form-card__header">
+            <div class="form-card__icon form-card__icon--teal"><i class="pi pi-map-marker"></i></div>
+            <span class="form-card__title">Localisation</span>
+            <span class="wilaya-badge"><i class="pi pi-map"></i> Wilaya de Tizi-Ouzou</span>
+          </div>
+          <div class="form-card__body">
+            <div class="form-grid-2">
+              <div class="field">
+                <label>Daïra</label>
+                <p-select
+                  formControlName="daira"
+                  [options]="dairaOptions"
+                  optionLabel="label"
+                  optionValue="value"
+                  placeholder="Sélectionner une daïra"
+                  [filter]="true"
+                  filterPlaceholder="Rechercher…"
+                  [showClear]="true"
+                  [style]="{width:'100%'}"
+                  appendTo="body"
+                  (onChange)="onDairaChange($event.value)"
+                />
+              </div>
+              <div class="field">
+                <label>Commune</label>
+                <p-select
+                  formControlName="commune"
+                  [options]="communeOptions"
+                  optionLabel="label"
+                  optionValue="value"
+                  placeholder="Sélectionner une commune"
+                  [filter]="true"
+                  filterPlaceholder="Rechercher…"
+                  [showClear]="true"
+                  [style]="{width:'100%'}"
+                  appendTo="body"
+                  [disabled]="!form.get('daira')?.value"
+                  (onChange)="onCommuneChange($event.value)"
+                />
+              </div>
+              <div class="field" style="grid-column:1/-1">
+                <label>Adresse</label>
+                <input pInputText formControlName="address" placeholder="Rue, quartier, numéro…" class="w-full">
+              </div>
+            </div>
+            <div class="loc-divider">
+              <i class="pi pi-map-marker"></i>
+              <span>Coordonnées GPS <em style="font-style:normal;font-weight:400;text-transform:none;letter-spacing:0;color:var(--text-color-secondary)">(optionnel)</em></span>
+            </div>
+            <div class="form-grid-2">
+              <div class="field">
+                <label>Latitude</label>
+                <p-inputnumber formControlName="latitude" [minFractionDigits]="6" [maxFractionDigits]="8"
+                  [showClear]="true" placeholder="36.752887" [style]="{width:'100%'}" />
+              </div>
+              <div class="field">
+                <label>Longitude</label>
+                <p-inputnumber formControlName="longitude" [minFractionDigits]="6" [maxFractionDigits]="8"
+                  [showClear]="true" placeholder="4.042048" [style]="{width:'100%'}" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /cf-fields -->
+
+      <!-- Right: sticky map panel -->
+      <div class="cf-map">
+        <app-map-picker
+          [initialLat]="initialLat"
+          [initialLng]="initialLng"
+          (locationPicked)="onMapPick($event)"
+        />
+      </div>
+
+    </div><!-- /cf-layout -->
+
+    <!-- Fixed footer -->
+    <div class="form-footer">
+      <p-button label="Annuler"     severity="secondary" [text]="true" type="button" (onClick)="cancel()" />
+      <p-button label="Enregistrer" icon="pi pi-check"   type="submit"
+        [disabled]="form.invalid || saving" [loading]="saving" />
     </div>
 
-    <form [formGroup]="form" (ngSubmit)="save()">
-
-      <div class="form-grid-2">
-        <div class="field">
-          <label>Code client</label>
-          <input pInputText formControlName="code" placeholder="ex: 000146" class="w-full">
-        </div>
-        <div class="field">
-          <label>Catégorie <span style="color:red">*</span></label>
-          <p-select formControlName="category" [options]="categoryOptions"
-            optionLabel="label" optionValue="value" [style]="{width:'100%'}" />
-        </div>
-      </div>
-
-      <div class="form-grid-2">
-        <div class="field">
-          <label>Prénom</label>
-          <input pInputText formControlName="first_name" placeholder="Prénom" class="w-full">
-        </div>
-        <div class="field">
-          <label>Nom de famille</label>
-          <input pInputText formControlName="last_name" placeholder="Nom" class="w-full">
-        </div>
-      </div>
-
-      <div class="field">
-        <label>Nom du magasin</label>
-        <input pInputText formControlName="store_name" placeholder="Nom du magasin" class="w-full">
-      </div>
-
-      <div class="field">
-        <label>Nom d'affichage <span style="color:red">*</span></label>
-        <input pInputText formControlName="name" placeholder="Nom affiché dans les BLs" class="w-full">
-      </div>
-
-      <div class="form-grid-2">
-        <div class="field">
-          <label>Daïra</label>
-          <p-select
-            formControlName="daira"
-            [options]="dairaOptions"
-            optionLabel="label"
-            optionValue="value"
-            placeholder="Sélectionner une daïra"
-            [filter]="true"
-            filterPlaceholder="Rechercher…"
-            [style]="{width:'100%'}"
-            (onChange)="onDairaChange($event.value)"
-          />
-        </div>
-        <div class="field">
-          <label>Commune</label>
-          <p-select
-            formControlName="commune"
-            [options]="communeOptions"
-            optionLabel="label"
-            optionValue="value"
-            placeholder="Sélectionner une commune"
-            [filter]="true"
-            filterPlaceholder="Rechercher…"
-            [style]="{width:'100%'}"
-            [disabled]="!form.get('daira')?.value"
-          />
-        </div>
-      </div>
-
-      <div class="form-grid-2">
-        <div class="field">
-          <label>Téléphone</label>
-          <input pInputText formControlName="phone" placeholder="0550 000 000" class="w-full">
-        </div>
-        <div class="field">
-          <label>Adresse</label>
-          <input pInputText formControlName="address" placeholder="Adresse complète" class="w-full">
-        </div>
-      </div>
-
-      <div style="display:flex;gap:8px;margin-top:8px">
-        <p-button label="Annuler"     severity="secondary" type="button" (onClick)="cancel()" />
-        <p-button label="Enregistrer" icon="pi pi-check"   type="submit"
-          [disabled]="form.invalid || saving" [loading]="saving" />
-      </div>
-
-    </form>
-  </div>
+  </form>
 </div>

@@ -69,6 +69,7 @@ export class RetourComponent implements OnInit {
     const today = new Date().toISOString().split('T')[0];
     const body: BonCreate = {
       date:               today,
+      destination_type:   'gros',
       client_id:          v.client_id!,
       chauffeur_id:       v.chauffeur_id!,
       consigne_plastique: 0,

@@ -7,21 +7,48 @@
   <div style="max-width:760px">
     <form [formGroup]="form" (ngSubmit)="save()">
 
-      <!-- Client + Chauffeur -->
+      <!-- Destination type -->
+      <div class="field" style="margin-bottom:20px">
+        <label style="display:block;margin-bottom:6px">Type d'expédition <span style="color:red">*</span></label>
+        <p-selectbutton
+          formControlName="destination_type"
+          [options]="destinationOptions"
+          optionLabel="label"
+          optionValue="value"
+        />
+      </div>
+
+      <!-- Destinataire + Chauffeur -->
       <div class="form-grid-2">
-        <div class="field">
-          <label>Client <span style="color:red">*</span></label>
-          <p-select
-            formControlName="client_id"
-            [options]="clients"
-            optionLabel="label"
-            optionValue="value"
-            placeholder="Sélectionner un client"
-            [filter]="true"
-            filterPlaceholder="Rechercher…"
-            [style]="{width:'100%'}"
-          />
-        </div>
+        @if (isGros) {
+          <div class="field">
+            <label>Client <span style="color:red">*</span></label>
+            <p-select
+              formControlName="client_id"
+              [options]="clients"
+              optionLabel="label"
+              optionValue="value"
+              placeholder="Sélectionner un client"
+              [filter]="true"
+              filterPlaceholder="Rechercher…"
+              [style]="{width:'100%'}"
+            />
+          </div>
+        } @else {
+          <div class="field">
+            <label>Livreur <span style="color:red">*</span></label>
+            <p-select
+              formControlName="livreur_id"
+              [options]="livreurs"
+              optionLabel="label"
+              optionValue="value"
+              placeholder="Sélectionner un livreur"
+              [filter]="true"
+              filterPlaceholder="Rechercher…"
+              [style]="{width:'100%'}"
+            />
+          </div>
+        }
         <div class="field">
           <label>Chauffeur <span style="color:red">*</span></label>
           <p-select
@@ -37,8 +64,8 @@
         </div>
       </div>
 
-      <!-- Balance actuelle -->
-      @if (selectedClient) {
+      <!-- Balance actuelle (gros only) -->
+      @if (selectedClient && isGros) {
         <div class="balance-box" style="margin-bottom:24px">
           <div class="balance-title">Solde actuel — {{ selectedClient.name }}</div>
           <div class="balance-grid">

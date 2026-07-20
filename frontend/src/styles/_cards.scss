@@ -77,3 +77,76 @@
   text-decoration: none;
   &:hover { text-decoration: underline; }
 }
+
+// ── Form section cards (add/edit pages) ────────────────────────────────────────
+.form-card {
+  background: var(--surface-card);
+  border: var(--border-width) solid var(--surface-border);
+  border-radius: var(--radius-2xl);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+
+  &__header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.875rem 1.5rem;
+    border-bottom: var(--border-width) solid var(--surface-border);
+    background: var(--surface-ground);
+  }
+
+  &__icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    border-radius: var(--radius-md);
+    background: var(--primary-100);
+    color: var(--primary-color);
+    font-size: 0.875rem;
+    flex-shrink: 0;
+
+    &--teal  { background: rgba(20, 184, 166, .12); color: #0d9488; }
+    &--indigo { background: rgba(99, 102, 241, .12); color: #6366f1; }
+  }
+
+  &__title {
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-semibold);
+    color: var(--text-color);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  &__body {
+    padding: 1.25rem 1.5rem 1rem;
+  }
+}
+
+// ── Back button ─────────────────────────────────────────────────────────────────
+.back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  height: 2.25rem;
+  padding: 0 0.875rem;
+  border-radius: var(--radius-lg);
+  border: var(--border-width) solid var(--surface-border);
+  background: var(--surface-card);
+  color: var(--text-color-secondary);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  flex-shrink: 0;
+  white-space: nowrap;
+
+  i { font-size: 0.75rem; }
+
+  &:hover {
+    background: var(--surface-hover);
+    color: var(--text-color);
+    border-color: var(--primary-color);
+  }
+}

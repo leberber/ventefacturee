@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, ViewChild, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -6,18 +6,21 @@ import { HttpClient } from '@angular/common/http';
 import { Button } from 'primeng/button';
 import { Toast } from 'primeng/toast';
 import { InputText } from 'primeng/inputtext';
+import { InputNumber } from 'primeng/inputnumber';
 import { Select } from 'primeng/select';
 import { MessageService } from 'primeng/api';
 
 import { ClientsService } from '../../../core/services/clients.service';
 import { Client, ClientCategory, ClientCreate } from '../../../core/models/client.model';
+import { MapPickerComponent, MapLocation } from '../../../shared/components/map-picker/map-picker.component';
 
 @Component({
   selector: 'app-client-form',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, Button, Toast, InputText, Select],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, Button, Toast, InputText, InputNumber, Select, MapPickerComponent],
   providers: [MessageService],
   templateUrl: './client-form.component.html',
+  styleUrl: './client-form.component.scss',
 })
 export class ClientFormComponent implements OnInit {
   private clientsService = inject(ClientsService);
@@ -27,10 +30,12 @@ export class ClientFormComponent implements OnInit {
   private route          = inject(ActivatedRoute);
   private http           = inject(HttpClient);
 
+  @ViewChild(MapPickerComponent) private mapPicker?: MapPickerComponent;
+
   editingId: number | null = null;
   saving = false;
 
-  dairaOptions:  { label: string; value: string }[] = [];
+  dairaOptions:   { label: string; value: string }[] = [];
   communeOptions: { label: string; value: string }[] = [];
   private dairasData: { daira_name: string; communes: { name: string }[] }[] = [];
 
@@ -45,12 +50,14 @@ export class ClientFormComponent implements OnInit {
     first_name: [''],
     last_name:  [''],
     store_name: [''],
-    name:       ['', Validators.required],
+    name:       [''],
     phone:      [''],
     category:   ['gros' as ClientCategory, Validators.required],
     daira:      [''],
     commune:    [''],
     address:    [''],
+    latitude:   [null as number | null],
+    longitude:  [null as number | null],
   });
 
   ngOnInit() {
@@ -58,7 +65,6 @@ export class ClientFormComponent implements OnInit {
       this.dairasData = data.dairas;
       this.dairaOptions = data.dairas.map((d: any) => ({ label: d.daira_name, value: d.daira_name }));
 
-      // Prefill after daira options are loaded so commune dropdown populates correctly
       const idParam = this.route.snapshot.paramMap.get('id');
       if (idParam) {
         this.editingId = +idParam;
@@ -77,7 +83,8 @@ export class ClientFormComponent implements OnInit {
     this.form.patchValue({
       code: c.code ?? '', first_name: c.first_name ?? '', last_name: c.last_name ?? '',
       store_name: c.store_name ?? '', name: c.name, phone: c.phone ?? '',
-      category: c.category, daira: c.daira ?? '', commune: c.commune ?? '', address: c.address ?? '',
+      category: c.category, daira: c.daira ?? '', commune: c.commune ?? '',
+      address: c.address ?? '', latitude: c.latitude ?? null, longitude: c.longitude ?? null,
     });
   }
 
@@ -87,7 +94,22 @@ export class ClientFormComponent implements OnInit {
       ? found.communes.map((c: any) => ({ label: c.name, value: c.name }))
       : [];
     this.form.patchValue({ commune: '' });
+    if (dairaName) this.mapPicker?.flyToPlace(dairaName);
   }
+
+  onCommuneChange(communeName: string) {
+    if (communeName) this.mapPicker?.flyToPlace(communeName);
+  }
+
+  onMapPick(loc: MapLocation) {
+    this.form.patchValue({ latitude: loc.latitude, longitude: loc.longitude });
+    if (loc.address && !this.form.get('address')!.value) {
+      this.form.patchValue({ address: loc.address });
+    }
+  }
+
+  get initialLat() { return this.form.get('latitude')!.value; }
+  get initialLng() { return this.form.get('longitude')!.value; }
 
   save() {
     if (this.form.invalid) return;
@@ -98,12 +120,14 @@ export class ClientFormComponent implements OnInit {
       first_name: v.first_name || undefined,
       last_name:  v.last_name  || undefined,
       store_name: v.store_name || undefined,
-      name:       v.name!,
+      name:       [v.first_name, v.last_name].filter(Boolean).join(' ') || v.store_name || v.name || '',
       phone:      v.phone      || undefined,
       category:   v.category as ClientCategory,
       daira:      v.daira      || undefined,
       commune:    v.commune    || undefined,
       address:    v.address    || undefined,
+      latitude:   v.latitude   ?? undefined,
+      longitude:  v.longitude  ?? undefined,
     };
     const obs = this.editingId
       ? this.clientsService.update(this.editingId, body)

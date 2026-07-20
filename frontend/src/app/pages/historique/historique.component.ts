@@ -16,6 +16,7 @@ import { MessageService, ConfirmationService } from 'primeng/api';
 
 import { BonsService } from '../../core/services/bons.service';
 import { ClientsService } from '../../core/services/clients.service';
+import { LivreursService } from '../../core/services/livreurs.service';
 import { Bon, BonUpdate } from '../../core/models/bon.model';
 import { Client } from '../../core/models/client.model';
 import { ChauffeursService } from '../../core/services/chauffeurs.service';
@@ -35,6 +36,7 @@ export class HistoriqueComponent implements OnInit {
   private bonsService         = inject(BonsService);
   private clientsService      = inject(ClientsService);
   private chauffeursService   = inject(ChauffeursService);
+  private livreursService     = inject(LivreursService);
   private messageService      = inject(MessageService);
   private confirmationService = inject(ConfirmationService);
   private route               = inject(ActivatedRoute);
@@ -47,10 +49,13 @@ export class HistoriqueComponent implements OnInit {
 
   clientOptions: { label: string; value: number | null }[] = [{ label: 'Tous les clients', value: null }];
   chauffeurOptions: { label: string; value: number }[] = [];
+  livreurOptions: { label: string; value: number }[] = [];
   selectedClientId: number | null = null;
+  editingDestinationType: string = 'gros';
 
   form = this.fb.group({
-    client_id:          [null as number | null, Validators.required],
+    client_id:          [null as number | null],
+    livreur_id:         [null as number | null],
     chauffeur_id:       [null as number | null, Validators.required],
     consigne_plastique: [0, [Validators.required, Validators.min(0)]],
     nc_plastique:       [0, [Validators.required, Validators.min(0)]],
@@ -76,6 +81,9 @@ export class HistoriqueComponent implements OnInit {
     this.chauffeursService.list().subscribe(data => {
       this.chauffeurOptions = data.map((c: Chauffeur) => ({ label: c.name, value: c.id }));
     });
+    this.livreursService.list().subscribe(data => {
+      this.livreurOptions = data.filter(l => l.is_active).map(l => ({ label: l.name, value: l.id }));
+    });
   }
 
   load() {
@@ -88,8 +96,10 @@ export class HistoriqueComponent implements OnInit {
 
   openEdit(bon: Bon) {
     this.editingId = bon.id;
+    this.editingDestinationType = bon.destination_type;
     this.form.patchValue({
-      client_id:          bon.client_id,
+      client_id:          bon.client_id ?? null,
+      livreur_id:         bon.livreur_id ?? null,
       chauffeur_id:       bon.chauffeur_id,
       consigne_plastique: bon.consigne_plastique,
       nc_plastique:       bon.nc_plastique,
@@ -106,8 +116,9 @@ export class HistoriqueComponent implements OnInit {
     if (this.form.invalid || !this.editingId) return;
     const v = this.form.value;
     const body: BonUpdate = {
-      client_id:          v.client_id!,
       chauffeur_id:       v.chauffeur_id!,
+      client_id:          v.client_id ?? undefined,
+      livreur_id:         v.livreur_id ?? undefined,
       consigne_plastique: v.consigne_plastique ?? 0,
       nc_plastique:       v.nc_plastique ?? 0,
       retour_plastique:   v.retour_plastique ?? 0,

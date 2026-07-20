@@ -12,6 +12,8 @@ export interface Client {
   daira?: string;
   commune?: string;
   address?: string;
+  latitude?: number;
+  longitude?: number;
   is_active: boolean;
   created_at: string;
   updated_at?: string;
@@ -34,6 +36,8 @@ export interface ClientCreate {
   daira?: string;
   commune?: string;
   address?: string;
+  latitude?: number;
+  longitude?: number;
 }
 
 export interface ClientUpdate extends Partial<ClientCreate> {

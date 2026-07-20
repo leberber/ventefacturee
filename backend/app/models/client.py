@@ -24,6 +24,8 @@ class Client(SQLModel, table=True):
     daira: Optional[str] = Field(default=None, max_length=60)
     commune: Optional[str] = Field(default=None, max_length=60)
     address: Optional[str] = Field(default=None, max_length=200)
+    latitude: Optional[float] = Field(default=None)
+    longitude: Optional[float] = Field(default=None)
     is_active: bool = Field(default=True)
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     updated_at: Optional[datetime] = Field(default=None)
@@ -40,6 +42,8 @@ class ClientCreate(SQLModel):
     daira: Optional[str] = None
     commune: Optional[str] = None
     address: Optional[str] = None
+    latitude: Optional[float] = None
+    longitude: Optional[float] = None
 
 
 class ClientUpdate(SQLModel):
@@ -53,6 +57,8 @@ class ClientUpdate(SQLModel):
     daira: Optional[str] = None
     commune: Optional[str] = None
     address: Optional[str] = None
+    latitude: Optional[float] = None
+    longitude: Optional[float] = None
     is_active: Optional[bool] = None
 
 
@@ -70,6 +76,8 @@ class ClientRead(SQLModel):
     daira: Optional[str] = None
     commune: Optional[str] = None
     address: Optional[str] = None
+    latitude: Optional[float] = None
+    longitude: Optional[float] = None
     is_active: bool
     created_at: datetime
     updated_at: Optional[datetime] = None
