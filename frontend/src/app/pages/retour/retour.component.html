@@ -2,7 +2,7 @@
 
 <div class="page-content" style="padding-bottom:5rem">
 
-  <div class="page-header" style="max-width:680px;margin:0 auto var(--space-6)">
+  <div class="page-header" style="max-width:1200px;margin:0 auto var(--space-6)">
     <div style="display:flex;align-items:center;gap:0.75rem">
       <div class="page-icon"><i class="pi pi-replay"></i></div>
       <div>
@@ -12,191 +12,172 @@
     </div>
   </div>
 
-  <form [formGroup]="form" style="max-width:680px;margin:0 auto">
+  <form [formGroup]="form" style="max-width:1200px;margin:0 auto">
+    <div class="nbl-layout nbl-layout--wide-right">
 
-    <!-- Info -->
-    <div class="exp-card">
+      <!-- Left column: lookup + counters -->
+      <div class="nbl-col">
 
-      <div class="field" style="max-width:50%;margin-bottom:1.25rem">
-        <label class="exp-label"><i class="pi pi-hashtag"></i>N° Bon de livraison <span style="color:var(--color-error)">*</span></label>
-        <div class="icon-input">
-          <i class="pi pi-receipt icon-input__icon"></i>
-          <input pInputText formControlName="bl_number" placeholder="Ex: BL-2025-001"
-                 class="w-full icon-input__field" style="font-weight:600;letter-spacing:0.03em" />
-        </div>
-      </div>
-
-      <div class="form-grid-2" style="margin-bottom:1.25rem">
-        <div class="field mb-0">
-          <label class="exp-label"><i class="pi pi-replay"></i>Type</label>
-          <p-selectbutton
-            formControlName="destination_type"
-            [options]="destinationOptions"
-            optionLabel="label"
-            optionValue="value"
-          />
-        </div>
-        <div class="field mb-0">
-          <label class="exp-label"><i class="pi pi-building"></i>Client @if(isGros){<span style="color:var(--color-error)">*</span>}</label>
-          <p-select
-            formControlName="client_id"
-            [options]="clients"
-            optionLabel="label"
-            optionValue="value"
-            placeholder="Sélectionner…"
-            [filter]="true"
-            filterPlaceholder="Rechercher…"
-            [style]="{width:'100%'}"
-            appendTo="body"
-          />
-        </div>
-      </div>
-      <div class="form-grid-2">
-        <div class="field mb-0">
-          <label class="exp-label"><i class="pi pi-truck"></i>Livreur @if(!isGros){<span style="color:var(--color-error)">*</span>}</label>
-          <p-select
-            formControlName="livreur_id"
-            [options]="livreurs"
-            optionLabel="label"
-            optionValue="value"
-            placeholder="Sélectionner…"
-            [filter]="true"
-            filterPlaceholder="Rechercher…"
-            [style]="{width:'100%'}"
-            appendTo="body"
-          />
-        </div>
-        <div class="field mb-0">
-          <label class="exp-label"><i class="pi pi-car"></i>Chauffeur <span style="color:var(--color-error)">*</span></label>
-          <p-select
-            formControlName="chauffeur_id"
-            [options]="chauffeurs"
-            optionLabel="label"
-            optionValue="value"
-            placeholder="Sélectionner…"
-            [filter]="true"
-            filterPlaceholder="Rechercher…"
-            [style]="{width:'100%'}"
-            appendTo="body"
-          />
-        </div>
-      </div>
-
-    </div>
-
-    <!-- Balance (gros client only) -->
-    @if (selectedClient && isGros) {
-      <div class="balance-box" style="margin-bottom:1rem">
-        <div class="balance-title">Solde dû — {{ selectedClient.name }}</div>
-        <div class="balance-grid">
-          <div class="balance-item">
-            <span class="balance-label"><img src="assets/plastiquepallette.png" style="height:12px;vertical-align:middle;margin-right:3px" alt="">Plastique</span>
-            <span [class]="plasticBalance > 0 ? 'badge badge--info' : 'badge badge--success'">{{ plasticBalance }}</span>
+        <!-- Expedition lookup -->
+        <div class="exp-card">
+          <div class="field mb-0">
+            <label class="exp-label"><i class="pi pi-search"></i>Expédition à retourner <span style="color:var(--color-error)">*</span></label>
+            <p-select
+              [(ngModel)]="selectedBlId"
+              [ngModelOptions]="{standalone: true}"
+              [options]="blOptions"
+              optionLabel="label"
+              optionValue="value"
+              placeholder="Rechercher par N° BL, client, livreur…"
+              [filter]="true"
+              filterPlaceholder="Rechercher…"
+              [showClear]="true"
+              [style]="{width:'100%'}"
+              appendTo="body"
+              (onChange)="onExpeditionSelect($event.value)"
+            />
           </div>
-          <div class="balance-item">
-            <span class="balance-label"><img src="assets/woodpallette.png" style="height:12px;vertical-align:middle;margin-right:3px" alt="">Bois</span>
-            <span [class]="woodBalance > 0 ? 'badge badge--warning' : 'badge badge--success'">{{ woodBalance }}</span>
-          </div>
-        </div>
-      </div>
-    }
 
-    <!-- Quantity counters -->
-    <div class="qty-grid">
-
-      <!-- Plastique tile -->
-      <div class="qty-tile">
-        <img src="assets/plastiquepallette.png" class="qty-tile__img" alt="">
-        <span class="qty-tile__name">Plastique</span>
-        <div class="qty-tile__counter">
-          <button type="button" class="qty-btn" (click)="dec('retour_plastique')">−</button>
-          <input type="number" class="qty-input" [value]="form.get('retour_plastique')?.value" (change)="setQty('retour_plastique', $event)" min="0">
-          <button type="button" class="qty-btn qty-btn--plus" (click)="inc('retour_plastique')">+</button>
-        </div>
-        <span class="qty-tile__unit">retournées</span>
-
-        <!-- Consigne toggle -->
-        <button type="button" class="consigne-toggle" (click)="toggleConsigne('plastique')">
-          Consigne encaissée
-          <i class="pi" [class.pi-chevron-down]="!showConsignePlastique" [class.pi-chevron-up]="showConsignePlastique"></i>
-        </button>
-
-        @if (showConsignePlastique) {
-          <div class="consigne-expand">
-            <div class="consigne-row">
-              <div class="consigne-field">
-                <label>Palettes</label>
-                <input type="number" [value]="consignePlastique" (input)="onConsigneQtyInput('plastique', $event)" min="0">
+          @if (selectedExpedition) {
+            <div class="retour-info">
+              <div class="retour-info__item">
+                <span class="retour-info__key"><i class="pi pi-receipt"></i>BL</span>
+                <strong class="retour-info__val">{{ selectedExpedition.bl_number }}</strong>
               </div>
-              <div class="consigne-sep">× {{ prixPlastique | number:'1.0-0' }} DA</div>
-              <div class="consigne-field">
-                <label>Montant</label>
-                <input type="number" [value]="montantPlastique" (input)="onConsigneMoneyInput('plastique', $event)" min="0">
+              <div class="retour-info__item">
+                <span class="retour-info__key"><i class="pi pi-calendar"></i>Date</span>
+                <span class="retour-info__val">{{ selectedExpedition.date }}</span>
               </div>
+              <div class="retour-info__item">
+                <span class="retour-info__key"><i class="pi pi-tag"></i>Type</span>
+                <span [class]="typeBadge[selectedExpedition.destination_type]">{{ typeLabel[selectedExpedition.destination_type] }}</span>
+              </div>
+              @if (selectedExpedition.client_name) {
+                <div class="retour-info__item">
+                  <span class="retour-info__key"><i class="pi pi-building"></i>Client</span>
+                  <span class="retour-info__val">{{ selectedExpedition.client_name }}</span>
+                </div>
+              }
+              @if (selectedExpedition.livreur_name) {
+                <div class="retour-info__item">
+                  <span class="retour-info__key"><i class="pi pi-truck"></i>Livreur</span>
+                  <span class="retour-info__val">{{ selectedExpedition.livreur_name }}</span>
+                </div>
+              }
+              <div class="retour-info__item">
+                <span class="retour-info__key"><i class="pi pi-car"></i>Chauffeur</span>
+                <span class="retour-info__val">{{ selectedExpedition.chauffeur_name }}</span>
+              </div>
+              @if (selectedClient?.daira) {
+                <div class="retour-info__item">
+                  <span class="retour-info__key"><i class="pi pi-map-marker"></i>Daïra</span>
+                  <span class="retour-info__val">{{ selectedClient!.daira }}</span>
+                </div>
+              }
+              @if (selectedClient?.category) {
+                <div class="retour-info__item">
+                  <span class="retour-info__key"><i class="pi pi-briefcase"></i>Catégorie</span>
+                  <span [class]="typeBadge[selectedClient!.category]">{{ typeLabel[selectedClient!.category] }}</span>
+                </div>
+              }
             </div>
-            @if (consignePlastique) {
-              <div class="consigne-summary">
-                {{ consignePlastique }} palette{{ consignePlastique !== 1 ? 's' : '' }}
-                × {{ prixPlastique | number:'1.0-0' }} = <strong>{{ montantPlastique | number:'1.0-0' }} DA</strong>
+          }
+        </div>
+
+        <!-- Quantity counters -->
+        <div class="qty-grid">
+
+          <div class="qty-tile">
+            <img src="assets/plastiquepallette.png" class="qty-tile__img" alt="">
+            <span class="qty-tile__name">Plastique</span>
+            <div class="qty-tile__counter">
+              <button type="button" class="qty-btn" (click)="dec('retour_plastique')">−</button>
+              <input type="number" class="qty-input" [value]="form.get('retour_plastique')?.value" (change)="setQty('retour_plastique', $event)" min="0">
+              <button type="button" class="qty-btn qty-btn--plus" (click)="inc('retour_plastique')">+</button>
+            </div>
+            <span class="qty-tile__unit">retournées</span>
+            <button type="button" class="consigne-toggle" (click)="toggleConsigne('plastique')">
+              Consigne encaissée
+              <i class="pi" [class.pi-chevron-down]="!showConsignePlastique" [class.pi-chevron-up]="showConsignePlastique"></i>
+            </button>
+            @if (showConsignePlastique) {
+              <div class="consigne-expand">
+                <div class="consigne-row">
+                  <div class="consigne-field">
+                    <label>Palettes</label>
+                    <input type="number" [value]="consignePlastique" (input)="onConsigneQtyInput('plastique', $event)" min="0">
+                  </div>
+                  <div class="consigne-sep">× {{ prixPlastique | number:'1.0-0' }} DA</div>
+                  <div class="consigne-field">
+                    <label>Montant</label>
+                    <input type="number" [value]="montantPlastique" (input)="onConsigneMoneyInput('plastique', $event)" min="0">
+                  </div>
+                </div>
+                @if (consignePlastique) {
+                  <div class="consigne-summary">
+                    {{ consignePlastique }} palette{{ consignePlastique !== 1 ? 's' : '' }}
+                    × {{ prixPlastique | number:'1.0-0' }} = <strong>{{ montantPlastique | number:'1.0-0' }} DA</strong>
+                  </div>
+                }
               </div>
             }
           </div>
-        }
-      </div>
 
-      <!-- Bois tile -->
-      <div class="qty-tile">
-        <img src="assets/woodpallette.png" class="qty-tile__img" alt="">
-        <span class="qty-tile__name">Bois</span>
-        <div class="qty-tile__counter">
-          <button type="button" class="qty-btn" (click)="dec('retour_bois')">−</button>
-          <input type="number" class="qty-input" [value]="form.get('retour_bois')?.value" (change)="setQty('retour_bois', $event)" min="0">
-          <button type="button" class="qty-btn qty-btn--plus" (click)="inc('retour_bois')">+</button>
-        </div>
-        <span class="qty-tile__unit">retournées</span>
-
-        <!-- Consigne toggle -->
-        <button type="button" class="consigne-toggle" (click)="toggleConsigne('bois')">
-          Consigne encaissée
-          <i class="pi" [class.pi-chevron-down]="!showConsigneBois" [class.pi-chevron-up]="showConsigneBois"></i>
-        </button>
-
-        @if (showConsigneBois) {
-          <div class="consigne-expand">
-            <div class="consigne-row">
-              <div class="consigne-field">
-                <label>Palettes</label>
-                <input type="number" [value]="consigneBois" (input)="onConsigneQtyInput('bois', $event)" min="0">
-              </div>
-              <div class="consigne-sep">× {{ prixBois | number:'1.0-0' }} DA</div>
-              <div class="consigne-field">
-                <label>Montant</label>
-                <input type="number" [value]="montantBois" (input)="onConsigneMoneyInput('bois', $event)" min="0">
-              </div>
+          <div class="qty-tile">
+            <img src="assets/woodpallette.png" class="qty-tile__img" alt="">
+            <span class="qty-tile__name">Bois</span>
+            <div class="qty-tile__counter">
+              <button type="button" class="qty-btn" (click)="dec('retour_bois')">−</button>
+              <input type="number" class="qty-input" [value]="form.get('retour_bois')?.value" (change)="setQty('retour_bois', $event)" min="0">
+              <button type="button" class="qty-btn qty-btn--plus" (click)="inc('retour_bois')">+</button>
             </div>
-            @if (consigneBois) {
-              <div class="consigne-summary">
-                {{ consigneBois }} palette{{ consigneBois !== 1 ? 's' : '' }}
-                × {{ prixBois | number:'1.0-0' }} = <strong>{{ montantBois | number:'1.0-0' }} DA</strong>
+            <span class="qty-tile__unit">retournées</span>
+            <button type="button" class="consigne-toggle" (click)="toggleConsigne('bois')">
+              Consigne encaissée
+              <i class="pi" [class.pi-chevron-down]="!showConsigneBois" [class.pi-chevron-up]="showConsigneBois"></i>
+            </button>
+            @if (showConsigneBois) {
+              <div class="consigne-expand">
+                <div class="consigne-row">
+                  <div class="consigne-field">
+                    <label>Palettes</label>
+                    <input type="number" [value]="consigneBois" (input)="onConsigneQtyInput('bois', $event)" min="0">
+                  </div>
+                  <div class="consigne-sep">× {{ prixBois | number:'1.0-0' }} DA</div>
+                  <div class="consigne-field">
+                    <label>Montant</label>
+                    <input type="number" [value]="montantBois" (input)="onConsigneMoneyInput('bois', $event)" min="0">
+                  </div>
+                </div>
+                @if (consigneBois) {
+                  <div class="consigne-summary">
+                    {{ consigneBois }} palette{{ consigneBois !== 1 ? 's' : '' }}
+                    × {{ prixBois | number:'1.0-0' }} = <strong>{{ montantBois | number:'1.0-0' }} DA</strong>
+                  </div>
+                }
               </div>
             }
           </div>
-        }
+
+        </div>
+
+      </div>
+
+      <!-- Right column: notes -->
+      <div class="nbl-col">
+        <div class="exp-card" style="height:100%">
+          <label class="exp-label" style="margin-bottom:0.75rem"><i class="pi pi-comment"></i>Notes</label>
+          <textarea
+            formControlName="notes"
+            class="exp-notes__input"
+            placeholder="Notes optionnelles…"
+            rows="6"
+            style="flex:1;resize:vertical"
+          ></textarea>
+        </div>
       </div>
 
     </div>
-
-    <!-- Notes -->
-    <div class="exp-notes">
-      <i class="pi pi-comment exp-notes__icon"></i>
-      <textarea
-        formControlName="notes"
-        class="exp-notes__input"
-        placeholder="Notes optionnelles…"
-        rows="2"
-      ></textarea>
-    </div>
-
   </form>
 
 </div>
@@ -204,5 +185,5 @@
 <div class="form-footer">
   <p-button label="Annuler" severity="secondary" type="button" (onClick)="reset()" />
   <p-button label="Enregistrer le retour" icon="pi pi-check" type="button"
-    [disabled]="form.invalid || saving" [loading]="saving" (onClick)="save()" />
+    [disabled]="form.invalid || saving || !selectedBlId" [loading]="saving" (onClick)="save()" />
 </div>
