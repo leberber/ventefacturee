@@ -1,0 +1,62 @@
+<p-toast />
+
+<div class="page-content">
+  <div style="max-width:520px">
+
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:24px">
+      <p-button icon="pi pi-arrow-left" severity="secondary" [text]="true" (onClick)="cancel()" />
+      <h2 class="page-title" style="margin:0">
+        {{ editingId ? 'Modifier l\'utilisateur' : 'Ajouter un utilisateur' }}
+      </h2>
+    </div>
+
+    <form [formGroup]="form" (ngSubmit)="save()">
+
+      <div class="form-grid-2">
+        <div class="field">
+          <label>Nom complet <span style="color:red">*</span></label>
+          <input pInputText formControlName="full_name" placeholder="Prénom Nom" class="w-full">
+        </div>
+        <div class="field">
+          <label>Identifiant <span style="color:red">*</span></label>
+          <input pInputText formControlName="username" placeholder="nom.prenom"
+            class="w-full" [attr.readonly]="editingId ? true : null">
+        </div>
+      </div>
+
+      <div class="form-grid-2">
+        <div class="field">
+          <label>
+            Mot de passe
+            @if(!editingId) { <span style="color:red">*</span> }
+            @if(editingId)  { <small style="color:#9ca3af">(laisser vide pour ne pas changer)</small> }
+          </label>
+          <p-password formControlName="password" [feedback]="false" [toggleMask]="true"
+            styleClass="w-full" inputStyleClass="w-full"
+            [placeholder]="editingId ? '••••••••' : 'Mot de passe'" />
+        </div>
+        <div class="field">
+          <label>Rôle <span style="color:red">*</span></label>
+          <p-select formControlName="role" [options]="roleOptions"
+            optionLabel="label" optionValue="value" [style]="{width:'100%'}" />
+        </div>
+      </div>
+
+      @if(editingId) {
+        <div class="field">
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+            <input type="checkbox" formControlName="is_active">
+            Compte actif
+          </label>
+        </div>
+      }
+
+      <div style="display:flex;gap:8px;margin-top:8px">
+        <p-button label="Annuler"     severity="secondary" type="button" (onClick)="cancel()" />
+        <p-button label="Enregistrer" icon="pi pi-check"   type="submit"
+          [disabled]="form.invalid || saving" [loading]="saving" />
+      </div>
+
+    </form>
+  </div>
+</div>

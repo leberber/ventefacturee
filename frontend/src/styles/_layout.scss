@@ -124,6 +124,24 @@
   @include mobile-only { display: none; }
 }
 
+// ---- Sidebar logout button ----
+.sidebar-logout {
+  flex-shrink: 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-color-secondary);
+  padding: 0.3rem;
+  border-radius: var(--radius-md);
+  font-size: 0.9rem;
+  transition: color var(--transition-fast), background var(--transition-fast);
+
+  &:hover {
+    color: var(--red-500, #ef4444);
+    background: rgba(239, 68, 68, 0.08);
+  }
+}
+
 .admin-content {
   flex: 1;
   margin-left: var(--sidebar-w);

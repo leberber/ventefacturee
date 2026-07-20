@@ -13,24 +13,30 @@
       <a class="nav-item" routerLink="/dashboard" routerLinkActive="active">
         <i class="pi pi-home"></i><span>Tableau de bord</span>
       </a>
-      <a class="nav-item nav-item--accent" routerLink="/expedition" routerLinkActive="active">
-        <i class="pi pi-file-plus"></i><span>Enregistrer une expédition</span>
-      </a>
-      <a class="nav-item" routerLink="/retour" routerLinkActive="active">
-        <i class="pi pi-replay"></i><span>Enregistrer un retour</span>
-      </a>
-      <a class="nav-item" routerLink="/clients" routerLinkActive="active">
-        <i class="pi pi-users"></i><span>Clients</span>
-      </a>
-      <a class="nav-item" routerLink="/chauffeurs" routerLinkActive="active">
-        <i class="pi pi-id-card"></i><span>Chauffeurs</span>
-      </a>
-      <a class="nav-item" routerLink="/livreurs" routerLinkActive="active">
-        <i class="pi pi-truck"></i><span>Livreurs</span>
-      </a>
-      <a class="nav-item" routerLink="/historique" routerLinkActive="active">
-        <i class="pi pi-list"></i><span>Historique BLs</span>
-      </a>
+
+      @if(isAdminOrClerk) {
+        <a class="nav-item nav-item--accent" routerLink="/expedition" routerLinkActive="active">
+          <i class="pi pi-file-plus"></i><span>Enregistrer une expédition</span>
+        </a>
+        <a class="nav-item" routerLink="/retour" routerLinkActive="active">
+          <i class="pi pi-replay"></i><span>Enregistrer un retour</span>
+        </a>
+        <a class="nav-item" routerLink="/clients" routerLinkActive="active">
+          <i class="pi pi-users"></i><span>Clients</span>
+        </a>
+        <a class="nav-item" routerLink="/chauffeurs" routerLinkActive="active">
+          <i class="pi pi-id-card"></i><span>Chauffeurs</span>
+        </a>
+        <a class="nav-item" routerLink="/livreurs" routerLinkActive="active">
+          <i class="pi pi-truck"></i><span>Livreurs</span>
+        </a>
+        <a class="nav-item" routerLink="/historique" routerLinkActive="active">
+          <i class="pi pi-list"></i><span>Historique BLs</span>
+        </a>
+        <a class="nav-item" routerLink="/utilisateurs" routerLinkActive="active">
+          <i class="pi pi-shield"></i><span>Utilisateurs</span>
+        </a>
+      }
     </nav>
 
     <!-- Collapse toggle -->
@@ -38,15 +44,18 @@
       <i [class]="collapsed() ? 'pi pi-chevron-right' : 'pi pi-chevron-left'"></i>
     </button>
 
-    <!-- Footer -->
+    <!-- Footer: user info + logout -->
     <div class="admin-sidebar__footer">
       <div class="admin-sidebar__footer-icon">
-        <i class="pi pi-warehouse"></i>
+        <i class="pi pi-user"></i>
       </div>
       <div class="admin-sidebar__footer-text">
-        <strong>CLR Freha</strong>
-        <span>Gestion des palettes</span>
+        <strong>{{ user?.full_name }}</strong>
+        <span>{{ user?.role | titlecase }}</span>
       </div>
+      <button class="sidebar-logout" type="button" (click)="logout()" title="Se déconnecter">
+        <i class="pi pi-sign-out"></i>
+      </button>
     </div>
 
   </aside>

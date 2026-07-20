@@ -1,0 +1,59 @@
+<p-toast />
+<p-confirmdialog />
+
+<div class="page-content">
+
+  <p-toolbar styleClass="mb-4">
+    <ng-template #start>
+      <h2 class="page-title">Utilisateurs&nbsp;<small style="font-size:14px;font-weight:400;color:#6b7280">({{ users.length }})</small></h2>
+    </ng-template>
+    <ng-template #end>
+      <p-iconfield>
+        <p-inputicon class="pi pi-search" />
+        <input pInputText [(ngModel)]="searchQuery" placeholder="Rechercher…" style="width:200px">
+      </p-iconfield>
+      <p-button label="Ajouter" icon="pi pi-plus" (onClick)="openAdd()" styleClass="ml-2" />
+    </ng-template>
+  </p-toolbar>
+
+  <p-table
+    [value]="filtered"
+    [loading]="loading"
+    styleClass="p-datatable-sm p-datatable-striped"
+  >
+    <ng-template #header>
+      <tr>
+        <th pSortableColumn="full_name">Nom complet <p-sortIcon field="full_name" /></th>
+        <th>Identifiant</th>
+        <th>Rôle</th>
+        <th>Statut</th>
+        <th style="width:120px">Actions</th>
+      </tr>
+    </ng-template>
+    <ng-template #body let-u>
+      <tr>
+        <td><strong>{{ u.full_name }}</strong> @if(isSelf(u)) { <small style="color:#9ca3af">(vous)</small> }</td>
+        <td><span class="font-mono">{{ u.username }}</span></td>
+        <td><p-tag [value]="roleLabel[u.role]" [severity]="roleSeverity[u.role]" /></td>
+        <td>
+          @if(u.is_active) {
+            <p-tag value="Actif" severity="success" />
+          } @else {
+            <p-tag value="Inactif" severity="secondary" />
+          }
+        </td>
+        <td>
+          <div style="display:flex;gap:4px">
+            <p-button icon="pi pi-pencil" size="small" severity="secondary" (onClick)="openEdit(u)" />
+            <p-button icon="pi pi-trash"  size="small" severity="danger"
+              (onClick)="confirmDelete(u)" [disabled]="isSelf(u)" />
+          </div>
+        </td>
+      </tr>
+    </ng-template>
+    <ng-template #emptymessage>
+      <tr><td colspan="5" style="text-align:center;padding:32px;color:#9ca3af">Aucun utilisateur</td></tr>
+    </ng-template>
+  </p-table>
+
+</div>

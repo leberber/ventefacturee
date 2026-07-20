@@ -4,7 +4,6 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { TableModule } from 'primeng/table';
 import { Button } from 'primeng/button';
-import { Tag } from 'primeng/tag';
 import { Toast } from 'primeng/toast';
 import { ConfirmDialog } from 'primeng/confirmdialog';
 import { InputText } from 'primeng/inputtext';
@@ -21,7 +20,7 @@ import { Livreur } from '../../core/models/livreur.model';
   standalone: true,
   imports: [
     CommonModule, FormsModule,
-    TableModule, Button, Tag, Toast, ConfirmDialog, InputText, Toolbar, IconField, InputIcon,
+    TableModule, Button, Toast, ConfirmDialog, InputText, Toolbar, IconField, InputIcon,
   ],
   providers: [MessageService, ConfirmationService],
   templateUrl: './livreurs.component.html',

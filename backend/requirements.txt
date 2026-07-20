@@ -4,3 +4,6 @@ sqlmodel
 psycopg2-binary
 python-dotenv
 pydantic-settings
+python-jose[cryptography]
+passlib[bcrypt]
+python-multipart

@@ -1,0 +1,74 @@
+<div class="login-page" [class.login-page--ready]="pageReady()">
+
+  <!-- Logo — starts large/centered, animates to top -->
+  <div class="login-logo">
+    <img src="assets/logo.png" alt="CLR Freha" />
+  </div>
+
+  <!-- Form container — fades in after logo moves -->
+  <div class="login-content">
+
+    <div class="login-header">
+      <h1>Bon retour 👋</h1>
+      <p>Connectez-vous à votre espace</p>
+    </div>
+
+    <form [formGroup]="form" (ngSubmit)="submit()" class="login-form">
+
+      <!-- Username -->
+      <div class="login-input"
+           [class.login-input--focused]="focusedField() === 'username'"
+           [class.login-input--filled]="form.get('username')?.value">
+        <i class="pi pi-user login-input__icon"></i>
+        <input
+          type="text"
+          enterkeyhint="next"
+          formControlName="username"
+          autocomplete="username"
+          placeholder="Nom d'utilisateur"
+          (focus)="onFocus('username')"
+          (blur)="onBlur()"
+        />
+      </div>
+
+      <!-- Password -->
+      <div class="login-input"
+           [class.login-input--focused]="focusedField() === 'password'"
+           [class.login-input--filled]="form.get('password')?.value">
+        <i class="pi pi-lock login-input__icon"></i>
+        <input
+          [type]="showPassword() ? 'text' : 'password'"
+          enterkeyhint="done"
+          formControlName="password"
+          autocomplete="current-password"
+          placeholder="Mot de passe"
+          (focus)="onFocus('password')"
+          (blur)="onBlur()"
+          (keydown.enter)="submit()"
+        />
+        <button type="button" class="login-input__toggle" (click)="togglePassword()" tabindex="-1">
+          <i class="pi" [class.pi-eye]="!showPassword()" [class.pi-eye-slash]="showPassword()"></i>
+        </button>
+      </div>
+
+      <!-- Error message -->
+      @if (errorMsg()) {
+        <div class="login-error">
+          <i class="pi pi-exclamation-circle"></i> {{ errorMsg() }}
+        </div>
+      }
+
+      <!-- Submit -->
+      <button type="submit" class="login-btn" [disabled]="form.invalid || loading()">
+        @if (loading()) {
+          <i class="pi pi-spin pi-spinner"></i>
+        } @else {
+          <span>Se connecter</span>
+          <i class="pi pi-arrow-right"></i>
+        }
+      </button>
+
+    </form>
+  </div>
+
+</div>
