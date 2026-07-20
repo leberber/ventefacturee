@@ -388,30 +388,6 @@
   i { color: var(--primary-color); font-size: 1.25rem; }
 }
 
-// ---- Localisation card layout (client form) ----
-.loc-layout {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1.5rem;
-  align-items: stretch;
-
-  @media (max-width: 900px) { grid-template-columns: 1fr; }
-}
-
-.loc-fields { display: flex; flex-direction: column; }
-
-.loc-map {
-  min-height: 480px;
-  display: flex;
-  flex-direction: column;
-
-  app-map-picker {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    min-height: 480px;
-  }
-}
 
 .loc-divider {
   display: flex;
@@ -451,13 +427,7 @@
 }
 
 // ---- Utility ----
-.text-muted    { color: var(--text-color-secondary); }
-.text-sm       { font-size: var(--font-size-sm); }
-.fw-semibold   { font-weight: var(--font-weight-semibold); }
-.fw-bold       { font-weight: var(--font-weight-bold); }
-.text-primary  { color: var(--primary-color); }
-.empty-msg     { text-align: center; padding: 3rem; color: var(--text-color-secondary); }
-.mt-section    { margin-top: var(--space-6); }
-.action-group  { display: flex; gap: 0.5rem; }
-.w-full        { width: 100%; }
-.mb-0          { margin-bottom: 0 !important; }
+.text-muted   { color: var(--text-color-secondary); }
+.text-primary { color: var(--primary-color); }
+.w-full       { width: 100%; }
+.mb-0         { margin-bottom: 0 !important; }

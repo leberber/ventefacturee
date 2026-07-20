@@ -8,6 +8,7 @@ import { MessageService, ConfirmationService } from 'primeng/api';
 
 import { ClientsService } from '../../core/services/clients.service';
 import { Client } from '../../core/models/client.model';
+import { sortItems, toggleSort } from '../../core/utils/sort.util';
 
 @Component({
   selector: 'app-clients',
@@ -33,20 +34,11 @@ export class ClientsComponent implements OnInit {
     gros: 'badge badge--info', detail: 'badge badge--success', horeca: 'badge badge--warning',
   };
 
-  get sorted(): Client[] {
-    const col = this.sortCol as keyof Client;
-    return [...this.clients].sort((a, b) => {
-      const av = (a[col] ?? '') as any;
-      const bv = (b[col] ?? '') as any;
-      if (av < bv) return -this.sortDir;
-      if (av > bv) return this.sortDir;
-      return 0;
-    });
-  }
+  get sorted(): Client[] { return sortItems(this.clients, this.sortCol as keyof Client, this.sortDir); }
 
   sortBy(col: string) {
-    if (this.sortCol === col) this.sortDir = this.sortDir === 1 ? -1 : 1;
-    else { this.sortCol = col; this.sortDir = 1; }
+    const s = toggleSort(this.sortCol, this.sortDir, col);
+    this.sortCol = s.col; this.sortDir = s.dir;
   }
 
   ngOnInit() { this.load(); }

@@ -8,6 +8,7 @@ import { MessageService, ConfirmationService } from 'primeng/api';
 
 import { ChauffeursService } from '../../core/services/chauffeurs.service';
 import { Chauffeur } from '../../core/models/chauffeur.model';
+import { sortItems, toggleSort } from '../../core/utils/sort.util';
 
 @Component({
   selector: 'app-chauffeurs',
@@ -28,20 +29,11 @@ export class ChauffeursComponent implements OnInit {
   sortCol = 'name';
   sortDir: 1 | -1 = 1;
 
-  get sorted(): Chauffeur[] {
-    const col = this.sortCol as keyof Chauffeur;
-    return [...this.chauffeurs].sort((a, b) => {
-      const av = (a[col] ?? '') as any;
-      const bv = (b[col] ?? '') as any;
-      if (av < bv) return -this.sortDir;
-      if (av > bv) return this.sortDir;
-      return 0;
-    });
-  }
+  get sorted(): Chauffeur[] { return sortItems(this.chauffeurs, this.sortCol as keyof Chauffeur, this.sortDir); }
 
   sortBy(col: string) {
-    if (this.sortCol === col) this.sortDir = this.sortDir === 1 ? -1 : 1;
-    else { this.sortCol = col; this.sortDir = 1; }
+    const s = toggleSort(this.sortCol, this.sortDir, col);
+    this.sortCol = s.col; this.sortDir = s.dir;
   }
 
   ngOnInit() { this.load(); }

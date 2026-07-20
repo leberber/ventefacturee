@@ -13,9 +13,8 @@
   --transition-smooth: 250ms ease;
   --transition-slow:   400ms ease;
 
-  --glass-bg:     rgba(255,255,255,0.88);
-  --glass-blur:   blur(12px);
-  --glass-border: 1px solid rgba(255,255,255,.5);
+  --glass-bg:   rgba(255,255,255,0.88);
+  --glass-blur: blur(12px);
 
   --shadow-add:    0 4px 16px rgba(var(--primary-rgb), 0.30);
   --shadow-add-lg: 0 8px 24px rgba(var(--primary-rgb), 0.40);

@@ -151,6 +151,17 @@
   }
 }
 
+// ── Form card entry animation (shared by all form pages) ───────────────────────
+@keyframes card-in {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.form-card--anim {
+  animation: card-in 0.3s ease both;
+  animation-delay: calc(var(--card-i, 0) * 60ms);
+}
+
 // ── Fixed form footer (shared by all form pages) ────────────────────────────────
 .form-footer {
   position: fixed;

@@ -1,9 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
-import { TableModule } from 'primeng/table';
-import { Tag } from 'primeng/tag';
-import { Button } from 'primeng/button';
 
 import { BonsService } from '../../core/services/bons.service';
 import { ClientsService } from '../../core/services/clients.service';
@@ -13,7 +10,7 @@ import { Client } from '../../core/models/client.model';
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterLink, TableModule, Tag, Button],
+  imports: [CommonModule, RouterLink],
   templateUrl: './dashboard.component.html',
 })
 export class DashboardComponent implements OnInit {
@@ -22,7 +19,7 @@ export class DashboardComponent implements OnInit {
   loading = false;
 
   readonly categoryLabel: Record<string, string> = { gros: 'Gros', detail: 'Détail', horeca: 'Horeca' };
-  readonly categorySeverity: Record<string, 'success' | 'info' | 'warn' | 'danger' | 'secondary' | 'contrast'> = { gros: 'info', detail: 'success', horeca: 'warn' };
+  readonly categoryBadge: Record<string, string> = { gros: 'badge badge--info', detail: 'badge badge--success', horeca: 'badge badge--warning' };
 
   constructor(
     private bonsService: BonsService,

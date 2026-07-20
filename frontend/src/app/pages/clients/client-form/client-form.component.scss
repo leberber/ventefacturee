@@ -28,24 +28,3 @@
   padding: 0.75rem;
 }
 
-// Three-column grid (phone / code / category)
-.form-grid-3 {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  gap: 1rem;
-
-  @media (max-width: 768px) {
-    grid-template-columns: 1fr;
-  }
-}
-
-// Card entry animation
-@keyframes card-in {
-  from { opacity: 0; transform: translateY(12px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
-.form-card--anim {
-  animation: card-in 0.3s ease both;
-  animation-delay: calc(var(--card-i, 0) * 60ms);
-}

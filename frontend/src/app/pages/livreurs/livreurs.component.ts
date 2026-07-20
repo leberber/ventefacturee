@@ -8,6 +8,7 @@ import { MessageService, ConfirmationService } from 'primeng/api';
 
 import { LivreursService } from '../../core/services/livreurs.service';
 import { Livreur } from '../../core/models/livreur.model';
+import { sortItems, toggleSort } from '../../core/utils/sort.util';
 
 @Component({
   selector: 'app-livreurs',
@@ -28,20 +29,11 @@ export class LivreursComponent implements OnInit {
   sortCol = 'name';
   sortDir: 1 | -1 = 1;
 
-  get sorted(): Livreur[] {
-    const col = this.sortCol as keyof Livreur;
-    return [...this.livreurs].sort((a, b) => {
-      const av = (a[col] ?? '') as any;
-      const bv = (b[col] ?? '') as any;
-      if (av < bv) return -this.sortDir;
-      if (av > bv) return this.sortDir;
-      return 0;
-    });
-  }
+  get sorted(): Livreur[] { return sortItems(this.livreurs, this.sortCol as keyof Livreur, this.sortDir); }
 
   sortBy(col: string) {
-    if (this.sortCol === col) this.sortDir = this.sortDir === 1 ? -1 : 1;
-    else { this.sortCol = col; this.sortDir = 1; }
+    const s = toggleSort(this.sortCol, this.sortDir, col);
+    this.sortCol = s.col; this.sortDir = s.dir;
   }
 
   ngOnInit() { this.load(); }

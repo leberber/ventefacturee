@@ -48,55 +48,78 @@
 </div>
 
 <!-- Clients with balance -->
-<div style="border-radius:var(--radius-xl);border:1px solid var(--border-color-light);box-shadow:var(--shadow-sm);overflow:hidden;background:var(--surface-card)">
+<div class="table-container">
   <div class="card-section-header">
     <span class="card-label">Clients avec palettes en circulation</span>
     <a class="link-primary" routerLink="/clients">Voir tous les clients →</a>
   </div>
 
-  <p-table
-    [value]="clients"
-    [loading]="loading"
-    styleClass="p-datatable-sm"
-    [paginator]="clients.length > 15"
-    [rows]="15"
-  >
-    <ng-template #header>
-      <tr>
-        <th>Client</th>
-        <th>Catégorie</th>
-        <th>Code</th>
-        <th><img src="assets/plastiquepallette.png" style="height:18px;vertical-align:middle;margin-right:4px" alt="">Plastique</th>
-        <th>Dont consig.</th>
-        <th>Dont non-consig.</th>
-        <th><img src="assets/woodpallette.png" style="height:18px;vertical-align:middle;margin-right:4px" alt="">Bois</th>
-        <th>Dont consig.</th>
-        <th>Dont non-consig.</th>
-        <th></th>
-      </tr>
-    </ng-template>
-    <ng-template #body let-c>
-      <tr>
-        <td>
-          <strong>{{ c.name }}</strong>
-          @if (c.phone) { <br><small class="text-muted">{{ c.phone }}</small> }
-        </td>
-        <td><p-tag [value]="categoryLabel[c.category]" [severity]="categorySeverity[c.category]" /></td>
-        <td><span class="font-mono">{{ c.code || '—' }}</span></td>
-        <td><p-tag [value]="(c.plastic_balance ?? 0).toString()" severity="info" /></td>
-        <td><p-tag [value]="(c.plastic_consigne ?? 0).toString()" severity="info" /></td>
-        <td><p-tag [value]="(c.plastic_nc ?? 0).toString()" severity="warn" /></td>
-        <td><p-tag [value]="(c.wood_balance ?? 0).toString()" severity="warn" /></td>
-        <td><p-tag [value]="(c.wood_consigne ?? 0).toString()" severity="warn" /></td>
-        <td><p-tag [value]="(c.wood_nc ?? 0).toString()" severity="warn" /></td>
-        <td>
-          <p-button icon="pi pi-list" size="small" severity="secondary"
-            [routerLink]="['/historique']" [queryParams]="{clientId: c.id}" />
-        </td>
-      </tr>
-    </ng-template>
-    <ng-template #emptymessage>
-      <tr><td colspan="10" class="table-empty">Aucune palette en circulation</td></tr>
-    </ng-template>
-  </p-table>
+  <div class="table-wrapper">
+    @if (loading) {
+      @for (_ of [1,2,3,4,5]; track $index) {
+        <div style="padding:0.65rem 1rem;border-bottom:1px solid var(--border-color-light)">
+          <div style="height:1rem;border-radius:6px;background:var(--surface-200);animation:skeleton 1.2s infinite alternate"></div>
+        </div>
+      }
+    } @else if (clients.length === 0) {
+      <div class="table-empty">Aucune palette en circulation</div>
+    } @else {
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Client</th>
+            <th>Catégorie</th>
+            <th>Code</th>
+            <th><img src="assets/plastiquepallette.png" style="height:16px;vertical-align:middle;margin-right:4px" alt="">Plastique</th>
+            <th>Consig.</th>
+            <th>Non-consig.</th>
+            <th><img src="assets/woodpallette.png" style="height:16px;vertical-align:middle;margin-right:4px" alt="">Bois</th>
+            <th>Consig.</th>
+            <th>Non-consig.</th>
+            <th style="width:4rem"></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (c of clients; track c.id; let i = $index) {
+            <tr class="table-row-animate" [style.--row-delay]="i * 20 + 'ms'">
+              <td>
+                <div class="table-item-info">
+                  <span class="table-item-name">{{ c.name }}</span>
+                  @if (c.phone) {
+                    <span class="table-item-desc">{{ c.phone }}</span>
+                  }
+                </div>
+              </td>
+              <td><span [class]="categoryBadge[c.category]">{{ categoryLabel[c.category] }}</span></td>
+              <td><code class="font-mono text-muted">{{ c.code || '—' }}</code></td>
+              <td>
+                @if ((c.plastic_balance ?? 0) > 0) {
+                  <span class="badge badge--info">{{ c.plastic_balance }}</span>
+                } @else {
+                  <span class="text-muted">0</span>
+                }
+              </td>
+              <td><span class="text-muted">{{ c.plastic_consigne ?? 0 }}</span></td>
+              <td><span class="text-muted">{{ c.plastic_nc ?? 0 }}</span></td>
+              <td>
+                @if ((c.wood_balance ?? 0) > 0) {
+                  <span class="badge badge--warning">{{ c.wood_balance }}</span>
+                } @else {
+                  <span class="text-muted">0</span>
+                }
+              </td>
+              <td><span class="text-muted">{{ c.wood_consigne ?? 0 }}</span></td>
+              <td><span class="text-muted">{{ c.wood_nc ?? 0 }}</span></td>
+              <td class="actions-cell">
+                <button class="table-action-btn" title="Historique BLs"
+                  [routerLink]="['/historique']" [queryParams]="{clientId: c.id}">
+                  <i class="pi pi-list"></i>
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+  </div>
 </div>
