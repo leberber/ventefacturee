@@ -17,18 +17,17 @@
     <!-- Info -->
     <div class="exp-card">
 
-      <div class="field">
-        <label class="exp-label">Type</label>
-        <p-selectbutton
-          formControlName="destination_type"
-          [options]="destinationOptions"
-          optionLabel="label"
-          optionValue="value"
-        />
-      </div>
-
-      <div class="form-grid-2">
-        <div class="field">
+      <div class="form-grid-2" style="margin-bottom:1.25rem">
+        <div class="field mb-0">
+          <label class="exp-label">Type</label>
+          <p-selectbutton
+            formControlName="destination_type"
+            [options]="destinationOptions"
+            optionLabel="label"
+            optionValue="value"
+          />
+        </div>
+        <div class="field mb-0">
           <label class="exp-label">Client @if(isGros){<span style="color:var(--color-error)">*</span>}</label>
           <p-select
             formControlName="client_id"
@@ -42,7 +41,9 @@
             appendTo="body"
           />
         </div>
-        <div class="field">
+      </div>
+      <div class="form-grid-2">
+        <div class="field mb-0">
           <label class="exp-label">Livreur @if(!isGros){<span style="color:var(--color-error)">*</span>}</label>
           <p-select
             formControlName="livreur_id"
@@ -56,21 +57,20 @@
             appendTo="body"
           />
         </div>
-      </div>
-
-      <div class="field mb-0">
-        <label class="exp-label">Chauffeur <span style="color:var(--color-error)">*</span></label>
-        <p-select
-          formControlName="chauffeur_id"
-          [options]="chauffeurs"
-          optionLabel="label"
-          optionValue="value"
-          placeholder="Sélectionner…"
-          [filter]="true"
-          filterPlaceholder="Rechercher…"
-          [style]="{width:'100%'}"
-          appendTo="body"
-        />
+        <div class="field mb-0">
+          <label class="exp-label">Chauffeur <span style="color:var(--color-error)">*</span></label>
+          <p-select
+            formControlName="chauffeur_id"
+            [options]="chauffeurs"
+            optionLabel="label"
+            optionValue="value"
+            placeholder="Sélectionner…"
+            [filter]="true"
+            filterPlaceholder="Rechercher…"
+            [style]="{width:'100%'}"
+            appendTo="body"
+          />
+        </div>
       </div>
 
     </div>
