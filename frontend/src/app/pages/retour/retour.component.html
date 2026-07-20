@@ -9,6 +9,12 @@
         <h1 class="page-header__title">Retour d'expédition</h1>
         <p class="page-header__sub">Palettes récupérées aujourd'hui</p>
       </div>
+      @if (selectedExpedition) {
+        <span class="retour-due-pill">
+          <i class="pi pi-box"></i>
+          {{ selectedExpedition.consigne_plastique + selectedExpedition.nc_plastique + selectedExpedition.consigne_bois + selectedExpedition.nc_bois }} palettes dues
+        </span>
+      }
     </div>
   </div>
 
@@ -88,6 +94,11 @@
         <div class="qty-grid">
 
           <div class="qty-tile">
+            @if (selectedExpedition) {
+              <div class="qty-tile__hint">
+                {{ selectedExpedition.consigne_plastique + selectedExpedition.nc_plastique }} envoyées
+              </div>
+            }
             <img src="assets/plastiquepallette.png" class="qty-tile__img" alt="">
             <span class="qty-tile__name">Plastique</span>
             <div class="qty-tile__counter">
@@ -124,6 +135,11 @@
           </div>
 
           <div class="qty-tile">
+            @if (selectedExpedition) {
+              <div class="qty-tile__hint">
+                {{ selectedExpedition.consigne_bois + selectedExpedition.nc_bois }} envoyées
+              </div>
+            }
             <img src="assets/woodpallette.png" class="qty-tile__img" alt="">
             <span class="qty-tile__name">Bois</span>
             <div class="qty-tile__counter">
