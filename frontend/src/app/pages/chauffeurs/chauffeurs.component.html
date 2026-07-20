@@ -3,56 +3,91 @@
 
 <div class="page-content">
 
-  <!-- Toolbar -->
-  <p-toolbar styleClass="mb-4">
-    <ng-template #start>
-      <h2 class="page-title">Chauffeurs&nbsp;<small style="font-size:14px;font-weight:400;color:#6b7280">({{ chauffeurs.length }})</small></h2>
-    </ng-template>
-    <ng-template #end>
-      <p-iconfield>
-        <p-inputicon class="pi pi-search" />
-        <input pInputText [(ngModel)]="searchQuery" (ngModelChange)="load()" placeholder="Rechercher…" style="width:200px">
-      </p-iconfield>
-      <p-button label="Ajouter" icon="pi pi-plus" (onClick)="openAdd()" styleClass="ml-2" />
-    </ng-template>
-  </p-toolbar>
+  <div class="page-header">
+    <div style="display:flex;align-items:center;gap:0.75rem">
+      <div class="page-icon"><i class="pi pi-car"></i></div>
+      <div>
+        <h1 class="page-header__title">Chauffeurs</h1>
+        <p class="page-header__sub">{{ chauffeurs.length }} chauffeurs enregistrés</p>
+      </div>
+    </div>
+  </div>
 
-  <!-- Table -->
-  <p-table
-    [value]="chauffeurs"
-    [loading]="loading"
-    styleClass="p-datatable-sm p-datatable-striped"
-    [paginator]="true"
-    [rows]="20"
-    [showCurrentPageReport]="true"
-    currentPageReportTemplate="{first}–{last} sur {totalRecords}"
-  >
-    <ng-template #header>
-      <tr>
-        <th pSortableColumn="name">Nom <p-sortIcon field="name" /></th>
-        <th>Téléphone</th>
-        <th>BLs effectués</th>
-        <th style="width:120px">Actions</th>
-      </tr>
-    </ng-template>
-    <ng-template #body let-c>
-      <tr>
-        <td><strong>{{ c.name }}</strong></td>
-        <td>{{ c.phone || '—' }}</td>
-        <td><p-tag [value]="(c.bl_count ?? 0).toString()" severity="secondary" /></td>
-        <td>
-          <div style="display:flex;gap:4px">
-            <p-button icon="pi pi-pencil" size="small" severity="secondary" (onClick)="openEdit(c)" />
-            <p-button icon="pi pi-trash"  size="small" severity="danger"    (onClick)="confirmDelete(c)" />
+  <div class="table-container">
+    <div class="table-header">
+      <div class="table-header-left">
+        <div class="table-search">
+          <div class="search-icon"><i class="pi pi-search"></i></div>
+          <input placeholder="Rechercher…" [(ngModel)]="searchQuery" (ngModelChange)="load()" />
+        </div>
+      </div>
+      <div class="table-actions">
+        <button class="btn-add" (click)="openAdd()">
+          <i class="pi pi-plus"></i>
+          <span>Ajouter</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="table-wrapper">
+      @if (loading) {
+        @for (_ of [1,2,3,4,5]; track $index) {
+          <div style="padding:0.65rem 1rem;border-bottom:1px solid var(--border-color-light)">
+            <div style="height:1rem;border-radius:6px;background:var(--surface-200);animation:skeleton 1.2s infinite alternate"></div>
           </div>
-        </td>
-      </tr>
-    </ng-template>
-    <ng-template #emptymessage>
-      <tr><td colspan="4" style="text-align:center;padding:32px;color:#9ca3af">
-        {{ searchQuery ? 'Aucun résultat pour "' + searchQuery + '"' : 'Aucun chauffeur enregistré' }}
-      </td></tr>
-    </ng-template>
-  </p-table>
+        }
+      } @else if (sorted.length === 0) {
+        <div class="table-empty">
+          {{ searchQuery ? 'Aucun résultat pour "' + searchQuery + '"' : 'Aucun chauffeur enregistré' }}
+        </div>
+      } @else {
+        <table class="table">
+          <thead>
+            <tr>
+              <th class="th-sort" (click)="sortBy('name')"
+                [class.th-sort--asc]="sortCol==='name'&&sortDir===1"
+                [class.th-sort--desc]="sortCol==='name'&&sortDir===-1">
+                Nom <i class="pi pi-sort-alt"></i>
+              </th>
+              <th>Téléphone</th>
+              <th class="th-sort" (click)="sortBy('bl_count')"
+                [class.th-sort--asc]="sortCol==='bl_count'&&sortDir===1"
+                [class.th-sort--desc]="sortCol==='bl_count'&&sortDir===-1">
+                BLs effectués <i class="pi pi-sort-alt"></i>
+              </th>
+              <th style="width:7rem"></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (c of sorted; track c.id; let i = $index) {
+              <tr class="table-row-animate" [style.--row-delay]="i * 20 + 'ms'">
+                <td>
+                  <div class="table-item-info">
+                    <span class="table-item-name">{{ c.name }}</span>
+                  </div>
+                </td>
+                <td class="text-muted">{{ c.phone || '—' }}</td>
+                <td>
+                  @if ((c.bl_count ?? 0) > 0) {
+                    <span class="badge badge--info">{{ c.bl_count }}</span>
+                  } @else {
+                    <span class="text-muted">0</span>
+                  }
+                </td>
+                <td class="actions-cell">
+                  <button class="table-action-btn" title="Modifier" (click)="openEdit(c)">
+                    <i class="pi pi-pencil"></i>
+                  </button>
+                  <button class="table-action-btn table-action-btn--danger" title="Supprimer" (click)="confirmDelete(c)">
+                    <i class="pi pi-trash"></i>
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      }
+    </div>
+  </div>
 
 </div>

@@ -39,23 +39,6 @@
   }
 }
 
-// Fixed footer with action buttons
-.form-footer {
-  position: fixed;
-  bottom: 0;
-  left: var(--sidebar-w, 350px);
-  right: 0;
-  z-index: 100;
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 0.75rem;
-  padding: 1rem 1.5rem;
-  background: var(--surface-card);
-  border-top: 1px solid var(--surface-border);
-  box-shadow: 0 -2px 10px rgba(0, 0, 0, .06);
-}
-
 // Card entry animation
 @keyframes card-in {
   from { opacity: 0; transform: translateY(12px); }
