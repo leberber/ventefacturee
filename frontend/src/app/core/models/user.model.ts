@@ -2,7 +2,7 @@ export type UserRole = 'admin' | 'clerk' | 'livreur';
 
 export interface User {
   id: number;
-  username: string;
+  phone: string;
   full_name: string;
   role: UserRole;
   is_active: boolean;
@@ -10,7 +10,7 @@ export interface User {
 }
 
 export interface UserCreate {
-  username: string;
+  phone: string;
   full_name: string;
   password: string;
   role: UserRole;
@@ -18,6 +18,7 @@ export interface UserCreate {
 
 export interface UserUpdate {
   full_name?: string;
+  phone?: string;
   password?: string;
   role?: UserRole;
   is_active?: boolean;

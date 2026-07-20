@@ -53,7 +53,7 @@ export class AuthService {
       }
       return {
         id:         +payload.sub,
-        username:   payload.username,
+        phone:      payload.phone,
         full_name:  payload.full_name,
         role:       payload.role as UserRole,
         is_active:  true,

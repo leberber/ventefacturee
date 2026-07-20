@@ -31,7 +31,6 @@ export class UtilisateurFormComponent implements OnInit {
   editingId: number | null = null;
   saving = false;
 
-  // Clerk cannot assign 'admin' role
   get roleOptions() {
     const all = [
       { label: 'Admin',   value: 'admin'   },
@@ -42,7 +41,7 @@ export class UtilisateurFormComponent implements OnInit {
   }
 
   form = this.fb.group({
-    username:  ['', Validators.required],
+    phone:     ['', Validators.required],
     full_name: ['', Validators.required],
     password:  [''],
     role:      ['clerk' as UserRole, Validators.required],
@@ -56,12 +55,11 @@ export class UtilisateurFormComponent implements OnInit {
       const state = history.state as { utilisateur?: User };
       if (state?.utilisateur) {
         const u = state.utilisateur;
-        this.form.patchValue({ username: u.username, full_name: u.full_name, role: u.role, is_active: u.is_active, password: '' });
+        this.form.patchValue({ phone: u.phone, full_name: u.full_name, role: u.role, is_active: u.is_active, password: '' });
       } else {
         this.router.navigate(['/utilisateurs']);
       }
     } else {
-      // New user — password required
       this.form.get('password')!.setValidators(Validators.required);
       this.form.get('password')!.updateValueAndValidity();
     }
@@ -73,23 +71,14 @@ export class UtilisateurFormComponent implements OnInit {
     const v = this.form.value;
 
     if (this.editingId) {
-      const body: UserUpdate = {
-        full_name: v.full_name!,
-        role:      v.role as UserRole,
-        is_active: v.is_active!,
-      };
+      const body: UserUpdate = { full_name: v.full_name!, phone: v.phone!, role: v.role as UserRole, is_active: v.is_active! };
       if (v.password) body.password = v.password;
       this.usersService.update(this.editingId, body).subscribe({
         next: () => this.done('Utilisateur modifié'),
         error: e => this.err(e),
       });
     } else {
-      const body: UserCreate = {
-        username:  v.username!,
-        full_name: v.full_name!,
-        password:  v.password!,
-        role:      v.role as UserRole,
-      };
+      const body: UserCreate = { phone: v.phone!, full_name: v.full_name!, password: v.password!, role: v.role as UserRole };
       this.usersService.create(body).subscribe({
         next: () => this.done('Utilisateur créé'),
         error: e => this.err(e),

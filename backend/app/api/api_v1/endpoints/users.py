@@ -27,10 +27,10 @@ def create_user(
 ) -> Any:
     if current_user.role == UserRole.CLERK and user_in.role == UserRole.ADMIN:
         raise HTTPException(status_code=403, detail="Les clercs ne peuvent pas créer des administrateurs")
-    if session.exec(select(User).where(User.username == user_in.username)).first():
-        raise HTTPException(status_code=400, detail="Ce nom d'utilisateur est déjà pris")
+    if session.exec(select(User).where(User.phone == user_in.phone)).first():
+        raise HTTPException(status_code=400, detail="Ce numéro de téléphone est déjà utilisé")
     user = User(
-        username=user_in.username,
+        phone=user_in.phone,
         full_name=user_in.full_name,
         hashed_password=hash_password(user_in.password),
         role=user_in.role,

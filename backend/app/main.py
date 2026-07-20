@@ -7,7 +7,7 @@ from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
 from app.core.config import settings
-from app.database import create_db_and_tables
+from app.database import create_db_and_tables, engine
 from app.api.api_v1.api import api_router
 
 FRONTEND_DIST = Path(__file__).parent.parent.parent / "frontend" / "dist" / "pallette" / "browser"
@@ -16,6 +16,11 @@ FRONTEND_DIST = Path(__file__).parent.parent.parent / "frontend" / "dist" / "pal
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     create_db_and_tables()
+    from sqlmodel import Session
+    from app.seed_data import run_all
+    with Session(engine) as session:
+        run_all(session)
+    print(f"  {settings.PROJECT_NAME} — démarré")
     yield
 
 

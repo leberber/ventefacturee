@@ -18,9 +18,8 @@
           <input pInputText formControlName="full_name" placeholder="Prénom Nom" class="w-full">
         </div>
         <div class="field">
-          <label>Identifiant <span style="color:red">*</span></label>
-          <input pInputText formControlName="username" placeholder="nom.prenom"
-            class="w-full" [attr.readonly]="editingId ? true : null">
+          <label>Téléphone <span style="color:red">*</span></label>
+          <input pInputText type="tel" formControlName="phone" placeholder="0550 000 000" class="w-full">
         </div>
       </div>
 

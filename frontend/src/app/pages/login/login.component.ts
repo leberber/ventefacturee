@@ -22,7 +22,7 @@ export class LoginComponent implements OnInit {
   readonly errorMsg     = signal<string | null>(null);
 
   form = this.fb.group({
-    username: ['', Validators.required],
+    phone:    ['', Validators.required],
     password: ['', [Validators.required, Validators.minLength(4)]],
   });
 
@@ -38,8 +38,8 @@ export class LoginComponent implements OnInit {
     if (this.form.invalid || this.loading()) return;
     this.errorMsg.set(null);
     this.loading.set(true);
-    const { username, password } = this.form.getRawValue();
-    this.auth.login(username!, password!).subscribe({
+    const { phone, password } = this.form.getRawValue();
+    this.auth.login(phone!, password!).subscribe({
       next: () => { this.loading.set(false); this.router.navigate(['/']); },
       error: err => {
         this.loading.set(false);

@@ -24,7 +24,7 @@
     <ng-template #header>
       <tr>
         <th pSortableColumn="full_name">Nom complet <p-sortIcon field="full_name" /></th>
-        <th>Identifiant</th>
+        <th>Téléphone</th>
         <th>Rôle</th>
         <th>Statut</th>
         <th style="width:120px">Actions</th>
@@ -33,7 +33,7 @@
     <ng-template #body let-u>
       <tr>
         <td><strong>{{ u.full_name }}</strong> @if(isSelf(u)) { <small style="color:#9ca3af">(vous)</small> }</td>
-        <td><span class="font-mono">{{ u.username }}</span></td>
+        <td><span class="font-mono">{{ u.phone }}</span></td>
         <td><p-tag [value]="roleLabel[u.role]" [severity]="roleSeverity[u.role]" /></td>
         <td>
           @if(u.is_active) {

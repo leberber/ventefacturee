@@ -15,18 +15,19 @@
 
     <form [formGroup]="form" (ngSubmit)="submit()" class="login-form">
 
-      <!-- Username -->
+      <!-- Phone -->
       <div class="login-input"
-           [class.login-input--focused]="focusedField() === 'username'"
-           [class.login-input--filled]="form.get('username')?.value">
-        <i class="pi pi-user login-input__icon"></i>
+           [class.login-input--focused]="focusedField() === 'phone'"
+           [class.login-input--filled]="form.get('phone')?.value">
+        <i class="pi pi-phone login-input__icon"></i>
         <input
-          type="text"
+          type="tel"
+          inputmode="tel"
           enterkeyhint="next"
-          formControlName="username"
+          formControlName="phone"
           autocomplete="username"
-          placeholder="Nom d'utilisateur"
-          (focus)="onFocus('username')"
+          placeholder="Numéro de téléphone"
+          (focus)="onFocus('phone')"
           (blur)="onBlur()"
         />
       </div>

@@ -5,8 +5,8 @@ from enum import Enum
 
 
 class UserRole(str, Enum):
-    ADMIN  = "admin"
-    CLERK  = "clerk"
+    ADMIN   = "admin"
+    CLERK   = "clerk"
     LIVREUR = "livreur"
 
 
@@ -14,7 +14,7 @@ class User(SQLModel, table=True):
     __tablename__ = "users"
 
     id: Optional[int] = Field(default=None, primary_key=True)
-    username: str = Field(max_length=50, index=True, unique=True)
+    phone: str = Field(max_length=20, index=True, unique=True)
     full_name: str = Field(max_length=100)
     hashed_password: str = Field(max_length=200)
     role: UserRole = Field(default=UserRole.CLERK)
@@ -23,7 +23,7 @@ class User(SQLModel, table=True):
 
 
 class UserCreate(SQLModel):
-    username: str
+    phone: str
     full_name: str
     password: str
     role: UserRole = UserRole.CLERK
@@ -31,6 +31,7 @@ class UserCreate(SQLModel):
 
 class UserUpdate(SQLModel):
     full_name: Optional[str] = None
+    phone: Optional[str] = None
     password: Optional[str] = None
     role: Optional[UserRole] = None
     is_active: Optional[bool] = None
@@ -40,7 +41,7 @@ class UserRead(SQLModel):
     model_config = {"from_attributes": True}
 
     id: int
-    username: str
+    phone: str
     full_name: str
     role: UserRole
     is_active: bool

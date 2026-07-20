@@ -45,7 +45,7 @@ export class UtilisateursComponent implements OnInit {
 
   get filtered() {
     const q = this.searchQuery.toLowerCase();
-    return q ? this.users.filter(u => u.full_name.toLowerCase().includes(q) || u.username.toLowerCase().includes(q)) : this.users;
+    return q ? this.users.filter(u => u.full_name.toLowerCase().includes(q) || u.phone.toLowerCase().includes(q)) : this.users;
   }
 
   ngOnInit() { this.load(); }
