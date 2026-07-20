@@ -2,7 +2,7 @@
 
 <div class="page-content" style="padding-bottom:5rem">
 
-  <div class="page-header" style="max-width:680px;margin:0 auto var(--space-6)">
+  <div class="page-header" style="max-width:960px;margin:0 auto var(--space-6)">
     <div style="display:flex;align-items:center;gap:0.75rem">
       <div class="page-icon"><i class="pi pi-file-plus"></i></div>
       <div>
@@ -12,36 +12,69 @@
     </div>
   </div>
 
-  <form [formGroup]="form" style="max-width:680px;margin:0 auto">
+  <form [formGroup]="form" style="max-width:960px;margin:0 auto">
 
-    <!-- Expédition info -->
-    <div class="exp-card">
+    <div class="nbl-layout">
 
-      <div class="field" style="max-width:50%;margin-bottom:1.25rem">
-        <label class="exp-label"><i class="pi pi-hashtag"></i>N° Bon de livraison <span style="color:var(--color-error)">*</span></label>
-        <div class="icon-input">
-          <i class="pi pi-receipt icon-input__icon"></i>
-          <input pInputText formControlName="bl_number" placeholder="Ex: BL-2025-001"
-                 class="w-full icon-input__field" style="font-weight:600;letter-spacing:0.03em" />
-        </div>
-      </div>
+      <!-- Left column: form fields -->
+      <div class="nbl-col">
+        <div class="exp-card">
 
-      <div class="form-grid-2" style="margin-bottom:1.25rem">
-        <div class="field mb-0">
-          <label class="exp-label"><i class="pi pi-tag"></i>Type</label>
-          <p-selectbutton
-            formControlName="destination_type"
-            [options]="destinationOptions"
-            optionLabel="label"
-            optionValue="value"
-          />
-        </div>
-        <div class="field mb-0">
-          @if (isGros) {
-            <label class="exp-label"><i class="pi pi-building"></i>Client <span style="color:var(--color-error)">*</span></label>
+          <div class="field" style="margin-bottom:1.25rem">
+            <label class="exp-label"><i class="pi pi-hashtag"></i>N° Bon de livraison <span style="color:var(--color-error)">*</span></label>
+            <div class="icon-input">
+              <i class="pi pi-receipt icon-input__icon"></i>
+              <input pInputText formControlName="bl_number" placeholder="Ex: BL-2025-001"
+                     class="w-full icon-input__field" style="font-weight:600;letter-spacing:0.03em" />
+            </div>
+          </div>
+
+          <div class="field" style="margin-bottom:1.25rem">
+            <label class="exp-label"><i class="pi pi-tag"></i>Type</label>
+            <p-selectbutton
+              formControlName="destination_type"
+              [options]="destinationOptions"
+              optionLabel="label"
+              optionValue="value"
+            />
+          </div>
+
+          <div class="field" style="margin-bottom:1.25rem">
+            @if (isGros) {
+              <label class="exp-label"><i class="pi pi-building"></i>Client <span style="color:var(--color-error)">*</span></label>
+              <p-select
+                formControlName="client_id"
+                [options]="clients"
+                optionLabel="label"
+                optionValue="value"
+                placeholder="Sélectionner…"
+                [filter]="true"
+                filterPlaceholder="Rechercher…"
+                [style]="{width:'100%'}"
+                appendTo="body"
+              />
+            } @else {
+              <label class="exp-label"><i class="pi pi-building"></i>Clients de la tournée</label>
+              <p-multiselect
+                formControlName="client_ids"
+                [options]="clients"
+                optionLabel="label"
+                optionValue="value"
+                placeholder="Sélectionner les clients…"
+                [filter]="true"
+                filterPlaceholder="Rechercher…"
+                [style]="{width:'100%'}"
+                appendTo="body"
+                selectedItemsLabel="{0} client(s) sélectionné(s)"
+              />
+            }
+          </div>
+
+          <div class="field" style="margin-bottom:1.25rem">
+            <label class="exp-label"><i class="pi pi-truck"></i>Livreur @if(!isGros){<span style="color:var(--color-error)">*</span>}</label>
             <p-select
-              formControlName="client_id"
-              [options]="clients"
+              formControlName="livreur_id"
+              [options]="livreurs"
               optionLabel="label"
               optionValue="value"
               placeholder="Sélectionner…"
@@ -50,109 +83,86 @@
               [style]="{width:'100%'}"
               appendTo="body"
             />
-          } @else {
-            <label class="exp-label"><i class="pi pi-building"></i>Clients de la tournée</label>
-            <p-multiselect
-              formControlName="client_ids"
-              [options]="clients"
+          </div>
+
+          <div class="field mb-0">
+            <label class="exp-label"><i class="pi pi-car"></i>Chauffeur <span style="color:var(--color-error)">*</span></label>
+            <p-select
+              formControlName="chauffeur_id"
+              [options]="chauffeurs"
               optionLabel="label"
               optionValue="value"
-              placeholder="Sélectionner les clients…"
+              placeholder="Sélectionner…"
               [filter]="true"
               filterPlaceholder="Rechercher…"
               [style]="{width:'100%'}"
               appendTo="body"
-              selectedItemsLabel="{0} client(s) sélectionné(s)"
             />
-          }
-        </div>
-      </div>
-      <div class="form-grid-2">
-        <div class="field mb-0">
-          <label class="exp-label"><i class="pi pi-truck"></i>Livreur @if(!isGros){<span style="color:var(--color-error)">*</span>}</label>
-          <p-select
-            formControlName="livreur_id"
-            [options]="livreurs"
-            optionLabel="label"
-            optionValue="value"
-            placeholder="Sélectionner…"
-            [filter]="true"
-            filterPlaceholder="Rechercher…"
-            [style]="{width:'100%'}"
-            appendTo="body"
-          />
-        </div>
-        <div class="field mb-0">
-          <label class="exp-label"><i class="pi pi-car"></i>Chauffeur <span style="color:var(--color-error)">*</span></label>
-          <p-select
-            formControlName="chauffeur_id"
-            [options]="chauffeurs"
-            optionLabel="label"
-            optionValue="value"
-            placeholder="Sélectionner…"
-            [filter]="true"
-            filterPlaceholder="Rechercher…"
-            [style]="{width:'100%'}"
-            appendTo="body"
-          />
-        </div>
-      </div>
-
-    </div>
-
-    <!-- Balance (gros client selected) -->
-    @if (selectedClient && isGros) {
-      <div class="balance-box" style="margin-bottom:1rem">
-        <div class="balance-title">Solde — {{ selectedClient.name }}</div>
-        <div class="balance-grid">
-          <div class="balance-item">
-            <span class="balance-label"><img src="assets/plastiquepallette.png" style="height:12px;vertical-align:middle;margin-right:3px" alt="">Plastique</span>
-            <span [class]="plasticBalance > 0 ? 'badge badge--info' : 'badge badge--success'">{{ plasticBalance }}</span>
           </div>
-          <div class="balance-item">
-            <span class="balance-label"><img src="assets/woodpallette.png" style="height:12px;vertical-align:middle;margin-right:3px" alt="">Bois</span>
-            <span [class]="woodBalance > 0 ? 'badge badge--warning' : 'badge badge--success'">{{ woodBalance }}</span>
+
+        </div>
+      </div>
+
+      <!-- Right column: balance, counters, notes -->
+      <div class="nbl-col">
+
+        <!-- Balance (gros client selected) -->
+        @if (selectedClient && isGros) {
+          <div class="balance-box">
+            <div class="balance-title">Solde — {{ selectedClient.name }}</div>
+            <div class="balance-grid">
+              <div class="balance-item">
+                <span class="balance-label"><img src="assets/plastiquepallette.png" style="height:12px;vertical-align:middle;margin-right:3px" alt="">Plastique</span>
+                <span [class]="plasticBalance > 0 ? 'badge badge--info' : 'badge badge--success'">{{ plasticBalance }}</span>
+              </div>
+              <div class="balance-item">
+                <span class="balance-label"><img src="assets/woodpallette.png" style="height:12px;vertical-align:middle;margin-right:3px" alt="">Bois</span>
+                <span [class]="woodBalance > 0 ? 'badge badge--warning' : 'badge badge--success'">{{ woodBalance }}</span>
+              </div>
+            </div>
           </div>
+        }
+
+        <!-- Quantity counters -->
+        <div class="qty-grid">
+
+          <div class="qty-tile">
+            <img src="assets/plastiquepallette.png" class="qty-tile__img" alt="">
+            <span class="qty-tile__name">Plastique</span>
+            <div class="qty-tile__counter">
+              <button type="button" class="qty-btn" (click)="dec('plastique')">−</button>
+              <input type="number" class="qty-input" [value]="form.get('plastique')?.value" (change)="setQty('plastique', $event)" min="0">
+              <button type="button" class="qty-btn qty-btn--plus" (click)="inc('plastique')">+</button>
+            </div>
+            <span class="qty-tile__unit">palettes chargées</span>
+          </div>
+
+          <div class="qty-tile">
+            <img src="assets/woodpallette.png" class="qty-tile__img" alt="">
+            <span class="qty-tile__name">Bois</span>
+            <div class="qty-tile__counter">
+              <button type="button" class="qty-btn" (click)="dec('bois')">−</button>
+              <input type="number" class="qty-input" [value]="form.get('bois')?.value" (change)="setQty('bois', $event)" min="0">
+              <button type="button" class="qty-btn qty-btn--plus" (click)="inc('bois')">+</button>
+            </div>
+            <span class="qty-tile__unit">palettes chargées</span>
+          </div>
+
         </div>
-      </div>
-    }
 
-    <!-- Quantity counters -->
-    <div class="qty-grid">
-
-      <div class="qty-tile">
-        <img src="assets/plastiquepallette.png" class="qty-tile__img" alt="">
-        <span class="qty-tile__name">Plastique</span>
-        <div class="qty-tile__counter">
-          <button type="button" class="qty-btn" (click)="dec('plastique')">−</button>
-          <input type="number" class="qty-input" [value]="form.get('plastique')?.value" (change)="setQty('plastique', $event)" min="0">
-          <button type="button" class="qty-btn qty-btn--plus" (click)="inc('plastique')">+</button>
+        <!-- Notes -->
+        <div class="exp-notes">
+          <i class="pi pi-comment exp-notes__icon"></i>
+          <textarea
+            formControlName="notes"
+            class="exp-notes__input"
+            placeholder="Notes optionnelles…"
+            rows="3"
+          ></textarea>
         </div>
-        <span class="qty-tile__unit">palettes chargées</span>
+
       </div>
 
-      <div class="qty-tile">
-        <img src="assets/woodpallette.png" class="qty-tile__img" alt="">
-        <span class="qty-tile__name">Bois</span>
-        <div class="qty-tile__counter">
-          <button type="button" class="qty-btn" (click)="dec('bois')">−</button>
-          <input type="number" class="qty-input" [value]="form.get('bois')?.value" (change)="setQty('bois', $event)" min="0">
-          <button type="button" class="qty-btn qty-btn--plus" (click)="inc('bois')">+</button>
-        </div>
-        <span class="qty-tile__unit">palettes chargées</span>
-      </div>
-
-    </div>
-
-    <!-- Notes -->
-    <div class="exp-notes">
-      <i class="pi pi-comment exp-notes__icon"></i>
-      <textarea
-        formControlName="notes"
-        class="exp-notes__input"
-        placeholder="Notes optionnelles…"
-        rows="2"
-      ></textarea>
     </div>
 
   </form>

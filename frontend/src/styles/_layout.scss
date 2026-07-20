@@ -694,6 +694,129 @@
   }
 }
 
+// ── Palette pill (dashboard table) ───────────────────────────────────────────
+.palette-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.3rem 0.65rem 0.3rem 0.5rem;
+  border-radius: 999px;
+  border: var(--border-width) solid var(--surface-border);
+  background: var(--surface-ground);
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+
+  &:hover {
+    border-color: var(--primary-color);
+    background: rgba(var(--primary-rgb), 0.05);
+  }
+
+  &__img { height: 14px; }
+
+  &__count {
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-semibold);
+    min-width: 1rem;
+    text-align: center;
+    &--plastic { color: var(--brand-blue-main, #2563eb); }
+    &--wood    { color: #92400e; }
+  }
+
+  &__caret {
+    font-size: 0.6rem;
+    color: var(--text-color-secondary);
+    margin-left: 0.1rem;
+  }
+}
+
+// ── Palette popover content ───────────────────────────────────────────────────
+.palette-pop__header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding-bottom: 0.75rem;
+  margin-bottom: 0.75rem;
+  border-bottom: var(--border-width) solid var(--surface-border);
+}
+
+.palette-pop__name {
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-sm);
+  color: var(--text-color);
+  flex: 1;
+}
+
+.palette-pop__section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding-bottom: 0.75rem;
+  margin-bottom: 0.75rem;
+  border-bottom: var(--border-width) solid var(--surface-border);
+
+  &:last-child { border-bottom: none; padding-bottom: 0; margin-bottom: 0; }
+}
+
+.palette-pop__type {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-color);
+  margin-bottom: 0.25rem;
+}
+
+.palette-pop__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  font-size: var(--font-size-xs);
+  color: var(--text-color-secondary);
+  padding: 0 0.25rem;
+}
+
+.palette-pop__val {
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-color);
+  min-width: 1.5rem;
+  text-align: right;
+}
+
+// ── Dashboard time filter ─────────────────────────────────────────────────────
+.dash-filter {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  background: var(--surface-ground);
+  border: var(--border-width) solid var(--surface-border);
+  border-radius: var(--radius-lg);
+  padding: 0.2rem;
+
+  &__btn {
+    border: none;
+    background: transparent;
+    color: var(--text-color-secondary);
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-medium);
+    font-family: inherit;
+    padding: 0.3rem 0.75rem;
+    border-radius: calc(var(--radius-lg) - 2px);
+    cursor: pointer;
+    transition: all 0.15s;
+    white-space: nowrap;
+
+    &:hover:not(&--active) { background: var(--surface-hover); color: var(--text-color); }
+
+    &--active {
+      background: var(--surface-card);
+      color: var(--primary-color);
+      font-weight: var(--font-weight-semibold);
+      box-shadow: var(--shadow-sm);
+    }
+  }
+}
 
 .client-delivery-card {
   background: var(--surface-card);

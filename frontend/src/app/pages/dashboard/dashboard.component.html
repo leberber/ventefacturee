@@ -1,10 +1,3 @@
-<div class="page-header">
-  <div>
-    <h1 class="page-header__title">Tableau de bord</h1>
-    <p class="page-header__sub">Palettes en circulation — CLR Freha</p>
-  </div>
-</div>
-
 <!-- KPI Cards -->
 <div class="kpi-grid">
   <div class="stat-card">
@@ -47,75 +40,50 @@
   </div>
 </div>
 
-<!-- Clients with balance -->
+<!-- BLs table with time filter -->
 <div class="table-container">
   <div class="card-section-header">
-    <span class="card-label">Clients avec palettes en circulation</span>
-    <a class="link-primary" routerLink="/clients">Voir tous les clients →</a>
+    <span class="card-label">Bons de livraison</span>
+    <div class="dash-filter">
+      <button class="dash-filter__btn" [class.dash-filter__btn--active]="timeFilter==='today'"  (click)="setFilter('today')">Aujourd'hui</button>
+      <button class="dash-filter__btn" [class.dash-filter__btn--active]="timeFilter==='week'"   (click)="setFilter('week')">Cette semaine</button>
+      <button class="dash-filter__btn" [class.dash-filter__btn--active]="timeFilter==='month'"  (click)="setFilter('month')">Ce mois</button>
+    </div>
   </div>
 
   <div class="table-wrapper">
-    @if (loading) {
+    @if (tableLoading) {
       @for (_ of [1,2,3,4,5]; track $index) {
         <div style="padding:0.65rem 1rem;border-bottom:1px solid var(--border-color-light)">
           <div style="height:1rem;border-radius:6px;background:var(--surface-200);animation:skeleton 1.2s infinite alternate"></div>
         </div>
       }
-    } @else if (clients.length === 0) {
-      <div class="table-empty">Aucune palette en circulation</div>
+    } @else if (bls.length === 0) {
+      <div class="table-empty">Aucun BL pour cette période</div>
     } @else {
       <table class="table">
         <thead>
           <tr>
+            <th>N° BL</th>
+            <th>Date</th>
             <th>Client</th>
-            <th>Catégorie</th>
-            <th>Code</th>
-            <th><img src="assets/plastiquepallette.png" style="height:16px;vertical-align:middle;margin-right:4px" alt="">Plastique</th>
-            <th>Consig.</th>
-            <th>Non-consig.</th>
-            <th><img src="assets/woodpallette.png" style="height:16px;vertical-align:middle;margin-right:4px" alt="">Bois</th>
-            <th>Consig.</th>
-            <th>Non-consig.</th>
-            <th style="width:4rem"></th>
+            <th>Chauffeur</th>
+            <th>Type</th>
           </tr>
         </thead>
         <tbody>
-          @for (c of clients; track c.id; let i = $index) {
+          @for (b of bls; track b.id; let i = $index) {
             <tr class="table-row-animate" [style.--row-delay]="i * 20 + 'ms'">
+              <td><code class="font-mono" style="font-weight:600">{{ b.bl_number }}</code></td>
               <td>
                 <div class="table-item-info">
-                  <span class="table-item-name">{{ c.name }}</span>
-                  @if (c.phone) {
-                    <span class="table-item-desc">{{ c.phone }}</span>
-                  }
+                  <span class="table-item-name" style="font-size:var(--font-size-sm)">{{ b.date }}</span>
+                  <span class="table-item-desc">{{ b.created_at | date:'HH:mm' }}</span>
                 </div>
               </td>
-              <td><span [class]="categoryBadge[c.category]">{{ categoryLabel[c.category] }}</span></td>
-              <td><code class="font-mono text-muted">{{ c.code || '—' }}</code></td>
-              <td>
-                @if ((c.plastic_balance ?? 0) > 0) {
-                  <span class="badge badge--info">{{ c.plastic_balance }}</span>
-                } @else {
-                  <span class="text-muted">0</span>
-                }
-              </td>
-              <td><span class="text-muted">{{ c.plastic_consigne ?? 0 }}</span></td>
-              <td><span class="text-muted">{{ c.plastic_nc ?? 0 }}</span></td>
-              <td>
-                @if ((c.wood_balance ?? 0) > 0) {
-                  <span class="badge badge--warning">{{ c.wood_balance }}</span>
-                } @else {
-                  <span class="text-muted">0</span>
-                }
-              </td>
-              <td><span class="text-muted">{{ c.wood_consigne ?? 0 }}</span></td>
-              <td><span class="text-muted">{{ c.wood_nc ?? 0 }}</span></td>
-              <td class="actions-cell">
-                <button class="table-action-btn" title="Historique BLs"
-                  [routerLink]="['/historique']" [queryParams]="{clientId: c.id}">
-                  <i class="pi pi-list"></i>
-                </button>
-              </td>
+              <td class="text-muted">{{ b.client_name || '—' }}</td>
+              <td class="text-muted">{{ b.chauffeur_name }}</td>
+              <td><span [class]="destinationBadge[b.destination_type]">{{ destinationLabel[b.destination_type] }}</span></td>
             </tr>
           }
         </tbody>
