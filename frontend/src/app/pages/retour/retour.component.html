@@ -2,7 +2,7 @@
 
 <div class="page-content">
 
-  <h2 class="page-title" style="margin-bottom:24px">Nouvelle expédition</h2>
+  <h2 class="page-title" style="margin-bottom:24px">Retour d'expédition</h2>
 
   <div style="max-width:760px">
     <form [formGroup]="form" (ngSubmit)="save()">
@@ -37,82 +37,43 @@
         </div>
       </div>
 
-      <!-- Balance actuelle -->
+      <!-- Solde actuel -->
       @if (selectedClient) {
         <div class="balance-box" style="margin-bottom:24px">
           <div class="balance-title">Solde actuel — {{ selectedClient.name }}</div>
           <div class="balance-grid">
             <div class="balance-item">
-              <span class="balance-label">🔵 Plastique total</span>
+              <span class="balance-label">🔵 Plastique total dû</span>
               <p-tag [value]="plasticBalance.toString()" [severity]="plasticBalance > 0 ? 'info' : 'success'" />
             </div>
             <div class="balance-item">
-              <span class="balance-label">Dont consig.</span>
+              <span class="balance-label">Dont consignées</span>
               <p-tag [value]="plasticConsigne.toString()" severity="info" />
             </div>
             <div class="balance-item">
-              <span class="balance-label">Dont non-consig.</span>
-              <p-tag [value]="plasticNc.toString()" severity="warn" />
-            </div>
-            <div class="balance-item">
-              <span class="balance-label">🟫 Bois total</span>
+              <span class="balance-label">🟫 Bois total dû</span>
               <p-tag [value]="woodBalance.toString()" [severity]="woodBalance > 0 ? 'warn' : 'success'" />
             </div>
             <div class="balance-item">
-              <span class="balance-label">Dont consig.</span>
+              <span class="balance-label">Dont consignées</span>
               <p-tag [value]="woodConsigne.toString()" severity="warn" />
-            </div>
-            <div class="balance-item">
-              <span class="balance-label">Dont non-consig.</span>
-              <p-tag [value]="woodNc.toString()" severity="warn" />
             </div>
           </div>
         </div>
       }
 
-      <!-- Palettes plastique -->
+      <!-- Palettes retournées -->
       <div class="palette-section">
-        <div class="palette-section-title">🔵 Palettes plastique</div>
-        <div class="form-grid-3">
+        <div class="palette-section-title">Palettes retournées</div>
+        <div class="form-grid-2">
           <div class="field">
-            <label>Consignées chargées</label>
-            <p-inputnumber formControlName="consigne_plastique" [min]="0" [showButtons]="true" buttonLayout="horizontal"
-              decrementButtonIcon="pi pi-minus" incrementButtonIcon="pi pi-plus"
-              [style]="{width:'100%'}" />
-          </div>
-          <div class="field">
-            <label>Non-consignées chargées</label>
-            <p-inputnumber formControlName="nc_plastique" [min]="0" [showButtons]="true" buttonLayout="horizontal"
-              decrementButtonIcon="pi pi-minus" incrementButtonIcon="pi pi-plus"
-              [style]="{width:'100%'}" />
-          </div>
-          <div class="field">
-            <label>Retournées</label>
+            <label>🔵 Plastique retournées</label>
             <p-inputnumber formControlName="retour_plastique" [min]="0" [showButtons]="true" buttonLayout="horizontal"
               decrementButtonIcon="pi pi-minus" incrementButtonIcon="pi pi-plus"
               [style]="{width:'100%'}" />
           </div>
-        </div>
-      </div>
-
-      <!-- Palettes bois -->
-      <div class="palette-section">
-        <div class="palette-section-title">🟫 Palettes bois</div>
-        <div class="form-grid-3">
           <div class="field">
-            <label>Consignées chargées</label>
-            <p-inputnumber formControlName="consigne_bois" [min]="0" [showButtons]="true" buttonLayout="horizontal"
-              decrementButtonIcon="pi pi-minus" incrementButtonIcon="pi pi-plus"
-              [style]="{width:'100%'}" />
-          </div>
-          <div class="field">
-            <label>Non-consignées chargées</label>
-            <p-inputnumber formControlName="nc_bois" [min]="0" [showButtons]="true" buttonLayout="horizontal"
-              decrementButtonIcon="pi pi-minus" incrementButtonIcon="pi pi-plus"
-              [style]="{width:'100%'}" />
-          </div>
-          <div class="field">
-            <label>Retournées</label>
+            <label>🟫 Bois retournées</label>
             <p-inputnumber formControlName="retour_bois" [min]="0" [showButtons]="true" buttonLayout="horizontal"
               decrementButtonIcon="pi pi-minus" incrementButtonIcon="pi pi-plus"
               [style]="{width:'100%'}" />
@@ -128,8 +89,8 @@
 
       <!-- Actions -->
       <div style="display:flex;gap:8px;margin-top:8px">
-        <p-button label="Annuler"     severity="secondary" type="button" (onClick)="reset()" />
-        <p-button label="Enregistrer le BL" icon="pi pi-check" type="submit"
+        <p-button label="Annuler"             severity="secondary" type="button" (onClick)="reset()" />
+        <p-button label="Enregistrer le retour" icon="pi pi-check" type="submit"
           [disabled]="form.invalid || saving" [loading]="saving" />
       </div>
 

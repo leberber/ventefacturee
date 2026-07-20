@@ -1,0 +1,33 @@
+<p-toast />
+
+<div class="page-content">
+  <div style="max-width:480px">
+
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:24px">
+      <p-button icon="pi pi-arrow-left" severity="secondary" [text]="true" (onClick)="cancel()" />
+      <h2 class="page-title" style="margin:0">
+        {{ editingId ? 'Modifier le chauffeur' : 'Ajouter un chauffeur' }}
+      </h2>
+    </div>
+
+    <form [formGroup]="form" (ngSubmit)="save()">
+
+      <div class="field">
+        <label>Nom <span style="color:red">*</span></label>
+        <input pInputText formControlName="name" placeholder="Nom du chauffeur" class="w-full">
+      </div>
+
+      <div class="field">
+        <label>Téléphone</label>
+        <input pInputText formControlName="phone" placeholder="0550 000 000" class="w-full">
+      </div>
+
+      <div style="display:flex;gap:8px;margin-top:8px">
+        <p-button label="Annuler"     severity="secondary" type="button" (onClick)="cancel()" />
+        <p-button label="Enregistrer" icon="pi pi-check"   type="submit"
+          [disabled]="form.invalid || saving" [loading]="saving" />
+      </div>
+
+    </form>
+  </div>
+</div>

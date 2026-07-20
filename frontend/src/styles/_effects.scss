@@ -1,0 +1,22 @@
+// =============================================================================
+// EFFECTS — shadows, transitions, glass
+// =============================================================================
+
+:root {
+  --shadow-xs: 0 1px 2px rgba(0,0,0,.05);
+  --shadow-sm: 0 1px 3px rgba(0,0,0,.1), 0 1px 2px rgba(0,0,0,.06);
+  --shadow-md: 0 4px 6px rgba(0,0,0,.07), 0 2px 4px rgba(0,0,0,.06);
+  --shadow-lg: 0 10px 15px rgba(0,0,0,.1), 0 4px 6px rgba(0,0,0,.05);
+  --shadow-xl: 0 20px 25px rgba(0,0,0,.1), 0 10px 10px rgba(0,0,0,.04);
+
+  --transition-fast:   150ms ease;
+  --transition-smooth: 250ms ease;
+  --transition-slow:   400ms ease;
+
+  --glass-bg:     rgba(255,255,255,0.88);
+  --glass-blur:   blur(12px);
+  --glass-border: 1px solid rgba(255,255,255,.5);
+
+  --shadow-add:    0 4px 16px rgba(var(--primary-rgb), 0.30);
+  --shadow-add-lg: 0 8px 24px rgba(var(--primary-rgb), 0.40);
+}

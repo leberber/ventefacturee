@@ -1,0 +1,98 @@
+<p-toast />
+
+<div class="page-content">
+  <div style="max-width:680px">
+
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:24px">
+      <p-button icon="pi pi-arrow-left" severity="secondary" [text]="true" (onClick)="cancel()" />
+      <h2 class="page-title" style="margin:0">
+        {{ editingId ? 'Modifier le client' : 'Ajouter un client' }}
+      </h2>
+    </div>
+
+    <form [formGroup]="form" (ngSubmit)="save()">
+
+      <div class="form-grid-2">
+        <div class="field">
+          <label>Code client</label>
+          <input pInputText formControlName="code" placeholder="ex: 000146" class="w-full">
+        </div>
+        <div class="field">
+          <label>Catégorie <span style="color:red">*</span></label>
+          <p-select formControlName="category" [options]="categoryOptions"
+            optionLabel="label" optionValue="value" [style]="{width:'100%'}" />
+        </div>
+      </div>
+
+      <div class="form-grid-2">
+        <div class="field">
+          <label>Prénom</label>
+          <input pInputText formControlName="first_name" placeholder="Prénom" class="w-full">
+        </div>
+        <div class="field">
+          <label>Nom de famille</label>
+          <input pInputText formControlName="last_name" placeholder="Nom" class="w-full">
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Nom du magasin</label>
+        <input pInputText formControlName="store_name" placeholder="Nom du magasin" class="w-full">
+      </div>
+
+      <div class="field">
+        <label>Nom d'affichage <span style="color:red">*</span></label>
+        <input pInputText formControlName="name" placeholder="Nom affiché dans les BLs" class="w-full">
+      </div>
+
+      <div class="form-grid-2">
+        <div class="field">
+          <label>Daïra</label>
+          <p-select
+            formControlName="daira"
+            [options]="dairaOptions"
+            optionLabel="label"
+            optionValue="value"
+            placeholder="Sélectionner une daïra"
+            [filter]="true"
+            filterPlaceholder="Rechercher…"
+            [style]="{width:'100%'}"
+            (onChange)="onDairaChange($event.value)"
+          />
+        </div>
+        <div class="field">
+          <label>Commune</label>
+          <p-select
+            formControlName="commune"
+            [options]="communeOptions"
+            optionLabel="label"
+            optionValue="value"
+            placeholder="Sélectionner une commune"
+            [filter]="true"
+            filterPlaceholder="Rechercher…"
+            [style]="{width:'100%'}"
+            [disabled]="!form.get('daira')?.value"
+          />
+        </div>
+      </div>
+
+      <div class="form-grid-2">
+        <div class="field">
+          <label>Téléphone</label>
+          <input pInputText formControlName="phone" placeholder="0550 000 000" class="w-full">
+        </div>
+        <div class="field">
+          <label>Adresse</label>
+          <input pInputText formControlName="address" placeholder="Adresse complète" class="w-full">
+        </div>
+      </div>
+
+      <div style="display:flex;gap:8px;margin-top:8px">
+        <p-button label="Annuler"     severity="secondary" type="button" (onClick)="cancel()" />
+        <p-button label="Enregistrer" icon="pi pi-check"   type="submit"
+          [disabled]="form.invalid || saving" [loading]="saving" />
+      </div>
+
+    </form>
+  </div>
+</div>

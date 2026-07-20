@@ -4,8 +4,14 @@ export interface Client {
   id: number;
   code?: string;
   name: string;
+  first_name?: string;
+  last_name?: string;
+  store_name?: string;
   phone?: string;
   category: ClientCategory;
+  daira?: string;
+  commune?: string;
+  address?: string;
   is_active: boolean;
   created_at: string;
   updated_at?: string;
@@ -20,8 +26,14 @@ export interface Client {
 export interface ClientCreate {
   code?: string;
   name: string;
+  first_name?: string;
+  last_name?: string;
+  store_name?: string;
   phone?: string;
   category: ClientCategory;
+  daira?: string;
+  commune?: string;
+  address?: string;
 }
 
 export interface ClientUpdate extends Partial<ClientCreate> {

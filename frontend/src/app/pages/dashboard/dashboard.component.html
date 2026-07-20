@@ -1,34 +1,59 @@
-<div class="page-content">
+<div class="page-header">
+  <div>
+    <h1 class="page-header__title">Tableau de bord</h1>
+    <p class="page-header__sub">Palettes en circulation — CLR Freha</p>
+  </div>
+</div>
 
-  <!-- Stat Cards -->
-  <div class="stats-grid">
-    <div class="stat-card">
-      <div class="stat-label">Clients</div>
-      <div class="stat-value">{{ stats?.total_clients ?? '—' }}</div>
-      <div class="stat-sub">enregistrés</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-label">Palettes plastique en circulation</div>
-      <div class="stat-value" style="color:#1a56db">{{ stats?.total_plastic_balance ?? '—' }}</div>
-      <div class="stat-sub">
-        {{ stats?.total_plastic_consigne ?? 0 }} consig. &middot; {{ stats?.total_plastic_nc ?? 0 }} non-consig.
-      </div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-label">Palettes bois en circulation</div>
-      <div class="stat-value" style="color:#92400e">{{ stats?.total_wood_balance ?? '—' }}</div>
-      <div class="stat-sub">
-        {{ stats?.total_wood_consigne ?? 0 }} consig. &middot; {{ stats?.total_wood_nc ?? 0 }} non-consig.
-      </div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-label">BLs aujourd'hui</div>
-      <div class="stat-value" style="color:#057a55">{{ stats?.today_bls ?? '—' }}</div>
-      <div class="stat-sub">{{ stats?.total_bls ?? 0 }} au total</div>
+<!-- KPI Cards -->
+<div class="kpi-grid">
+  <div class="stat-card">
+    <div class="stat-card__icon stat-card__icon--primary"><i class="pi pi-users"></i></div>
+    <div class="stat-card__body">
+      <div class="stat-card__value">{{ stats?.total_clients ?? '—' }}</div>
+      <div class="stat-card__label">Clients enregistrés</div>
     </div>
   </div>
 
-  <!-- Clients with balance -->
+  <div class="stat-card">
+    <div class="stat-card__icon stat-card__icon--img">
+      <img src="assets/plastiquepallette.png" alt="Palette plastique" />
+    </div>
+    <div class="stat-card__body">
+      <div class="stat-card__value" style="color:var(--brand-blue-main)">{{ stats?.total_plastic_balance ?? '—' }}</div>
+      <div class="stat-card__label">Palettes plastique</div>
+      <div class="stat-card__sub">{{ stats?.total_plastic_consigne ?? 0 }} consig. · {{ stats?.total_plastic_nc ?? 0 }} non-consig.</div>
+    </div>
+  </div>
+
+  <div class="stat-card">
+    <div class="stat-card__icon stat-card__icon--img">
+      <img src="assets/woodpallette.png" alt="Palette bois" />
+    </div>
+    <div class="stat-card__body">
+      <div class="stat-card__value" style="color:#92400e">{{ stats?.total_wood_balance ?? '—' }}</div>
+      <div class="stat-card__label">Palettes bois</div>
+      <div class="stat-card__sub">{{ stats?.total_wood_consigne ?? 0 }} consig. · {{ stats?.total_wood_nc ?? 0 }} non-consig.</div>
+    </div>
+  </div>
+
+  <div class="stat-card">
+    <div class="stat-card__icon stat-card__icon--success"><i class="pi pi-file-check"></i></div>
+    <div class="stat-card__body">
+      <div class="stat-card__value" style="color:var(--color-success-dark)">{{ stats?.today_bls ?? '—' }}</div>
+      <div class="stat-card__label">BLs aujourd'hui</div>
+      <div class="stat-card__sub">{{ stats?.total_bls ?? 0 }} au total</div>
+    </div>
+  </div>
+</div>
+
+<!-- Clients with balance -->
+<div style="border-radius:var(--radius-xl);border:1px solid var(--border-color-light);box-shadow:var(--shadow-sm);overflow:hidden;background:var(--surface-card)">
+  <div class="card-section-header">
+    <span class="card-label">Clients avec palettes en circulation</span>
+    <a class="link-primary" routerLink="/clients">Voir tous les clients →</a>
+  </div>
+
   <p-table
     [value]="clients"
     [loading]="loading"
@@ -36,23 +61,15 @@
     [paginator]="clients.length > 15"
     [rows]="15"
   >
-    <ng-template #caption>
-      <div style="display:flex;justify-content:space-between;align-items:center">
-        <span style="font-size:13px;font-weight:600;color:#6b7280;text-transform:uppercase;letter-spacing:.05em">
-          Clients avec palettes en circulation
-        </span>
-        <p-button label="Voir tous les clients" icon="pi pi-users" size="small" severity="secondary" routerLink="/clients" />
-      </div>
-    </ng-template>
     <ng-template #header>
       <tr>
         <th>Client</th>
         <th>Catégorie</th>
         <th>Code</th>
-        <th>🔵 Plt. plastique</th>
+        <th><img src="assets/plastiquepallette.png" style="height:18px;vertical-align:middle;margin-right:4px" alt="">Plastique</th>
         <th>Dont consig.</th>
         <th>Dont non-consig.</th>
-        <th>🟫 Plt. bois</th>
+        <th><img src="assets/woodpallette.png" style="height:18px;vertical-align:middle;margin-right:4px" alt="">Bois</th>
         <th>Dont consig.</th>
         <th>Dont non-consig.</th>
         <th></th>
@@ -60,7 +77,10 @@
     </ng-template>
     <ng-template #body let-c>
       <tr>
-        <td><strong>{{ c.name }}</strong><br><small class="text-muted">{{ c.phone }}</small></td>
+        <td>
+          <strong>{{ c.name }}</strong>
+          @if (c.phone) { <br><small class="text-muted">{{ c.phone }}</small> }
+        </td>
         <td><p-tag [value]="categoryLabel[c.category]" [severity]="categorySeverity[c.category]" /></td>
         <td><span class="font-mono">{{ c.code || '—' }}</span></td>
         <td><p-tag [value]="(c.plastic_balance ?? 0).toString()" severity="info" /></td>
@@ -70,13 +90,13 @@
         <td><p-tag [value]="(c.wood_consigne ?? 0).toString()" severity="warn" /></td>
         <td><p-tag [value]="(c.wood_nc ?? 0).toString()" severity="warn" /></td>
         <td>
-          <p-button icon="pi pi-list" size="small" severity="secondary" [routerLink]="['/historique']" [queryParams]="{clientId: c.id}" />
+          <p-button icon="pi pi-list" size="small" severity="secondary"
+            [routerLink]="['/historique']" [queryParams]="{clientId: c.id}" />
         </td>
       </tr>
     </ng-template>
     <ng-template #emptymessage>
-      <tr><td colspan="10" style="text-align:center;padding:32px;color:#9ca3af">Aucune palette en circulation</td></tr>
+      <tr><td colspan="10" class="table-empty">Aucune palette en circulation</td></tr>
     </ng-template>
   </p-table>
-
 </div>

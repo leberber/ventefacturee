@@ -1,7 +1,7 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
 import { TableModule } from 'primeng/table';
 import { Button } from 'primeng/button';
 import { Tag } from 'primeng/tag';
@@ -13,60 +13,55 @@ import { IconField } from 'primeng/iconfield';
 import { InputIcon } from 'primeng/inputicon';
 import { MessageService, ConfirmationService } from 'primeng/api';
 
-import { ClientsService } from '../../core/services/clients.service';
-import { Client } from '../../core/models/client.model';
+import { LivreursService } from '../../core/services/livreurs.service';
+import { Livreur } from '../../core/models/livreur.model';
 
 @Component({
-  selector: 'app-clients',
+  selector: 'app-livreurs',
   standalone: true,
   imports: [
-    CommonModule, FormsModule, RouterLink,
+    CommonModule, FormsModule,
     TableModule, Button, Tag, Toast, ConfirmDialog, InputText, Toolbar, IconField, InputIcon,
   ],
   providers: [MessageService, ConfirmationService],
-  templateUrl: './clients.component.html',
+  templateUrl: './livreurs.component.html',
 })
-export class ClientsComponent implements OnInit {
-  private clientsService      = inject(ClientsService);
+export class LivreursComponent implements OnInit {
+  private livreursService     = inject(LivreursService);
   private messageService      = inject(MessageService);
   private confirmationService = inject(ConfirmationService);
   private router              = inject(Router);
 
-  clients: Client[] = [];
+  livreurs: Livreur[] = [];
   loading = false;
   searchQuery = '';
-
-  readonly categoryLabel: Record<string, string> = { gros: 'Gros', detail: 'Détail', horeca: 'Horeca' };
-  readonly categorySeverity: Record<string, 'success' | 'info' | 'warn' | 'danger' | 'secondary' | 'contrast'> = {
-    gros: 'info', detail: 'success', horeca: 'warn',
-  };
 
   ngOnInit() { this.load(); }
 
   load() {
     this.loading = true;
-    this.clientsService.list(this.searchQuery || undefined).subscribe({
-      next: data => { this.clients = data; this.loading = false; },
+    this.livreursService.list(this.searchQuery || undefined).subscribe({
+      next: data => { this.livreurs = data; this.loading = false; },
       error: () => { this.loading = false; this.toast('error', 'Erreur de chargement'); },
     });
   }
 
-  openAdd() { this.router.navigate(['/clients/nouveau']); }
+  openAdd() { this.router.navigate(['/livreurs/nouveau']); }
 
-  openEdit(c: Client) {
-    this.router.navigate(['/clients', c.id, 'modifier'], { state: { client: c } });
+  openEdit(l: Livreur) {
+    this.router.navigate(['/livreurs', l.id, 'modifier'], { state: { livreur: l } });
   }
 
-  confirmDelete(c: Client) {
+  confirmDelete(l: Livreur) {
     this.confirmationService.confirm({
-      message: `Supprimer "${c.name}" ? Ses BLs seront conservés.`,
+      message: `Supprimer "${l.name}" ?`,
       header: 'Confirmation',
       icon: 'pi pi-exclamation-triangle',
       acceptLabel: 'Supprimer',
       rejectLabel: 'Annuler',
       accept: () => {
-        this.clientsService.delete(c.id).subscribe({
-          next: () => { this.load(); this.toast('success', 'Client supprimé'); },
+        this.livreursService.delete(l.id).subscribe({
+          next: () => { this.load(); this.toast('success', 'Livreur supprimé'); },
           error: e  => this.toast('error', e.error?.detail ?? 'Erreur'),
         });
       },

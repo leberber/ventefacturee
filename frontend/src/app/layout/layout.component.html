@@ -1,25 +1,59 @@
-<div class="app-layout">
+<div class="admin-shell" [class.admin-shell--collapsed]="collapsed()">
+
   <!-- Sidebar -->
-  <aside class="sidebar">
-    <div class="logo">
-      <i class="pi pi-box logo-icon"></i>
-      <div>
-        <div class="logo-title">Pallette</div>
-        <div class="logo-sub">CLR Freha</div>
+  <aside class="admin-sidebar">
+
+    <!-- Logo -->
+    <div class="admin-sidebar__logo">
+      <img src="assets/logo.png" alt="CLR Freha" class="sidebar-logo-full" />
+    </div>
+
+    <!-- Nav -->
+    <nav class="admin-sidebar__nav">
+      <a class="nav-item" routerLink="/dashboard" routerLinkActive="active">
+        <i class="pi pi-home"></i><span>Tableau de bord</span>
+      </a>
+      <a class="nav-item nav-item--accent" routerLink="/expedition" routerLinkActive="active">
+        <i class="pi pi-file-plus"></i><span>Enregistrer une expédition</span>
+      </a>
+      <a class="nav-item" routerLink="/retour" routerLinkActive="active">
+        <i class="pi pi-replay"></i><span>Enregistrer un retour</span>
+      </a>
+      <a class="nav-item" routerLink="/clients" routerLinkActive="active">
+        <i class="pi pi-users"></i><span>Clients</span>
+      </a>
+      <a class="nav-item" routerLink="/chauffeurs" routerLinkActive="active">
+        <i class="pi pi-id-card"></i><span>Chauffeurs</span>
+      </a>
+      <a class="nav-item" routerLink="/livreurs" routerLinkActive="active">
+        <i class="pi pi-truck"></i><span>Livreurs</span>
+      </a>
+      <a class="nav-item" routerLink="/historique" routerLinkActive="active">
+        <i class="pi pi-list"></i><span>Historique BLs</span>
+      </a>
+    </nav>
+
+    <!-- Collapse toggle -->
+    <button class="sidebar-toggle" type="button" (click)="collapsed.set(!collapsed())">
+      <i [class]="collapsed() ? 'pi pi-chevron-right' : 'pi pi-chevron-left'"></i>
+    </button>
+
+    <!-- Footer -->
+    <div class="admin-sidebar__footer">
+      <div class="admin-sidebar__footer-icon">
+        <i class="pi pi-warehouse"></i>
+      </div>
+      <div class="admin-sidebar__footer-text">
+        <strong>CLR Freha</strong>
+        <span>Gestion des palettes</span>
       </div>
     </div>
-    <nav>
-      @for (item of navItems; track item.route) {
-        <a class="nav-item" [routerLink]="item.route" routerLinkActive="active">
-          <i [class]="item.icon"></i>
-          <span>{{ item.label }}</span>
-        </a>
-      }
-    </nav>
+
   </aside>
 
   <!-- Main content -->
-  <div class="main-area">
+  <main class="admin-content">
     <router-outlet />
-  </div>
+  </main>
+
 </div>

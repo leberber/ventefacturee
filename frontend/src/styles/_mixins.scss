@@ -1,0 +1,62 @@
+// =============================================================================
+// MIXINS — shared patterns
+// =============================================================================
+
+@mixin flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@mixin flex-center-column {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+@mixin flex-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+@mixin flex-start {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+@mixin square($size) {
+  width: $size;
+  height: $size;
+}
+
+@mixin text-truncate {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@mixin surface-card {
+  background: var(--surface-card);
+  border-radius: var(--radius-xl);
+  border: var(--border-width) solid var(--border-color-light);
+  box-shadow: var(--shadow-sm);
+}
+
+@mixin hover-lift {
+  transition: transform var(--transition-smooth), box-shadow var(--transition-smooth);
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+  }
+}
+
+@mixin mobile-only {
+  @media (max-width: 768px) { @content; }
+}
+
+@mixin desktop-only {
+  @media (min-width: 769px) { @content; }
+}

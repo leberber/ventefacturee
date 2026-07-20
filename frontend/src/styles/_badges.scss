@@ -1,0 +1,20 @@
+// =============================================================================
+// BADGES
+// =============================================================================
+@use 'mixins' as *;
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  border-radius: var(--radius-full);
+  padding: 0.2rem 0.65rem;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  white-space: nowrap;
+
+  &--success { background: rgba(var(--color-success-rgb), 0.12); color: var(--color-success-dark); }
+  &--warning { background: rgba(var(--color-warning-rgb), 0.12); color: var(--color-warning-dark); }
+  &--danger  { background: rgba(var(--color-error-rgb),   0.12); color: var(--color-error-dark); }
+  &--info    { background: rgba(var(--color-info-rgb),    0.12); color: var(--color-info-dark); }
+}

@@ -71,37 +71,3 @@
   </p-table>
 
 </div>
-
-<!-- Dialog: Add / Edit -->
-<p-dialog
-  [(visible)]="dialogVisible"
-  [header]="editingId ? 'Modifier le client' : 'Ajouter un client'"
-  [modal]="true"
-  [style]="{width:'480px'}"
-  [draggable]="false"
->
-  <form [formGroup]="form" (ngSubmit)="save()">
-    <div class="form-grid-2">
-      <div class="field">
-        <label>Code client</label>
-        <input pInputText formControlName="code" placeholder="ex: 000146">
-      </div>
-      <div class="field">
-        <label>Catégorie <span style="color:red">*</span></label>
-        <p-select formControlName="category" [options]="categoryOptions" optionLabel="label" optionValue="value" [style]="{width:'100%'}" />
-      </div>
-    </div>
-    <div class="field">
-      <label>Nom / Magasin <span style="color:red">*</span></label>
-      <input pInputText formControlName="name" placeholder="Nom du client ou magasin" class="w-full">
-    </div>
-    <div class="field mb-0">
-      <label>Téléphone</label>
-      <input pInputText formControlName="phone" placeholder="0550 000 000" class="w-full">
-    </div>
-  </form>
-  <ng-template #footer>
-    <p-button label="Annuler"     severity="secondary" (onClick)="dialogVisible = false" />
-    <p-button label="Enregistrer" icon="pi pi-check"   (onClick)="save()" [disabled]="form.invalid" />
-  </ng-template>
-</p-dialog>

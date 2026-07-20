@@ -1,0 +1,125 @@
+import { Component, OnInit, inject } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule, ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
+import { ActivatedRoute, Router } from '@angular/router';
+import { HttpClient } from '@angular/common/http';
+import { Button } from 'primeng/button';
+import { Toast } from 'primeng/toast';
+import { InputText } from 'primeng/inputtext';
+import { Select } from 'primeng/select';
+import { MessageService } from 'primeng/api';
+
+import { ClientsService } from '../../../core/services/clients.service';
+import { Client, ClientCategory, ClientCreate } from '../../../core/models/client.model';
+
+@Component({
+  selector: 'app-client-form',
+  standalone: true,
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, Button, Toast, InputText, Select],
+  providers: [MessageService],
+  templateUrl: './client-form.component.html',
+})
+export class ClientFormComponent implements OnInit {
+  private clientsService = inject(ClientsService);
+  private messageService = inject(MessageService);
+  private fb             = inject(FormBuilder);
+  private router         = inject(Router);
+  private route          = inject(ActivatedRoute);
+  private http           = inject(HttpClient);
+
+  editingId: number | null = null;
+  saving = false;
+
+  dairaOptions:  { label: string; value: string }[] = [];
+  communeOptions: { label: string; value: string }[] = [];
+  private dairasData: { daira_name: string; communes: { name: string }[] }[] = [];
+
+  categoryOptions = [
+    { label: 'Gros',   value: 'gros'   },
+    { label: 'Détail', value: 'detail' },
+    { label: 'Horeca', value: 'horeca' },
+  ];
+
+  form = this.fb.group({
+    code:       [''],
+    first_name: [''],
+    last_name:  [''],
+    store_name: [''],
+    name:       ['', Validators.required],
+    phone:      [''],
+    category:   ['gros' as ClientCategory, Validators.required],
+    daira:      [''],
+    commune:    [''],
+    address:    [''],
+  });
+
+  ngOnInit() {
+    this.http.get<any>('assets/tizi-ouzou.json').subscribe(data => {
+      this.dairasData = data.dairas;
+      this.dairaOptions = data.dairas.map((d: any) => ({ label: d.daira_name, value: d.daira_name }));
+
+      // Prefill after daira options are loaded so commune dropdown populates correctly
+      const idParam = this.route.snapshot.paramMap.get('id');
+      if (idParam) {
+        this.editingId = +idParam;
+        const state = history.state as { client?: Client };
+        if (state?.client) {
+          this.prefill(state.client);
+        } else {
+          this.router.navigate(['/clients']);
+        }
+      }
+    });
+  }
+
+  private prefill(c: Client) {
+    if (c.daira) this.onDairaChange(c.daira);
+    this.form.patchValue({
+      code: c.code ?? '', first_name: c.first_name ?? '', last_name: c.last_name ?? '',
+      store_name: c.store_name ?? '', name: c.name, phone: c.phone ?? '',
+      category: c.category, daira: c.daira ?? '', commune: c.commune ?? '', address: c.address ?? '',
+    });
+  }
+
+  onDairaChange(dairaName: string) {
+    const found = this.dairasData.find(d => d.daira_name === dairaName);
+    this.communeOptions = found
+      ? found.communes.map((c: any) => ({ label: c.name, value: c.name }))
+      : [];
+    this.form.patchValue({ commune: '' });
+  }
+
+  save() {
+    if (this.form.invalid) return;
+    this.saving = true;
+    const v = this.form.value;
+    const body: ClientCreate = {
+      code:       v.code       || undefined,
+      first_name: v.first_name || undefined,
+      last_name:  v.last_name  || undefined,
+      store_name: v.store_name || undefined,
+      name:       v.name!,
+      phone:      v.phone      || undefined,
+      category:   v.category as ClientCategory,
+      daira:      v.daira      || undefined,
+      commune:    v.commune    || undefined,
+      address:    v.address    || undefined,
+    };
+    const obs = this.editingId
+      ? this.clientsService.update(this.editingId, body)
+      : this.clientsService.create(body);
+
+    obs.subscribe({
+      next: () => {
+        this.messageService.add({ severity: 'success', summary: 'Succès', detail: 'Client enregistré', life: 3000 });
+        setTimeout(() => this.router.navigate(['/clients']), 1000);
+      },
+      error: e => {
+        this.saving = false;
+        this.messageService.add({ severity: 'error', summary: 'Erreur', detail: e.error?.detail ?? 'Erreur', life: 4000 });
+      },
+    });
+  }
+
+  cancel() { this.router.navigate(['/clients']); }
+}

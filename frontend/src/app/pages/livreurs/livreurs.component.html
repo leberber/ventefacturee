@@ -6,7 +6,7 @@
   <!-- Toolbar -->
   <p-toolbar styleClass="mb-4">
     <ng-template #start>
-      <h2 class="page-title">Chauffeurs&nbsp;<small style="font-size:14px;font-weight:400;color:#6b7280">({{ chauffeurs.length }})</small></h2>
+      <h2 class="page-title">Livreurs&nbsp;<small style="font-size:14px;font-weight:400;color:#6b7280">({{ livreurs.length }})</small></h2>
     </ng-template>
     <ng-template #end>
       <p-iconfield>
@@ -19,7 +19,7 @@
 
   <!-- Table -->
   <p-table
-    [value]="chauffeurs"
+    [value]="livreurs"
     [loading]="loading"
     styleClass="p-datatable-sm p-datatable-striped"
     [paginator]="true"
@@ -31,26 +31,24 @@
       <tr>
         <th pSortableColumn="name">Nom <p-sortIcon field="name" /></th>
         <th>Téléphone</th>
-        <th>BLs effectués</th>
         <th style="width:120px">Actions</th>
       </tr>
     </ng-template>
-    <ng-template #body let-c>
+    <ng-template #body let-l>
       <tr>
-        <td><strong>{{ c.name }}</strong></td>
-        <td>{{ c.phone || '—' }}</td>
-        <td><p-tag [value]="(c.bl_count ?? 0).toString()" severity="secondary" /></td>
+        <td><strong>{{ l.name }}</strong></td>
+        <td>{{ l.phone || '—' }}</td>
         <td>
           <div style="display:flex;gap:4px">
-            <p-button icon="pi pi-pencil" size="small" severity="secondary" (onClick)="openEdit(c)" />
-            <p-button icon="pi pi-trash"  size="small" severity="danger"    (onClick)="confirmDelete(c)" />
+            <p-button icon="pi pi-pencil" size="small" severity="secondary" (onClick)="openEdit(l)" />
+            <p-button icon="pi pi-trash"  size="small" severity="danger"    (onClick)="confirmDelete(l)" />
           </div>
         </td>
       </tr>
     </ng-template>
     <ng-template #emptymessage>
-      <tr><td colspan="4" style="text-align:center;padding:32px;color:#9ca3af">
-        {{ searchQuery ? 'Aucun résultat pour "' + searchQuery + '"' : 'Aucun chauffeur enregistré' }}
+      <tr><td colspan="3" style="text-align:center;padding:32px;color:#9ca3af">
+        {{ searchQuery ? 'Aucun résultat pour "' + searchQuery + '"' : 'Aucun livreur enregistré' }}
       </td></tr>
     </ng-template>
   </p-table>

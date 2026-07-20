@@ -1,0 +1,171 @@
+// =============================================================================
+// TABLE SYSTEM
+// =============================================================================
+
+.table-container {
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  border-radius: var(--radius-2xl);
+  box-shadow: var(--shadow-md);
+  border: var(--border-width) solid var(--border-color-light);
+  overflow: hidden;
+}
+
+.table-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 1.1rem 1.5rem 0.75rem;
+  flex-wrap: wrap;
+
+  &-left {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    flex-wrap: wrap;
+  }
+}
+
+.table-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.table-action-btn {
+  width: 36px;
+  height: 36px;
+  border: var(--border-width) solid var(--border-color-light);
+  border-radius: 50%;
+  background: var(--surface-ground);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background var(--transition-fast), border-color var(--transition-fast);
+
+  i { font-size: 0.9rem; color: var(--text-color-secondary); }
+
+  &:hover {
+    background: rgba(var(--primary-rgb), 0.07);
+    border-color: var(--primary-color);
+    i { color: var(--primary-color); }
+  }
+
+  &--danger:hover {
+    background: rgba(239, 68, 68, 0.07);
+    border-color: #ef4444;
+    i { color: #ef4444; }
+  }
+}
+
+.actions-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.table-wrapper {
+  overflow-x: auto;
+  overflow-y: auto;
+  max-height: var(--table-max-height, calc(100vh - 280px));
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+
+  thead {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+
+    th {
+      padding: 0.45rem 1rem;
+      background: var(--surface-card);
+      box-shadow: 0 1px 0 var(--border-color-light);
+      text-align: left;
+      font-weight: var(--font-weight-semibold);
+      font-size: 0.68rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-color-secondary);
+      white-space: nowrap;
+    }
+  }
+
+  tbody {
+    tr {
+      border-bottom: 1px solid var(--border-color-light);
+      transition: background var(--transition-fast);
+
+      &:hover { background: rgba(var(--primary-rgb), 0.025); }
+      &:last-child { border-bottom: none; }
+    }
+
+    td {
+      padding: 0.45rem 1rem;
+      vertical-align: middle;
+    }
+  }
+}
+
+.table-empty {
+  padding: 3rem;
+  text-align: center;
+  color: var(--text-color-secondary);
+  font-size: var(--font-size-sm);
+}
+
+// PrimeNG p-table overrides to match the design
+.p-datatable {
+  .p-datatable-thead > tr > th {
+    background: var(--surface-50) !important;
+    font-size: 0.72rem !important;
+    font-weight: var(--font-weight-semibold) !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.05em !important;
+    color: var(--text-color-secondary) !important;
+    border-color: var(--surface-border) !important;
+    padding: 0.6rem 1rem !important;
+  }
+
+  .p-datatable-tbody > tr {
+    transition: background var(--transition-fast);
+
+    &:hover { background: rgba(var(--primary-rgb), 0.03) !important; }
+
+    > td {
+      padding: 0.65rem 1rem !important;
+      border-color: var(--border-color-light) !important;
+      font-size: var(--font-size-sm);
+    }
+  }
+
+  .p-datatable-striped .p-datatable-tbody > tr:nth-child(even) {
+    background: var(--surface-50) !important;
+  }
+
+  &-wrapper {
+    border-radius: var(--radius-xl);
+    border: var(--border-width) solid var(--border-color-light);
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+  }
+}
+
+// p-toolbar match
+.p-toolbar {
+  background: var(--surface-card) !important;
+  border: var(--border-width) solid var(--border-color-light) !important;
+  border-radius: var(--radius-xl) !important;
+  box-shadow: var(--shadow-sm) !important;
+  padding: 0.75rem 1.25rem !important;
+}
+
+// Font mono utility
+.font-mono { font-family: 'Courier New', monospace; font-size: 0.85em; }

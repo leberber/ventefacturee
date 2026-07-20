@@ -1,0 +1,79 @@
+// =============================================================================
+// CARDS
+// =============================================================================
+@use 'mixins' as *;
+
+.card {
+  @include surface-card;
+  padding: var(--space-6);
+
+  &--compact { padding: var(--space-4); }
+  &--flush   { padding: 0; overflow: hidden; }
+}
+
+// Stat card (dashboard KPIs)
+.stat-card {
+  @include surface-card;
+  padding: var(--space-5);
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+
+  &__icon {
+    @include flex-center;
+    @include square(2.75rem);
+    border-radius: var(--radius-lg);
+    flex-shrink: 0;
+    font-size: 1.25rem;
+
+    &--primary { background: var(--primary-100);                              color: var(--primary-color); }
+    &--success { background: rgba(var(--color-success-rgb),.12);              color: var(--color-success-dark); }
+    &--warning { background: rgba(var(--color-warning-rgb),.12);              color: var(--color-warning-dark); }
+    &--danger  { background: rgba(var(--color-error-rgb),.12);                color: var(--color-error-dark); }
+    &--info    { background: rgba(var(--color-info-rgb),.12);                 color: var(--color-info-dark); }
+    &--img     { background: transparent; padding: 0;
+      img { width: 2.75rem; height: 2.75rem; object-fit: contain; }
+    }
+  }
+
+  &__body  { flex: 1; min-width: 0; }
+  &__value { font-size: var(--font-size-2xl); font-weight: var(--font-weight-bold); line-height: 1; }
+  &__label { font-size: var(--font-size-sm); color: var(--text-color-secondary); margin-top: 0.2rem; }
+  &__sub   { font-size: var(--font-size-xs); color: var(--text-color-muted); margin-top: 0.15rem; }
+}
+
+.card-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-color-secondary);
+  margin: 0 0 0.75rem;
+}
+
+.card-section-header {
+  @include flex-between;
+  padding: 1rem 1.25rem;
+  border-bottom: var(--border-width) solid var(--surface-border);
+
+  .card-label { margin: 0; }
+}
+
+.section-header {
+  @include flex-between;
+  margin-bottom: 0.75rem;
+}
+
+.section-title {
+  margin: 0;
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-color);
+}
+
+.link-primary {
+  font-size: var(--font-size-sm);
+  color: var(--primary-color);
+  text-decoration: none;
+  &:hover { text-decoration: underline; }
+}

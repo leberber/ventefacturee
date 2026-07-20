@@ -15,9 +15,15 @@ class Client(SQLModel, table=True):
 
     id: Optional[int] = Field(default=None, primary_key=True)
     code: Optional[str] = Field(default=None, max_length=20, index=True)
-    name: str = Field(max_length=100, index=True)
+    name: str = Field(max_length=150, index=True)          # Nom magasin / display
+    first_name: Optional[str] = Field(default=None, max_length=60)
+    last_name: Optional[str] = Field(default=None, max_length=60)
+    store_name: Optional[str] = Field(default=None, max_length=100)
     phone: Optional[str] = Field(default=None, max_length=20)
     category: ClientCategory = Field(default=ClientCategory.GROS)
+    daira: Optional[str] = Field(default=None, max_length=60)
+    commune: Optional[str] = Field(default=None, max_length=60)
+    address: Optional[str] = Field(default=None, max_length=200)
     is_active: bool = Field(default=True)
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     updated_at: Optional[datetime] = Field(default=None)
@@ -26,15 +32,27 @@ class Client(SQLModel, table=True):
 class ClientCreate(SQLModel):
     code: Optional[str] = None
     name: str
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
+    store_name: Optional[str] = None
     phone: Optional[str] = None
     category: ClientCategory = ClientCategory.GROS
+    daira: Optional[str] = None
+    commune: Optional[str] = None
+    address: Optional[str] = None
 
 
 class ClientUpdate(SQLModel):
     code: Optional[str] = None
     name: Optional[str] = None
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
+    store_name: Optional[str] = None
     phone: Optional[str] = None
     category: Optional[ClientCategory] = None
+    daira: Optional[str] = None
+    commune: Optional[str] = None
+    address: Optional[str] = None
     is_active: Optional[bool] = None
 
 
@@ -44,15 +62,21 @@ class ClientRead(SQLModel):
     id: int
     code: Optional[str] = None
     name: str
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
+    store_name: Optional[str] = None
     phone: Optional[str] = None
     category: ClientCategory
+    daira: Optional[str] = None
+    commune: Optional[str] = None
+    address: Optional[str] = None
     is_active: bool
     created_at: datetime
     updated_at: Optional[datetime] = None
     # Computed from BL history
-    plastic_balance: Optional[int] = None       # total en circulation
-    plastic_consigne: Optional[int] = None      # sent with consigne
-    plastic_nc: Optional[int] = None            # sent non-consignées
+    plastic_balance: Optional[int] = None
+    plastic_consigne: Optional[int] = None
+    plastic_nc: Optional[int] = None
     wood_balance: Optional[int] = None
     wood_consigne: Optional[int] = None
     wood_nc: Optional[int] = None
