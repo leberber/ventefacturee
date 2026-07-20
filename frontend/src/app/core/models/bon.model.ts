@@ -28,6 +28,7 @@ export interface BonCreate {
   chauffeur_id: number;
   client_id?: number | null;
   livreur_id?: number | null;
+  client_ids?: number[];
   consigne_plastique: number;
   nc_plastique: number;
   retour_plastique: number;
@@ -38,6 +39,39 @@ export interface BonCreate {
 }
 
 export interface BonUpdate extends Partial<BonCreate> {}
+
+export interface LivraisonDetail {
+  id: number;
+  bl_id: number;
+  client_id: number;
+  client_name: string;
+  client_code?: string;
+  plastique: number;
+  bois: number;
+  retour_plastique: number;
+  retour_bois: number;
+  notes?: string;
+  recorded_at: string;
+  updated_at?: string;
+}
+
+export interface LivraisonDetailCreate {
+  client_id: number;
+  plastique: number;
+  bois: number;
+  retour_plastique?: number;
+  retour_bois?: number;
+  notes?: string;
+}
+
+export interface ExpeditionClient {
+  id: number;
+  bl_id: number;
+  client_id: number;
+  client_name: string;
+  client_code?: string;
+  detail?: LivraisonDetail;
+}
 
 export interface DashboardStats {
   total_clients: number;

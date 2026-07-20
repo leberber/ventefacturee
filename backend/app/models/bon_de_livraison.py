@@ -1,5 +1,5 @@
 from sqlmodel import SQLModel, Field
-from typing import Optional
+from typing import Optional, List
 from datetime import date, datetime, timezone
 
 
@@ -45,6 +45,7 @@ class BLCreate(SQLModel):
     chauffeur_id: int
     client_id: Optional[int] = None      # required if destination_type == gros
     livreur_id: Optional[int] = None     # required if destination_type in [detail, horeca]
+    client_ids: List[int] = []           # planned clients for detail/horeca expeditions
     consigne_plastique: int = 0
     nc_plastique: int = 0
     retour_plastique: int = 0

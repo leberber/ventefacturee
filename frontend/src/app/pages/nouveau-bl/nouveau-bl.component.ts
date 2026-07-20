@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Select } from 'primeng/select';
+import { MultiSelect } from 'primeng/multiselect';
 import { SelectButton } from 'primeng/selectbutton';
 import { Button } from 'primeng/button';
 import { Toast } from 'primeng/toast';
@@ -19,7 +20,7 @@ import { BonCreate } from '../../core/models/bon.model';
 @Component({
   selector: 'app-nouveau-bl',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, Select, SelectButton, Button, Toast, InputText],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, Select, MultiSelect, SelectButton, Button, Toast, InputText],
   providers: [MessageService],
   templateUrl: './nouveau-bl.component.html',
 })
@@ -49,6 +50,7 @@ export class NouveauBLComponent implements OnInit {
     bl_number:        ['', Validators.required],
     destination_type: ['gros', Validators.required],
     client_id:        [null as number | null],
+    client_ids:       [[] as number[]],
     livreur_id:       [null as number | null],
     chauffeur_id:     [null as number | null, Validators.required],
     plastique:        [0, [Validators.required, Validators.min(0)]],
@@ -82,12 +84,14 @@ export class NouveauBLComponent implements OnInit {
     this.form.get('client_id')!.updateValueAndValidity();
 
     this.form.get('destination_type')!.valueChanges.subscribe(type => {
-      const clientCtrl  = this.form.get('client_id')!;
-      const livreurCtrl = this.form.get('livreur_id')!;
+      const clientCtrl   = this.form.get('client_id')!;
+      const clientIdsCtrl = this.form.get('client_ids')!;
+      const livreurCtrl  = this.form.get('livreur_id')!;
       if (type === 'gros') {
         clientCtrl.setValidators(Validators.required);
         livreurCtrl.clearValidators();
         livreurCtrl.setValue(null);
+        clientIdsCtrl.setValue([]);
       } else {
         livreurCtrl.setValidators(Validators.required);
         clientCtrl.clearValidators();
@@ -125,6 +129,7 @@ export class NouveauBLComponent implements OnInit {
       chauffeur_id:       v.chauffeur_id!,
       client_id:          v.destination_type === 'gros' ? v.client_id! : null,
       livreur_id:         v.destination_type !== 'gros' ? v.livreur_id! : null,
+      client_ids:         v.destination_type !== 'gros' ? (v.client_ids ?? []) : [],
       consigne_plastique: 0,
       nc_plastique:       v.plastique ?? 0,
       retour_plastique:   0,
@@ -149,7 +154,7 @@ export class NouveauBLComponent implements OnInit {
     this.form.reset({
       bl_number: '',
       destination_type: 'gros',
-      client_id: null, livreur_id: null, chauffeur_id: null,
+      client_id: null, client_ids: [], livreur_id: null, chauffeur_id: null,
       plastique: 0, bois: 0, notes: '',
     });
     this.selectedClient = null;

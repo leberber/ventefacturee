@@ -9,6 +9,10 @@ from app.models.client import Client
 from app.models.chauffeur import Chauffeur
 from app.models.livreur import Livreur
 from app.models.bon_de_livraison import BonDeLivraison, BLCreate, BLUpdate, BLRead
+from app.models.livraison_detail import (
+    ExpeditionClient, LivraisonDetail,
+    LivraisonDetailCreate, LivraisonDetailRead, ExpeditionClientRead,
+)
 
 router = APIRouter()
 
@@ -93,6 +97,21 @@ def create_bl(
     session.add(bl)
     session.commit()
     session.refresh(bl)
+
+    # For detail/horeca: create ExpeditionClient records for planned clients
+    if bl_in.destination_type != "gros" and bl_in.client_ids:
+        for cid in bl_in.client_ids:
+            client = session.get(Client, cid)
+            if client:
+                ec = ExpeditionClient(
+                    bl_id=bl.id,
+                    client_id=client.id,
+                    client_name=client.name,
+                    client_code=client.code,
+                )
+                session.add(ec)
+        session.commit()
+
     return BLRead.model_validate(bl)
 
 
@@ -151,6 +170,90 @@ def delete_bl(
         raise HTTPException(status_code=404, detail="BL introuvable")
     session.delete(bl)
     session.commit()
+
+
+@router.get("/{bl_id}", response_model=BLRead)
+def get_bl(bl_id: int, session: Session = Depends(get_session)) -> Any:
+    bl = session.get(BonDeLivraison, bl_id)
+    if not bl:
+        raise HTTPException(status_code=404, detail="BL introuvable")
+    return BLRead.model_validate(bl)
+
+
+@router.get("/{bl_id}/expedition-clients", response_model=List[ExpeditionClientRead])
+def get_expedition_clients(bl_id: int, session: Session = Depends(get_session)) -> Any:
+    bl = session.get(BonDeLivraison, bl_id)
+    if not bl:
+        raise HTTPException(status_code=404, detail="BL introuvable")
+
+    exp_clients = session.exec(
+        select(ExpeditionClient).where(ExpeditionClient.bl_id == bl_id)
+    ).all()
+
+    details_map = {
+        d.client_id: d
+        for d in session.exec(
+            select(LivraisonDetail).where(LivraisonDetail.bl_id == bl_id)
+        ).all()
+    }
+
+    result = []
+    for ec in exp_clients:
+        ec_read = ExpeditionClientRead.model_validate(ec)
+        d = details_map.get(ec.client_id)
+        ec_read.detail = LivraisonDetailRead.model_validate(d) if d else None
+        result.append(ec_read)
+    return result
+
+
+@router.post("/{bl_id}/details", response_model=LivraisonDetailRead, status_code=201)
+def upsert_livraison_detail(
+    bl_id: int,
+    body: LivraisonDetailCreate,
+    session: Session = Depends(get_session),
+) -> Any:
+    bl = session.get(BonDeLivraison, bl_id)
+    if not bl:
+        raise HTTPException(status_code=404, detail="BL introuvable")
+
+    client = session.get(Client, body.client_id)
+    if not client:
+        raise HTTPException(status_code=404, detail="Client introuvable")
+
+    existing = session.exec(
+        select(LivraisonDetail).where(
+            LivraisonDetail.bl_id == bl_id,
+            LivraisonDetail.client_id == body.client_id,
+        )
+    ).first()
+
+    if existing:
+        existing.plastique = max(0, body.plastique)
+        existing.bois = max(0, body.bois)
+        existing.retour_plastique = max(0, body.retour_plastique)
+        existing.retour_bois = max(0, body.retour_bois)
+        existing.notes = body.notes
+        existing.updated_at = datetime.now(timezone.utc)
+        session.add(existing)
+        session.commit()
+        session.refresh(existing)
+        return LivraisonDetailRead.model_validate(existing)
+
+    detail = LivraisonDetail(
+        bl_id=bl_id,
+        client_id=client.id,
+        client_name=client.name,
+        client_code=client.code,
+        plastique=max(0, body.plastique),
+        bois=max(0, body.bois),
+        retour_plastique=max(0, body.retour_plastique),
+        retour_bois=max(0, body.retour_bois),
+        notes=body.notes,
+    )
+    session.add(detail)
+    session.commit()
+    session.refresh(detail)
+    return LivraisonDetailRead.model_validate(detail)
 
 
 @router.get("/stats/dashboard")

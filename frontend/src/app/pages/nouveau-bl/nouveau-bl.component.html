@@ -37,18 +37,34 @@
           />
         </div>
         <div class="field mb-0">
-          <label class="exp-label"><i class="pi pi-building"></i>Client @if(isGros){<span style="color:var(--color-error)">*</span>}</label>
-          <p-select
-            formControlName="client_id"
-            [options]="clients"
-            optionLabel="label"
-            optionValue="value"
-            placeholder="Sélectionner…"
-            [filter]="true"
-            filterPlaceholder="Rechercher…"
-            [style]="{width:'100%'}"
-            appendTo="body"
-          />
+          @if (isGros) {
+            <label class="exp-label"><i class="pi pi-building"></i>Client <span style="color:var(--color-error)">*</span></label>
+            <p-select
+              formControlName="client_id"
+              [options]="clients"
+              optionLabel="label"
+              optionValue="value"
+              placeholder="Sélectionner…"
+              [filter]="true"
+              filterPlaceholder="Rechercher…"
+              [style]="{width:'100%'}"
+              appendTo="body"
+            />
+          } @else {
+            <label class="exp-label"><i class="pi pi-building"></i>Clients de la tournée</label>
+            <p-multiselect
+              formControlName="client_ids"
+              [options]="clients"
+              optionLabel="label"
+              optionValue="value"
+              placeholder="Sélectionner les clients…"
+              [filter]="true"
+              filterPlaceholder="Rechercher…"
+              [style]="{width:'100%'}"
+              appendTo="body"
+              selectedItemsLabel="{0} client(s) sélectionné(s)"
+            />
+          }
         </div>
       </div>
       <div class="form-grid-2">

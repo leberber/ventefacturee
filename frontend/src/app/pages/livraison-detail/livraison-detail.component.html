@@ -1,0 +1,97 @@
+<p-toast />
+
+<div class="page-content" style="padding-bottom:5rem">
+
+  <div class="page-header" style="max-width:680px;margin:0 auto var(--space-6)">
+    <div style="display:flex;align-items:center;gap:0.75rem">
+      <a routerLink="/historique" class="back-btn"><i class="pi pi-arrow-left"></i></a>
+      <div class="page-icon"><i class="pi pi-map-marker"></i></div>
+      <div>
+        <h1 class="page-header__title">Livraisons — {{ bl?.bl_number }}</h1>
+        <p class="page-header__sub">
+          @if (bl) {
+            {{ bl.livreur_name }} · {{ bl.chauffeur_name }}
+            &nbsp;·&nbsp;
+            <span [class]="recordedCount === expeditionClients.length && expeditionClients.length > 0 ? 'badge badge--success' : 'badge badge--warning'" style="font-size:0.7rem">
+              {{ recordedCount }}/{{ expeditionClients.length }} livrés
+            </span>
+          }
+        </p>
+      </div>
+    </div>
+  </div>
+
+  @if (loading) {
+    <div style="max-width:680px;margin:0 auto">
+      @for (_ of [1,2,3]; track $index) {
+        <div style="height:160px;border-radius:var(--radius-xl);background:var(--surface-200);animation:skeleton 1.2s infinite alternate;margin-bottom:1rem"></div>
+      }
+    </div>
+  } @else if (expeditionClients.length === 0) {
+    <div style="max-width:680px;margin:0 auto;text-align:center;padding:3rem 1rem;color:var(--text-color-secondary)">
+      <i class="pi pi-inbox" style="font-size:2.5rem;margin-bottom:1rem;display:block;opacity:0.4"></i>
+      <p>Aucun client associé à cette expédition.</p>
+    </div>
+  } @else {
+    <div style="max-width:680px;margin:0 auto;display:flex;flex-direction:column;gap:1rem">
+
+      @for (ec of expeditionClients; track ec.client_id) {
+        <div class="client-delivery-card" [class.client-delivery-card--done]="ec.detail">
+
+          <div class="client-delivery-header">
+            <div>
+              <span class="client-delivery-name">{{ ec.client_name }}</span>
+              @if (ec.client_code) {
+                <span class="text-muted" style="font-size:var(--font-size-xs);margin-left:0.5rem">({{ ec.client_code }})</span>
+              }
+            </div>
+            @if (ec.detail) {
+              <span class="badge badge--success"><i class="pi pi-check" style="font-size:0.65rem"></i> Enregistré</span>
+            } @else {
+              <span class="badge badge--warning">En attente</span>
+            }
+          </div>
+
+          <div class="qty-grid" style="margin:1rem 0 0.75rem">
+
+            <div class="qty-tile qty-tile--sm">
+              <img src="assets/plastiquepallette.png" class="qty-tile__img" alt="">
+              <span class="qty-tile__name">Plastique</span>
+              <div class="qty-tile__counter">
+                <button type="button" class="qty-btn" (click)="dec(ec.client_id, 'plastique')">−</button>
+                <input type="number" class="qty-input" [value]="getInput(ec.client_id).plastique"
+                       (change)="setQty(ec.client_id, 'plastique', $event)" min="0">
+                <button type="button" class="qty-btn qty-btn--plus" (click)="inc(ec.client_id, 'plastique')">+</button>
+              </div>
+            </div>
+
+            <div class="qty-tile qty-tile--sm">
+              <img src="assets/woodpallette.png" class="qty-tile__img" alt="">
+              <span class="qty-tile__name">Bois</span>
+              <div class="qty-tile__counter">
+                <button type="button" class="qty-btn" (click)="dec(ec.client_id, 'bois')">−</button>
+                <input type="number" class="qty-input" [value]="getInput(ec.client_id).bois"
+                       (change)="setQty(ec.client_id, 'bois', $event)" min="0">
+                <button type="button" class="qty-btn qty-btn--plus" (click)="inc(ec.client_id, 'bois')">+</button>
+              </div>
+            </div>
+
+          </div>
+
+          <div style="display:flex;justify-content:flex-end;padding-top:0.5rem;border-top:1px solid var(--surface-border)">
+            <p-button
+              [label]="ec.detail ? 'Mettre à jour' : 'Enregistrer'"
+              [icon]="ec.detail ? 'pi pi-refresh' : 'pi pi-check'"
+              size="small"
+              [loading]="getInput(ec.client_id).saving"
+              (onClick)="saveDetail(ec.client_id)"
+            />
+          </div>
+
+        </div>
+      }
+
+    </div>
+  }
+
+</div>

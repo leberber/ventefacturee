@@ -108,6 +108,11 @@
                   {{ b.notes || '—' }}
                 </td>
                 <td class="actions-cell">
+                  @if (b.destination_type !== 'gros') {
+                    <a [routerLink]="['/expedition', b.id, 'livraison']" class="table-action-btn" title="Voir livraisons">
+                      <i class="pi pi-map-marker"></i>
+                    </a>
+                  }
                   <button class="table-action-btn" title="Modifier" (click)="openEdit(b)">
                     <i class="pi pi-pencil"></i>
                   </button>

@@ -1,7 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { Bon, BonCreate, BonUpdate, DashboardStats } from '../models/bon.model';
+import { Bon, BonCreate, BonUpdate, DashboardStats, ExpeditionClient, LivraisonDetail, LivraisonDetailCreate } from '../models/bon.model';
 
 @Injectable({ providedIn: 'root' })
 export class BonsService {
@@ -25,6 +25,18 @@ export class BonsService {
 
   delete(id: number): Observable<void> {
     return this.http.delete<void>(`${this.base}/${id}`);
+  }
+
+  getById(id: number): Observable<Bon> {
+    return this.http.get<Bon>(`${this.base}/${id}`);
+  }
+
+  getExpeditionClients(blId: number): Observable<ExpeditionClient[]> {
+    return this.http.get<ExpeditionClient[]>(`${this.base}/${blId}/expedition-clients`);
+  }
+
+  upsertDetail(blId: number, body: LivraisonDetailCreate): Observable<LivraisonDetail> {
+    return this.http.post<LivraisonDetail>(`${this.base}/${blId}/details`, body);
   }
 
   getDashboardStats(): Observable<DashboardStats> {

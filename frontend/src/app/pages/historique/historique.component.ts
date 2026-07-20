@@ -1,7 +1,7 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { Button } from 'primeng/button';
 import { Dialog } from 'primeng/dialog';
 import { Toast } from 'primeng/toast';
@@ -24,7 +24,7 @@ import { sortItems, toggleSort } from '../../core/utils/sort.util';
   selector: 'app-historique',
   standalone: true,
   imports: [
-    CommonModule, FormsModule, ReactiveFormsModule,
+    CommonModule, FormsModule, ReactiveFormsModule, RouterLink,
     Button, Dialog, Toast, ConfirmDialog, Select, InputNumber, InputText,
   ],
   providers: [MessageService, ConfirmationService],

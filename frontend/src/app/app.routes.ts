@@ -24,9 +24,10 @@ export const routes: Routes = [
       { path: 'livreurs/nouveau',      loadComponent: () => import('./pages/livreurs/livreur-form/livreur-form.component').then(m => m.LivreurFormComponent) },
       { path: 'livreurs/:id/modifier', loadComponent: () => import('./pages/livreurs/livreur-form/livreur-form.component').then(m => m.LivreurFormComponent) },
 
-      { path: 'expedition', loadComponent: () => import('./pages/nouveau-bl/nouveau-bl.component').then(m => m.NouveauBLComponent) },
-      { path: 'retour',     loadComponent: () => import('./pages/retour/retour.component').then(m => m.RetourComponent) },
-      { path: 'historique', loadComponent: () => import('./pages/historique/historique.component').then(m => m.HistoriqueComponent) },
+      { path: 'expedition',              loadComponent: () => import('./pages/nouveau-bl/nouveau-bl.component').then(m => m.NouveauBLComponent) },
+      { path: 'expedition/:id/livraison', loadComponent: () => import('./pages/livraison-detail/livraison-detail.component').then(m => m.LivraisonDetailComponent) },
+      { path: 'retour',                  loadComponent: () => import('./pages/retour/retour.component').then(m => m.RetourComponent) },
+      { path: 'historique',              loadComponent: () => import('./pages/historique/historique.component').then(m => m.HistoriqueComponent) },
 
       { path: 'utilisateurs',              canActivate: [adminGuard], loadComponent: () => import('./pages/utilisateurs/utilisateurs.component').then(m => m.UtilisateursComponent) },
       { path: 'utilisateurs/nouveau',      canActivate: [adminGuard], loadComponent: () => import('./pages/utilisateurs/utilisateur-form/utilisateur-form.component').then(m => m.UtilisateurFormComponent) },

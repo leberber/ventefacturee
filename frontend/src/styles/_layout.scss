@@ -694,6 +694,60 @@
   }
 }
 
+// ---- Livraison detail page ----
+.back-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: var(--radius-lg);
+  background: var(--surface-100);
+  border: var(--border-width) solid var(--surface-border);
+  color: var(--text-color-secondary);
+  text-decoration: none;
+  flex-shrink: 0;
+  transition: background 0.15s, color 0.15s;
+
+  &:hover { background: var(--surface-200); color: var(--text-color); }
+
+  i { font-size: 0.8rem; }
+}
+
+.client-delivery-card {
+  background: var(--surface-card);
+  border: var(--border-width) solid var(--surface-border);
+  border-radius: var(--radius-2xl);
+  box-shadow: var(--shadow-sm);
+  padding: 1.25rem 1.5rem;
+  transition: border-color 0.2s;
+
+  &--done {
+    border-color: color-mix(in srgb, var(--color-success, #22c55e) 40%, transparent);
+    background: color-mix(in srgb, var(--color-success, #22c55e) 4%, var(--surface-card));
+  }
+}
+
+.client-delivery-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.25rem;
+}
+
+.client-delivery-name {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-color);
+}
+
+.qty-tile--sm {
+  .qty-tile__img { height: 28px; }
+  .qty-tile__name { font-size: var(--font-size-sm); }
+  .qty-btn { width: 1.75rem; height: 1.75rem; font-size: 1rem; }
+  .qty-input { width: 2.5rem; font-size: var(--font-size-base); }
+}
+
 // ---- Utility ----
 .text-muted   { color: var(--text-color-secondary); }
 .text-primary { color: var(--primary-color); }
