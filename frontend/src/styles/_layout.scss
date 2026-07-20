@@ -472,21 +472,6 @@
   &__img  { height: 2.25rem; object-fit: contain; }
   &__name { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: var(--text-color-secondary); display: flex; align-items: center; gap: 0.4rem; }
   &__unit { font-size: 0.62rem; color: var(--text-color-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-top: 0.25rem; }
-  &__badge {
-    font-size: 0.55rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    padding: 0.15rem 0.45rem;
-    border-radius: 999px;
-    background: rgba(var(--primary-rgb), .12);
-    color: var(--primary-color);
-  }
-
-  &--consigne {
-    border-color: rgba(var(--primary-rgb), .2);
-    background: rgba(var(--primary-rgb), .02);
-  }
 
   &__counter {
     display: flex;
@@ -548,6 +533,96 @@
 @media (max-width: 560px) {
   .qty-grid,
   .qty-grid--4 { grid-template-columns: 1fr; }
+}
+
+// ---- Consigne expand (retour tile) ----
+.consigne-toggle {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 0.62rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--primary-color);
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.25rem 0.6rem;
+  border-radius: var(--radius-md);
+  transition: background 0.15s;
+  margin-top: 0.1rem;
+
+  i { font-size: 0.55rem; }
+  &:hover { background: rgba(var(--primary-rgb), .08); }
+}
+
+.consigne-expand {
+  width: 100%;
+  border-top: 1px solid var(--surface-border);
+  padding-top: 0.75rem;
+  margin-top: 0.1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.consigne-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.5rem;
+}
+
+.consigne-field {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+
+  label {
+    font-size: 0.58rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-color-secondary);
+    text-align: center;
+  }
+
+  input {
+    width: 100%;
+    text-align: center;
+    font-size: 1rem;
+    font-weight: 600;
+    border: 1.5px solid var(--surface-border);
+    border-radius: var(--radius-lg);
+    padding: 0.4rem 0.5rem;
+    background: var(--surface-ground);
+    color: var(--text-color);
+    outline: none;
+    -moz-appearance: textfield;
+    transition: border-color 0.15s;
+
+    &:focus { border-color: var(--primary-color); }
+    &::-webkit-outer-spin-button,
+    &::-webkit-inner-spin-button { -webkit-appearance: none; }
+  }
+}
+
+.consigne-sep {
+  font-size: 0.6rem;
+  font-weight: 600;
+  color: var(--text-color-muted);
+  white-space: nowrap;
+  padding-bottom: 0.55rem;
+  flex-shrink: 0;
+}
+
+.consigne-summary {
+  font-size: 0.7rem;
+  color: var(--text-color-secondary);
+  text-align: center;
+
+  strong { color: var(--primary-color); }
 }
 
 // ---- Expedition notes ----

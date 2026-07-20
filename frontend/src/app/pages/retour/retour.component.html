@@ -2,7 +2,7 @@
 
 <div class="page-content" style="padding-bottom:5rem">
 
-  <div class="page-header" style="max-width:780px;margin:0 auto var(--space-6)">
+  <div class="page-header" style="max-width:680px;margin:0 auto var(--space-6)">
     <div style="display:flex;align-items:center;gap:0.75rem">
       <div class="page-icon"><i class="pi pi-replay"></i></div>
       <div>
@@ -12,7 +12,7 @@
     </div>
   </div>
 
-  <form [formGroup]="form" style="max-width:780px;margin:0 auto">
+  <form [formGroup]="form" style="max-width:680px;margin:0 auto">
 
     <!-- Info -->
     <div class="exp-card">
@@ -57,6 +57,7 @@
           />
         </div>
       </div>
+
       <div class="field mb-0">
         <label class="exp-label">Chauffeur <span style="color:var(--color-error)">*</span></label>
         <p-select
@@ -91,9 +92,10 @@
       </div>
     }
 
-    <!-- Counters: 2 cols × 2 rows -->
-    <div class="qty-grid qty-grid--4">
+    <!-- Quantity counters -->
+    <div class="qty-grid">
 
+      <!-- Plastique tile -->
       <div class="qty-tile">
         <img src="assets/plastiquepallette.png" class="qty-tile__img" alt="">
         <span class="qty-tile__name">Plastique</span>
@@ -103,19 +105,37 @@
           <button type="button" class="qty-btn qty-btn--plus" (click)="inc('retour_plastique')">+</button>
         </div>
         <span class="qty-tile__unit">retournées</span>
+
+        <!-- Consigne toggle -->
+        <button type="button" class="consigne-toggle" (click)="toggleConsigne('plastique')">
+          Consigne encaissée
+          <i class="pi" [class.pi-chevron-down]="!showConsignePlastique" [class.pi-chevron-up]="showConsignePlastique"></i>
+        </button>
+
+        @if (showConsignePlastique) {
+          <div class="consigne-expand">
+            <div class="consigne-row">
+              <div class="consigne-field">
+                <label>Palettes</label>
+                <input type="number" [value]="consignePlastique" (input)="onConsigneQtyInput('plastique', $event)" min="0">
+              </div>
+              <div class="consigne-sep">× {{ prixPlastique | number:'1.0-0' }} DA</div>
+              <div class="consigne-field">
+                <label>Montant</label>
+                <input type="number" [value]="montantPlastique" (input)="onConsigneMoneyInput('plastique', $event)" min="0">
+              </div>
+            </div>
+            @if (consignePlastique) {
+              <div class="consigne-summary">
+                {{ consignePlastique }} palette{{ consignePlastique !== 1 ? 's' : '' }}
+                × {{ prixPlastique | number:'1.0-0' }} = <strong>{{ montantPlastique | number:'1.0-0' }} DA</strong>
+              </div>
+            }
+          </div>
+        }
       </div>
 
-      <div class="qty-tile qty-tile--consigne">
-        <img src="assets/plastiquepallette.png" class="qty-tile__img" alt="">
-        <span class="qty-tile__name">Plastique <span class="qty-tile__badge">consigne</span></span>
-        <div class="qty-tile__counter">
-          <button type="button" class="qty-btn" (click)="dec('consigne_plastique')">−</button>
-          <input type="number" class="qty-input" [value]="form.get('consigne_plastique')?.value" (change)="setQty('consigne_plastique', $event)" min="0">
-          <button type="button" class="qty-btn qty-btn--plus" (click)="inc('consigne_plastique')">+</button>
-        </div>
-        <span class="qty-tile__unit">à rembourser</span>
-      </div>
-
+      <!-- Bois tile -->
       <div class="qty-tile">
         <img src="assets/woodpallette.png" class="qty-tile__img" alt="">
         <span class="qty-tile__name">Bois</span>
@@ -125,17 +145,34 @@
           <button type="button" class="qty-btn qty-btn--plus" (click)="inc('retour_bois')">+</button>
         </div>
         <span class="qty-tile__unit">retournées</span>
-      </div>
 
-      <div class="qty-tile qty-tile--consigne">
-        <img src="assets/woodpallette.png" class="qty-tile__img" alt="">
-        <span class="qty-tile__name">Bois <span class="qty-tile__badge">consigne</span></span>
-        <div class="qty-tile__counter">
-          <button type="button" class="qty-btn" (click)="dec('consigne_bois')">−</button>
-          <input type="number" class="qty-input" [value]="form.get('consigne_bois')?.value" (change)="setQty('consigne_bois', $event)" min="0">
-          <button type="button" class="qty-btn qty-btn--plus" (click)="inc('consigne_bois')">+</button>
-        </div>
-        <span class="qty-tile__unit">à rembourser</span>
+        <!-- Consigne toggle -->
+        <button type="button" class="consigne-toggle" (click)="toggleConsigne('bois')">
+          Consigne encaissée
+          <i class="pi" [class.pi-chevron-down]="!showConsigneBois" [class.pi-chevron-up]="showConsigneBois"></i>
+        </button>
+
+        @if (showConsigneBois) {
+          <div class="consigne-expand">
+            <div class="consigne-row">
+              <div class="consigne-field">
+                <label>Palettes</label>
+                <input type="number" [value]="consigneBois" (input)="onConsigneQtyInput('bois', $event)" min="0">
+              </div>
+              <div class="consigne-sep">× {{ prixBois | number:'1.0-0' }} DA</div>
+              <div class="consigne-field">
+                <label>Montant</label>
+                <input type="number" [value]="montantBois" (input)="onConsigneMoneyInput('bois', $event)" min="0">
+              </div>
+            </div>
+            @if (consigneBois) {
+              <div class="consigne-summary">
+                {{ consigneBois }} palette{{ consigneBois !== 1 ? 's' : '' }}
+                × {{ prixBois | number:'1.0-0' }} = <strong>{{ montantBois | number:'1.0-0' }} DA</strong>
+              </div>
+            }
+          </div>
+        }
       </div>
 
     </div>

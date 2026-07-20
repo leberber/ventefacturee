@@ -12,10 +12,11 @@ import { ClientsService } from '../../core/services/clients.service';
 import { ChauffeursService } from '../../core/services/chauffeurs.service';
 import { LivreursService } from '../../core/services/livreurs.service';
 import { BonsService } from '../../core/services/bons.service';
+import { ConfigService } from '../../core/services/config.service';
 import { Client } from '../../core/models/client.model';
 import { BonCreate } from '../../core/models/bon.model';
 
-type QtyField = 'retour_plastique' | 'consigne_plastique' | 'retour_bois' | 'consigne_bois';
+type RetourField = 'retour_plastique' | 'retour_bois';
 
 @Component({
   selector: 'app-retour',
@@ -29,6 +30,7 @@ export class RetourComponent implements OnInit {
   private chauffeursService = inject(ChauffeursService);
   private livreursService   = inject(LivreursService);
   private bonsService       = inject(BonsService);
+  private configService     = inject(ConfigService);
   private messageService    = inject(MessageService);
   private router            = inject(Router);
   private fb                = inject(FormBuilder);
@@ -39,6 +41,20 @@ export class RetourComponent implements OnInit {
   clientsMap: Map<number, Client> = new Map();
   selectedClient: Client | null = null;
   saving = false;
+
+  // Pricing from config
+  prixPlastique = 7500;
+  prixBois      = 1200;
+
+  // Consigne toggle state
+  showConsignePlastique = false;
+  showConsigneBois      = false;
+
+  // Consigne local state (both sides kept in sync)
+  consignePlastique = 0;
+  montantPlastique  = 0;
+  consigneBois      = 0;
+  montantBois       = 0;
 
   readonly destinationOptions = [
     { label: 'Gros',   value: 'gros'   },
@@ -93,26 +109,66 @@ export class RetourComponent implements OnInit {
     this.livreursService.list().subscribe(data => {
       this.livreurs = data.filter(l => l.is_active).map(l => ({ label: l.name, value: l.id }));
     });
-
     this.form.get('client_id')!.valueChanges.subscribe(id => {
       this.selectedClient = id ? (this.clientsMap.get(id) ?? null) : null;
     });
+
+    this.configService.get<{ consigne_plastique: number; consigne_bois: number }>('pricing').subscribe(p => {
+      this.prixPlastique = p.consigne_plastique;
+      this.prixBois      = p.consigne_bois;
+    });
   }
 
-  inc(field: QtyField) {
+  // Retour tile counter (inc/dec/set)
+  inc(field: RetourField) {
     const ctrl = this.form.get(field)!;
     ctrl.setValue((ctrl.value ?? 0) + 1);
   }
 
-  dec(field: QtyField) {
+  dec(field: RetourField) {
     const ctrl = this.form.get(field)!;
     const val = ctrl.value ?? 0;
     if (val > 0) ctrl.setValue(val - 1);
   }
 
-  setQty(field: QtyField, event: Event) {
+  setQty(field: RetourField, event: Event) {
     const n = parseInt((event.target as HTMLInputElement).value, 10);
     this.form.get(field)!.setValue(isNaN(n) || n < 0 ? 0 : n);
+  }
+
+  // Consigne: qty input → update money
+  onConsigneQtyInput(type: 'plastique' | 'bois', event: Event) {
+    const qty = Math.max(0, parseInt((event.target as HTMLInputElement).value, 10) || 0);
+    const prix = type === 'plastique' ? this.prixPlastique : this.prixBois;
+    if (type === 'plastique') { this.consignePlastique = qty; this.montantPlastique = qty * prix; }
+    else                      { this.consigneBois      = qty; this.montantBois      = qty * prix; }
+    this.form.get(`consigne_${type}`)!.setValue(qty);
+  }
+
+  // Consigne: money input → update qty
+  onConsigneMoneyInput(type: 'plastique' | 'bois', event: Event) {
+    const montant = Math.max(0, parseInt((event.target as HTMLInputElement).value, 10) || 0);
+    const prix = type === 'plastique' ? this.prixPlastique : this.prixBois;
+    const qty = prix > 0 ? Math.round(montant / prix) : 0;
+    if (type === 'plastique') { this.consignePlastique = qty; this.montantPlastique = montant; }
+    else                      { this.consigneBois      = qty; this.montantBois      = montant; }
+    this.form.get(`consigne_${type}`)!.setValue(qty);
+  }
+
+  toggleConsigne(type: 'plastique' | 'bois') {
+    if (type === 'plastique') {
+      this.showConsignePlastique = !this.showConsignePlastique;
+      if (this.showConsignePlastique) {
+        this.consignePlastique = this.form.get('consigne_plastique')!.value ?? 0;
+        this.montantPlastique  = this.consignePlastique * this.prixPlastique;
+      }
+    } else {
+      this.showConsigneBois = !this.showConsigneBois;
+      if (this.showConsigneBois) {
+        this.consigneBois = this.form.get('consigne_bois')!.value ?? 0;
+        this.montantBois  = this.consigneBois * this.prixBois;
+      }
+    }
   }
 
   save() {
@@ -154,6 +210,10 @@ export class RetourComponent implements OnInit {
       notes: '',
     });
     this.selectedClient = null;
+    this.showConsignePlastique = false;
+    this.showConsigneBois      = false;
+    this.consignePlastique = 0; this.montantPlastique = 0;
+    this.consigneBois      = 0; this.montantBois      = 0;
     this.form.get('client_id')!.setValidators(Validators.required);
     this.form.get('livreur_id')!.clearValidators();
     this.form.get('client_id')!.updateValueAndValidity();
