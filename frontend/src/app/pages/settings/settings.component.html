@@ -1,8 +1,8 @@
 <p-toast />
 
-<div class="page-content">
+<div class="page-content" style="padding-bottom:5rem">
 
-  <div class="page-header">
+  <div class="page-header" style="max-width:680px;margin:0 auto var(--space-6)">
     <div style="display:flex;align-items:center;gap:0.75rem">
       <div class="page-icon"><i class="pi pi-cog"></i></div>
       <div>
@@ -12,24 +12,21 @@
     </div>
   </div>
 
-  <form [formGroup]="form" (ngSubmit)="save()" style="max-width:600px">
+  <form [formGroup]="form" (ngSubmit)="save()" style="max-width:680px;margin:0 auto">
 
-    <div class="form-card form-card--anim" style="--card-i:0">
-      <div class="form-card__header">
-        <div class="form-card__icon"><i class="pi pi-tag"></i></div>
-        <span class="form-card__title">Tarifs de consigne</span>
-      </div>
-      <div class="form-card__body">
+    <div class="exp-card">
 
-        @if (loading) {
-          <div style="padding:1rem 0">
-            @for (_ of [1,2]; track $index) {
-              <div style="height:2.5rem;border-radius:8px;background:var(--surface-200);animation:skeleton 1.2s infinite alternate;margin-bottom:1rem"></div>
-            }
-          </div>
-        } @else {
-          <div class="field">
-            <label>Consigne palette plastique <span style="color:var(--text-color-secondary);font-weight:400">(DA / palette)</span></label>
+      @if (loading) {
+        @for (_ of [1,2]; track $index) {
+          <div style="height:2.5rem;border-radius:8px;background:var(--surface-200);animation:skeleton 1.2s infinite alternate;margin-bottom:1rem"></div>
+        }
+      } @else {
+        <div class="form-grid-2">
+          <div class="field mb-0">
+            <label class="exp-label">
+              <img src="assets/plastiquepallette.png" style="height:10px;opacity:0.7" alt="">
+              Plastique <span style="font-weight:400;text-transform:none;letter-spacing:0">(DA / palette)</span>
+            </label>
             <p-inputnumber formControlName="consigne_plastique"
               [min]="0" [showButtons]="true" buttonLayout="horizontal"
               incrementButtonIcon="pi pi-plus" decrementButtonIcon="pi pi-minus"
@@ -37,22 +34,25 @@
           </div>
 
           <div class="field mb-0">
-            <label>Consigne palette bois <span style="color:var(--text-color-secondary);font-weight:400">(DA / palette)</span></label>
+            <label class="exp-label">
+              <img src="assets/woodpallette.png" style="height:10px;opacity:0.7" alt="">
+              Bois <span style="font-weight:400;text-transform:none;letter-spacing:0">(DA / palette)</span>
+            </label>
             <p-inputnumber formControlName="consigne_bois"
               [min]="0" [showButtons]="true" buttonLayout="horizontal"
               incrementButtonIcon="pi pi-plus" decrementButtonIcon="pi pi-minus"
               suffix=" DA" [style]="{width:'100%'}" />
           </div>
-        }
+        </div>
+      }
 
-      </div>
-    </div>
-
-    <div style="display:flex;justify-content:flex-end;margin-top:1rem">
-      <p-button label="Enregistrer" icon="pi pi-check" type="submit"
-        [disabled]="form.invalid || saving || loading" [loading]="saving" />
     </div>
 
   </form>
 
+</div>
+
+<div class="form-footer">
+  <p-button label="Enregistrer" icon="pi pi-check" type="button"
+    [disabled]="form.invalid || saving || loading" [loading]="saving" (onClick)="save()" />
 </div>
