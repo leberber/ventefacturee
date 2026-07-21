@@ -4,7 +4,7 @@
 
   <div class="page-header" style="max-width:680px;margin:0 auto var(--space-6)">
     <div style="display:flex;align-items:center;gap:0.75rem">
-      <a routerLink="/historique" class="back-btn"><i class="pi pi-arrow-left"></i></a>
+      <button type="button" class="back-btn" (click)="router.navigate([bl?.livreur_id ? '/mes-tournees' : '/historique'])"><i class="pi pi-arrow-left"></i></button>
       <div class="page-icon"><i class="pi pi-map-marker"></i></div>
       <div>
         <h1 class="page-header__title">Livraisons — {{ bl?.bl_number }}</h1>
@@ -78,7 +78,19 @@
 
           </div>
 
-          <div style="display:flex;justify-content:flex-end;padding-top:0.5rem;border-top:1px solid var(--surface-border)">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:0.5rem;padding-top:0.5rem;border-top:1px solid var(--surface-border)">
+            <button type="button"
+              [class]="getInput(ec.client_id).lat ? 'gps-btn gps-btn--captured' : 'gps-btn'"
+              [disabled]="getInput(ec.client_id).locating"
+              (click)="captureLocation(ec.client_id)">
+              @if (getInput(ec.client_id).locating) {
+                <i class="pi pi-spin pi-spinner"></i><span>Localisation…</span>
+              } @else if (getInput(ec.client_id).lat) {
+                <i class="pi pi-check"></i><span>Position capturée</span>
+              } @else {
+                <i class="pi pi-crosshairs"></i><span>Ma position</span>
+              }
+            </button>
             <p-button
               [label]="ec.detail ? 'Mettre à jour' : 'Enregistrer'"
               [icon]="ec.detail ? 'pi pi-refresh' : 'pi pi-check'"

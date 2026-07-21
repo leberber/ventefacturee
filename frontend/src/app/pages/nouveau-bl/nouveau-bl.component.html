@@ -104,7 +104,7 @@
           </div>
 
           <div class="field mb-0">
-            <label class="exp-label"><i class="pi pi-car"></i>Chauffeur <span style="color:var(--color-error)">*</span></label>
+            <label class="exp-label"><i class="pi pi-car"></i>Chauffeur @if(isGros){<span style="color:var(--color-error)">*</span>}</label>
             <p-select
               formControlName="chauffeur_id"
               [options]="chauffeurs"

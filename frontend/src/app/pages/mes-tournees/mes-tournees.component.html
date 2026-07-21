@@ -1,0 +1,46 @@
+<div class="page-content">
+
+  <div class="page-header">
+    <div style="display:flex;align-items:center;gap:0.75rem">
+      <div class="page-icon"><i class="pi pi-truck"></i></div>
+      <div>
+        <h1 class="page-header__title">Mes Tournées</h1>
+        <p class="page-header__sub">{{ tournees.length }} tournée{{ tournees.length !== 1 ? 's' : '' }}</p>
+      </div>
+    </div>
+  </div>
+
+  @if (loading) {
+    <div style="max-width:680px;margin:0 auto;display:flex;flex-direction:column;gap:0.75rem">
+      @for (_ of [1,2,3]; track $index) {
+        <div style="height:90px;border-radius:var(--radius-xl);background:var(--surface-200);animation:skeleton 1.2s infinite alternate"></div>
+      }
+    </div>
+  } @else if (tournees.length === 0) {
+    <div style="text-align:center;padding:3rem 1rem;color:var(--text-color-secondary)">
+      <i class="pi pi-truck" style="font-size:2.5rem;margin-bottom:1rem;display:block;opacity:0.35"></i>
+      <p>Aucune tournée assignée</p>
+    </div>
+  } @else {
+    <div style="max-width:680px;margin:0 auto;display:flex;flex-direction:column;gap:0.75rem">
+      @for (t of tournees; track t.id) {
+        <a [routerLink]="['/expedition', t.id, 'livraison']" class="tournee-card">
+          <div class="tournee-card__left">
+            <code class="font-mono tournee-card__bl">{{ t.bl_number }}</code>
+            <span class="text-muted tournee-card__date">{{ t.date | date:'dd/MM/yyyy' }}</span>
+          </div>
+          <div class="tournee-card__mid">
+            <span [class]="destinationBadge[t.destination_type]">{{ destinationLabel[t.destination_type] }}</span>
+            @if (t.chauffeur_name) {
+              <span class="tournee-card__chauffeur">
+                <i class="pi pi-user"></i> {{ t.chauffeur_name }}
+              </span>
+            }
+          </div>
+          <i class="pi pi-chevron-right tournee-card__arrow"></i>
+        </a>
+      }
+    </div>
+  }
+
+</div>

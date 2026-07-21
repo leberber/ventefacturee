@@ -10,29 +10,34 @@
 
     <!-- Nav -->
     <nav class="admin-sidebar__nav">
-      <a class="nav-item" routerLink="/dashboard" routerLinkActive="active">
-        <i class="pi pi-home"></i><span>Tableau de bord</span>
-      </a>
-
-      @if(isAdminOrEmploye) {
-        <a class="nav-item nav-item--accent" routerLink="/expedition" routerLinkActive="active">
-          <i class="pi pi-file-plus"></i><span>Enregistrer une expédition</span>
+      @if(isLivreur) {
+        <a class="nav-item" routerLink="/mes-tournees" routerLinkActive="active">
+          <i class="pi pi-truck"></i><span>Mes Tournées</span>
         </a>
-        <a class="nav-item" routerLink="/retour" routerLinkActive="active">
-          <i class="pi pi-replay"></i><span>Enregistrer un retour</span>
+      } @else {
+        <a class="nav-item" routerLink="/dashboard" routerLinkActive="active">
+          <i class="pi pi-home"></i><span>Tableau de bord</span>
         </a>
-        <a class="nav-item" routerLink="/clients" routerLinkActive="active">
-          <i class="pi pi-users"></i><span>Clients</span>
-        </a>
-        <a class="nav-item" routerLink="/historique" routerLinkActive="active">
-          <i class="pi pi-list"></i><span>Historique BLs</span>
-        </a>
-        <a class="nav-item" routerLink="/utilisateurs" routerLinkActive="active">
-          <i class="pi pi-shield"></i><span>Fonctionnaires</span>
-        </a>
-        <a class="nav-item" routerLink="/parametres" routerLinkActive="active">
-          <i class="pi pi-cog"></i><span>Paramètres</span>
-        </a>
+        @if(isAdminOrEmploye) {
+          <a class="nav-item nav-item--accent" routerLink="/expedition" routerLinkActive="active">
+            <i class="pi pi-file-plus"></i><span>Enregistrer une expédition</span>
+          </a>
+          <a class="nav-item" routerLink="/retour" routerLinkActive="active">
+            <i class="pi pi-replay"></i><span>Enregistrer un retour</span>
+          </a>
+          <a class="nav-item" routerLink="/clients" routerLinkActive="active">
+            <i class="pi pi-users"></i><span>Clients</span>
+          </a>
+          <a class="nav-item" routerLink="/historique" routerLinkActive="active">
+            <i class="pi pi-list"></i><span>Historique BLs</span>
+          </a>
+          <a class="nav-item" routerLink="/utilisateurs" routerLinkActive="active">
+            <i class="pi pi-shield"></i><span>Fonctionnaires</span>
+          </a>
+          <a class="nav-item" routerLink="/parametres" routerLinkActive="active">
+            <i class="pi pi-cog"></i><span>Paramètres</span>
+          </a>
+        }
       }
     </nav>
 
@@ -75,29 +80,36 @@
 
   <!-- Mobile bottom nav -->
   <nav class="mob-nav">
-    <a class="mob-nav__item" routerLink="/dashboard" routerLinkActive="mob-nav__item--active" [routerLinkActiveOptions]="{exact:true}">
-      <i class="pi pi-home"></i>
-      <span>Accueil</span>
-    </a>
-    @if(isAdminOrEmploye) {
-      <a class="mob-nav__item" routerLink="/expedition" routerLinkActive="mob-nav__item--active">
-        <i class="pi pi-file-plus"></i>
-        <span>Expédition</span>
+    @if(isLivreur) {
+      <a class="mob-nav__item" routerLink="/mes-tournees" routerLinkActive="mob-nav__item--active">
+        <i class="pi pi-truck"></i>
+        <span>Tournées</span>
       </a>
-      <a class="mob-nav__item" routerLink="/retour" routerLinkActive="mob-nav__item--active">
-        <i class="pi pi-replay"></i>
-        <span>Retour</span>
+    } @else {
+      <a class="mob-nav__item" routerLink="/dashboard" routerLinkActive="mob-nav__item--active" [routerLinkActiveOptions]="{exact:true}">
+        <i class="pi pi-home"></i>
+        <span>Accueil</span>
       </a>
-    }
-    <a class="mob-nav__item" routerLink="/historique" routerLinkActive="mob-nav__item--active">
-      <i class="pi pi-list"></i>
-      <span>Historique</span>
-    </a>
-    @if(isAdminOrEmploye) {
-      <a class="mob-nav__item" routerLink="/clients" routerLinkActive="mob-nav__item--active">
-        <i class="pi pi-users"></i>
-        <span>Clients</span>
+      @if(isAdminOrEmploye) {
+        <a class="mob-nav__item" routerLink="/expedition" routerLinkActive="mob-nav__item--active">
+          <i class="pi pi-file-plus"></i>
+          <span>Expédition</span>
+        </a>
+        <a class="mob-nav__item" routerLink="/retour" routerLinkActive="mob-nav__item--active">
+          <i class="pi pi-replay"></i>
+          <span>Retour</span>
+        </a>
+      }
+      <a class="mob-nav__item" routerLink="/historique" routerLinkActive="mob-nav__item--active">
+        <i class="pi pi-list"></i>
+        <span>Historique</span>
       </a>
+      @if(isAdminOrEmploye) {
+        <a class="mob-nav__item" routerLink="/clients" routerLinkActive="mob-nav__item--active">
+          <i class="pi pi-users"></i>
+          <span>Clients</span>
+        </a>
+      }
     }
   </nav>
 

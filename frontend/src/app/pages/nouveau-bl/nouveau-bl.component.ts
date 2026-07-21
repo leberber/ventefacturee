@@ -54,7 +54,7 @@ export class NouveauBLComponent implements OnInit {
     client_id:         [null as number | null],
     client_ids:        [[] as number[]],
     livreur_id:        [null as number | null],
-    chauffeur_id:      [null as number | null, Validators.required],
+    chauffeur_id:      [null as number | null],
     plastique:         [0, [Validators.required, Validators.min(0)]],
     bois:              [0, [Validators.required, Validators.min(0)]],
     notes:             [''],
@@ -88,24 +88,30 @@ export class NouveauBLComponent implements OnInit {
   ngOnInit() {
     this.form.get('client_id')!.setValidators(Validators.required);
     this.form.get('client_id')!.updateValueAndValidity();
+    this.form.get('chauffeur_id')!.setValidators(Validators.required);
+    this.form.get('chauffeur_id')!.updateValueAndValidity();
 
     this.form.get('destination_type')!.valueChanges.subscribe(type => {
       const clientCtrl    = this.form.get('client_id')!;
       const clientIdsCtrl = this.form.get('client_ids')!;
       const livreurCtrl   = this.form.get('livreur_id')!;
+      const chauffeurCtrl = this.form.get('chauffeur_id')!;
       if (type === 'gros') {
         clientCtrl.setValidators(Validators.required);
+        chauffeurCtrl.setValidators(Validators.required);
         livreurCtrl.clearValidators();
         livreurCtrl.setValue(null);
         clientIdsCtrl.setValue([]);
       } else {
         livreurCtrl.setValidators(Validators.required);
+        chauffeurCtrl.clearValidators();
         clientCtrl.clearValidators();
         clientCtrl.setValue(null);
         this.selectedClient = null;
       }
       clientCtrl.updateValueAndValidity();
       livreurCtrl.updateValueAndValidity();
+      chauffeurCtrl.updateValueAndValidity();
     });
 
     this.clientsService.list().subscribe(data => {
@@ -140,7 +146,7 @@ export class NouveauBLComponent implements OnInit {
       bl_number: v.bl_number!.trim(),
       date:              new Date().toISOString().split('T')[0],
       destination_type:  v.destination_type!,
-      chauffeur_id:      v.chauffeur_id!,
+      chauffeur_id:      v.chauffeur_id ?? null,
       client_id:         v.destination_type === 'gros' ? v.client_id! : null,
       livreur_id:        v.destination_type !== 'gros' ? v.livreur_id! : null,
       client_ids:        v.destination_type !== 'gros' ? (v.client_ids ?? []) : [],
@@ -169,8 +175,10 @@ export class NouveauBLComponent implements OnInit {
     });
     this.selectedClient = null;
     this.form.get('client_id')!.setValidators(Validators.required);
+    this.form.get('chauffeur_id')!.setValidators(Validators.required);
     this.form.get('livreur_id')!.clearValidators();
     this.form.get('client_id')!.updateValueAndValidity();
+    this.form.get('chauffeur_id')!.updateValueAndValidity();
     this.form.get('livreur_id')!.updateValueAndValidity();
   }
 }

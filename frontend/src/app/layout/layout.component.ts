@@ -16,6 +16,7 @@ export class LayoutComponent {
   get user()           { return this.auth.currentUser(); }
   get isAdminOrEmploye() { return this.auth.isAdminOrEmploye; }
   get isAdmin()        { return this.auth.isAdmin; }
+  get isLivreur()      { return this.auth.isLivreur; }
 
   logout() { this.auth.logout(); }
 }

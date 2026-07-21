@@ -11,14 +11,14 @@ class Expedition(SQLModel, table=True):
     date: date
     destination_type: str = Field(default="gros", max_length=20)  # gros | detail | horeca
 
-    chauffeur_id: int = Field(foreign_key="chauffeurs.id", index=True)
-    chauffeur_name: str = Field(max_length=100)
+    chauffeur_id: Optional[int] = Field(default=None, foreign_key="users.id", index=True)
+    chauffeur_name: Optional[str] = Field(default=None, max_length=100)
 
     client_id: Optional[int] = Field(default=None, foreign_key="clients.id", index=True)
     client_name: Optional[str] = Field(default=None, max_length=100)
     client_code: Optional[str] = Field(default=None, max_length=20)
 
-    livreur_id: Optional[int] = Field(default=None, foreign_key="livreurs.id", index=True)
+    livreur_id: Optional[int] = Field(default=None, foreign_key="users.id", index=True)
     livreur_name: Optional[str] = Field(default=None, max_length=100)
 
     # Palettes sent — set at creation, never modified
@@ -34,7 +34,7 @@ class ExpeditionCreate(SQLModel):
     bl_number: str
     date: date
     destination_type: str = "gros"
-    chauffeur_id: int
+    chauffeur_id: Optional[int] = None
     client_id: Optional[int] = None
     livreur_id: Optional[int] = None
     client_ids: List[int] = []
@@ -60,8 +60,8 @@ class ExpeditionRead(SQLModel):
     bl_number: str
     date: date
     destination_type: str
-    chauffeur_id: int
-    chauffeur_name: str
+    chauffeur_id: Optional[int] = None
+    chauffeur_name: Optional[str] = None
     client_id: Optional[int] = None
     client_name: Optional[str] = None
     client_code: Optional[str] = None

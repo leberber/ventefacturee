@@ -55,6 +55,7 @@ def _attach_retours(expeditions: list[Expedition], session: Session) -> list[Exp
 def list_expeditions(
     client_id: Optional[int] = None,
     chauffeur_id: Optional[int] = None,
+    livreur_id: Optional[int] = None,
     search: Optional[str] = Query(default=None),
     date_from: Optional[str] = None,
     date_to: Optional[str] = None,
@@ -67,6 +68,8 @@ def list_expeditions(
         q = q.where(Expedition.client_id == client_id)
     if chauffeur_id:
         q = q.where(Expedition.chauffeur_id == chauffeur_id)
+    if livreur_id:
+        q = q.where(Expedition.livreur_id == livreur_id)
     if search:
         term = f"%{search}%"
         q = q.where(
@@ -90,9 +93,11 @@ def create_expedition(
     exp_in: ExpeditionCreate,
     session: Session = Depends(get_session),
 ) -> Any:
-    chauffeur = session.get(User, exp_in.chauffeur_id)
-    if not chauffeur:
-        raise HTTPException(status_code=404, detail="Chauffeur introuvable")
+    chauffeur = None
+    if exp_in.chauffeur_id:
+        chauffeur = session.get(User, exp_in.chauffeur_id)
+        if not chauffeur:
+            raise HTTPException(status_code=404, detail="Chauffeur introuvable")
 
     existing = session.exec(
         select(Expedition).where(Expedition.bl_number == exp_in.bl_number)
@@ -105,7 +110,7 @@ def create_expedition(
         date=exp_in.date,
         destination_type=exp_in.destination_type,
         chauffeur_id=exp_in.chauffeur_id,
-        chauffeur_name=chauffeur.full_name,
+        chauffeur_name=chauffeur.full_name if chauffeur else None,
         nc_plastique=max(0, exp_in.nc_plastique),
         nc_bois=max(0, exp_in.nc_bois),
         notes=exp_in.notes,

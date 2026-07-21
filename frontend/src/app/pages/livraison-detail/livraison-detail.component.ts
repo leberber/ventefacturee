@@ -7,6 +7,7 @@ import { Toast } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
 
 import { ExpeditionsService } from '../../core/services/expeditions.service';
+import { ClientsService } from '../../core/services/clients.service';
 import { Expedition, ExpeditionClient, LivraisonDetailCreate } from '../../core/models/expedition.model';
 
 interface ClientInput {
@@ -16,20 +17,24 @@ interface ClientInput {
   retour_bois: number;
   notes: string;
   saving: boolean;
+  locating: boolean;
+  lat?: number;
+  lng?: number;
 }
 
 @Component({
   selector: 'app-livraison-detail',
   standalone: true,
   imports: [CommonModule, FormsModule, RouterLink, Button, Toast],
-  providers: [MessageService],
+  providers: [MessageService, ClientsService],
   templateUrl: './livraison-detail.component.html',
 })
 export class LivraisonDetailComponent implements OnInit {
-  private route          = inject(ActivatedRoute);
-  private router         = inject(Router);
+  private route              = inject(ActivatedRoute);
+  readonly router            = inject(Router);
   private expeditionsService = inject(ExpeditionsService);
-  private messageService = inject(MessageService);
+  private clientsService     = inject(ClientsService);
+  private messageService     = inject(MessageService);
 
   bl: Expedition | null = null;
   expeditionClients: ExpeditionClient[] = [];
@@ -67,6 +72,7 @@ export class LivraisonDetailComponent implements OnInit {
             retour_bois:      ec.detail?.retour_bois      ?? 0,
             notes:            ec.detail?.notes            ?? '',
             saving: false,
+            locating: false,
           });
         }
         this.loading = false;
@@ -110,9 +116,16 @@ export class LivraisonDetailComponent implements OnInit {
     this.expeditionsService.upsertDetail(this.expeditionId, body).subscribe({
       next: detail => {
         inp.saving = false;
-        // Update the local expedition client with the saved detail
         const ec = this.expeditionClients.find(c => c.client_id === clientId);
         if (ec) ec.detail = detail;
+
+        // Save captured GPS location to the client record
+        if (inp.lat && inp.lng) {
+          this.clientsService.update(clientId, { latitude: inp.lat, longitude: inp.lng }).subscribe({
+            next: () => { inp.lat = undefined; inp.lng = undefined; },
+          });
+        }
+
         this.messageService.add({ severity: 'success', summary: 'Enregistré', detail: `Livraison pour ${ec?.client_name} enregistrée`, life: 3000 });
       },
       error: e => {
@@ -120,5 +133,29 @@ export class LivraisonDetailComponent implements OnInit {
         this.messageService.add({ severity: 'error', summary: 'Erreur', detail: e.error?.detail ?? 'Erreur', life: 4000 });
       },
     });
+  }
+
+  captureLocation(clientId: number) {
+    if (!('geolocation' in navigator)) {
+      this.messageService.add({ severity: 'warn', summary: 'Non supporté', detail: 'Géolocalisation non disponible', life: 3000 });
+      return;
+    }
+    const inp = this.inputs.get(clientId)!;
+    inp.locating = true;
+    navigator.geolocation.getCurrentPosition(
+      pos => {
+        inp.locating = false;
+        inp.lat = pos.coords.latitude;
+        inp.lng = pos.coords.longitude;
+      },
+      err => {
+        inp.locating = false;
+        const msg = err.code === 1
+          ? 'Accès refusé. Vérifiez les permissions.'
+          : 'Position introuvable.';
+        this.messageService.add({ severity: 'error', summary: 'Localisation', detail: msg, life: 4000 });
+      },
+      { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
+    );
   }
 }

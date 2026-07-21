@@ -19,7 +19,8 @@ export class AuthService {
     const r = this.currentUser()?.role;
     return r === 'admin' || r === 'employe';
   }
-  get isAdmin(): boolean { return this.currentUser()?.role === 'admin'; }
+  get isAdmin(): boolean    { return this.currentUser()?.role === 'admin'; }
+  get isLivreur(): boolean  { return this.currentUser()?.role === 'livreur'; }
 
   login(username: string, password: string) {
     const body = new URLSearchParams({ username, password });

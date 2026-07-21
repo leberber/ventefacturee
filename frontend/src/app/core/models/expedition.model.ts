@@ -27,7 +27,7 @@ export interface ExpeditionCreate {
   bl_number: string;
   date: string;
   destination_type: string;
-  chauffeur_id: number;
+  chauffeur_id?: number | null;
   client_id?: number | null;
   livreur_id?: number | null;
   client_ids?: number[];
