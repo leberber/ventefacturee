@@ -36,6 +36,7 @@ export class NouveauBLComponent implements OnInit {
   private router              = inject(Router);
   private fb                  = inject(FormBuilder);
 
+  allClients: ({ label: string; value: number; category: string; firstName: string; lastName: string; storeName: string })[] = [];
   clients: { label: string; value: number }[] = [];
   chauffeurs: { label: string; value: number }[] = [];
   livreurs: { label: string; value: number }[] = [];
@@ -62,8 +63,13 @@ export class NouveauBLComponent implements OnInit {
   });
 
   get isGros() { return this.form.get('destination_type')!.value === 'gros'; }
-  get plasticBalance() { return this.selectedClient?.plastic_balance ?? 0; }
-  get woodBalance()    { return this.selectedClient?.wood_balance ?? 0; }
+  get plasticBalance() { return this.selectedClient?.plastic_out ?? 0; }
+  get woodBalance()    { return this.selectedClient?.wood_out ?? 0; }
+
+  get filteredClients(): { label: string; value: number; category: string; firstName: string; lastName: string; storeName: string }[] {
+    const type = this.form.get('destination_type')!.value;
+    return this.allClients.filter(c => c.category === type);
+  }
 
   inc(field: PaletteField) {
     const ctrl = this.form.get(field)!;
@@ -105,7 +111,15 @@ export class NouveauBLComponent implements OnInit {
     });
 
     this.clientsService.list().subscribe(data => {
-      this.clients = data.map(c => ({ label: `${c.name}${c.code ? ' (' + c.code + ')' : ''}`, value: c.id }));
+      this.allClients = data.map(c => ({
+        label: `${c.name}${c.code ? ' (' + c.code + ')' : ''}`,
+        value: c.id,
+        category: c.category,
+        firstName: c.first_name ?? '',
+        lastName: c.last_name ?? '',
+        storeName: c.store_name ?? c.name,
+      }));
+      this.clients = this.allClients; // used for multiselect (all categories)
       data.forEach(c => this.clientsMap.set(c.id, c));
     });
     this.chauffeursService.list().subscribe(data => {

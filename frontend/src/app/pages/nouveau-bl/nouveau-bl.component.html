@@ -44,7 +44,7 @@
               <label class="exp-label"><i class="pi pi-building"></i>Client <span style="color:var(--color-error)">*</span></label>
               <p-select
                 formControlName="client_id"
-                [options]="clients"
+                [options]="filteredClients"
                 optionLabel="label"
                 optionValue="value"
                 placeholder="Sélectionner…"
@@ -57,7 +57,7 @@
               <label class="exp-label"><i class="pi pi-building"></i>Clients de la tournée</label>
               <p-multiselect
                 formControlName="client_ids"
-                [options]="clients"
+                [options]="filteredClients"
                 optionLabel="label"
                 optionValue="value"
                 placeholder="Sélectionner les clients…"
@@ -66,7 +66,16 @@
                 [style]="{width:'100%'}"
                 appendTo="body"
                 selectedItemsLabel="{0} client(s) sélectionné(s)"
-              />
+              >
+                <ng-template #item let-opt>
+                  <div style="display:flex;flex-direction:column;gap:2px;line-height:1.3">
+                    @if (opt.firstName || opt.lastName) {
+                      <span style="font-weight:600;font-size:var(--font-size-sm)">{{ opt.firstName }} {{ opt.lastName }}</span>
+                    }
+                    <span class="hist-store-pill" style="align-self:flex-start">{{ opt.storeName }}</span>
+                  </div>
+                </ng-template>
+              </p-multiselect>
             }
           </div>
 
