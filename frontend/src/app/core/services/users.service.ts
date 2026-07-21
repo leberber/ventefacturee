@@ -1,7 +1,7 @@
 import { inject, Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { User, UserCreate, UserUpdate } from '../models/user.model';
+import { User, UserCreate, UserUpdate, UserRole } from '../models/user.model';
 
 @Injectable({ providedIn: 'root' })
 export class UsersService {
@@ -10,6 +10,11 @@ export class UsersService {
 
   list(): Observable<User[]> {
     return this.http.get<User[]>(this.base);
+  }
+
+  listByRole(role: UserRole): Observable<User[]> {
+    const params = new HttpParams().set('role', role);
+    return this.http.get<User[]>(this.base, { params });
   }
 
   create(body: UserCreate): Observable<User> {

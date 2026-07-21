@@ -6,8 +6,7 @@ from sqlmodel import Session, select, func
 
 from app.database import get_session
 from app.models.client import Client
-from app.models.chauffeur import Chauffeur
-from app.models.livreur import Livreur
+from app.models.user import User
 from app.models.expedition import Expedition, ExpeditionCreate, ExpeditionUpdate, ExpeditionRead
 from app.models.retour import Retour, RetourCreate, RetourRead
 from app.models.livraison_detail import (
@@ -91,7 +90,7 @@ def create_expedition(
     exp_in: ExpeditionCreate,
     session: Session = Depends(get_session),
 ) -> Any:
-    chauffeur = session.get(Chauffeur, exp_in.chauffeur_id)
+    chauffeur = session.get(User, exp_in.chauffeur_id)
     if not chauffeur:
         raise HTTPException(status_code=404, detail="Chauffeur introuvable")
 
@@ -106,7 +105,7 @@ def create_expedition(
         date=exp_in.date,
         destination_type=exp_in.destination_type,
         chauffeur_id=exp_in.chauffeur_id,
-        chauffeur_name=chauffeur.name,
+        chauffeur_name=chauffeur.full_name,
         nc_plastique=max(0, exp_in.nc_plastique),
         nc_bois=max(0, exp_in.nc_bois),
         notes=exp_in.notes,
@@ -122,10 +121,10 @@ def create_expedition(
     else:
         if not exp_in.livreur_id:
             raise HTTPException(status_code=422, detail="livreur_id requis pour une expédition Détail/Horeca")
-        livreur = session.get(Livreur, exp_in.livreur_id)
+        livreur = session.get(User, exp_in.livreur_id)
         if not livreur:
             raise HTTPException(status_code=404, detail="Livreur introuvable")
-        exp_data.update(livreur_id=livreur.id, livreur_name=livreur.name)
+        exp_data.update(livreur_id=livreur.id, livreur_name=livreur.full_name)
 
     exp = Expedition(**exp_data)
     session.add(exp)
@@ -168,16 +167,16 @@ def update_expedition(
         exp.client_code = client.code
 
     if "livreur_id" in data and data["livreur_id"] is not None:
-        livreur = session.get(Livreur, data["livreur_id"])
+        livreur = session.get(User, data["livreur_id"])
         if not livreur:
             raise HTTPException(status_code=404, detail="Livreur introuvable")
-        exp.livreur_name = livreur.name
+        exp.livreur_name = livreur.full_name
 
     if "chauffeur_id" in data:
-        chauffeur = session.get(Chauffeur, data["chauffeur_id"])
+        chauffeur = session.get(User, data["chauffeur_id"])
         if not chauffeur:
             raise HTTPException(status_code=404, detail="Chauffeur introuvable")
-        exp.chauffeur_name = chauffeur.name
+        exp.chauffeur_name = chauffeur.full_name
 
     for k, v in data.items():
         if v is not None:

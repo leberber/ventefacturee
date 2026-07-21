@@ -12,6 +12,11 @@ def run_migrations() -> None:
     """Rename legacy tables/columns to new naming convention."""
     with engine.connect() as conn:
         conn.execute(text("""
+            ALTER TYPE userrole ADD VALUE IF NOT EXISTS 'CHAUFFEUR';
+        """))
+        conn.commit()
+
+        conn.execute(text("""
             DO $$
             BEGIN
                 -- Rename main table (only if target doesn't already exist)

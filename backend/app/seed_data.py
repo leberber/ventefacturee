@@ -34,6 +34,37 @@ def seed_config(session: Session) -> None:
     print("[seed] Config pricing créée")
 
 
+def seed_staff(session: Session) -> None:
+    DEFAULT_PASSWORD = "pallette2025"
+
+    livreurs = [
+        ("Hocine Mebarek",  "0555123001", UserRole.LIVREUR),
+        ("Rachid Ait Ali",  "0555123002", UserRole.LIVREUR),
+        ("Farid Tigrine",   "0555123003", UserRole.LIVREUR),
+    ]
+    chauffeurs = [
+        ("Mourad Ouali",     "0555124001", UserRole.CHAUFFEUR),
+        ("Yacine Boukhalfa", "0555124002", UserRole.CHAUFFEUR),
+        ("Amar Meziane",     "0555124003", UserRole.CHAUFFEUR),
+    ]
+
+    for full_name, phone, role in livreurs + chauffeurs:
+        existing = session.exec(select(User).where(User.phone == phone)).first()
+        if existing:
+            continue
+        session.add(User(
+            phone=phone,
+            full_name=full_name,
+            hashed_password=hash_password(DEFAULT_PASSWORD),
+            role=role,
+            is_active=True,
+        ))
+        print(f"[seed] {role.value} créé : {full_name} / {phone} / {DEFAULT_PASSWORD}")
+
+    session.commit()
+
+
 def run_all(session: Session) -> None:
     seed_admin(session)
     seed_config(session)
+    seed_staff(session)

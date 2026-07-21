@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends
-from app.api.api_v1.endpoints import clients, chauffeurs, livreurs, expeditions, auth, users, config
+from app.api.api_v1.endpoints import clients, expeditions, auth, users, config
 from app.api.deps import get_current_user
 
 api_router = APIRouter()
@@ -10,7 +10,5 @@ api_router.include_router(auth.router,  prefix="/auth",  tags=["Auth"])
 # Protected — valid JWT required
 api_router.include_router(users.router,        prefix="/users",        tags=["Users"],        dependencies=[Depends(get_current_user)])
 api_router.include_router(clients.router,      prefix="/clients",      tags=["Clients"],      dependencies=[Depends(get_current_user)])
-api_router.include_router(chauffeurs.router,   prefix="/chauffeurs",   tags=["Chauffeurs"],   dependencies=[Depends(get_current_user)])
-api_router.include_router(livreurs.router,     prefix="/livreurs",     tags=["Livreurs"],     dependencies=[Depends(get_current_user)])
 api_router.include_router(expeditions.router,  prefix="/expeditions",  tags=["Expeditions"],  dependencies=[Depends(get_current_user)])
 api_router.include_router(config.router,       prefix="/config",       tags=["Config"],       dependencies=[Depends(get_current_user)])

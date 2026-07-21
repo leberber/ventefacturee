@@ -31,11 +31,12 @@ export class UtilisateursComponent implements OnInit {
   sortCol = 'full_name';
   sortDir: 1 | -1 = 1;
 
-  readonly roleLabel: Record<string, string> = { admin: 'Admin', employe: 'Employé', livreur: 'Livreur' };
+  readonly roleLabel: Record<string, string> = { admin: 'Admin', employe: 'Employé', livreur: 'Livreur', chauffeur: 'Chauffeur' };
   readonly roleBadge: Record<string, string> = {
-    admin:   'badge badge--danger',
-    employe: 'badge badge--warning',
-    livreur: 'badge badge--info',
+    admin:     'badge badge--danger',
+    employe:   'badge badge--warning',
+    livreur:   'badge badge--info',
+    chauffeur: 'badge badge--success',
   };
 
   get sorted(): User[] {
@@ -79,6 +80,15 @@ export class UtilisateursComponent implements OnInit {
         });
       },
     });
+  }
+
+  get isAdmin(): boolean { return this.auth.isAdmin; }
+
+  formatPhone(phone: string): string {
+    const d = phone.replace(/\s/g, '');
+    return d.length === 10
+      ? `${d.slice(0,4)} ${d.slice(4,6)} ${d.slice(6,8)} ${d.slice(8,10)}`
+      : phone;
   }
 
   isSelf(u: User): boolean { return u.id === this.auth.currentUser()?.id; }

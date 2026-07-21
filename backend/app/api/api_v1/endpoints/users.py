@@ -1,6 +1,6 @@
-from typing import Any, List
+from typing import Any, List, Optional
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlmodel import Session, select
 
 from app.database import get_session
@@ -13,22 +13,33 @@ router = APIRouter()
 
 @router.get("", response_model=List[UserRead])
 def list_users(
+    role: Optional[UserRole] = Query(default=None),
     session: Session = Depends(get_session),
-    current_user: User = Depends(require_admin),
+    current_user: User = Depends(get_current_user),
 ) -> Any:
-    return session.exec(select(User).order_by(User.full_name)).all()
+    q = select(User)
+    if role:
+        q = q.where(User.role == role)
+    return session.exec(q.order_by(User.full_name)).all()
 
 
 @router.post("", response_model=UserRead, status_code=201)
 def create_user(
     user_in: UserCreate,
     session: Session = Depends(get_session),
-    current_user: User = Depends(require_admin),
+    current_user: User = Depends(get_current_user),
 ) -> Any:
-    if session.exec(select(User).where(User.phone == user_in.phone)).first():
+    if current_user.role == UserRole.EMPLOYE:
+        if user_in.role not in (UserRole.LIVREUR, UserRole.CHAUFFEUR):
+            raise HTTPException(status_code=403, detail="Les employés ne peuvent créer que des livreurs ou chauffeurs")
+    elif current_user.role not in (UserRole.ADMIN,):
+        raise HTTPException(status_code=403, detail="Accès refusé")
+
+    phone = user_in.phone.replace(" ", "")
+    if session.exec(select(User).where(User.phone == phone)).first():
         raise HTTPException(status_code=400, detail="Ce numéro de téléphone est déjà utilisé")
     user = User(
-        phone=user_in.phone,
+        phone=phone,
         full_name=user_in.full_name,
         hashed_password=hash_password(user_in.password),
         role=user_in.role,
@@ -50,6 +61,8 @@ def update_user(
     if not user:
         raise HTTPException(status_code=404, detail="Utilisateur introuvable")
     data = user_in.model_dump(exclude_unset=True)
+    if "phone" in data:
+        data["phone"] = data["phone"].replace(" ", "")
     if "password" in data:
         data["hashed_password"] = hash_password(data.pop("password"))
     for k, v in data.items():

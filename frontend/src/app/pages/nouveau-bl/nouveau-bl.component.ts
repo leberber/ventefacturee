@@ -11,8 +11,7 @@ import { InputText } from 'primeng/inputtext';
 import { MessageService } from 'primeng/api';
 
 import { ClientsService } from '../../core/services/clients.service';
-import { ChauffeursService } from '../../core/services/chauffeurs.service';
-import { LivreursService } from '../../core/services/livreurs.service';
+import { UsersService } from '../../core/services/users.service';
 import { ExpeditionsService } from '../../core/services/expeditions.service';
 import { Client } from '../../core/models/client.model';
 import { ExpeditionCreate } from '../../core/models/expedition.model';
@@ -29,8 +28,7 @@ type PaletteField = 'plastique' | 'bois';
 })
 export class NouveauBLComponent implements OnInit {
   private clientsService      = inject(ClientsService);
-  private chauffeursService   = inject(ChauffeursService);
-  private livreursService     = inject(LivreursService);
+  private usersService        = inject(UsersService);
   private expeditionsService  = inject(ExpeditionsService);
   private messageService      = inject(MessageService);
   private router              = inject(Router);
@@ -122,11 +120,11 @@ export class NouveauBLComponent implements OnInit {
       this.clients = this.allClients; // used for multiselect (all categories)
       data.forEach(c => this.clientsMap.set(c.id, c));
     });
-    this.chauffeursService.list().subscribe(data => {
-      this.chauffeurs = data.map(c => ({ label: c.name, value: c.id }));
+    this.usersService.listByRole('chauffeur').subscribe(data => {
+      this.chauffeurs = data.filter(u => u.is_active).map(u => ({ label: u.full_name, value: u.id }));
     });
-    this.livreursService.list().subscribe(data => {
-      this.livreurs = data.filter(l => l.is_active).map(l => ({ label: l.name, value: l.id }));
+    this.usersService.listByRole('livreur').subscribe(data => {
+      this.livreurs = data.filter(u => u.is_active).map(u => ({ label: u.full_name, value: u.id }));
     });
 
     this.form.get('client_id')!.valueChanges.subscribe(id => {

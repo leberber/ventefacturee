@@ -5,9 +5,10 @@ from enum import Enum
 
 
 class UserRole(str, Enum):
-    ADMIN   = "admin"
-    EMPLOYE = "employe"
-    LIVREUR = "livreur"
+    ADMIN    = "admin"
+    EMPLOYE  = "employe"
+    LIVREUR  = "livreur"
+    CHAUFFEUR = "chauffeur"
 
 
 class User(SQLModel, table=True):

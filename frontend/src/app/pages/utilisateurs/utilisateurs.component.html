@@ -67,7 +67,7 @@
                     </span>
                   </div>
                 </td>
-                <td><code class="font-mono text-muted">{{ u.phone }}</code></td>
+                <td><code class="font-mono text-muted">{{ formatPhone(u.phone) }}</code></td>
                 <td><span [class]="roleBadge[u.role]">{{ roleLabel[u.role] }}</span></td>
                 <td>
                   @if (u.is_active) {
@@ -77,13 +77,15 @@
                   }
                 </td>
                 <td class="actions-cell">
-                  <button class="table-action-btn" title="Modifier" (click)="openEdit(u)">
-                    <i class="pi pi-pencil"></i>
-                  </button>
-                  <button class="table-action-btn table-action-btn--danger" title="Supprimer"
-                    (click)="confirmDelete(u)" [disabled]="isSelf(u)">
-                    <i class="pi pi-trash"></i>
-                  </button>
+                  @if (isAdmin) {
+                    <button class="table-action-btn" title="Modifier" (click)="openEdit(u)">
+                      <i class="pi pi-pencil"></i>
+                    </button>
+                    <button class="table-action-btn table-action-btn--danger" title="Supprimer"
+                      (click)="confirmDelete(u)" [disabled]="isSelf(u)">
+                      <i class="pi pi-trash"></i>
+                    </button>
+                  }
                 </td>
               </tr>
             }

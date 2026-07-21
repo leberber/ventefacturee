@@ -14,11 +14,9 @@ import { MessageService, ConfirmationService } from 'primeng/api';
 
 import { ExpeditionsService } from '../../core/services/expeditions.service';
 import { ClientsService } from '../../core/services/clients.service';
-import { LivreursService } from '../../core/services/livreurs.service';
+import { UsersService } from '../../core/services/users.service';
 import { Expedition, ExpeditionUpdate } from '../../core/models/expedition.model';
 import { Client } from '../../core/models/client.model';
-import { ChauffeursService } from '../../core/services/chauffeurs.service';
-import { Chauffeur } from '../../core/models/chauffeur.model';
 import { sortItems, toggleSort } from '../../core/utils/sort.util';
 
 @Component({
@@ -44,8 +42,7 @@ export class HistoriqueComponent implements OnInit {
 
   private expeditionsService  = inject(ExpeditionsService);
   private clientsService      = inject(ClientsService);
-  private chauffeursService   = inject(ChauffeursService);
-  private livreursService     = inject(LivreursService);
+  private usersService        = inject(UsersService);
   private messageService      = inject(MessageService);
   private confirmationService = inject(ConfirmationService);
   private route               = inject(ActivatedRoute);
@@ -101,11 +98,11 @@ export class HistoriqueComponent implements OnInit {
       ];
       data.forEach(c => this.clientsMap.set(c.id, c));
     });
-    this.chauffeursService.list().subscribe(data => {
-      this.chauffeurOptions = data.map((c: Chauffeur) => ({ label: c.name, value: c.id }));
+    this.usersService.listByRole('chauffeur').subscribe(data => {
+      this.chauffeurOptions = data.filter(u => u.is_active).map(u => ({ label: u.full_name, value: u.id }));
     });
-    this.livreursService.list().subscribe(data => {
-      this.livreurOptions = data.filter(l => l.is_active).map(l => ({ label: l.name, value: l.id }));
+    this.usersService.listByRole('livreur').subscribe(data => {
+      this.livreurOptions = data.filter(u => u.is_active).map(u => ({ label: u.full_name, value: u.id }));
     });
   }
 
