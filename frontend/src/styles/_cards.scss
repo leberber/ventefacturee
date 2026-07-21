@@ -164,6 +164,28 @@
   animation-delay: calc(var(--card-i, 0) * 60ms);
 }
 
+// ── Livraison "restant" bar ───────────────────────────────────────────────────
+.livraison-restant-bar {
+  position: fixed;
+  bottom: 0;
+  left: var(--sidebar-w, 0);
+  right: 0;
+  z-index: 90;
+  background: var(--surface-card);
+  border-top: 1px solid var(--surface-border);
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, .06);
+  padding: 0.65rem 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+
+  @media (max-width: 768px) {
+    left: 0;
+    bottom: calc(var(--mob-nav-h) + env(safe-area-inset-bottom));
+  }
+}
+
 // ── Fixed form footer (shared by all form pages) ────────────────────────────────
 .form-footer {
   position: fixed;

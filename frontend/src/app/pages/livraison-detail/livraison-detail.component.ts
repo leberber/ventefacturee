@@ -8,6 +8,7 @@ import { MessageService } from 'primeng/api';
 
 import { ExpeditionsService } from '../../core/services/expeditions.service';
 import { ClientsService } from '../../core/services/clients.service';
+import { TourneeStateService } from '../../core/services/tournee-state.service';
 import { Expedition, ExpeditionClient, LivraisonDetailCreate } from '../../core/models/expedition.model';
 
 interface ClientInput {
@@ -34,6 +35,7 @@ export class LivraisonDetailComponent implements OnInit {
   readonly router            = inject(Router);
   private expeditionsService = inject(ExpeditionsService);
   private clientsService     = inject(ClientsService);
+  private tourneeState       = inject(TourneeStateService);
   private messageService     = inject(MessageService);
 
   bl: Expedition | null = null;
@@ -45,6 +47,16 @@ export class LivraisonDetailComponent implements OnInit {
 
   get recordedCount(): number {
     return this.expeditionClients.filter(ec => ec.detail).length;
+  }
+
+  get restantPlastique(): number {
+    const distributed = Array.from(this.inputs.values()).reduce((s, inp) => s + inp.plastique, 0);
+    return (this.bl?.nc_plastique ?? 0) - distributed;
+  }
+
+  get restantBois(): number {
+    const distributed = Array.from(this.inputs.values()).reduce((s, inp) => s + inp.bois, 0);
+    return (this.bl?.nc_bois ?? 0) - distributed;
   }
 
   ngOnInit() {
@@ -96,8 +108,10 @@ export class LivraisonDetailComponent implements OnInit {
   }
 
   setQty(clientId: number, field: 'plastique' | 'bois' | 'retour_plastique' | 'retour_bois', event: Event) {
-    const n = parseInt((event.target as HTMLInputElement).value, 10);
-    this.inputs.get(clientId)![field] = isNaN(n) || n < 0 ? 0 : n;
+    const inp = this.inputs.get(clientId)!;
+    let n = parseInt((event.target as HTMLInputElement).value, 10);
+    if (isNaN(n) || n < 0) n = 0;
+    inp[field] = n;
   }
 
   saveDetail(clientId: number) {
@@ -126,6 +140,7 @@ export class LivraisonDetailComponent implements OnInit {
           });
         }
 
+        this.tourneeState.refresh();
         this.messageService.add({ severity: 'success', summary: 'Enregistré', detail: `Livraison pour ${ec?.client_name} enregistrée`, life: 3000 });
       },
       error: e => {
@@ -133,6 +148,11 @@ export class LivraisonDetailComponent implements OnInit {
         this.messageService.add({ severity: 'error', summary: 'Erreur', detail: e.error?.detail ?? 'Erreur', life: 4000 });
       },
     });
+  }
+
+  clearIfZero(event: Event) {
+    const el = event.target as HTMLInputElement;
+    if (el.value === '0') el.value = '';
   }
 
   captureLocation(clientId: number) {

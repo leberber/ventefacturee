@@ -11,8 +11,11 @@
     <!-- Nav -->
     <nav class="admin-sidebar__nav">
       @if(isLivreur) {
+        <button class="nav-item" (click)="goToActiveTournee()">
+          <i class="pi pi-truck"></i><span>Tournée active</span>
+        </button>
         <a class="nav-item" routerLink="/mes-tournees" routerLinkActive="active">
-          <i class="pi pi-truck"></i><span>Mes Tournées</span>
+          <i class="pi pi-list"></i><span>Mes Tournées</span>
         </a>
       } @else {
         <a class="nav-item" routerLink="/dashboard" routerLinkActive="active">
@@ -66,11 +69,42 @@
   <header class="mob-topbar">
     <img src="assets/logo.png" alt="CLR Freha" class="mob-topbar__logo" />
     <div class="mob-topbar__user">
-      <span class="mob-topbar__name">{{ user?.full_name }}</span>
+      @if (isLivreur && tourneeState.activeBlNumber()) {
+        <span class="mob-topbar__name"><code class="font-mono">{{ tourneeState.activeBlNumber() }}</code></span>
+      } @else {
+        <span class="mob-topbar__name">{{ user?.full_name }}</span>
+      }
     </div>
-    <button class="mob-topbar__logout" type="button" (click)="logout()" title="Se déconnecter">
-      <i class="pi pi-sign-out"></i>
-    </button>
+    @if (isLivreur) {
+      @if (tourneeState.totalClients() > 0) {
+        <span [class]="tourneeState.deliveredCount() === tourneeState.totalClients() ? 'badge badge--success' : 'badge badge--warning'" style="font-size:0.7rem;flex-shrink:0">
+          {{ tourneeState.deliveredCount() }}/{{ tourneeState.totalClients() }} livrés
+        </span>
+      }
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:0.1rem;flex-shrink:0">
+        <span style="font-size:0.6rem;text-transform:uppercase;letter-spacing:0.05em;color:var(--text-color-secondary);font-weight:600">Avec vous</span>
+        <div style="display:flex;align-items:center;gap:0.6rem">
+          <span style="display:flex;align-items:center;gap:0.25rem">
+            <img src="assets/plastiquepallette.png" style="height:14px" alt="">
+            <strong style="font-size:var(--font-size-sm)"
+              [style.color]="tourneeState.restantPlastique() === 0 ? 'var(--color-success,#22c55e)' : 'var(--color-warning,#f59e0b)'">
+              {{ tourneeState.restantPlastique() }}
+            </strong>
+          </span>
+          <span style="display:flex;align-items:center;gap:0.25rem">
+            <img src="assets/woodpallette.png" style="height:14px" alt="">
+            <strong style="font-size:var(--font-size-sm)"
+              [style.color]="tourneeState.restantBois() === 0 ? 'var(--color-success,#22c55e)' : 'var(--color-warning,#f59e0b)'">
+              {{ tourneeState.restantBois() }}
+            </strong>
+          </span>
+        </div>
+      </div>
+    } @else {
+      <button class="mob-topbar__logout" type="button" (click)="logout()" title="Se déconnecter">
+        <i class="pi pi-sign-out"></i>
+      </button>
+    }
   </header>
 
   <!-- Main content -->
@@ -81,8 +115,12 @@
   <!-- Mobile bottom nav -->
   <nav class="mob-nav">
     @if(isLivreur) {
-      <a class="mob-nav__item" routerLink="/mes-tournees" routerLinkActive="mob-nav__item--active">
+      <button class="mob-nav__item" (click)="goToActiveTournee()">
         <i class="pi pi-truck"></i>
+        <span>Active</span>
+      </button>
+      <a class="mob-nav__item" routerLink="/mes-tournees" routerLinkActive="mob-nav__item--active">
+        <i class="pi pi-list"></i>
         <span>Tournées</span>
       </a>
     } @else {
@@ -111,6 +149,41 @@
         </a>
       }
     }
+    <button class="mob-nav__item" (click)="drawerOpen.set(true)">
+      <i class="pi pi-bars"></i>
+      <span>Menu</span>
+    </button>
   </nav>
+
+  <!-- Mobile drawer -->
+  @if (drawerOpen()) {
+    <div class="mob-drawer-backdrop" (click)="drawerOpen.set(false)"></div>
+    <div class="mob-drawer">
+      <div class="mob-drawer__handle"></div>
+
+      <div class="mob-drawer__user">
+        <div class="mob-drawer__user-avatar"><i class="pi pi-user"></i></div>
+        <div>
+          <div class="mob-drawer__user-name">{{ user?.full_name }}</div>
+          <div class="mob-drawer__user-role">{{ user?.role | titlecase }}</div>
+        </div>
+      </div>
+
+      @if (isAdminOrEmploye) {
+        <a class="mob-drawer__item" routerLink="/utilisateurs" (click)="drawerOpen.set(false)">
+          <i class="pi pi-shield"></i><span>Fonctionnaires</span>
+        </a>
+        <a class="mob-drawer__item" routerLink="/parametres" (click)="drawerOpen.set(false)">
+          <i class="pi pi-cog"></i><span>Paramètres</span>
+        </a>
+      }
+
+      <div class="mob-drawer__separator"></div>
+
+      <button class="mob-drawer__item mob-drawer__item--danger" (click)="logout()">
+        <i class="pi pi-sign-out"></i><span>Se déconnecter</span>
+      </button>
+    </div>
+  }
 
 </div>

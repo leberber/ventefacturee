@@ -3,22 +3,11 @@
 <div class="page-content" style="padding-bottom:5rem">
 
   <div class="page-header" style="max-width:680px;margin:0 auto var(--space-6)">
-    <div style="display:flex;align-items:center;gap:0.75rem">
-      <button type="button" class="back-btn" (click)="router.navigate([bl?.livreur_id ? '/mes-tournees' : '/historique'])"><i class="pi pi-arrow-left"></i></button>
-      <div class="page-icon"><i class="pi pi-map-marker"></i></div>
-      <div>
-        <h1 class="page-header__title">Livraisons — {{ bl?.bl_number }}</h1>
-        <p class="page-header__sub">
-          @if (bl) {
-            {{ bl.livreur_name }} · {{ bl.chauffeur_name }}
-            &nbsp;·&nbsp;
-            <span [class]="recordedCount === expeditionClients.length && expeditionClients.length > 0 ? 'badge badge--success' : 'badge badge--warning'" style="font-size:0.7rem">
-              {{ recordedCount }}/{{ expeditionClients.length }} livrés
-            </span>
-          }
-        </p>
-      </div>
-    </div>
+    @if (bl) {
+      <span [class]="recordedCount === expeditionClients.length && expeditionClients.length > 0 ? 'badge badge--success' : 'badge badge--warning'" style="font-size:0.75rem">
+        {{ recordedCount }}/{{ expeditionClients.length }} livrés
+      </span>
+    }
   </div>
 
   @if (loading) {
@@ -63,6 +52,17 @@
                        (change)="setQty(ec.client_id, 'plastique', $event)" min="0">
                 <button type="button" class="qty-btn qty-btn--plus" (click)="inc(ec.client_id, 'plastique')">+</button>
               </div>
+              <div class="qty-tile__consigne">
+                <span class="qty-tile__consigne-label">Nb. palettes consignées</span>
+                <input type="number" class="qty-input qty-input--sm"
+                       [class.qty-input--error]="getInput(ec.client_id).retour_plastique > getInput(ec.client_id).plastique"
+                       [value]="getInput(ec.client_id).retour_plastique"
+                       (focus)="clearIfZero($event)"
+                       (input)="setQty(ec.client_id, 'retour_plastique', $event)" min="0">
+                @if (getInput(ec.client_id).retour_plastique > getInput(ec.client_id).plastique) {
+                  <span class="qty-tile__consigne-error">Vous ne pouvez pas récupérer plus de consignes que le nombre de palettes laissées chez le client</span>
+                }
+              </div>
             </div>
 
             <div class="qty-tile qty-tile--sm">
@@ -74,11 +74,22 @@
                        (change)="setQty(ec.client_id, 'bois', $event)" min="0">
                 <button type="button" class="qty-btn qty-btn--plus" (click)="inc(ec.client_id, 'bois')">+</button>
               </div>
+              <div class="qty-tile__consigne">
+                <span class="qty-tile__consigne-label">Nb. palettes consignées</span>
+                <input type="number" class="qty-input qty-input--sm"
+                       [class.qty-input--error]="getInput(ec.client_id).retour_bois > getInput(ec.client_id).bois"
+                       [value]="getInput(ec.client_id).retour_bois"
+                       (focus)="clearIfZero($event)"
+                       (input)="setQty(ec.client_id, 'retour_bois', $event)" min="0">
+                @if (getInput(ec.client_id).retour_bois > getInput(ec.client_id).bois) {
+                  <span class="qty-tile__consigne-error">Max {{ getInput(ec.client_id).bois }} palettes chez ce client</span>
+                }
+              </div>
             </div>
 
           </div>
 
-          <div style="display:flex;align-items:center;justify-content:space-between;gap:0.5rem;padding-top:0.5rem;border-top:1px solid var(--surface-border)">
+<div style="display:flex;align-items:center;justify-content:space-between;gap:0.5rem;padding-top:0.5rem;border-top:1px solid var(--surface-border)">
             @if (!ec.has_location || getInput(ec.client_id).lat) {
               <button type="button"
                 [class]="getInput(ec.client_id).lat ? 'gps-btn gps-btn--captured' : 'gps-btn'"
@@ -113,3 +124,4 @@
   }
 
 </div>
+
