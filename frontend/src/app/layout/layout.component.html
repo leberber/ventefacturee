@@ -69,13 +69,15 @@
   <header class="mob-topbar">
     <img src="assets/logo.png" alt="CLR Freha" class="mob-topbar__logo" />
     <div class="mob-topbar__user">
-      @if (isLivreur && tourneeState.totalClients() > 0) {
+      @if (isLivreur && router.url === '/mes-tournees') {
+        <span style="font-size:var(--font-size-sm);font-weight:var(--font-weight-semibold);color:var(--text-color)">Mes Tournées</span>
+      } @else if (isLivreur && tourneeState.totalClients() > 0) {
         <span [class]="tourneeState.deliveredCount() === tourneeState.totalClients() ? 'badge badge--success' : 'badge badge--warning'" style="font-size:0.7rem">
           {{ tourneeState.deliveredCount() }}/{{ tourneeState.totalClients() }} livrés
         </span>
       }
     </div>
-    @if (isLivreur) {
+    @if (isLivreur && router.url !== '/mes-tournees') {
       <div style="display:flex;flex-direction:column;align-items:flex-end;gap:0.1rem;flex-shrink:0">
         <span style="font-size:0.6rem;text-transform:uppercase;letter-spacing:0.05em;color:var(--text-color-secondary);font-weight:600">Avec vous</span>
         <div style="display:flex;align-items:center;gap:0.6rem">
@@ -95,10 +97,6 @@
           </span>
         </div>
       </div>
-    } @else {
-      <button class="mob-topbar__logout" type="button" (click)="logout()" title="Se déconnecter">
-        <i class="pi pi-sign-out"></i>
-      </button>
     }
   </header>
 

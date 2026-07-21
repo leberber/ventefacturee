@@ -10,6 +10,37 @@
 
 .btn-block { width: 100%; justify-content: center; }
 
+.filter-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.35rem 0.9rem;
+  border-radius: 999px;
+  border: 1px solid var(--surface-border);
+  background: var(--surface-card);
+  color: var(--text-color-secondary);
+  font-size: 0.8rem;
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  white-space: nowrap;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+
+  &--active {
+    background: var(--text-color);
+    border-color: var(--text-color);
+    color: var(--surface-ground);
+    font-weight: var(--font-weight-semibold);
+  }
+
+  @media (hover: hover) {
+    &:not(.filter-chip--active):hover {
+      border-color: var(--text-color-secondary);
+      color: var(--text-color);
+    }
+  }
+}
+
 .btn-add {
   display: inline-flex;
   align-items: center;

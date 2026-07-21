@@ -15,7 +15,7 @@ export class LayoutComponent implements OnInit {
   drawerOpen    = signal(false);
   auth          = inject(AuthService);
   tourneeState  = inject(TourneeStateService);
-  private router = inject(Router);
+  readonly router = inject(Router);
 
   get user()             { return this.auth.currentUser(); }
   get isAdminOrEmploye() { return this.auth.isAdminOrEmploye; }

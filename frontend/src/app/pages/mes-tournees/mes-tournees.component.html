@@ -1,16 +1,12 @@
 <div class="page-content">
 
-  <div class="page-header">
-    <div style="display:flex;align-items:center;gap:0.75rem">
-      <div class="page-icon"><i class="pi pi-truck"></i></div>
-      <div>
-        <h1 class="page-header__title">Mes Tournées</h1>
-        <p class="page-header__sub">{{ tournees.length }} tournée{{ tournees.length !== 1 ? 's' : '' }}</p>
-      </div>
-    </div>
+  <div style="max-width:680px;margin:0 auto var(--space-4);display:flex;gap:0.5rem">
+    <button type="button" [class]="filter === 'today' ? 'filter-chip filter-chip--active' : 'filter-chip'" (click)="setFilter('today')">Aujourd'hui</button>
+    <button type="button" [class]="filter === 'week' ? 'filter-chip filter-chip--active' : 'filter-chip'" (click)="setFilter('week')">Cette semaine</button>
+    <button type="button" [class]="filter === 'month' ? 'filter-chip filter-chip--active' : 'filter-chip'" (click)="setFilter('month')">Ce mois</button>
   </div>
 
-  @if (loading) {
+@if (loading) {
     <div style="max-width:680px;margin:0 auto;display:flex;flex-direction:column;gap:0.75rem">
       @for (_ of [1,2,3]; track $index) {
         <div style="height:90px;border-radius:var(--radius-xl);background:var(--surface-200);animation:skeleton 1.2s infinite alternate"></div>
@@ -25,19 +21,26 @@
     <div style="max-width:680px;margin:0 auto;display:flex;flex-direction:column;gap:0.75rem">
       @for (t of tournees; track t.id) {
         <a [routerLink]="['/expedition', t.id, 'livraison']" class="tournee-card">
-          <div class="tournee-card__left">
-            <code class="font-mono tournee-card__bl">{{ t.bl_number }}</code>
-            <span class="text-muted tournee-card__date">{{ t.date | date:'dd/MM/yyyy' }}</span>
+          <div class="tournee-card__body">
+            <div class="tournee-card__row-top">
+              <code class="font-mono tournee-card__bl">{{ t.bl_number }}</code>
+              @if (restant.get(t.id); as r) {
+                <div class="tournee-card__palettes">
+                  <span><img src="assets/plastiquepallette.png" style="height:13px" alt=""><strong>{{ r.plastique }}</strong></span>
+                  <span><img src="assets/woodpallette.png" style="height:13px" alt=""><strong>{{ r.bois }}</strong></span>
+                </div>
+              }
+            </div>
+            <div class="tournee-card__row-bot">
+              <span class="text-muted tournee-card__date">{{ t.date | date:'dd/MM/yyyy' }}</span>
+              <div style="display:flex;align-items:center;gap:0.4rem">
+                <span [class]="destinationBadge[t.destination_type]">{{ destinationLabel[t.destination_type] }}</span>
+                @if (t.chauffeur_name) {
+                  <span class="tournee-card__chauffeur"><i class="pi pi-user"></i> {{ t.chauffeur_name }}</span>
+                }
+              </div>
+            </div>
           </div>
-          <div class="tournee-card__mid">
-            <span [class]="destinationBadge[t.destination_type]">{{ destinationLabel[t.destination_type] }}</span>
-            @if (t.chauffeur_name) {
-              <span class="tournee-card__chauffeur">
-                <i class="pi pi-user"></i> {{ t.chauffeur_name }}
-              </span>
-            }
-          </div>
-          <i class="pi pi-chevron-right tournee-card__arrow"></i>
         </a>
       }
     </div>
