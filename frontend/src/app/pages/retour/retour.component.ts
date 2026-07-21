@@ -134,6 +134,23 @@ export class RetourComponent implements OnInit {
     }
   }
 
+  incLivreur(field: 'plastique' | 'bois') {
+    if (field === 'plastique') this.retourLivreurPlastique++;
+    else this.retourLivreurBois++;
+  }
+
+  decLivreur(field: 'plastique' | 'bois') {
+    if (field === 'plastique') { if (this.retourLivreurPlastique > 0) this.retourLivreurPlastique--; }
+    else { if (this.retourLivreurBois > 0) this.retourLivreurBois--; }
+  }
+
+  setLivreurQty(field: 'plastique' | 'bois', event: Event) {
+    const n = parseInt((event.target as HTMLInputElement).value, 10);
+    const val = isNaN(n) || n < 0 ? 0 : n;
+    if (field === 'plastique') this.retourLivreurPlastique = val;
+    else this.retourLivreurBois = val;
+  }
+
   inc(field: RetourField) {
     const ctrl = this.form.get(field)!;
     ctrl.setValue((ctrl.value ?? 0) + 1);
