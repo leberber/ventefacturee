@@ -7,8 +7,8 @@
     <div style="display:flex;align-items:center;gap:0.75rem">
       <div class="page-icon"><i class="pi pi-list"></i></div>
       <div>
-        <h1 class="page-header__title">Historique des BLs</h1>
-        <p class="page-header__sub">{{ bons.length }} bon{{ bons.length !== 1 ? 's' : '' }} de livraison</p>
+        <h1 class="page-header__title">Historique des expéditions</h1>
+        <p class="page-header__sub">{{ expeditions.length }} expédition{{ expeditions.length !== 1 ? 's' : '' }}</p>
       </div>
     </div>
   </div>
@@ -37,7 +37,7 @@
           </div>
         }
       } @else if (sorted.length === 0) {
-        <div class="table-empty">Aucun BL trouvé</div>
+        <div class="table-empty">Aucune expédition trouvée</div>
       } @else {
         <table class="table">
           <thead>
@@ -45,7 +45,7 @@
               <th class="th-sort" (click)="sortBy('bl_number')"
                 [class.th-sort--asc]="sortCol==='bl_number'&&sortDir===1"
                 [class.th-sort--desc]="sortCol==='bl_number'&&sortDir===-1">
-                N° BL <i class="pi pi-sort-alt"></i>
+                N° Expédition <i class="pi pi-sort-alt"></i>
               </th>
               <th class="th-sort" (click)="sortBy('date')"
                 [class.th-sort--asc]="sortCol==='date'&&sortDir===1"
@@ -54,69 +54,68 @@
               </th>
               <th>Destinataire</th>
               <th>Chauffeur</th>
-              <th><img src="assets/plastiquepallette.png" style="height:14px;vertical-align:middle;margin-right:3px" alt="">Consig.</th>
-              <th>Non-consig.</th>
-              <th>Retour</th>
-              <th><img src="assets/woodpallette.png" style="height:14px;vertical-align:middle;margin-right:3px" alt="">Consig.</th>
-              <th>Non-consig.</th>
-              <th>Retour</th>
+              <th><img src="assets/plastiquepallette.png" style="height:13px;vertical-align:middle;margin-right:3px" alt="">Plastique</th>
+              <th><img src="assets/woodpallette.png" style="height:13px;vertical-align:middle;margin-right:3px" alt="">Bois</th>
               <th>Notes</th>
               <th style="width:7rem"></th>
             </tr>
           </thead>
           <tbody>
-            @for (b of sorted; track b.id; let i = $index) {
+            @for (e of sorted; track e.id; let i = $index) {
               <tr class="table-row-animate" [style.--row-delay]="i * 20 + 'ms'">
-                <td><code class="font-mono text-muted">{{ b.bl_number }}</code></td>
-                <td class="text-muted">{{ b.date | date:'dd/MM/yyyy' }}</td>
+                <td><code class="font-mono text-muted">{{ e.bl_number }}</code></td>
+                <td class="text-muted">{{ e.date | date:'dd/MM/yyyy' }}</td>
                 <td>
                   <div class="table-item-info">
-                    <span class="table-item-name">{{ b.client_name || b.livreur_name }}</span>
-                    @if (b.destination_type !== 'gros') {
-                      <span [class]="destinationBadge[b.destination_type]" style="align-self:flex-start">
-                        {{ destinationLabel[b.destination_type] }}
+                    @if (e.client_id && (clientsMap.get(e.client_id)?.first_name || clientsMap.get(e.client_id)?.last_name)) {
+                      <span class="table-item-name">{{ clientsMap.get(e.client_id)!.first_name }} {{ clientsMap.get(e.client_id)!.last_name }}</span>
+                      <span class="hist-store-pill">{{ e.client_name }}</span>
+                    } @else {
+                      <span class="table-item-name">{{ e.client_name || e.livreur_name }}</span>
+                    }
+                    @if (e.destination_type !== 'gros') {
+                      <span [class]="destinationBadge[e.destination_type]" style="align-self:flex-start">
+                        {{ destinationLabel[e.destination_type] }}
                       </span>
                     }
                   </div>
                 </td>
-                <td class="text-muted">{{ b.chauffeur_name }}</td>
+                <td class="text-muted">{{ e.chauffeur_name }}</td>
                 <td>
-                  @if (b.consigne_plastique > 0) { <span class="badge badge--info">{{ b.consigne_plastique }}</span> }
-                  @else { <span class="text-muted">0</span> }
+                  @if (e.nc_plastique > 0) {
+                    <button class="palette-pill" (click)="openExpPop($event, e, 'plastique')">
+                      <img src="assets/plastiquepallette.png" class="palette-pill__img" alt="">
+                      <span class="palette-pill__count palette-pill__count--plastic">{{ e.nc_plastique - e.retour_plastique }}</span>
+                      <i class="pi pi-chevron-down palette-pill__caret"></i>
+                    </button>
+                  } @else {
+                    <span class="text-muted">—</span>
+                  }
                 </td>
                 <td>
-                  @if (b.nc_plastique > 0) { <span class="badge badge--warning">{{ b.nc_plastique }}</span> }
-                  @else { <span class="text-muted">0</span> }
-                </td>
-                <td>
-                  @if (b.retour_plastique > 0) { <span class="badge badge--success">{{ b.retour_plastique }}</span> }
-                  @else { <span class="text-muted">0</span> }
-                </td>
-                <td>
-                  @if (b.consigne_bois > 0) { <span class="badge badge--info">{{ b.consigne_bois }}</span> }
-                  @else { <span class="text-muted">0</span> }
-                </td>
-                <td>
-                  @if (b.nc_bois > 0) { <span class="badge badge--warning">{{ b.nc_bois }}</span> }
-                  @else { <span class="text-muted">0</span> }
-                </td>
-                <td>
-                  @if (b.retour_bois > 0) { <span class="badge badge--success">{{ b.retour_bois }}</span> }
-                  @else { <span class="text-muted">0</span> }
+                  @if (e.nc_bois > 0) {
+                    <button class="palette-pill" (click)="openExpPop($event, e, 'bois')">
+                      <img src="assets/woodpallette.png" class="palette-pill__img" alt="">
+                      <span class="palette-pill__count palette-pill__count--wood">{{ e.nc_bois - e.retour_bois }}</span>
+                      <i class="pi pi-chevron-down palette-pill__caret"></i>
+                    </button>
+                  } @else {
+                    <span class="text-muted">—</span>
+                  }
                 </td>
                 <td class="text-muted" style="max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">
-                  {{ b.notes || '—' }}
+                  {{ e.notes || '—' }}
                 </td>
                 <td class="actions-cell">
-                  @if (b.destination_type !== 'gros') {
-                    <a [routerLink]="['/expedition', b.id, 'livraison']" class="table-action-btn" title="Voir livraisons">
+                  @if (e.destination_type !== 'gros') {
+                    <a [routerLink]="['/expedition', e.id, 'livraison']" class="table-action-btn" title="Voir livraisons">
                       <i class="pi pi-map-marker"></i>
                     </a>
                   }
-                  <button class="table-action-btn" title="Modifier" (click)="openEdit(b)">
+                  <button class="table-action-btn" title="Modifier" (click)="openEdit(e)">
                     <i class="pi pi-pencil"></i>
                   </button>
-                  <button class="table-action-btn table-action-btn--danger" title="Supprimer" (click)="confirmDelete(b)">
+                  <button class="table-action-btn table-action-btn--danger" title="Supprimer" (click)="confirmDelete(e)">
                     <i class="pi pi-trash"></i>
                   </button>
                 </td>
@@ -131,10 +130,51 @@
 
 </div>
 
-<!-- Dialog: Edit BL -->
+<p-popover #expPop>
+  @if (activeExpedition) {
+    @let sent    = activeType === 'plastique' ? activeExpedition.nc_plastique          : activeExpedition.nc_bois;
+    @let retour  = activeType === 'plastique' ? activeExpedition.retour_plastique       : activeExpedition.retour_bois;
+    @let consigne = activeType === 'plastique' ? activeExpedition.consigne_paid_plastique : activeExpedition.consigne_paid_bois;
+    @let dette   = activeType === 'plastique' ? activeExpedition.palette_dette_plastique : activeExpedition.palette_dette_bois;
+    <div style="min-width:210px;padding:0.25rem 0">
+      <div class="palette-pop__header">
+        <img [src]="activeType === 'plastique' ? 'assets/plastiquepallette.png' : 'assets/woodpallette.png'" style="height:14px" alt="">
+        <span class="palette-pop__name">{{ activeType === 'plastique' ? 'Plastique' : 'Bois' }}</span>
+        <code class="font-mono" style="font-size:var(--font-size-xs);color:var(--text-color-secondary)">{{ activeExpedition.bl_number }}</code>
+      </div>
+      <div class="palette-pop__row" style="font-weight:600;color:var(--text-color)">
+        <span>Envoyées</span>
+        <span class="palette-pop__val">{{ sent }}</span>
+      </div>
+      <div class="palette-pop__row" style="color:var(--color-success,#22c55e)">
+        <span>Retournées</span>
+        <span class="palette-pop__val">− {{ retour }}</span>
+      </div>
+      <div class="palette-pop__row" style="color:var(--color-success,#22c55e)">
+        <span>Consigne encaissée</span>
+        <span class="palette-pop__val">− {{ consigne }}</span>
+      </div>
+      @if (dette > 0) {
+        <div class="palette-pop__row" style="color:var(--color-error,#ef4444)">
+          <span>Dette</span>
+          <span class="palette-pop__val">{{ dette }}</span>
+        </div>
+      }
+      <div style="border-top:var(--border-width) solid var(--surface-border);margin:0.5rem 0.25rem"></div>
+      <div class="palette-pop__row" style="font-weight:700;font-size:var(--font-size-sm)">
+        <span>Balance due</span>
+        <span class="palette-pop__val" [style.color]="sent - retour - consigne > 0 ? 'var(--color-error,#ef4444)' : 'var(--color-success,#22c55e)'">
+          {{ sent - retour - consigne }}
+        </span>
+      </div>
+    </div>
+  }
+</p-popover>
+
+<!-- Dialog: Edit expedition -->
 <p-dialog
   [(visible)]="dialogVisible"
-  header="Modifier le BL"
+  header="Modifier l'expédition"
   [modal]="true"
   [style]="{width:'680px'}"
   [draggable]="false"
@@ -163,18 +203,8 @@
       <div class="palette-section-title"><img src="assets/plastiquepallette.png" style="height:16px;vertical-align:middle;margin-right:6px" alt="">Palettes plastique</div>
       <div class="form-grid-3">
         <div class="field">
-          <label>Consignées</label>
-          <p-inputnumber formControlName="consigne_plastique" [min]="0" [showButtons]="true" buttonLayout="horizontal"
-            decrementButtonIcon="pi pi-minus" incrementButtonIcon="pi pi-plus" [style]="{width:'100%'}" />
-        </div>
-        <div class="field">
-          <label>Non-consignées</label>
+          <label>Quantité</label>
           <p-inputnumber formControlName="nc_plastique" [min]="0" [showButtons]="true" buttonLayout="horizontal"
-            decrementButtonIcon="pi pi-minus" incrementButtonIcon="pi pi-plus" [style]="{width:'100%'}" />
-        </div>
-        <div class="field">
-          <label>Retour</label>
-          <p-inputnumber formControlName="retour_plastique" [min]="0" [showButtons]="true" buttonLayout="horizontal"
             decrementButtonIcon="pi pi-minus" incrementButtonIcon="pi pi-plus" [style]="{width:'100%'}" />
         </div>
       </div>
@@ -184,18 +214,8 @@
       <div class="palette-section-title"><img src="assets/woodpallette.png" style="height:16px;vertical-align:middle;margin-right:6px" alt="">Palettes bois</div>
       <div class="form-grid-3">
         <div class="field">
-          <label>Consignées</label>
-          <p-inputnumber formControlName="consigne_bois" [min]="0" [showButtons]="true" buttonLayout="horizontal"
-            decrementButtonIcon="pi pi-minus" incrementButtonIcon="pi pi-plus" [style]="{width:'100%'}" />
-        </div>
-        <div class="field">
-          <label>Non-consignées</label>
+          <label>Quantité</label>
           <p-inputnumber formControlName="nc_bois" [min]="0" [showButtons]="true" buttonLayout="horizontal"
-            decrementButtonIcon="pi pi-minus" incrementButtonIcon="pi pi-plus" [style]="{width:'100%'}" />
-        </div>
-        <div class="field">
-          <label>Retour</label>
-          <p-inputnumber formControlName="retour_bois" [min]="0" [showButtons]="true" buttonLayout="horizontal"
             decrementButtonIcon="pi pi-minus" incrementButtonIcon="pi pi-plus" [style]="{width:'100%'}" />
         </div>
       </div>

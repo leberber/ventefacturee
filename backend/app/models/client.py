@@ -81,10 +81,6 @@ class ClientRead(SQLModel):
     is_active: bool
     created_at: datetime
     updated_at: Optional[datetime] = None
-    # Computed from BL history
+    # Computed from expedition history
     plastic_balance: Optional[int] = None
-    plastic_consigne: Optional[int] = None
-    plastic_nc: Optional[int] = None
     wood_balance: Optional[int] = None
-    wood_consigne: Optional[int] = None
-    wood_nc: Optional[int] = None

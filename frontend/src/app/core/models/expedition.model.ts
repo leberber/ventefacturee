@@ -1,4 +1,4 @@
-export interface Bon {
+export interface Expedition {
   id: number;
   bl_number: string;
   date: string;
@@ -10,18 +10,20 @@ export interface Bon {
   client_code?: string;
   livreur_id?: number;
   livreur_name?: string;
-  consigne_plastique: number;
   nc_plastique: number;
-  retour_plastique: number;
-  consigne_bois: number;
   nc_bois: number;
+  retour_plastique: number;
+  consigne_paid_plastique: number;
+  palette_dette_plastique: number;
   retour_bois: number;
+  consigne_paid_bois: number;
+  palette_dette_bois: number;
   notes?: string;
   created_at: string;
   updated_at?: string;
 }
 
-export interface BonCreate {
+export interface ExpeditionCreate {
   bl_number: string;
   date: string;
   destination_type: string;
@@ -29,20 +31,46 @@ export interface BonCreate {
   client_id?: number | null;
   livreur_id?: number | null;
   client_ids?: number[];
-  consigne_plastique: number;
   nc_plastique: number;
-  retour_plastique: number;
-  consigne_bois: number;
   nc_bois: number;
-  retour_bois: number;
   notes?: string | null;
 }
 
-export interface BonUpdate extends Partial<BonCreate> {}
+export interface ExpeditionUpdate {
+  chauffeur_id?: number;
+  client_id?: number | null;
+  livreur_id?: number | null;
+  nc_plastique?: number;
+  nc_bois?: number;
+  notes?: string | null;
+}
+
+export interface RetourCreate {
+  date: string;
+  retour_plastique: number;
+  consigne_paid_plastique: number;
+  retour_bois: number;
+  consigne_paid_bois: number;
+  notes?: string | null;
+}
+
+export interface RetourRead {
+  id: number;
+  expedition_id: number;
+  date: string;
+  retour_plastique: number;
+  consigne_paid_plastique: number;
+  palette_dette_plastique: number;
+  retour_bois: number;
+  consigne_paid_bois: number;
+  palette_dette_bois: number;
+  notes?: string;
+  created_at: string;
+}
 
 export interface LivraisonDetail {
   id: number;
-  bl_id: number;
+  expedition_id: number;
   client_id: number;
   client_name: string;
   client_code?: string;
@@ -66,7 +94,7 @@ export interface LivraisonDetailCreate {
 
 export interface ExpeditionClient {
   id: number;
-  bl_id: number;
+  expedition_id: number;
   client_id: number;
   client_name: string;
   client_code?: string;
@@ -79,8 +107,4 @@ export interface DashboardStats {
   today_bls: number;
   total_plastic_balance: number;
   total_wood_balance: number;
-  total_plastic_consigne: number;
-  total_plastic_nc: number;
-  total_wood_consigne: number;
-  total_wood_nc: number;
 }

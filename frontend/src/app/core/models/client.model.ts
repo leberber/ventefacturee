@@ -18,11 +18,7 @@ export interface Client {
   created_at: string;
   updated_at?: string;
   plastic_balance?: number;
-  plastic_consigne?: number;
-  plastic_nc?: number;
   wood_balance?: number;
-  wood_consigne?: number;
-  wood_nc?: number;
 }
 
 export interface ClientCreate {

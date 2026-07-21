@@ -6,8 +6,8 @@ import { Button } from 'primeng/button';
 import { Toast } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
 
-import { BonsService } from '../../core/services/bons.service';
-import { Bon, ExpeditionClient, LivraisonDetailCreate } from '../../core/models/bon.model';
+import { ExpeditionsService } from '../../core/services/expeditions.service';
+import { Expedition, ExpeditionClient, LivraisonDetailCreate } from '../../core/models/expedition.model';
 
 interface ClientInput {
   plastique: number;
@@ -28,35 +28,35 @@ interface ClientInput {
 export class LivraisonDetailComponent implements OnInit {
   private route          = inject(ActivatedRoute);
   private router         = inject(Router);
-  private bonsService    = inject(BonsService);
+  private expeditionsService = inject(ExpeditionsService);
   private messageService = inject(MessageService);
 
-  bl: Bon | null = null;
+  bl: Expedition | null = null;
   expeditionClients: ExpeditionClient[] = [];
   inputs: Map<number, ClientInput> = new Map();
   loading = true;
 
-  get blId(): number { return +this.route.snapshot.paramMap.get('id')!; }
+  get expeditionId(): number { return +this.route.snapshot.paramMap.get('id')!; }
 
   get recordedCount(): number {
     return this.expeditionClients.filter(ec => ec.detail).length;
   }
 
   ngOnInit() {
-    this.bonsService.getById(this.blId).subscribe({
-      next: bl => {
-        this.bl = bl;
+    this.expeditionsService.getById(this.expeditionId).subscribe({
+      next: exp => {
+        this.bl = exp;
         this.loadClients();
       },
       error: () => {
-        this.messageService.add({ severity: 'error', summary: 'Erreur', detail: 'BL introuvable', life: 4000 });
+        this.messageService.add({ severity: 'error', summary: 'Erreur', detail: 'Expédition introuvable', life: 4000 });
         this.loading = false;
       },
     });
   }
 
   loadClients() {
-    this.bonsService.getExpeditionClients(this.blId).subscribe({
+    this.expeditionsService.getExpeditionClients(this.expeditionId).subscribe({
       next: clients => {
         this.expeditionClients = clients;
         for (const ec of clients) {
@@ -107,7 +107,7 @@ export class LivraisonDetailComponent implements OnInit {
       notes:            inp.notes || undefined,
     };
 
-    this.bonsService.upsertDetail(this.blId, body).subscribe({
+    this.expeditionsService.upsertDetail(this.expeditionId, body).subscribe({
       next: detail => {
         inp.saving = false;
         // Update the local expedition client with the saved detail

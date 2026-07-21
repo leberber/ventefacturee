@@ -840,6 +840,166 @@
   }
 }
 
+// ── Dashboard activity section ────────────────────────────────────────────────
+.dash-flux-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.75rem;
+  padding: 1rem 1.25rem;
+  border-bottom: var(--border-width) solid var(--surface-border);
+}
+
+.dash-flux-card {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.85rem 1rem;
+  border-radius: var(--radius-xl);
+  background: var(--surface-ground);
+  border: var(--border-width) solid var(--surface-border);
+  position: relative;
+  overflow: hidden;
+
+  &--in {
+    background: color-mix(in srgb, var(--color-success, #22c55e) 5%, var(--surface-ground));
+    border-color: color-mix(in srgb, var(--color-success, #22c55e) 20%, transparent);
+  }
+
+  &__img { height: 1.75rem; object-fit: contain; }
+
+  &__body { flex: 1; min-width: 0; }
+
+  &__val {
+    font-size: 1.4rem;
+    font-weight: var(--font-weight-bold);
+    color: var(--text-color);
+    line-height: 1.1;
+  }
+
+  &__label {
+    font-size: var(--font-size-xs);
+    color: var(--text-color-secondary);
+    margin-top: 0.15rem;
+  }
+
+  &__icon {
+    font-size: 0.75rem;
+    position: absolute;
+    top: 0.6rem;
+    right: 0.75rem;
+    &--out { color: var(--color-error, #ef4444); opacity: 0.6; }
+    &--in  { color: var(--color-success, #22c55e); opacity: 0.7; }
+  }
+}
+
+.dash-bottom-grid {
+  display: grid;
+  grid-template-columns: 1fr 1.6fr;
+  gap: 1.25rem;
+  padding: 1.25rem;
+}
+
+.dash-section {
+  &__title {
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-semibold);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-color-secondary);
+    margin-bottom: 0.85rem;
+  }
+}
+
+.dash-type-list { display: flex; flex-direction: column; gap: 0.6rem; }
+
+.dash-type-row {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+
+  .badge { min-width: 52px; text-align: center; flex-shrink: 0; }
+}
+
+.dash-type-bar {
+  flex: 1;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--surface-border);
+  overflow: hidden;
+
+  &__fill {
+    height: 100%;
+    border-radius: 999px;
+    transition: width 0.4s ease;
+    &--gros   { background: var(--brand-blue-main, #2563eb); }
+    &--detail { background: #f59e0b; }
+    &--horeca { background: #22c55e; }
+  }
+}
+
+.dash-type-count {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-color);
+  min-width: 1.5rem;
+  text-align: right;
+}
+
+.dash-type-total {
+  margin-top: 0.85rem;
+  font-size: var(--font-size-xs);
+  color: var(--text-color-secondary);
+}
+
+.dash-empty {
+  font-size: var(--font-size-sm);
+  color: var(--text-color-secondary);
+  padding: 0.5rem 0;
+}
+
+.dash-pending-list { display: flex; flex-direction: column; gap: 0.5rem; }
+
+.dash-pending-item {
+  display: grid;
+  grid-template-columns: auto 1fr auto auto;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: var(--radius-lg);
+  background: var(--surface-ground);
+  border: var(--border-width) solid var(--surface-border);
+
+  &__bl   { font-size: var(--font-size-xs); font-weight: 700; color: var(--text-color); }
+  &__client { font-size: var(--font-size-xs); color: var(--text-color-secondary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  &__date { font-size: var(--font-size-xs); color: var(--text-color-secondary); white-space: nowrap; }
+  &__palettes { display: flex; gap: 0.5rem; }
+}
+
+.palette-counts {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.palette-count {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-color);
+
+  &__img { height: 12px; object-fit: contain; }
+
+  &--wood { color: #92400e; }
+
+  &--zero {
+    color: var(--text-color-secondary);
+    opacity: 0.45;
+    font-weight: var(--font-weight-normal);
+  }
+}
+
 // ── Two-column form layout (expedition, retour pages) ─────────────────────────
 .nbl-layout {
   display: grid;

@@ -5,10 +5,10 @@ from datetime import datetime, timezone
 
 class ExpeditionClient(SQLModel, table=True):
     __tablename__ = "expedition_clients"
-    __table_args__ = (UniqueConstraint("bl_id", "client_id"),)
+    __table_args__ = (UniqueConstraint("expedition_id", "client_id"),)
 
     id: Optional[int] = Field(default=None, primary_key=True)
-    bl_id: int = Field(foreign_key="bons_de_livraison.id", index=True)
+    expedition_id: int = Field(foreign_key="expeditions.id", index=True)
     client_id: int = Field(foreign_key="clients.id")
     client_name: str = Field(max_length=150)
     client_code: Optional[str] = Field(default=None, max_length=20)
@@ -16,10 +16,10 @@ class ExpeditionClient(SQLModel, table=True):
 
 class LivraisonDetail(SQLModel, table=True):
     __tablename__ = "livraison_details"
-    __table_args__ = (UniqueConstraint("bl_id", "client_id"),)
+    __table_args__ = (UniqueConstraint("expedition_id", "client_id"),)
 
     id: Optional[int] = Field(default=None, primary_key=True)
-    bl_id: int = Field(foreign_key="bons_de_livraison.id", index=True)
+    expedition_id: int = Field(foreign_key="expeditions.id", index=True)
     client_id: int = Field(foreign_key="clients.id")
     client_name: str = Field(max_length=150)
     client_code: Optional[str] = Field(default=None, max_length=20)
@@ -47,7 +47,7 @@ class LivraisonDetailRead(SQLModel):
     model_config = {"from_attributes": True}
 
     id: int
-    bl_id: int
+    expedition_id: int
     client_id: int
     client_name: str
     client_code: Optional[str] = None
@@ -64,7 +64,7 @@ class ExpeditionClientRead(SQLModel):
     model_config = {"from_attributes": True}
 
     id: int
-    bl_id: int
+    expedition_id: int
     client_id: int
     client_name: str
     client_code: Optional[str] = None

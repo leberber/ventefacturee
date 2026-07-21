@@ -12,7 +12,7 @@
       @if (selectedExpedition) {
         <span class="retour-due-pill">
           <i class="pi pi-box"></i>
-          {{ selectedExpedition.consigne_plastique + selectedExpedition.nc_plastique + selectedExpedition.consigne_bois + selectedExpedition.nc_bois }} palettes dues
+          {{ selectedExpedition.nc_plastique + selectedExpedition.nc_bois }} palettes dues
         </span>
       }
     </div>
@@ -29,9 +29,9 @@
           <div class="field mb-0">
             <label class="exp-label"><i class="pi pi-search"></i>Expédition à retourner <span style="color:var(--color-error)">*</span></label>
             <p-select
-              [(ngModel)]="selectedBlId"
+              [(ngModel)]="selectedExpeditionId"
               [ngModelOptions]="{standalone: true}"
-              [options]="blOptions"
+              [options]="expeditionOptions"
               optionLabel="label"
               optionValue="value"
               placeholder="Rechercher par N° BL, client, livreur…"
@@ -96,7 +96,7 @@
           <div class="qty-tile">
             @if (selectedExpedition) {
               <div class="qty-tile__hint">
-                {{ selectedExpedition.consigne_plastique + selectedExpedition.nc_plastique }} envoyées
+                {{ selectedExpedition.nc_plastique }} envoyées
               </div>
             }
             <img src="assets/plastiquepallette.png" class="qty-tile__img" alt="">
@@ -137,7 +137,7 @@
           <div class="qty-tile">
             @if (selectedExpedition) {
               <div class="qty-tile__hint">
-                {{ selectedExpedition.consigne_bois + selectedExpedition.nc_bois }} envoyées
+                {{ selectedExpedition.nc_bois }} envoyées
               </div>
             }
             <img src="assets/woodpallette.png" class="qty-tile__img" alt="">
@@ -201,5 +201,5 @@
 <div class="form-footer">
   <p-button label="Annuler" severity="secondary" type="button" (onClick)="reset()" />
   <p-button label="Enregistrer le retour" icon="pi pi-check" type="button"
-    [disabled]="form.invalid || saving || !selectedBlId" [loading]="saving" (onClick)="save()" />
+    [disabled]="form.invalid || saving || !selectedExpeditionId" [loading]="saving" (onClick)="save()" />
 </div>

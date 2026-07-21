@@ -6,52 +6,37 @@ from sqlmodel import Session, select, func
 
 from app.database import get_session
 from app.models.client import Client, ClientCreate, ClientUpdate, ClientRead
-from app.models.bon_de_livraison import BonDeLivraison
+from app.models.expedition import Expedition
+from app.models.retour import Retour
 
 router = APIRouter()
 
 
 def _compute_balance(client_id: int, session: Session) -> dict:
-    row = session.exec(
+    sent_row = session.exec(
         select(
-            func.coalesce(func.sum(BonDeLivraison.consigne_plastique), 0),
-            func.coalesce(func.sum(BonDeLivraison.nc_plastique), 0),
-            func.coalesce(func.sum(BonDeLivraison.retour_plastique), 0),
-            func.coalesce(func.sum(BonDeLivraison.consigne_bois), 0),
-            func.coalesce(func.sum(BonDeLivraison.nc_bois), 0),
-            func.coalesce(func.sum(BonDeLivraison.retour_bois), 0),
-        ).where(BonDeLivraison.client_id == client_id)
+            func.coalesce(func.sum(Expedition.nc_plastique), 0),
+            func.coalesce(func.sum(Expedition.nc_bois), 0),
+        ).where(Expedition.client_id == client_id)
     ).one()
 
-    p_consigne = int(row[0])
-    p_nc       = int(row[1])
-    p_back     = int(row[2])
-    w_consigne = int(row[3])
-    w_nc       = int(row[4])
-    w_back     = int(row[5])
-
-    p_balance = max(0, p_consigne + p_nc - p_back)
-    w_balance = max(0, w_consigne + w_nc - w_back)
+    exp_subq = select(Expedition.id).where(Expedition.client_id == client_id).scalar_subquery()
+    retour_row = session.exec(
+        select(
+            func.coalesce(func.sum(Retour.retour_plastique), 0),
+            func.coalesce(func.sum(Retour.retour_bois), 0),
+        ).where(Retour.expedition_id.in_(exp_subq))
+    ).one()
 
     return {
-        "plastic_balance":  p_balance,
-        "plastic_consigne": p_consigne,
-        "plastic_nc":       p_nc,
-        "plastic_back":     p_back,
-        "wood_balance":     w_balance,
-        "wood_consigne":    w_consigne,
-        "wood_nc":          w_nc,
-        "wood_back":        w_back,
+        "plastic_balance": max(0, int(sent_row[0]) - int(retour_row[0])),
+        "wood_balance":    max(0, int(sent_row[1]) - int(retour_row[1])),
     }
 
 
 def _attach_balance(cr: ClientRead, bal: dict) -> ClientRead:
-    cr.plastic_balance  = bal["plastic_balance"]
-    cr.plastic_consigne = bal["plastic_consigne"]
-    cr.plastic_nc       = bal["plastic_nc"]
-    cr.wood_balance     = bal["wood_balance"]
-    cr.wood_consigne    = bal["wood_consigne"]
-    cr.wood_nc          = bal["wood_nc"]
+    cr.plastic_balance = bal["plastic_balance"]
+    cr.wood_balance    = bal["wood_balance"]
     return cr
 
 

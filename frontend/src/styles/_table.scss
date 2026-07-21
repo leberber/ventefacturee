@@ -231,6 +231,18 @@
 .table-item-name { font-weight: var(--font-weight-semibold); color: var(--text-color); }
 .table-item-desc { font-size: var(--font-size-sm); color: var(--text-color-secondary); }
 
+.hist-store-pill {
+  display: inline-block;
+  align-self: flex-start;
+  padding: 0.1rem 0.5rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, #f43f5e 8%, transparent);
+  border: 1px solid color-mix(in srgb, #f43f5e 20%, transparent);
+  font-size: var(--font-size-xs);
+  color: #be185d;
+  font-weight: var(--font-weight-normal);
+}
+
 // ── Row entry animation ────────────────────────────────────────────────────────
 @keyframes row-in {
   from { opacity: 0; transform: translateY(4px); }

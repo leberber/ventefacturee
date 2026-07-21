@@ -6,7 +6,7 @@ from sqlmodel import Session, select, func
 
 from app.database import get_session
 from app.models.chauffeur import Chauffeur, ChauffeurCreate, ChauffeurUpdate, ChauffeurRead
-from app.models.bon_de_livraison import BonDeLivraison
+from app.models.expedition import Expedition
 
 router = APIRouter()
 
@@ -30,9 +30,9 @@ def list_chauffeurs(
     counts = {}
     if ids:
         rows = session.exec(
-            select(BonDeLivraison.chauffeur_id, func.count(BonDeLivraison.id))
-            .where(BonDeLivraison.chauffeur_id.in_(ids))
-            .group_by(BonDeLivraison.chauffeur_id)
+            select(Expedition.chauffeur_id, func.count(Expedition.id))
+            .where(Expedition.chauffeur_id.in_(ids))
+            .group_by(Expedition.chauffeur_id)
         ).all()
         counts = {r[0]: r[1] for r in rows}
 
@@ -77,7 +77,7 @@ def update_chauffeur(
 
     cr = ChauffeurRead.model_validate(chauffeur)
     cr.bl_count = session.exec(
-        select(func.count(BonDeLivraison.id)).where(BonDeLivraison.chauffeur_id == chauffeur_id)
+        select(func.count(Expedition.id)).where(Expedition.chauffeur_id == chauffeur_id)
     ).one()
     return cr
 
