@@ -1,129 +1,64 @@
-<!-- KPI Cards -->
-<div class="kpi-grid">
-  <div class="stat-card">
-    <div class="stat-card__icon stat-card__icon--primary"><i class="pi pi-users"></i></div>
-    <div class="stat-card__body">
-      <div class="stat-card__value">{{ stats?.total_clients ?? '—' }}</div>
-      <div class="stat-card__label">Clients enregistrés</div>
+<!-- Quick actions -->
+<div class="db-actions">
+  <a class="db-action db-action--primary" routerLink="/expedition">
+    <i class="pi pi-file-plus"></i><span>Nouvelle expédition</span>
+  </a>
+  <a class="db-action db-action--secondary" routerLink="/retour">
+    <i class="pi pi-replay"></i><span>Retour palettes</span>
+  </a>
+  <a class="db-action db-action--ghost" routerLink="/historique">
+    <i class="pi pi-list"></i><span>Historique</span>
+  </a>
+  <a class="db-action db-action--ghost" routerLink="/clients">
+    <i class="pi pi-users"></i><span>Clients</span>
+  </a>
+</div>
+
+<!-- Palette balance hero -->
+<div class="db-balance-grid">
+  <div class="db-balance-card db-balance-card--plastic">
+    <img src="assets/plastiquepallette.png" class="db-balance-card__img" alt="">
+    <div class="db-balance-card__content">
+      <div class="db-balance-card__label">Plastique en circulation</div>
+      <div class="db-balance-card__value">{{ stats?.total_plastic_balance ?? '—' }}</div>
+      <div class="db-balance-card__unit">palettes</div>
     </div>
   </div>
-
-  <div class="stat-card">
-    <div class="stat-card__icon stat-card__icon--img">
-      <img src="assets/plastiquepallette.png" alt="Palette plastique" />
-    </div>
-    <div class="stat-card__body">
-      <div class="stat-card__value" style="color:var(--brand-blue-main)">{{ stats?.total_plastic_balance ?? '—' }}</div>
-      <div class="stat-card__label">Palettes plastique</div>
-      <div class="stat-card__sub">{{ stats?.total_plastic_balance ?? 0 }} en circulation</div>
-    </div>
-  </div>
-
-  <div class="stat-card">
-    <div class="stat-card__icon stat-card__icon--img">
-      <img src="assets/woodpallette.png" alt="Palette bois" />
-    </div>
-    <div class="stat-card__body">
-      <div class="stat-card__value" style="color:#92400e">{{ stats?.total_wood_balance ?? '—' }}</div>
-      <div class="stat-card__label">Palettes bois</div>
-      <div class="stat-card__sub">{{ stats?.total_wood_balance ?? 0 }} en circulation</div>
-    </div>
-  </div>
-
-  <div class="stat-card">
-    <div class="stat-card__icon stat-card__icon--success"><i class="pi pi-file-check"></i></div>
-    <div class="stat-card__body">
-      <div class="stat-card__value" style="color:var(--color-success-dark)">{{ stats?.today_bls ?? '—' }}</div>
-      <div class="stat-card__label">BLs aujourd'hui</div>
-      <div class="stat-card__sub">{{ stats?.total_bls ?? 0 }} au total</div>
+  <div class="db-balance-card db-balance-card--wood">
+    <img src="assets/woodpallette.png" class="db-balance-card__img" alt="">
+    <div class="db-balance-card__content">
+      <div class="db-balance-card__label">Bois en circulation</div>
+      <div class="db-balance-card__value">{{ stats?.total_wood_balance ?? '—' }}</div>
+      <div class="db-balance-card__unit">palettes</div>
     </div>
   </div>
 </div>
 
-<!-- Clients balance -->
-<div class="table-container" style="margin-bottom:1.5rem">
-  <div class="card-section-header">
-    <span class="card-label">Solde palettes par client</span>
+<!-- Mini stats row -->
+<div class="db-mini-row">
+  <div class="db-mini-stat">
+    <i class="pi pi-users db-mini-stat__icon"></i>
+    <span class="db-mini-stat__val">{{ stats?.total_clients ?? '—' }}</span>
+    <span class="db-mini-stat__label">clients enregistrés</span>
   </div>
-  <div class="table-wrapper">
-    @if (clients.length === 0) {
-      <div class="table-empty">Aucune palette en circulation</div>
-    } @else {
-      <table class="table">
-        <thead>
-          <tr>
-            <th>Client</th>
-            <th>Plastique</th>
-            <th>Bois</th>
-            <th>Dernier BL</th>
-            <th>Date</th>
-            <th>Chauffeur</th>
-          </tr>
-        </thead>
-        <tbody>
-          @for (c of clients; track c.id) {
-            <tr>
-              <td>{{ c.name }}</td>
-              <td>
-                <button class="palette-pill" (click)="openPop($event, c, 'plastique')">
-                  <img src="assets/plastiquepallette.png" class="palette-pill__img" alt="">
-                  <span class="palette-pill__count palette-pill__count--plastic">{{ c.plastic_out ?? 0 }}</span>
-                  <i class="pi pi-chevron-down palette-pill__caret"></i>
-                </button>
-              </td>
-              <td>
-                <button class="palette-pill" (click)="openPop($event, c, 'bois')">
-                  <img src="assets/woodpallette.png" class="palette-pill__img" alt="">
-                  <span class="palette-pill__count palette-pill__count--wood">{{ c.wood_out ?? 0 }}</span>
-                  <i class="pi pi-chevron-down palette-pill__caret"></i>
-                </button>
-              </td>
-              <td><code class="font-mono" style="font-size:var(--font-size-xs);font-weight:600">{{ latestExpByClient.get(c.id)?.bl_number ?? '—' }}</code></td>
-              <td class="text-muted" style="font-size:var(--font-size-xs)">{{ latestExpByClient.get(c.id)?.date ?? '—' }}</td>
-              <td class="text-muted" style="font-size:var(--font-size-xs)">{{ latestExpByClient.get(c.id)?.chauffeur_name ?? '—' }}</td>
-            </tr>
-          }
-        </tbody>
-      </table>
-    }
+  <div class="db-mini-divider"></div>
+  <div class="db-mini-stat">
+    <i class="pi pi-file-check db-mini-stat__icon db-mini-stat__icon--success"></i>
+    <span class="db-mini-stat__val">{{ stats?.today_bls ?? '—' }}</span>
+    <span class="db-mini-stat__label">BLs aujourd'hui</span>
+  </div>
+  <div class="db-mini-divider"></div>
+  <div class="db-mini-stat">
+    <i class="pi pi-chart-bar db-mini-stat__icon db-mini-stat__icon--muted"></i>
+    <span class="db-mini-stat__val">{{ stats?.total_bls ?? '—' }}</span>
+    <span class="db-mini-stat__label">BLs au total</span>
   </div>
 </div>
 
-<p-popover #pop>
-  @if (activeClient) {
-    <div style="min-width:200px;padding:0.25rem 0">
-      <div class="palette-pop__header">
-        <span class="palette-pop__name">{{ activeClient.name }}</span>
-      </div>
-      @if (activeType === 'plastique') {
-        <div class="palette-pop__section">
-          <div class="palette-pop__type">
-            <img src="assets/plastiquepallette.png" style="height:13px" alt=""> Plastique
-          </div>
-          <div class="palette-pop__row">
-            <span>Balance due</span>
-            <span class="palette-pop__val">{{ activeClient.plastic_balance ?? 0 }}</span>
-          </div>
-        </div>
-      } @else {
-        <div class="palette-pop__section">
-          <div class="palette-pop__type">
-            <img src="assets/woodpallette.png" style="height:13px" alt=""> Bois
-          </div>
-          <div class="palette-pop__row">
-            <span>Balance due</span>
-            <span class="palette-pop__val">{{ activeClient.wood_balance ?? 0 }}</span>
-          </div>
-        </div>
-      }
-    </div>
-  }
-</p-popover>
-
-<!-- Activity stats with time filter -->
-<div class="table-container">
-  <div class="card-section-header">
-    <span class="card-label">Activité</span>
+<!-- Activity -->
+<div class="db-section">
+  <div class="db-section__header">
+    <span class="db-section__title">Activité</span>
     <div class="dash-filter">
       <button class="dash-filter__btn" [class.dash-filter__btn--active]="timeFilter==='today'"  (click)="setFilter('today')">Aujourd'hui</button>
       <button class="dash-filter__btn" [class.dash-filter__btn--active]="timeFilter==='week'"   (click)="setFilter('week')">Cette semaine</button>
@@ -131,98 +66,89 @@
     </div>
   </div>
 
-  <!-- Palette flux -->
-  <div class="dash-flux-grid">
-    <div class="dash-flux-card">
-      <img src="assets/plastiquepallette.png" class="dash-flux-card__img" alt="">
-      <div class="dash-flux-card__body">
-        <div class="dash-flux-card__val">{{ plastiqueEnvoyees }}</div>
-        <div class="dash-flux-card__label">Plastique envoyées</div>
+  <div class="db-metrics">
+    <a class="db-metric" routerLink="/historique">
+      <div class="db-metric__icon db-metric__icon--out"><i class="pi pi-arrow-up"></i></div>
+      <div class="db-metric__body">
+        <div class="db-metric__val">{{ plastiqueEnvoyees }}</div>
+        <div class="db-metric__label">Plastique envoyées</div>
       </div>
-      <i class="pi pi-arrow-up dash-flux-card__icon dash-flux-card__icon--out"></i>
-    </div>
-    <div class="dash-flux-card dash-flux-card--in">
-      <img src="assets/plastiquepallette.png" class="dash-flux-card__img" alt="">
-      <div class="dash-flux-card__body">
-        <div class="dash-flux-card__val">{{ plastiqueRetournees }}</div>
-        <div class="dash-flux-card__label">Plastique retournées</div>
+      <img src="assets/plastiquepallette.png" class="db-metric__img" alt="">
+    </a>
+    <a class="db-metric" routerLink="/retour">
+      <div class="db-metric__icon db-metric__icon--in"><i class="pi pi-arrow-down"></i></div>
+      <div class="db-metric__body">
+        <div class="db-metric__val">{{ plastiqueRetournees }}</div>
+        <div class="db-metric__label">Plastique retournées</div>
       </div>
-      <i class="pi pi-arrow-down dash-flux-card__icon dash-flux-card__icon--in"></i>
-    </div>
-    <div class="dash-flux-card">
-      <img src="assets/woodpallette.png" class="dash-flux-card__img" alt="">
-      <div class="dash-flux-card__body">
-        <div class="dash-flux-card__val">{{ boisEnvoyes }}</div>
-        <div class="dash-flux-card__label">Bois envoyés</div>
+      <img src="assets/plastiquepallette.png" class="db-metric__img" alt="">
+    </a>
+    <a class="db-metric" routerLink="/historique">
+      <div class="db-metric__icon db-metric__icon--out"><i class="pi pi-arrow-up"></i></div>
+      <div class="db-metric__body">
+        <div class="db-metric__val">{{ boisEnvoyes }}</div>
+        <div class="db-metric__label">Bois envoyés</div>
       </div>
-      <i class="pi pi-arrow-up dash-flux-card__icon dash-flux-card__icon--out"></i>
-    </div>
-    <div class="dash-flux-card dash-flux-card--in">
-      <img src="assets/woodpallette.png" class="dash-flux-card__img" alt="">
-      <div class="dash-flux-card__body">
-        <div class="dash-flux-card__val">{{ boisRetournes }}</div>
-        <div class="dash-flux-card__label">Bois retournés</div>
+      <img src="assets/woodpallette.png" class="db-metric__img" alt="">
+    </a>
+    <a class="db-metric" routerLink="/retour">
+      <div class="db-metric__icon db-metric__icon--in"><i class="pi pi-arrow-down"></i></div>
+      <div class="db-metric__body">
+        <div class="db-metric__val">{{ boisRetournes }}</div>
+        <div class="db-metric__label">Bois retournés</div>
       </div>
-      <i class="pi pi-arrow-down dash-flux-card__icon dash-flux-card__icon--in"></i>
-    </div>
+      <img src="assets/woodpallette.png" class="db-metric__img" alt="">
+    </a>
   </div>
 
-  <!-- Bottom: type breakdown + pending returns -->
-  <div class="dash-bottom-grid">
+  <div class="db-types">
+    <a class="db-type-pill" routerLink="/historique">
+      <span class="badge badge--info">Gros</span>
+      <strong>{{ countByType['gros'] }}</strong>
+    </a>
+    <a class="db-type-pill" routerLink="/historique">
+      <span class="badge badge--warning">Détail</span>
+      <strong>{{ countByType['detail'] }}</strong>
+    </a>
+    <a class="db-type-pill" routerLink="/historique">
+      <span class="badge badge--success">Horeca</span>
+      <strong>{{ countByType['horeca'] }}</strong>
+    </a>
+    <span class="db-type-total">{{ expeditions.length }} BL{{ expeditions.length !== 1 ? 's' : '' }} au total</span>
+  </div>
+</div>
 
-    <!-- Répartition par type -->
-    <div class="dash-section">
-      <div class="dash-section__title">Répartition par type</div>
-      <div class="dash-type-list">
-        <div class="dash-type-row">
-          <span class="badge badge--info">Gros</span>
-          <div class="dash-type-bar">
-            <div class="dash-type-bar__fill dash-type-bar__fill--gros"
-                 [style.width.%]="(countByType['gros'] / maxTypeCount) * 100"></div>
-          </div>
-          <span class="dash-type-count">{{ countByType['gros'] }}</span>
-        </div>
-        <div class="dash-type-row">
-          <span class="badge badge--warning">Détail</span>
-          <div class="dash-type-bar">
-            <div class="dash-type-bar__fill dash-type-bar__fill--detail"
-                 [style.width.%]="(countByType['detail'] / maxTypeCount) * 100"></div>
-          </div>
-          <span class="dash-type-count">{{ countByType['detail'] }}</span>
-        </div>
-        <div class="dash-type-row">
-          <span class="badge badge--success">Horeca</span>
-          <div class="dash-type-bar">
-            <div class="dash-type-bar__fill dash-type-bar__fill--horeca"
-                 [style.width.%]="(countByType['horeca'] / maxTypeCount) * 100"></div>
-          </div>
-          <span class="dash-type-count">{{ countByType['horeca'] }}</span>
-        </div>
-      </div>
-      <div class="dash-type-total">{{ expeditions.length }} BL{{ expeditions.length !== 1 ? 's' : '' }} au total</div>
+<!-- Pending returns -->
+<div class="db-section">
+  <div class="db-section__header">
+    <span class="db-section__title">
+      <i class="pi pi-exclamation-circle" style="color:var(--color-warning-dark);margin-right:0.4rem"></i>
+      Retours en attente
+    </span>
+    <a routerLink="/retour" class="db-section__link">Enregistrer un retour <i class="pi pi-arrow-right"></i></a>
+  </div>
+  @if (pendingReturns.length === 0) {
+    <div class="db-empty">
+      <i class="pi pi-check-circle"></i>
+      <span>Aucun retour en attente</span>
     </div>
-
-    <!-- Retours en attente -->
-    <div class="dash-section">
-      <div class="dash-section__title">Retours en attente</div>
-      @if (pendingReturns.length === 0) {
-        <div class="dash-empty">Aucun retour en attente</div>
-      } @else {
-        <div class="dash-pending-list">
-          @for (b of pendingReturns; track b.id) {
-            <div class="dash-pending-item">
-              <code class="font-mono dash-pending-item__bl">{{ b.bl_number }}</code>
-              <span class="dash-pending-item__client">{{ b.client_name || b.livreur_name || '—' }}</span>
-              <span class="dash-pending-item__date">{{ b.date }}</span>
-              <div class="dash-pending-item__palettes">
-                <span class="palette-count"><img src="assets/plastiquepallette.png" class="palette-count__img" alt="">{{ b.nc_plastique }}</span>
-                <span class="palette-count palette-count--wood"><img src="assets/woodpallette.png" class="palette-count__img" alt="">{{ b.nc_bois }}</span>
-              </div>
-            </div>
-          }
+  } @else {
+    <div class="db-pending-list">
+      @for (b of pendingReturns; track b.id) {
+        <div class="db-pending-item">
+          <code class="font-mono" style="font-size:var(--font-size-xs);font-weight:700;color:var(--primary-color)">{{ b.bl_number }}</code>
+          <span class="db-pending-item__client">{{ b.client_name || b.livreur_name || '—' }}</span>
+          <span class="db-pending-item__date">{{ b.date }}</span>
+          <div class="db-pending-item__palettes">
+            @if (b.nc_plastique > 0) {
+              <span class="palette-count"><img src="assets/plastiquepallette.png" class="palette-count__img" alt="">{{ b.nc_plastique }}</span>
+            }
+            @if (b.nc_bois > 0) {
+              <span class="palette-count palette-count--wood"><img src="assets/woodpallette.png" class="palette-count__img" alt="">{{ b.nc_bois }}</span>
+            }
+          </div>
         </div>
       }
     </div>
-
-  </div>
+  }
 </div>

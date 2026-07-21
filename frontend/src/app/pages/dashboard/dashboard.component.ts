@@ -1,29 +1,20 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
-import { Popover } from 'primeng/popover';
 
 import { ExpeditionsService } from '../../core/services/expeditions.service';
-import { ClientsService } from '../../core/services/clients.service';
 import { Expedition, DashboardStats } from '../../core/models/expedition.model';
-import { Client } from '../../core/models/client.model';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterLink, DatePipe, Popover],
+  imports: [CommonModule, RouterLink, DatePipe],
   templateUrl: './dashboard.component.html',
 })
 export class DashboardComponent implements OnInit {
-  @ViewChild('pop') pop!: Popover;
-
   stats: DashboardStats | null = null;
   expeditions: Expedition[] = [];
   allRecentExpeditions: Expedition[] = [];
-  clients: Client[] = [];
-  latestExpByClient: Map<number, Expedition> = new Map();
-  activeClient: Client | null = null;
-  activeType: 'plastique' | 'bois' = 'plastique';
   loading = false;
   tableLoading = false;
   timeFilter: 'today' | 'week' | 'month' = 'today';
@@ -31,7 +22,7 @@ export class DashboardComponent implements OnInit {
   readonly destinationLabel: Record<string, string> = { gros: 'Gros', detail: 'Détail', horeca: 'Horeca' };
   readonly destinationBadge: Record<string, string> = { gros: 'badge badge--info', detail: 'badge badge--warning', horeca: 'badge badge--success' };
 
-  constructor(private expeditionsService: ExpeditionsService, private clientsService: ClientsService) {}
+  constructor(private expeditionsService: ExpeditionsService) {}
 
   ngOnInit() {
     this.loading = true;
@@ -42,22 +33,7 @@ export class DashboardComponent implements OnInit {
     const dateFrom = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
     this.expeditionsService.list(undefined, undefined, dateFrom, dateTo).subscribe(all => {
       this.allRecentExpeditions = all;
-      all.forEach(e => {
-        if (e.client_id && !this.latestExpByClient.has(e.client_id)) {
-          this.latestExpByClient.set(e.client_id, e);
-        }
-      });
     });
-
-    this.clientsService.list().subscribe(cs => {
-      this.clients = cs.filter(c => (c.plastic_out ?? 0) > 0 || (c.wood_out ?? 0) > 0);
-    });
-  }
-
-  openPop(event: Event, client: Client, type: 'plastique' | 'bois') {
-    this.activeClient = client;
-    this.activeType = type;
-    this.pop.toggle(event);
   }
 
   setFilter(f: 'today' | 'week' | 'month') {
