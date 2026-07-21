@@ -71,13 +71,17 @@ export class LivraisonDetailComponent implements OnInit {
   }
 
   get restantPlastique(): number {
-    const distributed = Array.from(this.inputs.values()).reduce((s, inp) => s + inp.plastique, 0);
-    return (this.bl?.nc_plastique ?? 0) - distributed;
+    const vals = Array.from(this.inputs.values());
+    const deposé    = vals.reduce((s, inp) => s + inp.plastique, 0);
+    const récupéré  = vals.reduce((s, inp) => s + inp.recovered_plastique, 0);
+    return (this.bl?.nc_plastique ?? 0) - deposé + récupéré;
   }
 
   get restantBois(): number {
-    const distributed = Array.from(this.inputs.values()).reduce((s, inp) => s + inp.bois, 0);
-    return (this.bl?.nc_bois ?? 0) - distributed;
+    const vals = Array.from(this.inputs.values());
+    const deposé    = vals.reduce((s, inp) => s + inp.bois, 0);
+    const récupéré  = vals.reduce((s, inp) => s + inp.recovered_bois, 0);
+    return (this.bl?.nc_bois ?? 0) - deposé + récupéré;
   }
 
   ngOnInit() {
@@ -144,13 +148,17 @@ export class LivraisonDetailComponent implements OnInit {
       if (inp.recovered_bois >= max) return;
     }
     inp[field]++;
-    if (field === 'plastique' || field === 'bois') this.tourneeState.updateRestant(this.restantPlastique, this.restantBois);
+    if (field === 'plastique' || field === 'bois' || field === 'recovered_plastique' || field === 'recovered_bois') {
+      this.tourneeState.updateRestant(this.restantPlastique, this.restantBois);
+    }
   }
 
   dec(clientId: number, field: 'plastique' | 'bois' | 'retour_plastique' | 'retour_bois' | 'recovered_plastique' | 'recovered_bois') {
     const inp = this.inputs.get(clientId)!;
     if (inp[field] > 0) inp[field]--;
-    if (field === 'plastique' || field === 'bois') this.tourneeState.updateRestant(this.restantPlastique, this.restantBois);
+    if (field === 'plastique' || field === 'bois' || field === 'recovered_plastique' || field === 'recovered_bois') {
+      this.tourneeState.updateRestant(this.restantPlastique, this.restantBois);
+    }
   }
 
   setQty(clientId: number, field: 'plastique' | 'bois' | 'retour_plastique' | 'retour_bois' | 'recovered_plastique' | 'recovered_bois', event: Event) {
@@ -162,7 +170,9 @@ export class LivraisonDetailComponent implements OnInit {
     if (field === 'recovered_plastique') n = Math.min(n, this.getEc(clientId)?.client_plastic_out ?? 0);
     if (field === 'recovered_bois')      n = Math.min(n, this.getEc(clientId)?.client_wood_out ?? 0);
     inp[field] = n;
-    if (field === 'plastique' || field === 'bois') this.tourneeState.updateRestant(this.restantPlastique, this.restantBois);
+    if (field === 'plastique' || field === 'bois' || field === 'recovered_plastique' || field === 'recovered_bois') {
+      this.tourneeState.updateRestant(this.restantPlastique, this.restantBois);
+    }
   }
 
   saveDetail(clientId: number) {
