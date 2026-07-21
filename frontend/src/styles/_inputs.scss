@@ -8,6 +8,16 @@
 textarea[pTextarea] {
   border-radius: var(--radius-lg) !important;
   width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+
+// Prevent p-select label from forcing the component wider than its container
+.p-select-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
 }
 
 .p-inputnumber,

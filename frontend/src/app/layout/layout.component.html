@@ -1,6 +1,6 @@
 <div class="admin-shell" [class.admin-shell--collapsed]="collapsed()">
 
-  <!-- Sidebar -->
+  <!-- Sidebar (desktop only) -->
   <aside class="admin-sidebar">
 
     <!-- Logo -->
@@ -57,9 +57,48 @@
 
   </aside>
 
+  <!-- Mobile top bar -->
+  <header class="mob-topbar">
+    <img src="assets/logo.png" alt="CLR Freha" class="mob-topbar__logo" />
+    <div class="mob-topbar__user">
+      <span class="mob-topbar__name">{{ user?.full_name }}</span>
+    </div>
+    <button class="mob-topbar__logout" type="button" (click)="logout()" title="Se déconnecter">
+      <i class="pi pi-sign-out"></i>
+    </button>
+  </header>
+
   <!-- Main content -->
   <main class="admin-content">
     <router-outlet />
   </main>
+
+  <!-- Mobile bottom nav -->
+  <nav class="mob-nav">
+    <a class="mob-nav__item" routerLink="/dashboard" routerLinkActive="mob-nav__item--active" [routerLinkActiveOptions]="{exact:true}">
+      <i class="pi pi-home"></i>
+      <span>Accueil</span>
+    </a>
+    @if(isAdminOrEmploye) {
+      <a class="mob-nav__item" routerLink="/expedition" routerLinkActive="mob-nav__item--active">
+        <i class="pi pi-file-plus"></i>
+        <span>Expédition</span>
+      </a>
+      <a class="mob-nav__item" routerLink="/retour" routerLinkActive="mob-nav__item--active">
+        <i class="pi pi-replay"></i>
+        <span>Retour</span>
+      </a>
+    }
+    <a class="mob-nav__item" routerLink="/historique" routerLinkActive="mob-nav__item--active">
+      <i class="pi pi-list"></i>
+      <span>Historique</span>
+    </a>
+    @if(isAdminOrEmploye) {
+      <a class="mob-nav__item" routerLink="/clients" routerLinkActive="mob-nav__item--active">
+        <i class="pi pi-users"></i>
+        <span>Clients</span>
+      </a>
+    }
+  </nav>
 
 </div>

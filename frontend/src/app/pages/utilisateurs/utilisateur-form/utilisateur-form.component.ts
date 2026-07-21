@@ -7,6 +7,7 @@ import { Toast } from 'primeng/toast';
 import { InputText } from 'primeng/inputtext';
 import { Password } from 'primeng/password';
 import { Select } from 'primeng/select';
+import { ToggleSwitch } from 'primeng/toggleswitch';
 import { MessageService } from 'primeng/api';
 
 import { UsersService } from '../../../core/services/users.service';
@@ -16,7 +17,7 @@ import { User, UserCreate, UserUpdate, UserRole } from '../../../core/models/use
 @Component({
   selector: 'app-utilisateur-form',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, Button, Toast, InputText, Password, Select],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, Button, Toast, InputText, Password, Select, ToggleSwitch],
   providers: [MessageService],
   templateUrl: './utilisateur-form.component.html',
 })
@@ -43,6 +44,32 @@ export class UtilisateurFormComponent implements OnInit {
       ? this.allRoleOptions
       : this.allRoleOptions.filter(r => !r.adminOnly);
   }
+
+  readonly roleBadgeMap: Record<string, string> = {
+    admin:     'badge badge--danger',
+    employe:   'badge badge--warning',
+    livreur:   'badge badge--info',
+    chauffeur: 'badge badge--success',
+  };
+
+  private readonly roleIcons: Record<string, string> = {
+    admin:     'pi-shield',
+    employe:   'pi-briefcase',
+    livreur:   'pi-send',
+    chauffeur: 'pi-truck',
+  };
+
+  private readonly roleLabels: Record<string, string> = {
+    admin:     'Admin',
+    employe:   'Employé',
+    livreur:   'Livreur',
+    chauffeur: 'Chauffeur',
+  };
+
+  get currentRole(): string { return this.form.get('role')?.value ?? 'employe'; }
+  get roleIcon(): string    { return this.roleIcons[this.currentRole]  ?? 'pi-user'; }
+  get roleBadgeClass(): string { return this.roleBadgeMap[this.currentRole] ?? 'badge'; }
+  get roleDisplayLabel(): string { return this.roleLabels[this.currentRole] ?? ''; }
 
   form = this.fb.group({
     phone:     ['', Validators.required],

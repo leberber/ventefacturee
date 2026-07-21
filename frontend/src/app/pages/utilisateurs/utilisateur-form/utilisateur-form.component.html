@@ -1,59 +1,109 @@
 <p-toast />
 
 <div class="page-content">
-  <div style="max-width:520px">
 
-    <div style="display:flex;align-items:center;gap:12px;margin-bottom:24px">
-      <p-button icon="pi pi-arrow-left" severity="secondary" [text]="true" (onClick)="cancel()" />
-      <h2 class="page-title" style="margin:0">
-        {{ editingId ? 'Modifier l\'utilisateur' : 'Ajouter un utilisateur' }}
-      </h2>
+  <div class="page-header" style="margin-bottom:1.5rem">
+    <div style="display:flex;align-items:center;gap:0.75rem">
+      <div class="page-icon"><i class="pi pi-shield"></i></div>
+      <div>
+        <h1 class="page-header__title">{{ editingId ? 'Modifier le fonctionnaire' : 'Nouveau fonctionnaire' }}</h1>
+      </div>
     </div>
+    <button class="back-btn" type="button" (click)="cancel()">
+      <i class="pi pi-arrow-left"></i>
+      <span>Retour</span>
+    </button>
+  </div>
+
+  <div class="uform-wrap">
 
     <form [formGroup]="form" (ngSubmit)="save()">
 
-      <div class="form-grid-2">
-        <div class="field">
-          <label>Nom complet <span style="color:red">*</span></label>
-          <input pInputText formControlName="full_name" placeholder="Prénom Nom" class="w-full">
+      <!-- Avatar hero + role -->
+      <div class="uform-hero">
+        <div class="uform-avatar" [attr.data-role]="form.get('role')?.value">
+          <i [class]="'pi ' + roleIcon"></i>
         </div>
-        <div class="field">
-          <label>Téléphone <span style="color:red">*</span></label>
-          <input pInputText type="tel" formControlName="phone" placeholder="0550 000 000" class="w-full">
+        <div class="uform-hero__info">
+          <div class="uform-hero__name">
+            {{ form.get('full_name')?.value || (editingId ? 'Utilisateur' : 'Nouvel utilisateur') }}
+          </div>
+          <div class="uform-hero__controls">
+            <p-select formControlName="role" [options]="roleOptions"
+              optionLabel="label" optionValue="value"
+              [style]="{minWidth:'140px'}" appendTo="body">
+              <ng-template #item let-opt>
+                <span [class]="roleBadgeMap[opt.value]">{{ opt.label }}</span>
+              </ng-template>
+              <ng-template #selectedItem let-opt>
+                <span [class]="roleBadgeMap[opt.value]">{{ opt.label }}</span>
+              </ng-template>
+            </p-select>
+            @if(editingId) {
+              <div class="uform-status-row">
+                <p-toggleswitch formControlName="is_active" />
+                <span [class]="form.get('is_active')?.value ? 'badge badge--success' : 'badge badge--danger'">
+                  {{ form.get('is_active')?.value ? 'Actif' : 'Inactif' }}
+                </span>
+              </div>
+            }
+          </div>
         </div>
       </div>
 
-      <div class="form-grid-2">
-        <div class="field">
+      <!-- Informations -->
+      <div class="uform-section">
+        <div class="uform-section__title">
+          <i class="pi pi-user"></i> Informations
+        </div>
+        <div class="uform-fields">
+          <div class="field">
+            <label>Nom complet <span class="required-star">*</span></label>
+            <div class="icon-input">
+              <i class="pi pi-id-card"></i>
+              <input pInputText formControlName="full_name" placeholder="Prénom Nom">
+            </div>
+          </div>
+          <div class="field">
+            <label>Téléphone <span class="required-star">*</span></label>
+            <div class="icon-input">
+              <i class="pi pi-phone"></i>
+              <input pInputText type="tel" formControlName="phone" placeholder="0550 00 00 00">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sécurité -->
+      <div class="uform-section">
+        <div class="uform-section__title">
+          <i class="pi pi-lock"></i> Sécurité
+        </div>
+        <div class="field" style="margin-bottom:0">
           <label>
             Mot de passe
-            @if(!editingId) { <span style="color:red">*</span> }
-            @if(editingId)  { <small style="color:#9ca3af">(laisser vide pour ne pas changer)</small> }
+            @if(!editingId) { <span class="required-star">*</span> }
+            @if(editingId)  { <small class="text-muted">(laisser vide pour ne pas changer)</small> }
           </label>
           <p-password formControlName="password" [feedback]="false" [toggleMask]="true"
             styleClass="w-full" inputStyleClass="w-full"
-            [placeholder]="editingId ? '••••••••' : 'Mot de passe'" />
-        </div>
-        <div class="field">
-          <label>Rôle <span style="color:red">*</span></label>
-          <p-select formControlName="role" [options]="roleOptions"
-            optionLabel="label" optionValue="value" [style]="{width:'100%'}" />
+            [placeholder]="editingId ? '••••••••' : 'Nouveau mot de passe'" />
         </div>
       </div>
 
-      @if(editingId) {
-        <div class="field">
-          <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
-            <input type="checkbox" formControlName="is_active">
-            Compte actif
-          </label>
-        </div>
-      }
-
-      <div style="display:flex;gap:8px;margin-top:8px">
-        <p-button label="Annuler"     severity="secondary" type="button" (onClick)="cancel()" />
-        <p-button label="Enregistrer" icon="pi pi-check"   type="submit"
-          [disabled]="form.invalid || saving" [loading]="saving" />
+      <!-- Footer -->
+      <div class="uform-footer">
+        <button type="button" class="uform-btn uform-btn--cancel" (click)="cancel()">
+          Annuler
+        </button>
+        <button type="submit" class="uform-btn uform-btn--save" [disabled]="form.invalid || saving">
+          @if(saving) {
+            <i class="pi pi-spin pi-spinner"></i>
+          } @else {
+            <i class="pi pi-check"></i>
+          }
+          {{ saving ? 'Enregistrement...' : 'Enregistrer' }}
+        </button>
       </div>
 
     </form>
