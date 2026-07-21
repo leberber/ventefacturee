@@ -88,15 +88,23 @@
                 <td><span [class]="categoryBadge[c.category]">{{ categoryLabel[c.category] }}</span></td>
                 <td class="text-muted">{{ c.phone || '—' }}</td>
                 <td>
-                  @if ((c.plastic_balance ?? 0) > 0) {
-                    <span class="badge badge--info">{{ c.plastic_balance }}</span>
+                  @if ((c.plastic_out ?? 0) > 0) {
+                    <button class="palette-pill" (click)="openPop($event, c, 'plastique')">
+                      <img src="assets/plastiquepallette.png" class="palette-pill__img" alt="">
+                      <span class="palette-pill__count palette-pill__count--plastic">{{ c.plastic_out }}</span>
+                      <i class="pi pi-chevron-down palette-pill__caret"></i>
+                    </button>
                   } @else {
                     <span class="text-muted">0</span>
                   }
                 </td>
                 <td>
-                  @if ((c.wood_balance ?? 0) > 0) {
-                    <span class="badge badge--warning">{{ c.wood_balance }}</span>
+                  @if ((c.wood_out ?? 0) > 0) {
+                    <button class="palette-pill" (click)="openPop($event, c, 'bois')">
+                      <img src="assets/woodpallette.png" class="palette-pill__img" alt="">
+                      <span class="palette-pill__count palette-pill__count--wood">{{ c.wood_out }}</span>
+                      <i class="pi pi-chevron-down palette-pill__caret"></i>
+                    </button>
                   } @else {
                     <span class="text-muted">0</span>
                   }
@@ -123,3 +131,39 @@
   </div>
 
 </div>
+
+<p-popover #pop>
+  @if (activeClient) {
+    @let sent     = activeType === 'plastique' ? (activeClient.plastic_sent     ?? 0) : (activeClient.wood_sent     ?? 0);
+    @let retour   = activeType === 'plastique' ? (activeClient.plastic_retour   ?? 0) : (activeClient.wood_retour   ?? 0);
+    @let consigne = activeType === 'plastique' ? (activeClient.plastic_consigne ?? 0) : (activeClient.wood_consigne ?? 0);
+    @let out      = activeType === 'plastique' ? (activeClient.plastic_out      ?? 0) : (activeClient.wood_out      ?? 0);
+    @let balance  = activeType === 'plastique' ? (activeClient.plastic_balance  ?? 0) : (activeClient.wood_balance  ?? 0);
+    <div style="min-width:210px;padding:0.25rem 0">
+      <div class="palette-pop__header">
+        <img [src]="activeType === 'plastique' ? 'assets/plastiquepallette.png' : 'assets/woodpallette.png'" style="height:14px" alt="">
+        <span class="palette-pop__name">{{ activeType === 'plastique' ? 'Plastique' : 'Bois' }}</span>
+        <span style="font-size:var(--font-size-xs);color:var(--text-color-secondary)">{{ activeClient.name }}</span>
+      </div>
+      <div class="palette-pop__row" style="font-weight:600;color:var(--text-color)">
+        <span>Envoyées</span>
+        <span class="palette-pop__val">{{ sent }}</span>
+      </div>
+      <div class="palette-pop__row" style="color:var(--color-success,#22c55e)">
+        <span>Retournées</span>
+        <span class="palette-pop__val">− {{ retour }}</span>
+      </div>
+      <div class="palette-pop__row" style="color:var(--color-success,#22c55e)">
+        <span>Consigne encaissée</span>
+        <span class="palette-pop__val">− {{ consigne }}</span>
+      </div>
+      <div style="border-top:var(--border-width) solid var(--surface-border);margin:0.5rem 0.25rem"></div>
+      <div class="palette-pop__row" style="font-weight:700;font-size:var(--font-size-sm)">
+        <span>Balance due</span>
+        <span class="palette-pop__val" [style.color]="balance > 0 ? 'var(--color-error,#ef4444)' : 'var(--color-success,#22c55e)'">
+          {{ balance }}
+        </span>
+      </div>
+    </div>
+  }
+</p-popover>

@@ -17,7 +17,15 @@ export interface Client {
   is_active: boolean;
   created_at: string;
   updated_at?: string;
+  plastic_sent?: number;
+  plastic_retour?: number;
+  plastic_consigne?: number;
+  plastic_out?: number;
   plastic_balance?: number;
+  wood_sent?: number;
+  wood_retour?: number;
+  wood_consigne?: number;
+  wood_out?: number;
   wood_balance?: number;
 }
 

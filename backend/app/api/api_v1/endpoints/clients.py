@@ -24,19 +24,41 @@ def _compute_balance(client_id: int, session: Session) -> dict:
     retour_row = session.exec(
         select(
             func.coalesce(func.sum(Retour.retour_plastique), 0),
+            func.coalesce(func.sum(Retour.consigne_paid_plastique), 0),
             func.coalesce(func.sum(Retour.retour_bois), 0),
+            func.coalesce(func.sum(Retour.consigne_paid_bois), 0),
         ).where(Retour.expedition_id.in_(exp_subq))
     ).one()
 
+    ps = int(sent_row[0]); bs = int(sent_row[1])
+    pr = int(retour_row[0]); pc = int(retour_row[1])
+    br = int(retour_row[2]); bc = int(retour_row[3])
+
     return {
-        "plastic_balance": max(0, int(sent_row[0]) - int(retour_row[0])),
-        "wood_balance":    max(0, int(sent_row[1]) - int(retour_row[1])),
+        "plastic_sent":    ps,
+        "plastic_retour":  pr,
+        "plastic_consigne": pc,
+        "plastic_out":     max(0, ps - pr),          # physical: still out there
+        "plastic_balance": max(0, ps - pr - pc),     # financial: after consigne
+        "wood_sent":       bs,
+        "wood_retour":     br,
+        "wood_consigne":   bc,
+        "wood_out":        max(0, bs - br),
+        "wood_balance":    max(0, bs - br - bc),
     }
 
 
 def _attach_balance(cr: ClientRead, bal: dict) -> ClientRead:
-    cr.plastic_balance = bal["plastic_balance"]
-    cr.wood_balance    = bal["wood_balance"]
+    cr.plastic_sent     = bal["plastic_sent"]
+    cr.plastic_retour   = bal["plastic_retour"]
+    cr.plastic_consigne = bal["plastic_consigne"]
+    cr.plastic_out      = bal["plastic_out"]
+    cr.plastic_balance  = bal["plastic_balance"]
+    cr.wood_sent        = bal["wood_sent"]
+    cr.wood_retour      = bal["wood_retour"]
+    cr.wood_consigne    = bal["wood_consigne"]
+    cr.wood_out         = bal["wood_out"]
+    cr.wood_balance     = bal["wood_balance"]
     return cr
 
 

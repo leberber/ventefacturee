@@ -50,7 +50,7 @@ export class DashboardComponent implements OnInit {
     });
 
     this.clientsService.list().subscribe(cs => {
-      this.clients = cs.filter(c => (c.plastic_balance ?? 0) > 0 || (c.wood_balance ?? 0) > 0);
+      this.clients = cs.filter(c => (c.plastic_out ?? 0) > 0 || (c.wood_out ?? 0) > 0);
     });
   }
 

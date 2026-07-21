@@ -67,14 +67,14 @@
               <td>
                 <button class="palette-pill" (click)="openPop($event, c, 'plastique')">
                   <img src="assets/plastiquepallette.png" class="palette-pill__img" alt="">
-                  <span class="palette-pill__count palette-pill__count--plastic">{{ c.plastic_balance ?? 0 }}</span>
+                  <span class="palette-pill__count palette-pill__count--plastic">{{ c.plastic_out ?? 0 }}</span>
                   <i class="pi pi-chevron-down palette-pill__caret"></i>
                 </button>
               </td>
               <td>
                 <button class="palette-pill" (click)="openPop($event, c, 'bois')">
                   <img src="assets/woodpallette.png" class="palette-pill__img" alt="">
-                  <span class="palette-pill__count palette-pill__count--wood">{{ c.wood_balance ?? 0 }}</span>
+                  <span class="palette-pill__count palette-pill__count--wood">{{ c.wood_out ?? 0 }}</span>
                   <i class="pi pi-chevron-down palette-pill__caret"></i>
                 </button>
               </td>

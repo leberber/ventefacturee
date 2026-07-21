@@ -1,9 +1,10 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, ViewChild, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { Toast } from 'primeng/toast';
 import { ConfirmDialog } from 'primeng/confirmdialog';
+import { Popover } from 'primeng/popover';
 import { MessageService, ConfirmationService } from 'primeng/api';
 
 import { ClientsService } from '../../core/services/clients.service';
@@ -13,11 +14,13 @@ import { sortItems, toggleSort } from '../../core/utils/sort.util';
 @Component({
   selector: 'app-clients',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, Toast, ConfirmDialog],
+  imports: [CommonModule, FormsModule, RouterLink, Toast, ConfirmDialog, Popover],
   providers: [MessageService, ConfirmationService],
   templateUrl: './clients.component.html',
 })
 export class ClientsComponent implements OnInit {
+  @ViewChild('pop') pop!: Popover;
+
   private clientsService      = inject(ClientsService);
   private messageService      = inject(MessageService);
   private confirmationService = inject(ConfirmationService);
@@ -28,6 +31,14 @@ export class ClientsComponent implements OnInit {
   searchQuery = '';
   sortCol = 'name';
   sortDir: 1 | -1 = 1;
+  activeClient: Client | null = null;
+  activeType: 'plastique' | 'bois' = 'plastique';
+
+  openPop(event: Event, c: Client, type: 'plastique' | 'bois') {
+    this.activeClient = c;
+    this.activeType   = type;
+    this.pop.toggle(event);
+  }
 
   readonly categoryLabel: Record<string, string> = { gros: 'Gros', detail: 'Détail', horeca: 'Horeca' };
   readonly categoryBadge: Record<string, string> = {
