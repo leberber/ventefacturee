@@ -252,7 +252,23 @@
 
                 <!-- Physical return -->
                 <div class="exp-card">
-                  <div class="exp-label" style="margin-bottom:0.75rem"><i class="pi pi-arrow-circle-left"></i>Palettes ramenées au dépôt</div>
+                  <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.75rem">
+                    <div class="exp-label" style="margin-bottom:0;flex:1"><i class="pi pi-arrow-circle-left"></i>Palettes ramenées au dépôt</div>
+                    @if (balancePlastique > 0 || balanceBois > 0) {
+                      <div style="display:flex;gap:0.5rem">
+                        @if (balancePlastique > 0) {
+                          <span style="display:flex;align-items:center;gap:0.3rem;font-size:var(--font-size-xs);font-weight:700;color:var(--color-error,#ef4444);background:color-mix(in srgb,var(--color-error,#ef4444) 10%,transparent);padding:0.2rem 0.5rem;border-radius:999px">
+                            <img src="assets/plastiquepallette.png" style="height:11px" alt="">Manque {{ balancePlastique }}
+                          </span>
+                        }
+                        @if (balanceBois > 0) {
+                          <span style="display:flex;align-items:center;gap:0.3rem;font-size:var(--font-size-xs);font-weight:700;color:var(--color-error,#ef4444);background:color-mix(in srgb,var(--color-error,#ef4444) 10%,transparent);padding:0.2rem 0.5rem;border-radius:999px">
+                            <img src="assets/woodpallette.png" style="height:11px" alt="">Manque {{ balanceBois }}
+                          </span>
+                        }
+                      </div>
+                    }
+                  </div>
                   @if (selectedExpedition.is_verified) {
                     <div style="display:flex;gap:1.5rem">
                       <div style="display:flex;align-items:center;gap:0.5rem">
@@ -318,7 +334,7 @@
                       </div>
                     }
                     <div style="padding:0.5rem 1rem;background:var(--surface-100);border-top:1px solid var(--surface-border);display:flex;gap:1.25rem;align-items:center">
-                      <span style="font-size:0.65rem;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:var(--text-color-secondary);flex:1">Total net</span>
+                      <span style="font-size:0.65rem;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:var(--text-color-secondary);flex:1">Palettes laissées chez les clients</span>
                       <span style="display:flex;align-items:center;gap:0.3rem;font-weight:var(--font-weight-bold);font-size:var(--font-size-sm)">
                         <img src="assets/plastiquepallette.png" style="height:13px" alt="">{{ netPlastique }}
                       </span>
