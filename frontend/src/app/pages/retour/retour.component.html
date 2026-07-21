@@ -5,26 +5,30 @@
 
     @if (!selectedExpedition) {
 
-      <div style="max-width:520px;margin:5rem auto 0;text-align:center">
+      <div style="max-width:480px;margin:5rem auto 0;text-align:center">
         <div style="width:3.5rem;height:3.5rem;border-radius:var(--radius-xl);background:color-mix(in srgb,var(--primary-color) 12%,transparent);display:flex;align-items:center;justify-content:center;margin:0 auto 1.25rem">
           <i class="pi pi-replay" style="font-size:1.4rem;color:var(--primary-color)"></i>
         </div>
         <h2 style="font-size:var(--font-size-xl);font-weight:var(--font-weight-bold);margin:0 0 0.375rem">Enregistrer un retour</h2>
         <p style="color:var(--text-color-secondary);margin:0 0 2rem;font-size:var(--font-size-sm)">Sélectionnez un BL pour commencer</p>
-        <p-select
-          [(ngModel)]="selectedExpeditionId"
-          [ngModelOptions]="{standalone: true}"
-          [options]="expeditionOptions"
-          optionLabel="label"
-          optionValue="value"
-          placeholder="Rechercher par N° BL, client, livreur…"
-          [filter]="true"
-          filterPlaceholder="Rechercher…"
-          [showClear]="true"
-          style="width:100%"
-          appendTo="body"
-          (onChange)="onExpeditionSelect($event.value)"
-        />
+
+        <div class="retour-search-card" style="background:var(--surface-card);border:1px solid var(--surface-border);border-radius:var(--radius-2xl);padding:1.25rem 1.25rem 1.25rem 1rem;box-shadow:0 4px 32px rgba(0,0,0,0.07);display:flex;align-items:center;gap:0.75rem;text-align:left">
+          <i class="pi pi-search" style="font-size:1.1rem;color:var(--text-color-secondary);flex-shrink:0"></i>
+          <p-select
+            [(ngModel)]="selectedExpeditionId"
+            [ngModelOptions]="{standalone: true}"
+            [options]="expeditionOptions"
+            optionLabel="label"
+            optionValue="value"
+            placeholder="N° BL, client, livreur…"
+            [filter]="true"
+            filterPlaceholder="Rechercher…"
+            [showClear]="true"
+            style="flex:1;border:none"
+            appendTo="body"
+            (onChange)="onExpeditionSelect($event.value)"
+          />
+        </div>
       </div>
 
     } @else {

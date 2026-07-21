@@ -40,6 +40,36 @@
           </div>
 
           <div class="field" style="margin-bottom:1.25rem">
+            <label class="exp-label"><i class="pi pi-truck"></i>Livreur @if(!isGros){<span style="color:var(--color-error)">*</span>}</label>
+            <p-select
+              formControlName="livreur_id"
+              [options]="livreurs"
+              optionLabel="label"
+              optionValue="value"
+              placeholder="Sélectionner…"
+              [filter]="true"
+              filterPlaceholder="Rechercher…"
+              [style]="{width:'100%'}"
+              appendTo="body"
+            />
+          </div>
+
+          <div class="field" style="margin-bottom:1.25rem">
+            <label class="exp-label"><i class="pi pi-car"></i>Chauffeur @if(isGros){<span style="color:var(--color-error)">*</span>}</label>
+            <p-select
+              formControlName="chauffeur_id"
+              [options]="chauffeurs"
+              optionLabel="label"
+              optionValue="value"
+              placeholder="Sélectionner…"
+              [filter]="true"
+              filterPlaceholder="Rechercher…"
+              [style]="{width:'100%'}"
+              appendTo="body"
+            />
+          </div>
+
+          <div class="field mb-0">
             @if (isGros) {
               <label class="exp-label"><i class="pi pi-building"></i>Client <span style="color:var(--color-error)">*</span></label>
               <p-select
@@ -74,6 +104,7 @@
                 filterPlaceholder="Rechercher…"
                 [style]="{width:'100%'}"
                 appendTo="body"
+                [maxSelectedLabels]="0"
                 selectedItemsLabel="{0} client(s) sélectionné(s)"
               >
                 <ng-template #item let-opt>
@@ -85,55 +116,32 @@
                   </div>
                 </ng-template>
               </p-multiselect>
+
+              @if ((form.get('client_ids')?.value ?? []).length > 0) {
+                <div style="margin-top:0.75rem;display:flex;flex-direction:column;gap:0;border:1px solid var(--surface-border);border-radius:var(--radius-xl);overflow:hidden">
+                  @for (id of (form.get('client_ids')?.value ?? []); track id; let i = $index; let last = $last) {
+                    <div style="display:flex;align-items:center;gap:0.6rem;padding:0.6rem 0.875rem" [style.border-bottom]="!last ? '1px solid var(--surface-border)' : null">
+                      <span style="width:1.25rem;height:1.25rem;border-radius:50%;background:var(--surface-200);display:flex;align-items:center;justify-content:center;font-size:0.6rem;font-weight:700;color:var(--text-color-secondary);flex-shrink:0">{{ i + 1 }}</span>
+                      <div style="flex:1;min-width:0">
+                        @if (clientById(id)?.firstName || clientById(id)?.lastName) {
+                          <div style="font-weight:var(--font-weight-semibold);font-size:var(--font-size-sm)">{{ clientById(id)?.firstName }} {{ clientById(id)?.lastName }}</div>
+                          <div style="font-size:var(--font-size-xs);color:var(--text-color-secondary)">{{ clientById(id)?.label }}</div>
+                        } @else {
+                          <div style="font-weight:var(--font-weight-semibold);font-size:var(--font-size-sm)">{{ clientById(id)?.label }}</div>
+                        }
+                      </div>
+                    </div>
+                  }
+                </div>
+              }
             }
           </div>
 
-          <div class="field" style="margin-bottom:1.25rem">
-            <label class="exp-label"><i class="pi pi-truck"></i>Livreur @if(!isGros){<span style="color:var(--color-error)">*</span>}</label>
-            <p-select
-              formControlName="livreur_id"
-              [options]="livreurs"
-              optionLabel="label"
-              optionValue="value"
-              placeholder="Sélectionner…"
-              [filter]="true"
-              filterPlaceholder="Rechercher…"
-              [style]="{width:'100%'}"
-              appendTo="body"
-            />
-          </div>
-
-          <div class="field mb-0">
-            <label class="exp-label"><i class="pi pi-car"></i>Chauffeur @if(isGros){<span style="color:var(--color-error)">*</span>}</label>
-            <p-select
-              formControlName="chauffeur_id"
-              [options]="chauffeurs"
-              optionLabel="label"
-              optionValue="value"
-              placeholder="Sélectionner…"
-              [filter]="true"
-              filterPlaceholder="Rechercher…"
-              [style]="{width:'100%'}"
-              appendTo="body"
-            />
-          </div>
-
-        </div>
-
-        <!-- Notes -->
-        <div class="exp-notes">
-          <i class="pi pi-comment exp-notes__icon"></i>
-          <textarea
-            formControlName="notes"
-            class="exp-notes__input"
-            placeholder="Notes optionnelles…"
-            rows="3"
-          ></textarea>
         </div>
 
       </div>
 
-      <!-- Right column: balance + counters -->
+      <!-- Right column: balance + counters + notes -->
       <div class="nbl-col">
 
         <!-- Balance (gros client selected) -->
@@ -178,6 +186,17 @@
             <span class="qty-tile__unit">palettes chargées</span>
           </div>
 
+        </div>
+
+        <!-- Notes -->
+        <div class="exp-notes">
+          <i class="pi pi-comment exp-notes__icon"></i>
+          <textarea
+            formControlName="notes"
+            class="exp-notes__input"
+            placeholder="Notes optionnelles…"
+            rows="3"
+          ></textarea>
         </div>
 
       </div>

@@ -71,6 +71,10 @@ export class NouveauBLComponent implements OnInit {
     return this.allClients.filter(c => c.category === type);
   }
 
+  clientById(id: number) {
+    return this.filteredClients.find(c => c.value === id);
+  }
+
   inc(field: PaletteField) {
     const ctrl = this.form.get(field)!;
     ctrl.setValue((ctrl.value ?? 0) + 1);

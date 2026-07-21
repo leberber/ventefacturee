@@ -12,6 +12,15 @@ textarea[pTextarea] {
   min-width: 0;
 }
 
+// Borderless p-select inside a custom search card wrapper
+.retour-search-card .p-select {
+  border: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+  &:focus-within { box-shadow: none !important; }
+}
+
 // Prevent p-select label from forcing the component wider than its container
 .p-select-label {
   overflow: hidden;
