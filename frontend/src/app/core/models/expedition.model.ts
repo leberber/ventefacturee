@@ -23,6 +23,8 @@ export interface Expedition {
   updated_at?: string;
   retour_livreur_plastique: number;
   retour_livreur_bois: number;
+  is_returned: boolean;
+  returned_at?: string;
   is_verified: boolean;
   verified_at?: string;
   verified_by_name?: string;

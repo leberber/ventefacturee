@@ -62,9 +62,14 @@ export class HistoriqueComponent implements OnInit {
   }
 
   isReturned(exp: Expedition): boolean {
-    return exp.destination_type === 'gros'
-      ? exp.retour_plastique > 0 || exp.retour_bois > 0
-      : exp.is_verified;
+    return exp.destination_type === 'gros' ? exp.is_returned : exp.is_verified;
+  }
+
+  markReturned(exp: Expedition) {
+    this.expeditionsService.markReturned(exp.id).subscribe(updated => {
+      const idx = this.expeditions.findIndex(e => e.id === exp.id);
+      if (idx !== -1) this.expeditions[idx] = updated;
+    });
   }
 
   private expeditionsService  = inject(ExpeditionsService);
@@ -84,6 +89,7 @@ export class HistoriqueComponent implements OnInit {
 
   sortCol = 'date';
   sortDir: 1 | -1 = -1;
+  statusFilter: 'all' | 'retournee' | 'en_livraison' = 'en_livraison';
 
   readonly destinationBadge: Record<string, string> = {
     gros:   'badge badge--info',
@@ -92,7 +98,12 @@ export class HistoriqueComponent implements OnInit {
   };
   readonly destinationLabel: Record<string, string> = { gros: 'Gros', detail: 'Détail', horeca: 'Horeca' };
 
-  get sorted(): Expedition[] { return sortItems(this.expeditions, this.sortCol as keyof Expedition, this.sortDir); }
+  get sorted(): Expedition[] {
+    let list = this.expeditions;
+    if (this.statusFilter === 'retournee')   list = list.filter(e => this.isReturned(e));
+    if (this.statusFilter === 'en_livraison') list = list.filter(e => !this.isReturned(e));
+    return sortItems(list, this.sortCol as keyof Expedition, this.sortDir);
+  }
 
   sortBy(col: string) {
     const s = toggleSort(this.sortCol, this.sortDir, col);

@@ -32,6 +32,10 @@ class Expedition(SQLModel, table=True):
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     updated_at: Optional[datetime] = Field(default=None)
 
+    # Gros return flag
+    is_returned: bool = Field(default=False)
+    returned_at: Optional[datetime] = Field(default=None)
+
     # Verification (détail/horeca only)
     retour_livreur_plastique: int = Field(default=0)
     retour_livreur_bois: int = Field(default=0)
@@ -100,6 +104,8 @@ class ExpeditionRead(SQLModel):
     created_by_name: Optional[str] = None
     retour_livreur_plastique: int = 0
     retour_livreur_bois: int = 0
+    is_returned: bool = False
+    returned_at: Optional[datetime] = None
     is_verified: bool = False
     verified_at: Optional[datetime] = None
     verified_by_name: Optional[str] = None

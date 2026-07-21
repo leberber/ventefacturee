@@ -442,9 +442,32 @@ def create_retour(
         notes=body.notes,
     )
     session.add(retour)
+
+    # Mark gros expedition as returned
+    if exp.destination_type == "gros":
+        exp.is_returned = True
+        exp.returned_at = datetime.now(timezone.utc)
+        session.add(exp)
+
     session.commit()
     session.refresh(retour)
     return RetourRead.model_validate(retour)
+
+
+@router.patch("/{expedition_id}/mark-returned", response_model=ExpeditionRead)
+def mark_returned(
+    expedition_id: int,
+    session: Session = Depends(get_session),
+) -> Any:
+    exp = session.get(Expedition, expedition_id)
+    if not exp:
+        raise HTTPException(status_code=404, detail="Expédition introuvable")
+    exp.is_returned = True
+    exp.returned_at = datetime.now(timezone.utc)
+    session.add(exp)
+    session.commit()
+    session.refresh(exp)
+    return _attach_retours([exp], session)[0]
 
 
 @router.get("/{expedition_id}/retours", response_model=List[RetourRead])

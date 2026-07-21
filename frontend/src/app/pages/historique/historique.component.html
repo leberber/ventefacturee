@@ -27,6 +27,11 @@
           [style]="{minWidth:'220px'}"
         />
       </div>
+      <div class="dash-filter">
+        <button class="dash-filter__btn" [class.dash-filter__btn--active]="statusFilter==='all'"          (click)="statusFilter='all'">Tous</button>
+        <button class="dash-filter__btn" [class.dash-filter__btn--active]="statusFilter==='retournee'"   (click)="statusFilter='retournee'">Retournés</button>
+        <button class="dash-filter__btn" [class.dash-filter__btn--active]="statusFilter==='en_livraison'" (click)="statusFilter='en_livraison'">En livraison</button>
+      </div>
     </div>
 
     <div class="table-wrapper mob-hide">
@@ -136,7 +141,19 @@
                   {{ e.notes || '—' }}
                 </td>
                 <td class="actions-cell">
-                  @if (e.destination_type !== 'gros') {
+                  @if (e.destination_type === 'gros') {
+                    @if (e.is_returned) {
+                      <span class="table-action-btn" title="Retour enregistré" style="cursor:default">
+                        <span style="display:inline-flex;align-items:center;justify-content:center;width:1.5rem;height:1.5rem;border-radius:50%;background:color-mix(in srgb,var(--color-success,#22c55e) 15%,transparent)">
+                          <i class="pi pi-check" style="font-size:0.65rem;font-weight:900;color:var(--color-success,#22c55e)"></i>
+                        </span>
+                      </span>
+                    } @else {
+                      <button class="table-action-btn" title="Marquer comme retourné" (click)="markReturned(e)">
+                        <i class="pi pi-replay"></i>
+                      </button>
+                    }
+                  } @else {
                     <a [routerLink]="['/retour']" [queryParams]="{expeditionId: e.id}" class="table-action-btn"
                        [title]="e.is_verified ? 'Vérifié par ' + e.verified_by_name : 'Vérifier le retour'"
                        style="text-decoration:none"

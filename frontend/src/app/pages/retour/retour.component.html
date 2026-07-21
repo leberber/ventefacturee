@@ -423,7 +423,7 @@
     [label]="isGros ? 'Enregistrer le retour' : (selectedExpedition?.is_verified ? 'Mettre à jour' : 'Confirmer le retour')"
     [icon]="isGros ? 'pi pi-check' : (selectedExpedition?.is_verified ? 'pi pi-refresh' : 'pi pi-shield')"
     type="button"
-    [disabled]="!selectedExpeditionId || saving || (isGros && form.invalid)"
+    [disabled]="!selectedExpeditionId || saving || (isGros && form.invalid) || (!isGros && !!selectedExpedition?.is_verified)"
     [loading]="saving"
     (onClick)="save()"
   />

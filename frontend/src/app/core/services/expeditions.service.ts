@@ -66,6 +66,10 @@ export class ExpeditionsService {
     return this.http.post<Expedition>(`${this.base}/${id}/verify`, body);
   }
 
+  markReturned(id: number): Observable<Expedition> {
+    return this.http.patch<Expedition>(`${this.base}/${id}/mark-returned`, {});
+  }
+
   getDashboardStats(): Observable<DashboardStats> {
     return this.http.get<DashboardStats>(`${this.base}/stats/dashboard`);
   }
