@@ -32,8 +32,8 @@
       </div>
     </div>
 
-    <!-- Table -->
-    <div class="table-wrapper">
+    <!-- Table (desktop) -->
+    <div class="table-wrapper mob-hide">
       @if (loading) {
         @for (_ of [1,2,3,4,5]; track $index) {
           <div style="padding:0.65rem 1rem;border-bottom:1px solid var(--border-color-light)">
@@ -125,6 +125,63 @@
             }
           </tbody>
         </table>
+      }
+    </div>
+
+    <!-- Card list (mobile) -->
+    <div class="mob-card-list desk-hide">
+      @if (loading) {
+        @for (_ of [1,2,3,4,5]; track $index) {
+          <div class="mob-client-card mob-client-card--skeleton">
+            <div class="mob-skeleton-line"></div>
+            <div class="mob-skeleton-line mob-skeleton-line--short"></div>
+          </div>
+        }
+      } @else if (sorted.length === 0) {
+        <div class="table-empty">
+          {{ searchQuery ? 'Aucun résultat pour "' + searchQuery + '"' : 'Aucun client enregistré' }}
+        </div>
+      } @else {
+        @for (c of sorted; track c.id) {
+          <div class="mob-client-card">
+            <div class="mob-client-card__main">
+              <div class="mob-client-card__info">
+                <span class="mob-client-card__name">{{ c.name }}</span>
+                @if (c.store_name && c.store_name !== c.name) {
+                  <span class="mob-client-card__store">{{ c.store_name }}</span>
+                }
+                <div class="mob-client-card__meta">
+                  <span [class]="categoryBadge[c.category]">{{ categoryLabel[c.category] }}</span>
+                  @if (c.code) {
+                    <code class="font-mono text-muted" style="font-size:var(--font-size-xs)">{{ c.code }}</code>
+                  }
+                </div>
+              </div>
+              <div class="mob-client-card__palettes">
+                <button class="palette-pill" (click)="openPop($event, c, 'plastique')">
+                  <img src="assets/plastiquepallette.png" class="palette-pill__img" alt="">
+                  <span class="palette-pill__count palette-pill__count--plastic">{{ c.plastic_out ?? 0 }}</span>
+                </button>
+                <button class="palette-pill" (click)="openPop($event, c, 'bois')">
+                  <img src="assets/woodpallette.png" class="palette-pill__img" alt="">
+                  <span class="palette-pill__count palette-pill__count--wood">{{ c.wood_out ?? 0 }}</span>
+                </button>
+              </div>
+            </div>
+            <div class="mob-client-card__actions">
+              <button class="table-action-btn" title="Modifier" (click)="openEdit(c)">
+                <i class="pi pi-pencil"></i>
+              </button>
+              <button class="table-action-btn" title="BLs"
+                [routerLink]="['/historique']" [queryParams]="{clientId: c.id}">
+                <i class="pi pi-list"></i>
+              </button>
+              <button class="table-action-btn table-action-btn--danger" title="Supprimer" (click)="confirmDelete(c)">
+                <i class="pi pi-trash"></i>
+              </button>
+            </div>
+          </div>
+        }
       }
     </div>
 

@@ -4,6 +4,10 @@
   grid-template-columns: 1fr 1fr;
   gap: 1.25rem;
   align-items: start;
+
+  @media (max-width: 768px) {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 
 // Left: scrollable form cards
@@ -26,5 +30,11 @@
   border: var(--border-width) solid var(--surface-border);
   background: var(--surface-card);
   padding: 0.75rem;
+
+  @media (max-width: 768px) {
+    position: static;
+    height: 220px;
+    order: -1;
+  }
 }
 

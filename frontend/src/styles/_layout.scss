@@ -542,6 +542,8 @@
   letter-spacing: 0.02em;
   text-transform: uppercase;
   i { font-size: 0.65rem; }
+
+  @include mobile-only { display: none; }
 }
 
 // ---- Expedition form ----
@@ -1800,3 +1802,85 @@
 }
 
 .required-star { color: var(--color-error, #ef4444); }
+
+// ── Responsive visibility helpers ─────────────────────────────────────────────
+.mob-hide { @include mobile-only { display: none !important; } }
+.desk-hide { display: none; @include mobile-only { display: block; } }
+
+// ── Mobile client card list ───────────────────────────────────────────────────
+.mob-card-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.mob-client-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  padding: 0.875rem 1rem;
+  border-bottom: var(--border-width) solid var(--surface-border);
+
+  &:last-child { border-bottom: none; }
+
+  &__main {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+
+  &__info {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+  }
+
+  &__name {
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-semibold);
+    color: var(--text-color);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &__store {
+    font-size: var(--font-size-xs);
+    color: var(--text-color-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &__meta {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin-top: 0.15rem;
+    flex-wrap: wrap;
+  }
+
+  &__palettes {
+    display: flex;
+    gap: 0.4rem;
+    flex-shrink: 0;
+  }
+
+  &__actions {
+    display: flex;
+    gap: 0.35rem;
+    padding-left: 0;
+  }
+
+  &--skeleton { gap: 0.4rem; }
+}
+
+.mob-skeleton-line {
+  height: 0.875rem;
+  border-radius: 6px;
+  background: var(--surface-200);
+  animation: skeleton 1.2s infinite alternate;
+
+  &--short { width: 55%; }
+}
