@@ -119,6 +119,14 @@ export class LivraisonDetailComponent implements OnInit {
 
   inc(clientId: number, field: 'plastique' | 'bois' | 'retour_plastique' | 'retour_bois') {
     const inp = this.inputs.get(clientId)!;
+    if (field === 'plastique' && this.restantPlastique <= 0) {
+      this.messageService.add({ key: 'stock', severity: 'warn', summary: 'Stock épuisé', detail: `Toutes les palettes plastique chargées (${this.bl?.nc_plastique}) ont déjà été distribuées`, life: 3000 });
+      return;
+    }
+    if (field === 'bois' && this.restantBois <= 0) {
+      this.messageService.add({ key: 'stock', severity: 'warn', summary: 'Stock épuisé', detail: `Toutes les palettes bois chargées (${this.bl?.nc_bois}) ont déjà été distribuées`, life: 3000 });
+      return;
+    }
     inp[field]++;
   }
 
@@ -131,6 +139,8 @@ export class LivraisonDetailComponent implements OnInit {
     const inp = this.inputs.get(clientId)!;
     let n = parseInt((event.target as HTMLInputElement).value, 10);
     if (isNaN(n) || n < 0) n = 0;
+    if (field === 'plastique') n = Math.min(n, inp.plastique + this.restantPlastique);
+    if (field === 'bois')      n = Math.min(n, inp.bois      + this.restantBois);
     inp[field] = n;
   }
 

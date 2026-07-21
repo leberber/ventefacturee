@@ -1,4 +1,15 @@
 <p-toast position="top-center" appendTo="body" showTransitionOptions="0ms" hideTransitionOptions="200ms ease-in" />
+<p-toast key="stock" position="top-center" appendTo="body" showTransitionOptions="0ms" hideTransitionOptions="200ms ease-in">
+  <ng-template #message let-msg>
+    <div style="display:flex;align-items:flex-start;gap:0.65rem">
+      <i class="pi pi-exclamation-circle" style="font-size:1.25rem;color:var(--color-error,#ef4444);flex-shrink:0;margin-top:0.1rem"></i>
+      <div style="display:flex;flex-direction:column;gap:0.2rem">
+        <span style="font-weight:700;color:var(--color-error,#ef4444)">{{ msg.summary }}</span>
+        <span style="font-size:var(--font-size-sm)">{{ msg.detail }}</span>
+      </div>
+    </div>
+  </ng-template>
+</p-toast>
 
 <div class="page-content" style="padding-bottom:5rem">
 
