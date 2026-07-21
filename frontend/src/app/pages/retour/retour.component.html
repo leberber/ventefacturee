@@ -19,187 +19,294 @@
   </div>
 
   <form [formGroup]="form" style="max-width:1200px;margin:0 auto">
-    <div class="nbl-layout nbl-layout--wide-right">
 
-      <!-- Left column: lookup + counters -->
-      <div class="nbl-col">
+    <!-- Expedition picker -->
+    <div class="exp-card" style="margin-bottom:1.5rem">
+      <div class="field mb-0">
+        <label class="exp-label"><i class="pi pi-search"></i>Expédition à retourner <span style="color:var(--color-error)">*</span></label>
+        <p-select
+          [(ngModel)]="selectedExpeditionId"
+          [ngModelOptions]="{standalone: true}"
+          [options]="expeditionOptions"
+          optionLabel="label"
+          optionValue="value"
+          placeholder="Rechercher par N° BL, client, livreur…"
+          [filter]="true"
+          filterPlaceholder="Rechercher…"
+          [showClear]="true"
+          [style]="{width:'100%'}"
+          appendTo="body"
+          (onChange)="onExpeditionSelect($event.value)"
+        />
+      </div>
 
-        <!-- Expedition lookup -->
-        <div class="exp-card">
-          <div class="field mb-0">
-            <label class="exp-label"><i class="pi pi-search"></i>Expédition à retourner <span style="color:var(--color-error)">*</span></label>
-            <p-select
-              [(ngModel)]="selectedExpeditionId"
-              [ngModelOptions]="{standalone: true}"
-              [options]="expeditionOptions"
-              optionLabel="label"
-              optionValue="value"
-              placeholder="Rechercher par N° BL, client, livreur…"
-              [filter]="true"
-              filterPlaceholder="Rechercher…"
-              [showClear]="true"
-              [style]="{width:'100%'}"
-              appendTo="body"
-              (onChange)="onExpeditionSelect($event.value)"
-            />
+      @if (selectedExpedition) {
+        <div class="retour-info">
+          <div class="retour-info__item">
+            <span class="retour-info__key"><i class="pi pi-receipt"></i>BL</span>
+            <strong class="retour-info__val">{{ selectedExpedition.bl_number }}</strong>
           </div>
-
-          @if (selectedExpedition) {
-            <div class="retour-info">
-              <div class="retour-info__item">
-                <span class="retour-info__key"><i class="pi pi-receipt"></i>BL</span>
-                <strong class="retour-info__val">{{ selectedExpedition.bl_number }}</strong>
-              </div>
-              <div class="retour-info__item">
-                <span class="retour-info__key"><i class="pi pi-calendar"></i>Date</span>
-                <span class="retour-info__val">{{ selectedExpedition.date }}</span>
-              </div>
-              <div class="retour-info__item">
-                <span class="retour-info__key"><i class="pi pi-tag"></i>Type</span>
-                <span [class]="typeBadge[selectedExpedition.destination_type]">{{ typeLabel[selectedExpedition.destination_type] }}</span>
-              </div>
-              @if (selectedExpedition.client_name) {
-                <div class="retour-info__item">
-                  <span class="retour-info__key"><i class="pi pi-building"></i>Client</span>
-                  <span class="retour-info__val">{{ selectedExpedition.client_name }}</span>
-                </div>
-              }
-              @if (selectedExpedition.livreur_name) {
-                <div class="retour-info__item">
-                  <span class="retour-info__key"><i class="pi pi-truck"></i>Livreur</span>
-                  <span class="retour-info__val">{{ selectedExpedition.livreur_name }}</span>
-                </div>
-              }
-              <div class="retour-info__item">
-                <span class="retour-info__key"><i class="pi pi-car"></i>Chauffeur</span>
-                <span class="retour-info__val">{{ selectedExpedition.chauffeur_name }}</span>
-              </div>
-              @if (selectedClient?.daira) {
-                <div class="retour-info__item">
-                  <span class="retour-info__key"><i class="pi pi-map-marker"></i>Daïra</span>
-                  <span class="retour-info__val">{{ selectedClient!.daira }}</span>
-                </div>
-              }
-              @if (selectedClient?.category) {
-                <div class="retour-info__item">
-                  <span class="retour-info__key"><i class="pi pi-briefcase"></i>Catégorie</span>
-                  <span [class]="typeBadge[selectedClient!.category]">{{ typeLabel[selectedClient!.category] }}</span>
-                </div>
-              }
+          <div class="retour-info__item">
+            <span class="retour-info__key"><i class="pi pi-calendar"></i>Date</span>
+            <span class="retour-info__val">{{ selectedExpedition.date }}</span>
+          </div>
+          <div class="retour-info__item">
+            <span class="retour-info__key"><i class="pi pi-tag"></i>Type</span>
+            <span [class]="typeBadge[selectedExpedition.destination_type]">{{ typeLabel[selectedExpedition.destination_type] }}</span>
+          </div>
+          @if (selectedExpedition.client_name) {
+            <div class="retour-info__item">
+              <span class="retour-info__key"><i class="pi pi-building"></i>Client</span>
+              <span class="retour-info__val">{{ selectedExpedition.client_name }}</span>
+            </div>
+          }
+          @if (selectedExpedition.livreur_name) {
+            <div class="retour-info__item">
+              <span class="retour-info__key"><i class="pi pi-send"></i>Livreur</span>
+              <span class="retour-info__val">{{ selectedExpedition.livreur_name }}</span>
+            </div>
+          }
+          @if (selectedExpedition.chauffeur_name) {
+            <div class="retour-info__item">
+              <span class="retour-info__key"><i class="pi pi-car"></i>Chauffeur</span>
+              <span class="retour-info__val">{{ selectedExpedition.chauffeur_name }}</span>
+            </div>
+          }
+          @if (selectedClient?.daira) {
+            <div class="retour-info__item">
+              <span class="retour-info__key"><i class="pi pi-map-marker"></i>Daïra</span>
+              <span class="retour-info__val">{{ selectedClient!.daira }}</span>
+            </div>
+          }
+          @if (selectedExpedition.is_verified) {
+            <div class="retour-info__item">
+              <span class="retour-info__key"><i class="pi pi-check-circle" style="color:var(--color-success,#22c55e)"></i>Vérifié</span>
+              <span class="retour-info__val" style="color:var(--color-success,#22c55e)">par {{ selectedExpedition.verified_by_name }}</span>
             </div>
           }
         </div>
-
-        <!-- Quantity counters -->
-        <div class="qty-grid">
-
-          <div class="qty-tile">
-            @if (selectedExpedition) {
-              <div class="qty-tile__hint">
-                {{ selectedExpedition.nc_plastique }} envoyées
-              </div>
-            }
-            <img src="assets/plastiquepallette.png" class="qty-tile__img" alt="">
-            <span class="qty-tile__name">Plastique</span>
-            <div class="qty-tile__counter">
-              <button type="button" class="qty-btn" (click)="dec('retour_plastique')">−</button>
-              <input type="number" class="qty-input" [value]="form.get('retour_plastique')?.value" (change)="setQty('retour_plastique', $event)" min="0">
-              <button type="button" class="qty-btn qty-btn--plus" (click)="inc('retour_plastique')">+</button>
-            </div>
-            <span class="qty-tile__unit">retournées</span>
-            <button type="button" class="consigne-toggle" (click)="toggleConsigne('plastique')">
-              Consigne encaissée
-              <i class="pi" [class.pi-chevron-down]="!showConsignePlastique" [class.pi-chevron-up]="showConsignePlastique"></i>
-            </button>
-            @if (showConsignePlastique) {
-              <div class="consigne-expand">
-                <div class="consigne-row">
-                  <div class="consigne-field">
-                    <label>Palettes</label>
-                    <input type="number" [value]="consignePlastique" (input)="onConsigneQtyInput('plastique', $event)" min="0">
-                  </div>
-                  <div class="consigne-sep">× {{ prixPlastique | number:'1.0-0' }} DA</div>
-                  <div class="consigne-field">
-                    <label>Montant</label>
-                    <input type="number" [value]="montantPlastique" (input)="onConsigneMoneyInput('plastique', $event)" min="0">
-                  </div>
-                </div>
-                @if (consignePlastique) {
-                  <div class="consigne-summary">
-                    {{ consignePlastique }} palette{{ consignePlastique !== 1 ? 's' : '' }}
-                    × {{ prixPlastique | number:'1.0-0' }} = <strong>{{ montantPlastique | number:'1.0-0' }} DA</strong>
-                  </div>
-                }
-              </div>
-            }
-          </div>
-
-          <div class="qty-tile">
-            @if (selectedExpedition) {
-              <div class="qty-tile__hint">
-                {{ selectedExpedition.nc_bois }} envoyées
-              </div>
-            }
-            <img src="assets/woodpallette.png" class="qty-tile__img" alt="">
-            <span class="qty-tile__name">Bois</span>
-            <div class="qty-tile__counter">
-              <button type="button" class="qty-btn" (click)="dec('retour_bois')">−</button>
-              <input type="number" class="qty-input" [value]="form.get('retour_bois')?.value" (change)="setQty('retour_bois', $event)" min="0">
-              <button type="button" class="qty-btn qty-btn--plus" (click)="inc('retour_bois')">+</button>
-            </div>
-            <span class="qty-tile__unit">retournées</span>
-            <button type="button" class="consigne-toggle" (click)="toggleConsigne('bois')">
-              Consigne encaissée
-              <i class="pi" [class.pi-chevron-down]="!showConsigneBois" [class.pi-chevron-up]="showConsigneBois"></i>
-            </button>
-            @if (showConsigneBois) {
-              <div class="consigne-expand">
-                <div class="consigne-row">
-                  <div class="consigne-field">
-                    <label>Palettes</label>
-                    <input type="number" [value]="consigneBois" (input)="onConsigneQtyInput('bois', $event)" min="0">
-                  </div>
-                  <div class="consigne-sep">× {{ prixBois | number:'1.0-0' }} DA</div>
-                  <div class="consigne-field">
-                    <label>Montant</label>
-                    <input type="number" [value]="montantBois" (input)="onConsigneMoneyInput('bois', $event)" min="0">
-                  </div>
-                </div>
-                @if (consigneBois) {
-                  <div class="consigne-summary">
-                    {{ consigneBois }} palette{{ consigneBois !== 1 ? 's' : '' }}
-                    × {{ prixBois | number:'1.0-0' }} = <strong>{{ montantBois | number:'1.0-0' }} DA</strong>
-                  </div>
-                }
-              </div>
-            }
-          </div>
-
-        </div>
-
-      </div>
-
-      <!-- Right column: notes -->
-      <div class="nbl-col">
-        <div class="exp-card" style="height:100%">
-          <label class="exp-label" style="margin-bottom:0.75rem"><i class="pi pi-comment"></i>Notes</label>
-          <textarea
-            formControlName="notes"
-            class="exp-notes__input"
-            placeholder="Notes optionnelles…"
-            rows="6"
-            style="flex:1;resize:vertical"
-          ></textarea>
-        </div>
-      </div>
-
+      }
     </div>
+
+    @if (selectedExpedition) {
+
+      @if (isGros) {
+
+        <!-- Gros: qty counters + notes -->
+        <div class="nbl-layout nbl-layout--wide-right">
+
+          <div class="nbl-col">
+            <div class="qty-grid">
+
+              <div class="qty-tile">
+                <div class="qty-tile__hint">{{ selectedExpedition.nc_plastique }} envoyées</div>
+                <img src="assets/plastiquepallette.png" class="qty-tile__img" alt="">
+                <span class="qty-tile__name">Plastique</span>
+                <div class="qty-tile__counter">
+                  <button type="button" class="qty-btn" (click)="dec('retour_plastique')">−</button>
+                  <input type="number" class="qty-input" [value]="form.get('retour_plastique')?.value" (change)="setQty('retour_plastique', $event)" min="0">
+                  <button type="button" class="qty-btn qty-btn--plus" (click)="inc('retour_plastique')">+</button>
+                </div>
+                <span class="qty-tile__unit">retournées</span>
+                <button type="button" class="consigne-toggle" (click)="toggleConsigne('plastique')">
+                  Consigne encaissée
+                  <i class="pi" [class.pi-chevron-down]="!showConsignePlastique" [class.pi-chevron-up]="showConsignePlastique"></i>
+                </button>
+                @if (showConsignePlastique) {
+                  <div class="consigne-expand">
+                    <div class="consigne-row">
+                      <div class="consigne-field">
+                        <label>Palettes</label>
+                        <input type="number" [value]="consignePlastique" (input)="onConsigneQtyInput('plastique', $event)" min="0">
+                      </div>
+                      <div class="consigne-sep">× {{ prixPlastique | number:'1.0-0' }} DA</div>
+                      <div class="consigne-field">
+                        <label>Montant</label>
+                        <input type="number" [value]="montantPlastique" (input)="onConsigneMoneyInput('plastique', $event)" min="0">
+                      </div>
+                    </div>
+                    @if (consignePlastique) {
+                      <div class="consigne-summary">
+                        {{ consignePlastique }} palette{{ consignePlastique !== 1 ? 's' : '' }}
+                        × {{ prixPlastique | number:'1.0-0' }} = <strong>{{ montantPlastique | number:'1.0-0' }} DA</strong>
+                      </div>
+                    }
+                  </div>
+                }
+              </div>
+
+              <div class="qty-tile">
+                <div class="qty-tile__hint">{{ selectedExpedition.nc_bois }} envoyées</div>
+                <img src="assets/woodpallette.png" class="qty-tile__img" alt="">
+                <span class="qty-tile__name">Bois</span>
+                <div class="qty-tile__counter">
+                  <button type="button" class="qty-btn" (click)="dec('retour_bois')">−</button>
+                  <input type="number" class="qty-input" [value]="form.get('retour_bois')?.value" (change)="setQty('retour_bois', $event)" min="0">
+                  <button type="button" class="qty-btn qty-btn--plus" (click)="inc('retour_bois')">+</button>
+                </div>
+                <span class="qty-tile__unit">retournées</span>
+                <button type="button" class="consigne-toggle" (click)="toggleConsigne('bois')">
+                  Consigne encaissée
+                  <i class="pi" [class.pi-chevron-down]="!showConsigneBois" [class.pi-chevron-up]="showConsigneBois"></i>
+                </button>
+                @if (showConsigneBois) {
+                  <div class="consigne-expand">
+                    <div class="consigne-row">
+                      <div class="consigne-field">
+                        <label>Palettes</label>
+                        <input type="number" [value]="consigneBois" (input)="onConsigneQtyInput('bois', $event)" min="0">
+                      </div>
+                      <div class="consigne-sep">× {{ prixBois | number:'1.0-0' }} DA</div>
+                      <div class="consigne-field">
+                        <label>Montant</label>
+                        <input type="number" [value]="montantBois" (input)="onConsigneMoneyInput('bois', $event)" min="0">
+                      </div>
+                    </div>
+                    @if (consigneBois) {
+                      <div class="consigne-summary">
+                        {{ consigneBois }} palette{{ consigneBois !== 1 ? 's' : '' }}
+                        × {{ prixBois | number:'1.0-0' }} = <strong>{{ montantBois | number:'1.0-0' }} DA</strong>
+                      </div>
+                    }
+                  </div>
+                }
+              </div>
+
+            </div>
+          </div>
+
+          <div class="nbl-col">
+            <div class="exp-card" style="height:100%">
+              <label class="exp-label" style="margin-bottom:0.75rem"><i class="pi pi-comment"></i>Notes</label>
+              <textarea
+                formControlName="notes"
+                class="exp-notes__input"
+                placeholder="Notes optionnelles…"
+                rows="6"
+                style="flex:1;resize:vertical"
+              ></textarea>
+            </div>
+          </div>
+
+        </div>
+
+      } @else {
+
+        <!-- Détail / Horeca: verification flow -->
+        <div style="display:flex;flex-direction:column;gap:1.5rem">
+
+          @if (verifyLoading) {
+            @for (_ of [1,2,3]; track $index) {
+              <div style="height:48px;border-radius:var(--radius-xl);background:var(--surface-200);animation:skeleton 1.2s infinite alternate"></div>
+            }
+          } @else {
+
+            <!-- Per-client breakdown -->
+            <div class="exp-card" style="padding:0;overflow:hidden">
+              <table class="table" style="font-size:var(--font-size-sm)">
+                <thead>
+                  <tr>
+                    <th>Client</th>
+                    <th style="text-align:center"><img src="assets/plastiquepallette.png" style="height:11px" alt=""> Livré</th>
+                    <th style="text-align:center">Retour client</th>
+                    <th style="text-align:center;font-weight:700">Net</th>
+                    <th style="text-align:center"><img src="assets/woodpallette.png" style="height:11px" alt=""> Livré</th>
+                    <th style="text-align:center">Retour client</th>
+                    <th style="text-align:center;font-weight:700">Net</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (ec of verifyClients; track ec.client_id) {
+                    <tr>
+                      <td>{{ ec.client_name }}</td>
+                      <td style="text-align:center">{{ ec.detail?.plastique ?? 0 }}</td>
+                      <td style="text-align:center;color:var(--color-success,#22c55e)">{{ ec.detail?.retour_plastique ?? 0 }}</td>
+                      <td style="text-align:center;font-weight:700">{{ (ec.detail?.plastique ?? 0) - (ec.detail?.retour_plastique ?? 0) }}</td>
+                      <td style="text-align:center">{{ ec.detail?.bois ?? 0 }}</td>
+                      <td style="text-align:center;color:var(--color-success,#22c55e)">{{ ec.detail?.retour_bois ?? 0 }}</td>
+                      <td style="text-align:center;font-weight:700">{{ (ec.detail?.bois ?? 0) - (ec.detail?.retour_bois ?? 0) }}</td>
+                    </tr>
+                  }
+                  @if (verifyClients.length === 0) {
+                    <tr><td colspan="7" style="text-align:center;color:var(--text-color-secondary);padding:1.5rem">Aucune livraison enregistrée</td></tr>
+                  }
+                </tbody>
+                <tfoot>
+                  <tr style="font-weight:700;border-top:2px solid var(--surface-border)">
+                    <td>Total distribué</td>
+                    <td colspan="2"></td>
+                    <td style="text-align:center">{{ netPlastique }}</td>
+                    <td colspan="2"></td>
+                    <td style="text-align:center">{{ netBois }}</td>
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
+
+            <!-- Physical return inputs -->
+            <div class="exp-card">
+              <div class="form-grid-2">
+                <div class="field mb-0">
+                  <label class="exp-label"><img src="assets/plastiquepallette.png" style="height:11px;vertical-align:middle;margin-right:4px" alt="">Retour physique plastique</label>
+                  <p-inputnumber [(ngModel)]="retourLivreurPlastique" [ngModelOptions]="{standalone:true}" [min]="0" [showButtons]="true"
+                    buttonLayout="horizontal" decrementButtonIcon="pi pi-minus" incrementButtonIcon="pi pi-plus"
+                    [style]="{width:'100%'}" />
+                </div>
+                <div class="field mb-0">
+                  <label class="exp-label"><img src="assets/woodpallette.png" style="height:11px;vertical-align:middle;margin-right:4px" alt="">Retour physique bois</label>
+                  <p-inputnumber [(ngModel)]="retourLivreurBois" [ngModelOptions]="{standalone:true}" [min]="0" [showButtons]="true"
+                    buttonLayout="horizontal" decrementButtonIcon="pi pi-minus" incrementButtonIcon="pi pi-plus"
+                    [style]="{width:'100%'}" />
+                </div>
+              </div>
+            </div>
+
+            <!-- Balance summary -->
+            <div class="exp-card" style="display:flex;align-items:center;gap:2.5rem;flex-wrap:wrap">
+              <div>
+                <div style="font-size:0.65rem;text-transform:uppercase;letter-spacing:0.05em;color:var(--text-color-secondary);margin-bottom:0.25rem">Balance plastique</div>
+                <span [style.color]="balancePlastique === 0 ? 'var(--color-success,#22c55e)' : 'var(--color-error,#ef4444)'"
+                      style="font-weight:700;font-size:1.4rem">
+                  {{ balancePlastique > 0 ? '+' : '' }}{{ balancePlastique }}
+                </span>
+              </div>
+              <div>
+                <div style="font-size:0.65rem;text-transform:uppercase;letter-spacing:0.05em;color:var(--text-color-secondary);margin-bottom:0.25rem">Balance bois</div>
+                <span [style.color]="balanceBois === 0 ? 'var(--color-success,#22c55e)' : 'var(--color-error,#ef4444)'"
+                      style="font-weight:700;font-size:1.4rem">
+                  {{ balanceBois > 0 ? '+' : '' }}{{ balanceBois }}
+                </span>
+              </div>
+              @if (balancePlastique !== 0 || balanceBois !== 0) {
+                <span style="font-size:var(--font-size-xs);color:var(--color-warning,#f59e0b);display:flex;align-items:center;gap:0.3rem">
+                  <i class="pi pi-exclamation-triangle"></i> Les comptes ne s'équilibrent pas
+                </span>
+              } @else {
+                <span style="font-size:var(--font-size-xs);color:var(--color-success,#22c55e);display:flex;align-items:center;gap:0.3rem">
+                  <i class="pi pi-check"></i> Comptes équilibrés
+                </span>
+              }
+            </div>
+
+          }
+        </div>
+
+      }
+
+    }
+
   </form>
 
 </div>
 
 <div class="form-footer">
   <p-button label="Annuler" severity="secondary" type="button" (onClick)="reset()" />
-  <p-button label="Enregistrer le retour" icon="pi pi-check" type="button"
-    [disabled]="form.invalid || saving || !selectedExpeditionId" [loading]="saving" (onClick)="save()" />
+  <p-button
+    [label]="isGros ? 'Enregistrer le retour' : (selectedExpedition?.is_verified ? 'Mettre à jour' : 'Confirmer le retour')"
+    [icon]="isGros ? 'pi pi-check' : (selectedExpedition?.is_verified ? 'pi pi-refresh' : 'pi pi-shield')"
+    type="button"
+    [disabled]="!selectedExpeditionId || saving || (isGros && form.invalid)"
+    [loading]="saving"
+    (onClick)="save()"
+  />
 </div>

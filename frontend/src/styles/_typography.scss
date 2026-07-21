@@ -23,9 +23,16 @@
   --line-height-relaxed: 1.75;
 }
 
+input, textarea, [contenteditable] {
+  user-select: text;
+  -webkit-user-select: text;
+}
+
 body {
   font-family: var(--font-family-base);
   font-size: var(--font-size-base);
   line-height: var(--line-height-normal);
   color: var(--text-color);
+  user-select: none;
+  -webkit-user-select: none;
 }

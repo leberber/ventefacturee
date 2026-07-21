@@ -111,7 +111,7 @@
                     <a [routerLink]="['/expedition', e.id, 'livraison']" class="table-action-btn" title="Livraisons par client">
                       <i class="pi pi-send"></i>
                     </a>
-                    <a [routerLink]="['/expedition', e.id, 'verification']" class="table-action-btn"
+                    <a [routerLink]="['/retour']" [queryParams]="{expeditionId: e.id}" class="table-action-btn"
                        [title]="e.is_verified ? 'Vérifié par ' + e.verified_by_name : 'Vérifier le retour'"
                        [style.color]="e.is_verified ? 'var(--color-success,#22c55e)' : ''">
                       <i [class]="e.is_verified ? 'pi pi-check-circle' : 'pi pi-shield'"></i>
@@ -205,7 +205,7 @@
                     <i class="pi pi-check-circle"></i>
                   </span>
                 } @else {
-                  <a [routerLink]="['/expedition', e.id, 'verification']" class="table-action-btn" title="Vérifier le retour">
+                  <a [routerLink]="['/retour']" [queryParams]="{expeditionId: e.id}" class="table-action-btn" title="Vérifier le retour">
                     <i class="pi pi-shield"></i>
                   </a>
                 }

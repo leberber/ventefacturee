@@ -1,16 +1,18 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { Select } from 'primeng/select';
 import { Button } from 'primeng/button';
 import { Toast } from 'primeng/toast';
+import { InputNumber } from 'primeng/inputnumber';
 import { MessageService } from 'primeng/api';
 
 import { ExpeditionsService } from '../../core/services/expeditions.service';
 import { ClientsService } from '../../core/services/clients.service';
 import { ConfigService } from '../../core/services/config.service';
-import { Expedition, RetourCreate } from '../../core/models/expedition.model';
+import { AuthService } from '../../core/services/auth.service';
+import { Expedition, RetourCreate, ExpeditionClient } from '../../core/models/expedition.model';
 import { Client } from '../../core/models/client.model';
 
 type RetourField = 'retour_plastique' | 'retour_bois';
@@ -18,7 +20,7 @@ type RetourField = 'retour_plastique' | 'retour_bois';
 @Component({
   selector: 'app-retour',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, Select, Button, Toast],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, Select, Button, Toast, InputNumber],
   providers: [MessageService],
   templateUrl: './retour.component.html',
 })
@@ -26,8 +28,10 @@ export class RetourComponent implements OnInit {
   private expeditionsService = inject(ExpeditionsService);
   private clientsService     = inject(ClientsService);
   private configService      = inject(ConfigService);
+  private authService        = inject(AuthService);
   private messageService     = inject(MessageService);
   private router             = inject(Router);
+  private route              = inject(ActivatedRoute);
   private fb                 = inject(FormBuilder);
 
   expeditionOptions: { label: string; value: number; expedition: Expedition }[] = [];
@@ -50,6 +54,27 @@ export class RetourComponent implements OnInit {
   montantPlastique  = 0;
   consigneBois      = 0;
   montantBois       = 0;
+
+  // Verify state (detail/horeca)
+  verifyClients: ExpeditionClient[] = [];
+  verifyLoading = false;
+  retourLivreurPlastique = 0;
+  retourLivreurBois      = 0;
+
+  get isGros(): boolean { return this.selectedExpedition?.destination_type === 'gros'; }
+
+  get netPlastique(): number {
+    return this.verifyClients.reduce((s, ec) => s + (ec.detail?.plastique ?? 0) - (ec.detail?.retour_plastique ?? 0), 0);
+  }
+  get netBois(): number {
+    return this.verifyClients.reduce((s, ec) => s + (ec.detail?.bois ?? 0) - (ec.detail?.retour_bois ?? 0), 0);
+  }
+  get balancePlastique(): number {
+    return (this.selectedExpedition?.nc_plastique ?? 0) - this.netPlastique - this.retourLivreurPlastique;
+  }
+  get balanceBois(): number {
+    return (this.selectedExpedition?.nc_bois ?? 0) - this.netBois - this.retourLivreurBois;
+  }
 
   form = this.fb.group({
     retour_plastique:        [0, [Validators.required, Validators.min(0)]],
@@ -77,17 +102,36 @@ export class RetourComponent implements OnInit {
         value: e.id,
         expedition: e,
       }));
+      // Pre-select via query param (e.g. from historique shield link)
+      const preId = this.route.snapshot.queryParamMap.get('expeditionId');
+      if (preId) {
+        const id = +preId;
+        this.selectedExpeditionId = id;
+        this.onExpeditionSelect(id);
+      }
     });
   }
 
   onExpeditionSelect(expId: number | null) {
-    if (!expId) { this.selectedExpedition = null; return; }
+    if (!expId) { this.selectedExpedition = null; this.verifyClients = []; return; }
     const opt = this.expeditionOptions.find(o => o.value === expId);
     this.selectedExpedition = opt?.expedition ?? null;
     this.selectedClient = this.selectedExpedition?.client_id
       ? (this.clientsMap.get(this.selectedExpedition.client_id) ?? null)
       : null;
     this.form.patchValue({ retour_plastique: 0, consigne_paid_plastique: 0, retour_bois: 0, consigne_paid_bois: 0, notes: '' });
+
+    if (this.selectedExpedition && this.selectedExpedition.destination_type !== 'gros') {
+      this.verifyLoading = true;
+      this.retourLivreurPlastique = this.selectedExpedition.retour_livreur_plastique ?? 0;
+      this.retourLivreurBois      = this.selectedExpedition.retour_livreur_bois ?? 0;
+      this.expeditionsService.getExpeditionClients(expId).subscribe({
+        next: clients => { this.verifyClients = clients; this.verifyLoading = false; },
+        error: ()      => { this.verifyLoading = false; },
+      });
+    } else {
+      this.verifyClients = [];
+    }
   }
 
   inc(field: RetourField) {
@@ -140,27 +184,48 @@ export class RetourComponent implements OnInit {
   }
 
   save() {
-    if (this.form.invalid || !this.selectedExpeditionId) return;
+    if (!this.selectedExpeditionId || !this.selectedExpedition) return;
     this.saving = true;
-    const v = this.form.value;
-    const body: RetourCreate = {
-      date:                    new Date().toISOString().split('T')[0],
-      retour_plastique:        v.retour_plastique ?? 0,
-      consigne_paid_plastique: v.consigne_paid_plastique ?? 0,
-      retour_bois:             v.retour_bois ?? 0,
-      consigne_paid_bois:      v.consigne_paid_bois ?? 0,
-      notes:                   v.notes || undefined,
-    };
-    this.expeditionsService.createRetour(this.selectedExpeditionId, body).subscribe({
-      next: () => {
-        this.messageService.add({ severity: 'success', summary: 'Succès', detail: `Retour enregistré — ${this.selectedExpedition!.bl_number}`, life: 4000 });
-        setTimeout(() => this.router.navigate(['/historique']), 1500);
-      },
-      error: e => {
-        this.saving = false;
-        this.messageService.add({ severity: 'error', summary: 'Erreur', detail: e.error?.detail ?? 'Erreur', life: 4000 });
-      },
-    });
+
+    if (!this.isGros) {
+      const userId = this.authService.currentUser()?.id;
+      if (!userId) { this.saving = false; return; }
+      this.expeditionsService.verify(this.selectedExpeditionId, {
+        retour_livreur_plastique: this.retourLivreurPlastique,
+        retour_livreur_bois:      this.retourLivreurBois,
+        verified_by_id:           userId,
+      }).subscribe({
+        next: () => {
+          this.messageService.add({ severity: 'success', summary: 'Succès', detail: `BL ${this.selectedExpedition!.bl_number} vérifié`, life: 4000 });
+          setTimeout(() => this.router.navigate(['/historique']), 1500);
+        },
+        error: e => {
+          this.saving = false;
+          this.messageService.add({ severity: 'error', summary: 'Erreur', detail: e.error?.detail ?? 'Erreur', life: 4000 });
+        },
+      });
+    } else {
+      if (this.form.invalid) { this.saving = false; return; }
+      const v = this.form.value;
+      const body: RetourCreate = {
+        date:                    new Date().toISOString().split('T')[0],
+        retour_plastique:        v.retour_plastique ?? 0,
+        consigne_paid_plastique: v.consigne_paid_plastique ?? 0,
+        retour_bois:             v.retour_bois ?? 0,
+        consigne_paid_bois:      v.consigne_paid_bois ?? 0,
+        notes:                   v.notes || undefined,
+      };
+      this.expeditionsService.createRetour(this.selectedExpeditionId, body).subscribe({
+        next: () => {
+          this.messageService.add({ severity: 'success', summary: 'Succès', detail: `Retour enregistré — ${this.selectedExpedition!.bl_number}`, life: 4000 });
+          setTimeout(() => this.router.navigate(['/historique']), 1500);
+        },
+        error: e => {
+          this.saving = false;
+          this.messageService.add({ severity: 'error', summary: 'Erreur', detail: e.error?.detail ?? 'Erreur', life: 4000 });
+        },
+      });
+    }
   }
 
   reset() {
@@ -172,5 +237,8 @@ export class RetourComponent implements OnInit {
     this.showConsigneBois      = false;
     this.consignePlastique = 0; this.montantPlastique = 0;
     this.consigneBois      = 0; this.montantBois      = 0;
+    this.verifyClients = [];
+    this.retourLivreurPlastique = 0;
+    this.retourLivreurBois      = 0;
   }
 }

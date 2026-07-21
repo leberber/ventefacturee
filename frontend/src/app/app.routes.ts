@@ -18,8 +18,7 @@ export const routes: Routes = [
 
       { path: 'expedition',               canActivate: [notLivreurGuard], loadComponent: () => import('./pages/nouveau-bl/nouveau-bl.component').then(m => m.NouveauBLComponent) },
       { path: 'expedition/:id/livraison',     loadComponent: () => import('./pages/livraison-detail/livraison-detail.component').then(m => m.LivraisonDetailComponent) },
-      { path: 'expedition/:id/verification', canActivate: [notLivreurGuard], loadComponent: () => import('./pages/verification/verification.component').then(m => m.VerificationComponent) },
-      { path: 'retour',                   canActivate: [notLivreurGuard], loadComponent: () => import('./pages/retour/retour.component').then(m => m.RetourComponent) },
+{ path: 'retour',                   canActivate: [notLivreurGuard], loadComponent: () => import('./pages/retour/retour.component').then(m => m.RetourComponent) },
       { path: 'historique',               canActivate: [notLivreurGuard], loadComponent: () => import('./pages/historique/historique.component').then(m => m.HistoriqueComponent) },
 
       { path: 'mes-tournees', canActivate: [livreurOnlyGuard], loadComponent: () => import('./pages/mes-tournees/mes-tournees.component').then(m => m.MesTourneesComponent) },
