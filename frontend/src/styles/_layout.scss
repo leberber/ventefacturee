@@ -1917,7 +1917,7 @@
 
 // ── Responsive visibility helpers ─────────────────────────────────────────────
 .mob-hide { @include mobile-only { display: none !important; } }
-.desk-hide { display: none; @include mobile-only { display: block; } }
+.desk-hide { display: none !important; @include mobile-only { display: block !important; } }
 
 // ── Mobile client card list ───────────────────────────────────────────────────
 .mob-card-list {
