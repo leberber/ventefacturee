@@ -52,7 +52,16 @@
                 filterPlaceholder="Rechercher…"
                 [style]="{width:'100%'}"
                 appendTo="body"
-              />
+              >
+                <ng-template #item let-opt>
+                  <div style="display:flex;flex-direction:column;gap:2px;line-height:1.3">
+                    @if (opt.firstName || opt.lastName) {
+                      <span style="font-weight:600;font-size:var(--font-size-sm)">{{ opt.firstName }} {{ opt.lastName }}</span>
+                    }
+                    <span class="hist-store-pill" style="align-self:flex-start">{{ opt.label }}</span>
+                  </div>
+                </ng-template>
+              </p-select>
             } @else {
               <label class="exp-label"><i class="pi pi-building"></i>Clients de la tournée</label>
               <p-multiselect
@@ -72,7 +81,7 @@
                     @if (opt.firstName || opt.lastName) {
                       <span style="font-weight:600;font-size:var(--font-size-sm)">{{ opt.firstName }} {{ opt.lastName }}</span>
                     }
-                    <span class="hist-store-pill" style="align-self:flex-start">{{ opt.storeName }}</span>
+                    <span class="hist-store-pill" style="align-self:flex-start">{{ opt.label }}</span>
                   </div>
                 </ng-template>
               </p-multiselect>

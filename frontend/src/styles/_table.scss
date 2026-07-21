@@ -233,13 +233,8 @@
 
 .hist-store-pill {
   display: inline-block;
-  align-self: flex-start;
-  padding: 0.1rem 0.5rem;
-  border-radius: 999px;
-  background: color-mix(in srgb, #f43f5e 8%, transparent);
-  border: 1px solid color-mix(in srgb, #f43f5e 20%, transparent);
   font-size: var(--font-size-xs);
-  color: #be185d;
+  color: var(--text-color-secondary);
   font-weight: var(--font-weight-normal);
 }
 
