@@ -134,6 +134,23 @@
 
       <!-- Right: sticky map panel -->
       <div class="cf-map">
+        <!-- Mobile-only bar: commune + locate -->
+        <div class="cf-mob-bar mob-only">
+          <p-select formControlName="daira" [options]="dairaOptions"
+            optionLabel="label" optionValue="value"
+            placeholder="Daïra…"
+            [filter]="true"
+            filterPlaceholder="Rechercher…"
+            [showClear]="true"
+            [style]="{flex:'1',minWidth:'0'}"
+            appendTo="body"
+            (onChange)="onDairaChange($event.value)"
+          />
+          <button type="button" class="cf-locate-btn" (click)="locateMe()" title="Ma position">
+            <i class="pi pi-crosshairs"></i>
+            <span>Ma position</span>
+          </button>
+        </div>
         <app-map-picker
           [initialLat]="initialLat"
           [initialLng]="initialLng"

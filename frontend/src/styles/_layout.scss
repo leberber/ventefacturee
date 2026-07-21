@@ -528,6 +528,29 @@
   i { font-size: 0.65rem; }
 }
 
+.locate-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-left: auto;
+  padding: 0.25rem 0.75rem;
+  border-radius: 999px;
+  border: var(--border-width) solid var(--primary-color);
+  background: rgba(var(--primary-rgb), 0.07);
+  color: var(--primary-color);
+  font-size: 0.7rem;
+  font-weight: var(--font-weight-semibold);
+  font-family: inherit;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: background 0.15s;
+
+  i { font-size: 0.75rem; }
+  &:hover:not(:disabled) { background: rgba(var(--primary-rgb), 0.14); }
+  &:disabled { opacity: 0.6; cursor: not-allowed; }
+}
+
 .wilaya-badge {
   display: inline-flex;
   align-items: center;

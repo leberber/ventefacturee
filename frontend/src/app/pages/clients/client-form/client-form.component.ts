@@ -162,5 +162,9 @@ export class ClientFormComponent implements OnInit {
     });
   }
 
+  locateMe() {
+    this.mapPicker?.locateUser();
+  }
+
   cancel() { this.router.navigate(['/clients']); }
 }

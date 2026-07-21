@@ -78,14 +78,21 @@ const MARKER_ICON = L.icon({
             <span>{{ isLocating() ? 'Localisation…' : 'Récupération de l\'adresse…' }}</span>
           </div>
         }
+        @if (locateError()) {
+          <div class="mp-locate-error">
+            <i class="pi pi-exclamation-triangle"></i>
+            <span>{{ locateError() }}</span>
+          </div>
+        }
+        @if (picked()) {
+          <div class="mp-address">
+            <i class="pi pi-map-marker"></i>
+            <span>{{ picked()!.address || (picked()!.latitude.toFixed(5) + ', ' + picked()!.longitude.toFixed(5)) }}</span>
+          </div>
+        }
       </div>
 
-      @if (picked()) {
-        <div class="mp-address">
-          <i class="pi pi-map-marker"></i>
-          <span>{{ picked()!.address || (picked()!.latitude.toFixed(5) + ', ' + picked()!.longitude.toFixed(5)) }}</span>
-        </div>
-      } @else {
+      @if (!picked()) {
         <div class="mp-hint">
           <i class="pi pi-info-circle"></i>
           <span>Cliquez sur la carte pour choisir un emplacement</span>
@@ -187,6 +194,8 @@ const MARKER_ICON = L.icon({
       border-radius: var(--radius-xl);
       border: var(--border-width) solid var(--surface-border);
       overflow: hidden;
+
+      @media (max-width: 768px) { min-height: 160px; }
     }
 
     .mp-map {
@@ -220,9 +229,35 @@ const MARKER_ICON = L.icon({
         border-color: var(--primary-color);
       }
       &:disabled { opacity: 0.6; cursor: wait; }
+
+      @media (max-width: 768px) { display: none; }
     }
 
-    .mp-address, .mp-hint {
+    @media (max-width: 768px) {
+      .mp-search, .mp-not-found { display: none; }
+    }
+
+    .mp-address {
+      position: absolute;
+      bottom: 1rem;
+      left: 0.625rem;
+      right: 0.625rem;
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 0.75rem;
+      border-radius: var(--radius-lg);
+      font-size: var(--font-size-xs);
+      line-height: 1.4;
+      background: color-mix(in srgb, var(--primary-color) 90%, transparent);
+      color: #fff;
+      font-weight: var(--font-weight-medium);
+      box-shadow: 0 2px 8px rgba(0,0,0,.18);
+      i { flex-shrink: 0; font-size: 0.75rem; }
+    }
+
+    .mp-hint {
       display: flex;
       align-items: center;
       gap: 0.5rem;
@@ -231,19 +266,11 @@ const MARKER_ICON = L.icon({
       font-size: var(--font-size-xs);
       line-height: 1.4;
       flex-shrink: 0;
-      i { flex-shrink: 0; font-size: 0.75rem; }
-    }
-
-    .mp-address {
-      background: color-mix(in srgb, var(--primary-color) 8%, transparent);
-      color: var(--primary-color);
-      font-weight: var(--font-weight-medium);
-    }
-
-    .mp-hint {
       background: var(--surface-ground);
       color: var(--text-color-secondary);
       border: var(--border-width) solid var(--surface-border);
+      i { flex-shrink: 0; font-size: 0.75rem; }
+      @media (max-width: 768px) { display: none; }
     }
 
     .mp-loading {
@@ -260,6 +287,25 @@ const MARKER_ICON = L.icon({
       color: var(--text-color-secondary);
       z-index: 1001;
       i { color: var(--primary-color); }
+    }
+
+    .mp-locate-error {
+      position: absolute;
+      bottom: 0.625rem;
+      left: 0.625rem;
+      right: 0.625rem;
+      z-index: 1001;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.5rem 0.75rem;
+      border-radius: var(--radius-lg);
+      background: rgba(239,68,68,0.92);
+      color: #fff;
+      font-size: var(--font-size-xs);
+      font-weight: 500;
+      box-shadow: 0 2px 8px rgba(0,0,0,.2);
+      i { font-size: 0.8rem; flex-shrink: 0; }
     }
 
     :host ::ng-deep .leaflet-control-zoom {
@@ -301,6 +347,7 @@ export class MapPickerComponent implements AfterViewInit, OnDestroy {
   readonly isSearching      = signal(false);
   readonly searchNotFound   = signal(false);
   readonly lastSearch       = signal('');
+  readonly locateError      = signal('');
 
   searchQuery = '';
 
@@ -378,17 +425,35 @@ export class MapPickerComponent implements AfterViewInit, OnDestroy {
   }
 
   locateUser(): void {
-    if (!('geolocation' in navigator)) return;
+    if (!('geolocation' in navigator)) {
+      this.locateError.set('La géolocalisation n\'est pas supportée par ce navigateur.');
+      setTimeout(() => this.locateError.set(''), 4000);
+      return;
+    }
     this.isLocating.set(true);
+    this.locateError.set('');
     navigator.geolocation.getCurrentPosition(
       pos => {
-        const { latitude, longitude } = pos.coords;
-        this.map.setView([latitude, longitude], 17);
-        this.placeMarker(latitude, longitude);
-        this.reverseGeocode(latitude, longitude);
-        this.isLocating.set(false);
+        this.ngZone.run(() => {
+          const { latitude, longitude } = pos.coords;
+          this.map.setView([latitude, longitude], 17);
+          this.placeMarker(latitude, longitude);
+          this.reverseGeocode(latitude, longitude);
+          this.isLocating.set(false);
+        });
       },
-      () => this.isLocating.set(false),
+      err => {
+        this.ngZone.run(() => {
+          this.isLocating.set(false);
+          const msg = err.code === 1
+            ? 'Accès à la position refusé. Vérifiez les permissions.'
+            : err.code === 2
+            ? 'Position introuvable. Vérifiez votre GPS.'
+            : 'Délai dépassé. Réessayez.';
+          this.locateError.set(msg);
+          setTimeout(() => this.locateError.set(''), 5000);
+        });
+      },
       { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
     );
   }
