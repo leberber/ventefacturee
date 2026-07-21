@@ -54,6 +54,10 @@ export class ExpeditionsService {
     return this.http.get<RetourRead[]>(`${this.base}/${expeditionId}/retours`);
   }
 
+  confirmLivraison(id: number): Observable<Expedition> {
+    return this.http.post<Expedition>(`${this.base}/${id}/confirm-livraison`, {});
+  }
+
   verify(id: number, body: ExpeditionVerify): Observable<Expedition> {
     return this.http.post<Expedition>(`${this.base}/${id}/verify`, body);
   }

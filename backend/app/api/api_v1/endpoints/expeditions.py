@@ -278,10 +278,27 @@ def get_expedition_clients(expedition_id: int, session: Session = Depends(get_se
         ec_read = ExpeditionClientRead.model_validate(ec)
         client = session.get(Client, ec.client_id)
         ec_read.has_location = bool(client and client.latitude is not None and client.longitude is not None)
+        if client:
+            ec_read.client_first_name = client.first_name
+            ec_read.client_last_name = client.last_name
         d = details_map.get(ec.client_id)
         ec_read.detail = LivraisonDetailRead.model_validate(d) if d else None
         result.append(ec_read)
     return result
+
+
+@router.post("/{expedition_id}/confirm-livraison", response_model=ExpeditionRead)
+def confirm_livraison(expedition_id: int, session: Session = Depends(get_session)) -> Any:
+    exp = session.get(Expedition, expedition_id)
+    if not exp:
+        raise HTTPException(status_code=404, detail="Expédition introuvable")
+    exp.livreur_confirmed = True
+    exp.livreur_confirmed_at = datetime.now(timezone.utc)
+    exp.updated_at = datetime.now(timezone.utc)
+    session.add(exp)
+    session.commit()
+    session.refresh(exp)
+    return _attach_retours([exp], session)[0]
 
 
 @router.post("/{expedition_id}/verify", response_model=ExpeditionRead)

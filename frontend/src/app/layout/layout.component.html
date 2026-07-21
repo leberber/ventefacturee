@@ -69,18 +69,13 @@
   <header class="mob-topbar">
     <img src="assets/logo.png" alt="CLR Freha" class="mob-topbar__logo" />
     <div class="mob-topbar__user">
-      @if (isLivreur && tourneeState.activeBlNumber()) {
-        <span class="mob-topbar__name"><code class="font-mono">{{ tourneeState.activeBlNumber() }}</code></span>
-      } @else {
-        <span class="mob-topbar__name">{{ user?.full_name }}</span>
-      }
-    </div>
-    @if (isLivreur) {
-      @if (tourneeState.totalClients() > 0) {
-        <span [class]="tourneeState.deliveredCount() === tourneeState.totalClients() ? 'badge badge--success' : 'badge badge--warning'" style="font-size:0.7rem;flex-shrink:0">
+      @if (isLivreur && tourneeState.totalClients() > 0) {
+        <span [class]="tourneeState.deliveredCount() === tourneeState.totalClients() ? 'badge badge--success' : 'badge badge--warning'" style="font-size:0.7rem">
           {{ tourneeState.deliveredCount() }}/{{ tourneeState.totalClients() }} livrés
         </span>
       }
+    </div>
+    @if (isLivreur) {
       <div style="display:flex;flex-direction:column;align-items:flex-end;gap:0.1rem;flex-shrink:0">
         <span style="font-size:0.6rem;text-transform:uppercase;letter-spacing:0.05em;color:var(--text-color-secondary);font-weight:600">Avec vous</span>
         <div style="display:flex;align-items:center;gap:0.6rem">
@@ -168,6 +163,15 @@
           <div class="mob-drawer__user-role">{{ user?.role | titlecase }}</div>
         </div>
       </div>
+
+      @if (isLivreur) {
+        <button class="mob-drawer__item" (click)="goToActiveTournee(); drawerOpen.set(false)">
+          <i class="pi pi-truck"></i><span>Tournée active</span>
+        </button>
+        <a class="mob-drawer__item" routerLink="/mes-tournees" (click)="drawerOpen.set(false)">
+          <i class="pi pi-list"></i><span>Mes Tournées</span>
+        </a>
+      }
 
       @if (isAdminOrEmploye) {
         <a class="mob-drawer__item" routerLink="/utilisateurs" (click)="drawerOpen.set(false)">

@@ -4,6 +4,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { Button } from 'primeng/button';
 import { Toast } from 'primeng/toast';
+import { Dialog } from 'primeng/dialog';
 import { MessageService } from 'primeng/api';
 
 import { ExpeditionsService } from '../../core/services/expeditions.service';
@@ -26,7 +27,7 @@ interface ClientInput {
 @Component({
   selector: 'app-livraison-detail',
   standalone: true,
-  imports: [CommonModule, FormsModule, Button, Toast],
+  imports: [CommonModule, FormsModule, Button, Toast, Dialog],
   providers: [MessageService, ClientsService],
   templateUrl: './livraison-detail.component.html',
 })
@@ -42,6 +43,24 @@ export class LivraisonDetailComponent implements OnInit {
   expeditionClients: ExpeditionClient[] = [];
   inputs: Map<number, ClientInput> = new Map();
   loading = true;
+  activeClientId: number | null = null;
+  showTerminerDialog = false;
+
+  get allRecorded(): boolean {
+    return this.expeditionClients.length > 0 && this.expeditionClients.every(ec => ec.detail);
+  }
+
+  get isConfirmed(): boolean {
+    return this.bl?.livreur_confirmed ?? false;
+  }
+
+  get totalRetourPlastique(): number {
+    return this.expeditionClients.reduce((s, ec) => s + (ec.detail?.retour_plastique ?? 0), 0);
+  }
+
+  get totalRetourBois(): number {
+    return this.expeditionClients.reduce((s, ec) => s + (ec.detail?.retour_bois ?? 0), 0);
+  }
 
   get expeditionId(): number { return +this.route.snapshot.paramMap.get('id')!; }
 
@@ -87,6 +106,7 @@ export class LivraisonDetailComponent implements OnInit {
             locating: false,
           });
         }
+        this.activeClientId = null;
         this.loading = false;
       },
       error: () => { this.loading = false; },
@@ -142,12 +162,31 @@ export class LivraisonDetailComponent implements OnInit {
 
         this.tourneeState.refresh();
         this.messageService.add({ severity: 'success', summary: 'Enregistré', detail: `Livraison pour ${ec?.client_name} enregistrée`, life: 3000 });
+        this.activeClientId = null;
       },
       error: e => {
         inp.saving = false;
         this.messageService.add({ severity: 'error', summary: 'Erreur', detail: e.error?.detail ?? 'Erreur', life: 4000 });
       },
     });
+  }
+
+  confirmLivraison() {
+    this.expeditionsService.confirmLivraison(this.expeditionId).subscribe({
+      next: bl => {
+        this.bl = bl;
+        this.showTerminerDialog = false;
+        this.tourneeState.refresh();
+        this.messageService.add({ severity: 'success', summary: 'Tournée confirmée', detail: 'La tournée est en attente de confirmation par l\'équipe.', life: 5000 });
+      },
+      error: e => {
+        this.messageService.add({ severity: 'error', summary: 'Erreur', detail: e.error?.detail ?? 'Erreur', life: 4000 });
+      },
+    });
+  }
+
+  toggleCard(clientId: number) {
+    this.activeClientId = this.activeClientId === clientId ? null : clientId;
   }
 
   clearIfZero(event: Event) {

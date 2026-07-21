@@ -38,6 +38,8 @@ class Expedition(SQLModel, table=True):
     is_verified: bool = Field(default=False)
     verified_at: Optional[datetime] = Field(default=None)
     verified_by_name: Optional[str] = Field(default=None, max_length=100)
+    livreur_confirmed: bool = Field(default=False)
+    livreur_confirmed_at: Optional[datetime] = Field(default=None)
 
 
 class ExpeditionCreate(SQLModel):
@@ -101,3 +103,5 @@ class ExpeditionRead(SQLModel):
     is_verified: bool = False
     verified_at: Optional[datetime] = None
     verified_by_name: Optional[str] = None
+    livreur_confirmed: bool = False
+    livreur_confirmed_at: Optional[datetime] = None

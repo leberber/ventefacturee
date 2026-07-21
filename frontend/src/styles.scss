@@ -35,6 +35,112 @@ html, body {
 
 .p-component { font-family: var(--font-family-base); }
 
+// =============================================================================
+// TERMINER DIALOG — bottom drawer style
+// =============================================================================
+
+.terminer-dialog {
+  &.p-dialog {
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    top: auto !important;
+    width: 100% !important;
+    max-width: 680px !important;
+    max-height: 92vh !important;
+    margin: 0 auto !important;
+    border-radius: 1.5rem 1.5rem 0 0 !important;
+    box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.15) !important;
+    animation: slide-up 0.32s cubic-bezier(0.32, 0.72, 0, 1) !important;
+    overflow: hidden !important;
+
+    .p-dialog-content {
+      padding: 1.25rem 1.25rem calc(env(safe-area-inset-bottom) + 1.25rem) !important;
+      overflow-y: auto !important;
+      border-radius: 1.5rem 1.5rem 0 0 !important;
+    }
+  }
+}
+
+.p-dialog-mask:has(.terminer-dialog) {
+  align-items: flex-end !important;
+}
+
+// =============================================================================
+// TOAST OVERRIDES — amanu style
+// =============================================================================
+
+@keyframes toast-slide-in {
+  from { transform: translateY(-100%); opacity: 0; }
+  to   { transform: translateY(0);     opacity: 1; }
+}
+
+@keyframes toast-slide-out {
+  from { transform: translateY(0);     opacity: 1; }
+  to   { transform: translateY(-100%); opacity: 0; }
+}
+
+.p-toast {
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  padding: 0 !important;
+  transform: none !important;
+}
+
+.p-toast-message {
+  margin: 0 !important;
+  border-radius: 0 !important;
+  border: none !important;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06) !important;
+  background: var(--surface-ground) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  box-shadow: 0 4px 24px -4px rgba(0, 0, 0, 0.12) !important;
+  animation: toast-slide-in 0.3s cubic-bezier(0.34, 1.2, 0.64, 1) both !important;
+
+}
+
+.p-toast-message-leave-active,
+.p-toastmessage-leave-active {
+  .p-toast-message {
+    animation: toast-slide-out 0.2s ease-in both !important;
+  }
+}
+
+.p-toast-message-content {
+  padding: 14px 16px !important;
+  align-items: center !important;
+}
+
+.p-toast-summary {
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  color: #1a1a1a !important;
+}
+
+.p-toast-detail {
+  font-size: 13px !important;
+  color: #666 !important;
+  margin-top: 2px !important;
+}
+
+.p-toast-icon-close {
+  width: 28px !important;
+  height: 28px !important;
+  border-radius: 6px !important;
+  color: #999 !important;
+  transition: background 0.15s, color 0.15s !important;
+
+  &:hover {
+    background: rgba(0, 0, 0, 0.06) !important;
+    color: #333 !important;
+  }
+}
+
 // Page content wrapper (inside admin-content)
 .page-content {
   // No extra padding needed — admin-content handles it

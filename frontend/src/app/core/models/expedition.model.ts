@@ -26,6 +26,8 @@ export interface Expedition {
   is_verified: boolean;
   verified_at?: string;
   verified_by_name?: string;
+  livreur_confirmed: boolean;
+  livreur_confirmed_at?: string;
   created_by_name?: string;
 }
 
@@ -105,6 +107,8 @@ export interface ExpeditionClient {
   client_id: number;
   client_name: string;
   client_code?: string;
+  client_first_name?: string;
+  client_last_name?: string;
   has_location: boolean;
   detail?: LivraisonDetail;
 }

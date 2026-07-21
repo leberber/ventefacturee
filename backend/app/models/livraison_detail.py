@@ -68,5 +68,7 @@ class ExpeditionClientRead(SQLModel):
     client_id: int
     client_name: str
     client_code: Optional[str] = None
+    client_first_name: Optional[str] = None
+    client_last_name: Optional[str] = None
     has_location: bool = False
     detail: Optional[LivraisonDetailRead] = None

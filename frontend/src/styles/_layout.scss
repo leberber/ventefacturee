@@ -190,6 +190,9 @@
   &__user {
     flex: 1;
     min-width: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
   }
 
   &__name {
@@ -1897,7 +1900,11 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 0.25rem;
+  background: var(--surface-100);
+  margin: -1.25rem -1.5rem 0.75rem;
+  padding: 0.75rem 1.5rem;
+  border-radius: var(--radius-2xl) var(--radius-2xl) 0 0;
+  border-bottom: 1px solid var(--surface-border);
 }
 
 .client-delivery-name {
