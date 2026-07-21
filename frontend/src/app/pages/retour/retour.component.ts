@@ -76,6 +76,19 @@ export class RetourComponent implements OnInit {
     return (this.selectedExpedition?.nc_bois ?? 0) - this.netBois - this.retourLivreurBois;
   }
 
+  get totalClientRetourPlastique(): number {
+    return this.verifyClients.reduce((s, ec) => s + (ec.detail?.retour_plastique ?? 0), 0);
+  }
+  get totalClientRetourBois(): number {
+    return this.verifyClients.reduce((s, ec) => s + (ec.detail?.retour_bois ?? 0), 0);
+  }
+  get maxRetourLivreurPlastique(): number {
+    return Math.max(0, (this.selectedExpedition?.nc_plastique ?? 0) - this.netPlastique + this.totalClientRetourPlastique);
+  }
+  get maxRetourLivreurBois(): number {
+    return Math.max(0, (this.selectedExpedition?.nc_bois ?? 0) - this.netBois + this.totalClientRetourBois);
+  }
+
   form = this.fb.group({
     retour_plastique:        [0, [Validators.required, Validators.min(0)]],
     consigne_paid_plastique: [0, [Validators.required, Validators.min(0)]],
@@ -135,8 +148,19 @@ export class RetourComponent implements OnInit {
   }
 
   incLivreur(field: 'plastique' | 'bois') {
-    if (field === 'plastique') this.retourLivreurPlastique++;
-    else this.retourLivreurBois++;
+    if (field === 'plastique') {
+      if (this.retourLivreurPlastique >= this.maxRetourLivreurPlastique) {
+        this.messageService.add({ severity: 'warn', summary: 'Maximum atteint', detail: `Vous ne pouvez pas ramener plus de ${this.maxRetourLivreurPlastique} palette(s) plastique`, life: 3000 });
+        return;
+      }
+      this.retourLivreurPlastique++;
+    } else {
+      if (this.retourLivreurBois >= this.maxRetourLivreurBois) {
+        this.messageService.add({ severity: 'warn', summary: 'Maximum atteint', detail: `Vous ne pouvez pas ramener plus de ${this.maxRetourLivreurBois} palette(s) bois`, life: 3000 });
+        return;
+      }
+      this.retourLivreurBois++;
+    }
   }
 
   decLivreur(field: 'plastique' | 'bois') {
@@ -147,8 +171,8 @@ export class RetourComponent implements OnInit {
   setLivreurQty(field: 'plastique' | 'bois', event: Event) {
     const n = parseInt((event.target as HTMLInputElement).value, 10);
     const val = isNaN(n) || n < 0 ? 0 : n;
-    if (field === 'plastique') this.retourLivreurPlastique = val;
-    else this.retourLivreurBois = val;
+    if (field === 'plastique') this.retourLivreurPlastique = Math.min(val, this.maxRetourLivreurPlastique);
+    else this.retourLivreurBois = Math.min(val, this.maxRetourLivreurBois);
   }
 
   inc(field: RetourField) {
