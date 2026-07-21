@@ -194,7 +194,6 @@
     @let sent     = activeType === 'plastique' ? (activeClient.plastic_sent     ?? 0) : (activeClient.wood_sent     ?? 0);
     @let retour   = activeType === 'plastique' ? (activeClient.plastic_retour   ?? 0) : (activeClient.wood_retour   ?? 0);
     @let consigne = activeType === 'plastique' ? (activeClient.plastic_consigne ?? 0) : (activeClient.wood_consigne ?? 0);
-    @let out      = activeType === 'plastique' ? (activeClient.plastic_out      ?? 0) : (activeClient.wood_out      ?? 0);
     @let balance  = activeType === 'plastique' ? (activeClient.plastic_balance  ?? 0) : (activeClient.wood_balance  ?? 0);
     <div style="min-width:210px;padding:0.25rem 0">
       <div class="palette-pop__header">

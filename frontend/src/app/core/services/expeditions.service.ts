@@ -2,7 +2,7 @@ import { inject, Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import {
-  Expedition, ExpeditionCreate, ExpeditionUpdate, DashboardStats,
+  Expedition, ExpeditionCreate, ExpeditionUpdate, ExpeditionVerify, DashboardStats,
   ExpeditionClient, LivraisonDetail, LivraisonDetailCreate,
   RetourCreate, RetourRead,
 } from '../models/expedition.model';
@@ -52,6 +52,10 @@ export class ExpeditionsService {
 
   listRetours(expeditionId: number): Observable<RetourRead[]> {
     return this.http.get<RetourRead[]>(`${this.base}/${expeditionId}/retours`);
+  }
+
+  verify(id: number, body: ExpeditionVerify): Observable<Expedition> {
+    return this.http.post<Expedition>(`${this.base}/${id}/verify`, body);
   }
 
   getDashboardStats(): Observable<DashboardStats> {

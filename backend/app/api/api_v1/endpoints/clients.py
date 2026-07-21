@@ -8,11 +8,13 @@ from app.database import get_session
 from app.models.client import Client, ClientCreate, ClientUpdate, ClientRead
 from app.models.expedition import Expedition
 from app.models.retour import Retour
+from app.models.livraison_detail import LivraisonDetail
 
 router = APIRouter()
 
 
 def _compute_balance(client_id: int, session: Session) -> dict:
+    # Gros: palettes sent directly to this client
     sent_row = session.exec(
         select(
             func.coalesce(func.sum(Expedition.nc_plastique), 0),
@@ -30,21 +32,43 @@ def _compute_balance(client_id: int, session: Session) -> dict:
         ).where(Retour.expedition_id.in_(exp_subq))
     ).one()
 
-    ps = int(sent_row[0]); bs = int(sent_row[1])
+    # Détail/Horeca: palettes delivered to this client via verified tournées
+    detail_row = session.exec(
+        select(
+            func.coalesce(func.sum(LivraisonDetail.plastique), 0),
+            func.coalesce(func.sum(LivraisonDetail.retour_plastique), 0),
+            func.coalesce(func.sum(LivraisonDetail.bois), 0),
+            func.coalesce(func.sum(LivraisonDetail.retour_bois), 0),
+        )
+        .join(Expedition, LivraisonDetail.expedition_id == Expedition.id)
+        .where(
+            LivraisonDetail.client_id == client_id,
+            Expedition.is_verified == True,
+        )
+    ).one()
+
+    ps = int(sent_row[0]);   bs = int(sent_row[1])
     pr = int(retour_row[0]); pc = int(retour_row[1])
     br = int(retour_row[2]); bc = int(retour_row[3])
+    dp = int(detail_row[0]); dr_p = int(detail_row[1])
+    db = int(detail_row[2]); dr_b = int(detail_row[3])
+
+    total_p_sent   = ps + dp
+    total_p_retour = pr + dr_p
+    total_b_sent   = bs + db
+    total_b_retour = br + dr_b
 
     return {
-        "plastic_sent":    ps,
-        "plastic_retour":  pr,
+        "plastic_sent":     total_p_sent,
+        "plastic_retour":   total_p_retour,
         "plastic_consigne": pc,
-        "plastic_out":     max(0, ps - pr),          # physical: still out there
-        "plastic_balance": max(0, ps - pr - pc),     # financial: after consigne
-        "wood_sent":       bs,
-        "wood_retour":     br,
-        "wood_consigne":   bc,
-        "wood_out":        max(0, bs - br),
-        "wood_balance":    max(0, bs - br - bc),
+        "plastic_out":      max(0, total_p_sent - total_p_retour),
+        "plastic_balance":  max(0, total_p_sent - total_p_retour - pc),
+        "wood_sent":        total_b_sent,
+        "wood_retour":      total_b_retour,
+        "wood_consigne":    bc,
+        "wood_out":         max(0, total_b_sent - total_b_retour),
+        "wood_balance":     max(0, total_b_sent - total_b_retour - bc),
     }
 
 

@@ -7,7 +7,7 @@ from sqlmodel import Session, select, func
 from app.database import get_session
 from app.models.client import Client
 from app.models.user import User
-from app.models.expedition import Expedition, ExpeditionCreate, ExpeditionUpdate, ExpeditionRead
+from app.models.expedition import Expedition, ExpeditionCreate, ExpeditionUpdate, ExpeditionRead, ExpeditionVerify
 from app.models.retour import Retour, RetourCreate, RetourRead
 from app.models.livraison_detail import (
     ExpeditionClient, LivraisonDetail,
@@ -105,6 +105,10 @@ def create_expedition(
     if existing:
         raise HTTPException(status_code=422, detail=f"Le numéro « {exp_in.bl_number} » existe déjà")
 
+    creator = None
+    if exp_in.created_by_id:
+        creator = session.get(User, exp_in.created_by_id)
+
     exp_data: dict = dict(
         bl_number=exp_in.bl_number,
         date=exp_in.date,
@@ -114,6 +118,8 @@ def create_expedition(
         nc_plastique=max(0, exp_in.nc_plastique),
         nc_bois=max(0, exp_in.nc_bois),
         notes=exp_in.notes,
+        created_by_id=exp_in.created_by_id,
+        created_by_name=creator.full_name if creator else None,
     )
 
     if exp_in.destination_type == "gros":
@@ -276,6 +282,35 @@ def get_expedition_clients(expedition_id: int, session: Session = Depends(get_se
         ec_read.detail = LivraisonDetailRead.model_validate(d) if d else None
         result.append(ec_read)
     return result
+
+
+@router.post("/{expedition_id}/verify", response_model=ExpeditionRead)
+def verify_expedition(
+    expedition_id: int,
+    body: ExpeditionVerify,
+    session: Session = Depends(get_session),
+) -> Any:
+    exp = session.get(Expedition, expedition_id)
+    if not exp:
+        raise HTTPException(status_code=404, detail="Expédition introuvable")
+    if exp.destination_type == "gros":
+        raise HTTPException(status_code=422, detail="Vérification non applicable aux expéditions Gros")
+
+    verifier = session.get(User, body.verified_by_id)
+    if not verifier:
+        raise HTTPException(status_code=404, detail="Vérificateur introuvable")
+
+    exp.retour_livreur_plastique = max(0, body.retour_livreur_plastique)
+    exp.retour_livreur_bois      = max(0, body.retour_livreur_bois)
+    exp.is_verified              = True
+    exp.verified_at              = datetime.now(timezone.utc)
+    exp.verified_by_name         = verifier.full_name
+    exp.updated_at               = datetime.now(timezone.utc)
+
+    session.add(exp)
+    session.commit()
+    session.refresh(exp)
+    return _attach_retours([exp], session)[0]
 
 
 @router.post("/{expedition_id}/details", response_model=LivraisonDetailRead, status_code=201)

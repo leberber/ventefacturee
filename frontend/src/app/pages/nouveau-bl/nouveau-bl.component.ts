@@ -13,6 +13,7 @@ import { MessageService } from 'primeng/api';
 import { ClientsService } from '../../core/services/clients.service';
 import { UsersService } from '../../core/services/users.service';
 import { ExpeditionsService } from '../../core/services/expeditions.service';
+import { AuthService } from '../../core/services/auth.service';
 import { Client } from '../../core/models/client.model';
 import { ExpeditionCreate } from '../../core/models/expedition.model';
 
@@ -30,6 +31,7 @@ export class NouveauBLComponent implements OnInit {
   private clientsService      = inject(ClientsService);
   private usersService        = inject(UsersService);
   private expeditionsService  = inject(ExpeditionsService);
+  private auth                = inject(AuthService);
   private messageService      = inject(MessageService);
   private router              = inject(Router);
   private fb                  = inject(FormBuilder);
@@ -150,9 +152,10 @@ export class NouveauBLComponent implements OnInit {
       client_id:         v.destination_type === 'gros' ? v.client_id! : null,
       livreur_id:        v.destination_type !== 'gros' ? v.livreur_id! : null,
       client_ids:        v.destination_type !== 'gros' ? (v.client_ids ?? []) : [],
-      nc_plastique: v.plastique ?? 0,
-      nc_bois:      v.bois ?? 0,
-      notes:              v.notes || undefined,
+      nc_plastique:  v.plastique ?? 0,
+      nc_bois:       v.bois ?? 0,
+      notes:         v.notes || undefined,
+      created_by_id: this.auth.currentUser()?.id ?? null,
     };
     this.expeditionsService.create(body).subscribe({
       next: exp => {

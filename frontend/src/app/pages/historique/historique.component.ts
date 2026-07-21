@@ -15,7 +15,8 @@ import { MessageService, ConfirmationService } from 'primeng/api';
 import { ExpeditionsService } from '../../core/services/expeditions.service';
 import { ClientsService } from '../../core/services/clients.service';
 import { UsersService } from '../../core/services/users.service';
-import { Expedition, ExpeditionUpdate } from '../../core/models/expedition.model';
+import { AuthService } from '../../core/services/auth.service';
+import { Expedition, ExpeditionUpdate, ExpeditionClient } from '../../core/models/expedition.model';
 import { Client } from '../../core/models/client.model';
 import { sortItems, toggleSort } from '../../core/utils/sort.util';
 
@@ -43,6 +44,7 @@ export class HistoriqueComponent implements OnInit {
   private expeditionsService  = inject(ExpeditionsService);
   private clientsService      = inject(ClientsService);
   private usersService        = inject(UsersService);
+  private auth                = inject(AuthService);
   private messageService      = inject(MessageService);
   private confirmationService = inject(ConfirmationService);
   private route               = inject(ActivatedRoute);
@@ -52,6 +54,28 @@ export class HistoriqueComponent implements OnInit {
   loading = false;
   dialogVisible = false;
   editingId: number | null = null;
+
+  // Verify dialog
+  verifyDialogVisible = false;
+  verifyExp: Expedition | null = null;
+  verifyClients: ExpeditionClient[] = [];
+  verifyLoadingClients = false;
+  verifyRetourPlastique = 0;
+  verifyRetourBois = 0;
+  verifying = false;
+
+  get verifyNetPlastique(): number {
+    return this.verifyClients.reduce((s, ec) => s + (ec.detail?.plastique ?? 0) - (ec.detail?.retour_plastique ?? 0), 0);
+  }
+  get verifyNetBois(): number {
+    return this.verifyClients.reduce((s, ec) => s + (ec.detail?.bois ?? 0) - (ec.detail?.retour_bois ?? 0), 0);
+  }
+  get verifyBalancePlastique(): number {
+    return (this.verifyExp?.nc_plastique ?? 0) - this.verifyNetPlastique - this.verifyRetourPlastique;
+  }
+  get verifyBalanceBois(): number {
+    return (this.verifyExp?.nc_bois ?? 0) - this.verifyNetBois - this.verifyRetourBois;
+  }
   sortCol = 'date';
   sortDir: 1 | -1 = -1;
 
@@ -157,6 +181,43 @@ export class HistoriqueComponent implements OnInit {
           next: () => { this.load(); this.toast('success', 'Expédition supprimée'); },
           error: e  => this.toast('error', e.error?.detail ?? 'Erreur'),
         });
+      },
+    });
+  }
+
+  openVerify(exp: Expedition) {
+    this.verifyExp = exp;
+    this.verifyRetourPlastique = exp.retour_livreur_plastique ?? 0;
+    this.verifyRetourBois = exp.retour_livreur_bois ?? 0;
+    this.verifyClients = [];
+    this.verifyLoadingClients = true;
+    this.verifyDialogVisible = true;
+    this.expeditionsService.getExpeditionClients(exp.id).subscribe({
+      next: clients => { this.verifyClients = clients; this.verifyLoadingClients = false; },
+      error: () => { this.verifyLoadingClients = false; },
+    });
+  }
+
+  doVerify() {
+    if (!this.verifyExp) return;
+    this.verifying = true;
+    const userId = this.auth.currentUser()?.id;
+    if (!userId) { this.verifying = false; return; }
+    this.expeditionsService.verify(this.verifyExp.id, {
+      retour_livreur_plastique: this.verifyRetourPlastique,
+      retour_livreur_bois:      this.verifyRetourBois,
+      verified_by_id:           userId,
+    }).subscribe({
+      next: updated => {
+        this.verifying = false;
+        this.verifyDialogVisible = false;
+        const idx = this.expeditions.findIndex(e => e.id === updated.id);
+        if (idx >= 0) this.expeditions[idx] = updated;
+        this.toast('success', `BL ${updated.bl_number} vérifié`);
+      },
+      error: e => {
+        this.verifying = false;
+        this.toast('error', e.error?.detail ?? 'Erreur de vérification');
       },
     });
   }

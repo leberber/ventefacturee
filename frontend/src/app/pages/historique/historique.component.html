@@ -75,6 +75,7 @@
                     } @else {
                       <span class="table-item-name">{{ e.client_name || e.livreur_name }}</span>
                     }
+                    <span class="hist-store-pill" style="font-size:0.6rem">{{ e.destination_type === 'gros' ? 'Client' : 'Livreur' }}</span>
                   </div>
                 </td>
                 <td class="text-muted">{{ e.chauffeur_name }}</td>
@@ -108,6 +109,15 @@
                     <a [routerLink]="['/expedition', e.id, 'livraison']" class="table-action-btn" title="Voir livraisons">
                       <i class="pi pi-map-marker"></i>
                     </a>
+                    @if (e.is_verified) {
+                      <span class="table-action-btn" style="color:var(--color-success,#22c55e);cursor:default" [title]="'Vérifié par ' + e.verified_by_name">
+                        <i class="pi pi-check-circle"></i>
+                      </span>
+                    } @else {
+                      <button class="table-action-btn" title="Vérifier le retour" (click)="openVerify(e)">
+                        <i class="pi pi-shield"></i>
+                      </button>
+                    }
                   }
                   <button class="table-action-btn" title="Modifier" (click)="openEdit(e)">
                     <i class="pi pi-pencil"></i>
@@ -151,6 +161,9 @@
                     {{ e.client_name || e.livreur_name }}
                   }
                 </span>
+                <span style="font-size:0.65rem;text-transform:uppercase;letter-spacing:0.04em;color:var(--text-color-secondary);font-weight:600">
+                  {{ e.destination_type === 'gros' ? 'Client' : 'Livreur' }}
+                </span>
                 <div class="mob-hist-card__meta">
                   @if (e.client_id && (clientsMap.get(e.client_id)?.first_name || clientsMap.get(e.client_id)?.last_name)) {
                     <span class="hist-store-pill">{{ e.client_name }}</span>
@@ -189,6 +202,15 @@
                 <a [routerLink]="['/expedition', e.id, 'livraison']" class="table-action-btn" title="Voir livraisons">
                   <i class="pi pi-map-marker"></i>
                 </a>
+                @if (e.is_verified) {
+                  <span class="table-action-btn" style="color:var(--color-success,#22c55e);cursor:default" [title]="'Vérifié par ' + e.verified_by_name">
+                    <i class="pi pi-check-circle"></i>
+                  </span>
+                } @else {
+                  <button class="table-action-btn" title="Vérifier le retour" (click)="openVerify(e)">
+                    <i class="pi pi-shield"></i>
+                  </button>
+                }
               }
               <button class="table-action-btn" title="Modifier" (click)="openEdit(e)">
                 <i class="pi pi-pencil"></i>
@@ -246,6 +268,109 @@
     </div>
   }
 </p-popover>
+
+<!-- Dialog: Verify return -->
+<p-dialog
+  [(visible)]="verifyDialogVisible"
+  [header]="'Vérification retour — ' + verifyExp?.bl_number"
+  [modal]="true"
+  [style]="{width:'680px'}"
+  [draggable]="false"
+>
+  @if (verifyLoadingClients) {
+    <div style="padding:2rem;text-align:center;color:var(--text-color-secondary)">Chargement…</div>
+  } @else if (verifyExp) {
+
+    <div style="background:var(--surface-100);border-radius:var(--radius-lg);padding:0.65rem 1rem;margin-bottom:1rem;display:flex;gap:1.5rem;flex-wrap:wrap;font-size:var(--font-size-sm)">
+      <span><i class="pi pi-send" style="margin-right:0.35rem;color:var(--text-color-secondary)"></i>{{ verifyExp.livreur_name }}</span>
+      <span><img src="assets/plastiquepallette.png" style="height:11px;vertical-align:middle;margin-right:3px" alt="">Parti avec <strong>{{ verifyExp.nc_plastique }}</strong></span>
+      <span><img src="assets/woodpallette.png" style="height:11px;vertical-align:middle;margin-right:3px" alt="">Parti avec <strong>{{ verifyExp.nc_bois }}</strong></span>
+    </div>
+
+    <table class="table" style="margin-bottom:1.25rem;font-size:var(--font-size-sm)">
+      <thead>
+        <tr>
+          <th>Client</th>
+          <th style="text-align:center"><img src="assets/plastiquepallette.png" style="height:10px" alt=""> Livré</th>
+          <th style="text-align:center">Retour client</th>
+          <th style="text-align:center;color:var(--text-color)">Net</th>
+          <th style="text-align:center"><img src="assets/woodpallette.png" style="height:10px" alt=""> Livré</th>
+          <th style="text-align:center">Retour client</th>
+          <th style="text-align:center;color:var(--text-color)">Net</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (ec of verifyClients; track ec.client_id) {
+          <tr>
+            <td>{{ ec.client_name }}</td>
+            <td style="text-align:center">{{ ec.detail?.plastique ?? 0 }}</td>
+            <td style="text-align:center;color:var(--color-success,#22c55e)">{{ ec.detail?.retour_plastique ?? 0 }}</td>
+            <td style="text-align:center;font-weight:600">{{ (ec.detail?.plastique ?? 0) - (ec.detail?.retour_plastique ?? 0) }}</td>
+            <td style="text-align:center">{{ ec.detail?.bois ?? 0 }}</td>
+            <td style="text-align:center;color:var(--color-success,#22c55e)">{{ ec.detail?.retour_bois ?? 0 }}</td>
+            <td style="text-align:center;font-weight:600">{{ (ec.detail?.bois ?? 0) - (ec.detail?.retour_bois ?? 0) }}</td>
+          </tr>
+        }
+        @if (verifyClients.length === 0) {
+          <tr><td colspan="7" style="text-align:center;color:var(--text-color-secondary);padding:1rem">Aucune livraison enregistrée</td></tr>
+        }
+      </tbody>
+      <tfoot>
+        <tr style="font-weight:700;border-top:2px solid var(--surface-border)">
+          <td>Total distribué</td>
+          <td colspan="2"></td>
+          <td style="text-align:center">{{ verifyNetPlastique }}</td>
+          <td colspan="2"></td>
+          <td style="text-align:center">{{ verifyNetBois }}</td>
+        </tr>
+      </tfoot>
+    </table>
+
+    <div class="form-grid-2" style="margin-bottom:1rem">
+      <div class="field mb-0">
+        <label class="exp-label"><img src="assets/plastiquepallette.png" style="height:11px;vertical-align:middle;margin-right:4px" alt="">Retour physique plastique</label>
+        <p-inputnumber [(ngModel)]="verifyRetourPlastique" [min]="0" [showButtons]="true"
+          buttonLayout="horizontal" decrementButtonIcon="pi pi-minus" incrementButtonIcon="pi pi-plus"
+          [style]="{width:'100%'}" />
+      </div>
+      <div class="field mb-0">
+        <label class="exp-label"><img src="assets/woodpallette.png" style="height:11px;vertical-align:middle;margin-right:4px" alt="">Retour physique bois</label>
+        <p-inputnumber [(ngModel)]="verifyRetourBois" [min]="0" [showButtons]="true"
+          buttonLayout="horizontal" decrementButtonIcon="pi pi-minus" incrementButtonIcon="pi pi-plus"
+          [style]="{width:'100%'}" />
+      </div>
+    </div>
+
+    <div style="background:var(--surface-100);border-radius:var(--radius-lg);padding:0.75rem 1rem;display:flex;align-items:center;gap:2rem;flex-wrap:wrap">
+      <div>
+        <div style="font-size:0.65rem;text-transform:uppercase;letter-spacing:0.05em;color:var(--text-color-secondary);margin-bottom:0.2rem">Balance plastique</div>
+        <span [style.color]="verifyBalancePlastique === 0 ? 'var(--color-success,#22c55e)' : 'var(--color-error,#ef4444)'" style="font-weight:700;font-size:1.15rem">
+          {{ verifyBalancePlastique > 0 ? '+' : '' }}{{ verifyBalancePlastique }}
+        </span>
+      </div>
+      <div>
+        <div style="font-size:0.65rem;text-transform:uppercase;letter-spacing:0.05em;color:var(--text-color-secondary);margin-bottom:0.2rem">Balance bois</div>
+        <span [style.color]="verifyBalanceBois === 0 ? 'var(--color-success,#22c55e)' : 'var(--color-error,#ef4444)'" style="font-weight:700;font-size:1.15rem">
+          {{ verifyBalanceBois > 0 ? '+' : '' }}{{ verifyBalanceBois }}
+        </span>
+      </div>
+      @if (verifyBalancePlastique !== 0 || verifyBalanceBois !== 0) {
+        <span style="font-size:var(--font-size-xs);color:var(--color-warning,#f59e0b);display:flex;align-items:center;gap:0.3rem">
+          <i class="pi pi-exclamation-triangle"></i> Les comptes ne s'équilibrent pas
+        </span>
+      } @else {
+        <span style="font-size:var(--font-size-xs);color:var(--color-success,#22c55e);display:flex;align-items:center;gap:0.3rem">
+          <i class="pi pi-check"></i> Comptes équilibrés
+        </span>
+      }
+    </div>
+  }
+
+  <ng-template #footer>
+    <p-button label="Annuler" severity="secondary" (onClick)="verifyDialogVisible = false" />
+    <p-button label="Confirmer le retour" icon="pi pi-check" (onClick)="doVerify()" [loading]="verifying" />
+  </ng-template>
+</p-dialog>
 
 <!-- Dialog: Edit expedition -->
 <p-dialog

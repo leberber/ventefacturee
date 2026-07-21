@@ -2,7 +2,6 @@ import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Button } from 'primeng/button';
 import { Toast } from 'primeng/toast';
 import { InputText } from 'primeng/inputtext';
 import { Password } from 'primeng/password';
@@ -17,7 +16,7 @@ import { User, UserCreate, UserUpdate, UserRole } from '../../../core/models/use
 @Component({
   selector: 'app-utilisateur-form',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, Button, Toast, InputText, Password, Select, ToggleSwitch],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, Toast, InputText, Password, Select, ToggleSwitch],
   providers: [MessageService],
   templateUrl: './utilisateur-form.component.html',
 })

@@ -3,8 +3,8 @@ export interface Expedition {
   bl_number: string;
   date: string;
   destination_type: string;  // gros | detail | horeca
-  chauffeur_id: number;
-  chauffeur_name: string;
+  chauffeur_id?: number | null;
+  chauffeur_name?: string | null;
   client_id?: number;
   client_name?: string;
   client_code?: string;
@@ -21,6 +21,12 @@ export interface Expedition {
   notes?: string;
   created_at: string;
   updated_at?: string;
+  retour_livreur_plastique: number;
+  retour_livreur_bois: number;
+  is_verified: boolean;
+  verified_at?: string;
+  verified_by_name?: string;
+  created_by_name?: string;
 }
 
 export interface ExpeditionCreate {
@@ -34,6 +40,7 @@ export interface ExpeditionCreate {
   nc_plastique: number;
   nc_bois: number;
   notes?: string | null;
+  created_by_id?: number | null;
 }
 
 export interface ExpeditionUpdate {
@@ -100,6 +107,12 @@ export interface ExpeditionClient {
   client_code?: string;
   has_location: boolean;
   detail?: LivraisonDetail;
+}
+
+export interface ExpeditionVerify {
+  retour_livreur_plastique: number;
+  retour_livreur_bois: number;
+  verified_by_id: number;
 }
 
 export interface DashboardStats {
