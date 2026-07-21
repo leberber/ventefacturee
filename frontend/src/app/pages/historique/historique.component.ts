@@ -1,5 +1,5 @@
 import { Component, OnInit, ViewChild, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, DatePipe } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { Button } from 'primeng/button';
@@ -7,6 +7,7 @@ import { Dialog } from 'primeng/dialog';
 import { Toast } from 'primeng/toast';
 import { ConfirmDialog } from 'primeng/confirmdialog';
 import { Select } from 'primeng/select';
+import { MultiSelect } from 'primeng/multiselect';
 import { InputNumber } from 'primeng/inputnumber';
 import { InputText } from 'primeng/inputtext';
 import { Popover } from 'primeng/popover';
@@ -23,21 +24,34 @@ import { sortItems, toggleSort } from '../../core/utils/sort.util';
   selector: 'app-historique',
   standalone: true,
   imports: [
-    CommonModule, FormsModule, ReactiveFormsModule, RouterLink,
-    Button, Dialog, Toast, ConfirmDialog, Select, InputNumber, InputText, Popover,
+    CommonModule, DatePipe, FormsModule, ReactiveFormsModule, RouterLink,
+    Button, Dialog, Toast, ConfirmDialog, Select, MultiSelect, InputNumber, InputText, Popover,
   ],
   providers: [MessageService, ConfirmationService],
   templateUrl: './historique.component.html',
 })
 export class HistoriqueComponent implements OnInit {
-  @ViewChild('expPop') expPop!: Popover;
+  @ViewChild('expPop')    expPop!: Popover;
+  @ViewChild('retourPop') retourPop!: Popover;
   activeExpedition:  Expedition | null = null;
   activeType: 'plastique' | 'bois' = 'plastique';
+  activeRetourExp: Expedition | null = null;
 
   openExpPop(event: Event, exp: Expedition, type: 'plastique' | 'bois') {
     this.activeExpedition = exp;
     this.activeType       = type;
     this.expPop.toggle(event);
+  }
+
+  openRetourPop(event: Event, exp: Expedition) {
+    this.activeRetourExp = exp;
+    this.retourPop.toggle(event);
+  }
+
+  isReturned(exp: Expedition): boolean {
+    return exp.destination_type === 'gros'
+      ? exp.retour_plastique > 0 || exp.retour_bois > 0
+      : exp.is_verified;
   }
 
   private expeditionsService  = inject(ExpeditionsService);
@@ -52,6 +66,8 @@ export class HistoriqueComponent implements OnInit {
   loading = false;
   dialogVisible = false;
   editingId: number | null = null;
+  editingClientIds: number[] = [];
+  readonly Math = Math;
 
   sortCol = 'date';
   sortDir: 1 | -1 = -1;
@@ -118,6 +134,7 @@ export class HistoriqueComponent implements OnInit {
   openEdit(exp: Expedition) {
     this.editingId = exp.id;
     this.editingDestinationType = exp.destination_type;
+    this.editingClientIds = [];
     this.form.patchValue({
       client_id:    exp.client_id ?? null,
       livreur_id:   exp.livreur_id ?? null,
@@ -126,11 +143,17 @@ export class HistoriqueComponent implements OnInit {
       nc_bois:      exp.nc_bois,
       notes:        exp.notes ?? '',
     });
+    if (exp.destination_type !== 'gros') {
+      this.expeditionsService.getExpeditionClients(exp.id).subscribe(
+        ecs => { this.editingClientIds = ecs.map(ec => ec.client_id); }
+      );
+    }
     this.dialogVisible = true;
   }
 
   save() {
     if (this.form.invalid || !this.editingId) return;
+    const id = this.editingId;
     const v = this.form.value;
     const body: ExpeditionUpdate = {
       chauffeur_id: v.chauffeur_id!,
@@ -140,9 +163,18 @@ export class HistoriqueComponent implements OnInit {
       nc_bois:      v.nc_bois ?? 0,
       notes:        v.notes || undefined,
     };
-    this.expeditionsService.update(this.editingId, body).subscribe({
-      next: () => { this.dialogVisible = false; this.load(); this.toast('success', 'Expédition mise à jour'); },
-      error: e  => this.toast('error', e.error?.detail ?? 'Erreur'),
+    this.expeditionsService.update(id, body).subscribe({
+      next: () => {
+        if (this.editingDestinationType !== 'gros') {
+          this.expeditionsService.setExpeditionClients(id, this.editingClientIds).subscribe({
+            next: () => { this.dialogVisible = false; this.load(); this.toast('success', 'Expédition mise à jour'); },
+            error: e  => this.toast('error', e.error?.detail ?? 'Erreur'),
+          });
+        } else {
+          this.dialogVisible = false; this.load(); this.toast('success', 'Expédition mise à jour');
+        }
+      },
+      error: e => this.toast('error', e.error?.detail ?? 'Erreur'),
     });
   }
 

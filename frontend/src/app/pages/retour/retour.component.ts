@@ -1,5 +1,5 @@
 import { Component, OnInit, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, DatePipe } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { Select } from 'primeng/select';
@@ -20,7 +20,7 @@ type RetourField = 'retour_plastique' | 'retour_bois';
 @Component({
   selector: 'app-retour',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, Select, Button, Toast, InputNumber],
+  imports: [CommonModule, DatePipe, FormsModule, ReactiveFormsModule, Select, Button, Toast, InputNumber],
   providers: [MessageService],
   templateUrl: './retour.component.html',
 })
@@ -64,10 +64,10 @@ export class RetourComponent implements OnInit {
   get isGros(): boolean { return this.selectedExpedition?.destination_type === 'gros'; }
 
   get netPlastique(): number {
-    return this.verifyClients.reduce((s, ec) => s + (ec.detail?.plastique ?? 0) - (ec.detail?.retour_plastique ?? 0), 0);
+    return this.verifyClients.reduce((s, ec) => s + (ec.detail?.plastique ?? 0), 0);
   }
   get netBois(): number {
-    return this.verifyClients.reduce((s, ec) => s + (ec.detail?.bois ?? 0) - (ec.detail?.retour_bois ?? 0), 0);
+    return this.verifyClients.reduce((s, ec) => s + (ec.detail?.bois ?? 0), 0);
   }
   get balancePlastique(): number {
     return (this.selectedExpedition?.nc_plastique ?? 0) - this.netPlastique - this.retourLivreurPlastique;

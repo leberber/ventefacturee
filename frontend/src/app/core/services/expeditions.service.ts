@@ -42,6 +42,10 @@ export class ExpeditionsService {
     return this.http.get<ExpeditionClient[]>(`${this.base}/${expeditionId}/expedition-clients`);
   }
 
+  setExpeditionClients(expeditionId: number, clientIds: number[]): Observable<any> {
+    return this.http.put(`${this.base}/${expeditionId}/expedition-clients`, clientIds);
+  }
+
   upsertDetail(expeditionId: number, body: LivraisonDetailCreate): Observable<LivraisonDetail> {
     return this.http.post<LivraisonDetail>(`${this.base}/${expeditionId}/details`, body);
   }

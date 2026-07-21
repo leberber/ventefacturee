@@ -150,6 +150,21 @@
             </div>
           } @else {
 
+            @if (selectedExpedition.is_verified) {
+              <div style="display:flex;align-items:center;gap:0.75rem;padding:0.75rem 1rem;border-radius:var(--radius-xl);background:color-mix(in srgb,var(--color-success,#22c55e) 10%,transparent);border:1px solid color-mix(in srgb,var(--color-success,#22c55e) 30%,transparent)">
+                <i class="pi pi-check-circle" style="font-size:1.1rem;color:var(--color-success,#22c55e)"></i>
+                <div style="flex:1">
+                  <div style="font-weight:var(--font-weight-semibold);font-size:var(--font-size-sm);color:var(--color-success,#22c55e)">Retour confirmé</div>
+                  @if (selectedExpedition.verified_by_name || selectedExpedition.verified_at) {
+                    <div style="font-size:var(--font-size-xs);color:var(--text-color-secondary);margin-top:0.1rem">
+                      @if (selectedExpedition.verified_by_name) { par {{ selectedExpedition.verified_by_name }} }
+                      @if (selectedExpedition.verified_at) { · {{ selectedExpedition.verified_at | date:'dd/MM/yyyy HH:mm' }} }
+                    </div>
+                  }
+                </div>
+              </div>
+            }
+
             <div style="display:grid;grid-template-columns:2fr 1fr;gap:1.5rem;align-items:start">
 
               <!-- Left column -->
@@ -199,26 +214,39 @@
                 <!-- Physical return -->
                 <div class="exp-card">
                   <div class="exp-label" style="margin-bottom:0.75rem"><i class="pi pi-arrow-circle-left"></i>Palettes ramenées au dépôt</div>
-                  <div class="qty-grid">
-                    <div class="qty-tile qty-tile--sm">
-                      <img src="assets/plastiquepallette.png" class="qty-tile__img" alt="">
-                      <span class="qty-tile__name">Plastique</span>
-                      <div class="qty-tile__counter">
-                        <button type="button" class="qty-btn" (click)="decLivreur('plastique')">−</button>
-                        <input type="number" class="qty-input" [value]="retourLivreurPlastique" (change)="setLivreurQty('plastique', $event)" min="0">
-                        <button type="button" class="qty-btn qty-btn--plus" (click)="incLivreur('plastique')">+</button>
+                  @if (selectedExpedition.is_verified) {
+                    <div style="display:flex;gap:1.5rem">
+                      <div style="display:flex;align-items:center;gap:0.5rem">
+                        <img src="assets/plastiquepallette.png" style="height:18px" alt="">
+                        <span style="font-size:var(--font-size-xl);font-weight:var(--font-weight-bold)">{{ retourLivreurPlastique }}</span>
+                      </div>
+                      <div style="display:flex;align-items:center;gap:0.5rem">
+                        <img src="assets/woodpallette.png" style="height:18px" alt="">
+                        <span style="font-size:var(--font-size-xl);font-weight:var(--font-weight-bold)">{{ retourLivreurBois }}</span>
                       </div>
                     </div>
-                    <div class="qty-tile qty-tile--sm">
-                      <img src="assets/woodpallette.png" class="qty-tile__img" alt="">
-                      <span class="qty-tile__name">Bois</span>
-                      <div class="qty-tile__counter">
-                        <button type="button" class="qty-btn" (click)="decLivreur('bois')">−</button>
-                        <input type="number" class="qty-input" [value]="retourLivreurBois" (change)="setLivreurQty('bois', $event)" min="0">
-                        <button type="button" class="qty-btn qty-btn--plus" (click)="incLivreur('bois')">+</button>
+                  } @else {
+                    <div class="qty-grid">
+                      <div class="qty-tile qty-tile--sm">
+                        <img src="assets/plastiquepallette.png" class="qty-tile__img" alt="">
+                        <span class="qty-tile__name">Plastique</span>
+                        <div class="qty-tile__counter">
+                          <button type="button" class="qty-btn" (click)="decLivreur('plastique')">−</button>
+                          <input type="number" class="qty-input" [value]="retourLivreurPlastique" (change)="setLivreurQty('plastique', $event)" min="0">
+                          <button type="button" class="qty-btn qty-btn--plus" (click)="incLivreur('plastique')">+</button>
+                        </div>
+                      </div>
+                      <div class="qty-tile qty-tile--sm">
+                        <img src="assets/woodpallette.png" class="qty-tile__img" alt="">
+                        <span class="qty-tile__name">Bois</span>
+                        <div class="qty-tile__counter">
+                          <button type="button" class="qty-btn" (click)="decLivreur('bois')">−</button>
+                          <input type="number" class="qty-input" [value]="retourLivreurBois" (change)="setLivreurQty('bois', $event)" min="0">
+                          <button type="button" class="qty-btn qty-btn--plus" (click)="incLivreur('bois')">+</button>
+                        </div>
                       </div>
                     </div>
-                  </div>
+                  }
                 </div>
 
                 <!-- Clients list -->

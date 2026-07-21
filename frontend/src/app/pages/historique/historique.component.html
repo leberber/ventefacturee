@@ -57,6 +57,7 @@
               <th>Chauffeur</th>
               <th><img src="assets/plastiquepallette.png" style="height:13px;vertical-align:middle;margin-right:3px" alt="">Plastique</th>
               <th><img src="assets/woodpallette.png" style="height:13px;vertical-align:middle;margin-right:3px" alt="">Bois</th>
+              <th>Retour</th>
               <th>Notes</th>
               <th style="width:7rem"></th>
             </tr>
@@ -64,7 +65,14 @@
           <tbody>
             @for (e of sorted; track e.id; let i = $index) {
               <tr class="table-row-animate" [style.--row-delay]="i * 20 + 'ms'">
-                <td><code class="font-mono text-muted">{{ e.bl_number }}</code></td>
+                <td>
+                  <div style="display:flex;flex-direction:column;gap:0.2rem;align-items:flex-start">
+                    <code class="font-mono text-muted">{{ e.bl_number }}</code>
+                    @if (e.is_verified) {
+                      <span class="badge badge--success" style="font-size:0.6rem" [title]="'Vérifié par ' + e.verified_by_name">Vérifié</span>
+                    }
+                  </div>
+                </td>
                 <td class="text-muted">{{ e.date | date:'dd/MM/yyyy' }}</td>
                 <td><span [class]="destinationBadge[e.destination_type]">{{ destinationLabel[e.destination_type] }}</span></td>
                 <td>
@@ -103,18 +111,35 @@
                     <span class="text-muted">—</span>
                   }
                 </td>
+                <td>
+                  @if (isReturned(e)) {
+                    <button class="palette-pill" (click)="openRetourPop($event, e)">
+                      <i class="pi pi-replay" style="font-size:0.7rem;color:var(--color-success,#22c55e)"></i>
+                      <span style="font-size:var(--font-size-xs);font-weight:600;color:var(--color-success,#22c55e)">Retourné</span>
+                      <i class="pi pi-chevron-down palette-pill__caret"></i>
+                    </button>
+                  } @else {
+                    <span style="font-size:var(--font-size-xs);font-weight:600;color:var(--color-warning,#f59e0b);display:flex;align-items:center;gap:0.3rem">
+                      <i class="pi pi-truck" style="font-size:0.7rem"></i>En livraison
+                    </span>
+                  }
+                </td>
                 <td class="text-muted" style="max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">
                   {{ e.notes || '—' }}
                 </td>
                 <td class="actions-cell">
                   @if (e.destination_type !== 'gros') {
-                    <a [routerLink]="['/expedition', e.id, 'livraison']" class="table-action-btn" title="Livraisons par client">
-                      <i class="pi pi-send"></i>
-                    </a>
                     <a [routerLink]="['/retour']" [queryParams]="{expeditionId: e.id}" class="table-action-btn"
                        [title]="e.is_verified ? 'Vérifié par ' + e.verified_by_name : 'Vérifier le retour'"
+                       style="text-decoration:none"
                        [style.color]="e.is_verified ? 'var(--color-success,#22c55e)' : ''">
-                      <i [class]="e.is_verified ? 'pi pi-check-circle' : 'pi pi-shield'"></i>
+                      @if (e.is_verified) {
+                        <span style="display:inline-flex;align-items:center;justify-content:center;width:1.5rem;height:1.5rem;border-radius:50%;background:color-mix(in srgb,var(--color-success,#22c55e) 15%,transparent)">
+                          <i class="pi pi-check" style="font-size:0.65rem;font-weight:900;color:var(--color-success,#22c55e)"></i>
+                        </span>
+                      } @else {
+                        <i class="pi pi-shield"></i>
+                      }
                     </a>
                   }
                   <button class="table-action-btn" title="Modifier" (click)="openEdit(e)">
@@ -148,6 +173,9 @@
             <div class="mob-hist-card__header">
               <code class="font-mono text-muted" style="font-size:var(--font-size-xs)">{{ e.bl_number }}</code>
               <span [class]="destinationBadge[e.destination_type]" style="font-size:0.65rem">{{ destinationLabel[e.destination_type] }}</span>
+              @if (e.is_verified) {
+                <span class="badge badge--success" style="font-size:0.6rem" [title]="'Vérifié par ' + e.verified_by_name">Vérifié</span>
+              }
               <span class="text-muted" style="font-size:var(--font-size-xs)">{{ e.date | date:'dd/MM/yyyy' }}</span>
             </div>
             <div class="mob-hist-card__body">
@@ -267,6 +295,70 @@
   }
 </p-popover>
 
+<!-- Popover: Retour info -->
+<p-popover #retourPop>
+  @if (activeRetourExp) {
+    <div style="min-width:220px;display:flex;flex-direction:column;gap:0.5rem;padding:0.25rem">
+
+      @if (activeRetourExp.destination_type === 'gros') {
+        <div style="font-size:0.65rem;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:var(--text-color-secondary);margin-bottom:0.25rem">Retour enregistré</div>
+        <div style="display:flex;justify-content:space-between;font-size:var(--font-size-sm)">
+          <span style="display:flex;align-items:center;gap:0.35rem;color:var(--text-color-secondary)">
+            <img src="assets/plastiquepallette.png" style="height:12px" alt="">Plastique retourné
+          </span>
+          <strong>{{ activeRetourExp.retour_plastique }}</strong>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:var(--font-size-sm)">
+          <span style="display:flex;align-items:center;gap:0.35rem;color:var(--text-color-secondary)">
+            <img src="assets/woodpallette.png" style="height:12px" alt="">Bois retourné
+          </span>
+          <strong>{{ activeRetourExp.retour_bois }}</strong>
+        </div>
+        <div style="border-top:1px solid var(--surface-border);margin:0.25rem 0;padding-top:0.5rem;display:flex;justify-content:space-between;align-items:center">
+          <span style="font-size:var(--font-size-xs);color:var(--text-color-secondary)">Comptes</span>
+          @if (activeRetourExp.palette_dette_plastique === 0 && activeRetourExp.palette_dette_bois === 0) {
+            <span class="badge badge--success" style="font-size:0.6rem">Équilibrés</span>
+          } @else {
+            <span class="badge badge--error" style="font-size:0.6rem">Déséquilibrés</span>
+          }
+        </div>
+      } @else {
+        <div style="font-size:0.65rem;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:var(--text-color-secondary);margin-bottom:0.25rem">Retour vérifié</div>
+        @if (activeRetourExp.verified_by_name) {
+          <div style="display:flex;justify-content:space-between;font-size:var(--font-size-sm)">
+            <span style="color:var(--text-color-secondary)">Vérifié par</span>
+            <strong>{{ activeRetourExp.verified_by_name }}</strong>
+          </div>
+        }
+        @if (activeRetourExp.verified_at) {
+          <div style="display:flex;justify-content:space-between;font-size:var(--font-size-sm)">
+            <span style="color:var(--text-color-secondary)">Le</span>
+            <strong>{{ activeRetourExp.verified_at | date:'dd/MM/yyyy HH:mm' }}</strong>
+          </div>
+        }
+        <div style="border-top:1px solid var(--surface-border);margin:0.25rem 0;padding-top:0.5rem">
+          <div style="font-size:0.65rem;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:var(--text-color-secondary);margin-bottom:0.35rem">Ramené au dépôt</div>
+          <div style="display:flex;gap:1.25rem">
+            <span style="display:flex;align-items:center;gap:0.35rem;font-size:var(--font-size-sm)">
+              <img src="assets/plastiquepallette.png" style="height:12px" alt="">
+              <strong>{{ activeRetourExp.retour_livreur_plastique }}</strong>
+            </span>
+            <span style="display:flex;align-items:center;gap:0.35rem;font-size:var(--font-size-sm)">
+              <img src="assets/woodpallette.png" style="height:12px" alt="">
+              <strong>{{ activeRetourExp.retour_livreur_bois }}</strong>
+            </span>
+          </div>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;padding-top:0.25rem">
+          <span style="font-size:var(--font-size-xs);color:var(--text-color-secondary)">Comptes</span>
+          <span class="badge badge--success" style="font-size:0.6rem">Confirmés</span>
+        </div>
+      }
+
+    </div>
+  }
+</p-popover>
+
 <!-- Dialog: Edit expedition -->
 <p-dialog
   [(visible)]="dialogVisible"
@@ -295,24 +387,41 @@
       </div>
     </div>
 
-    <div class="palette-section">
-      <div class="palette-section-title"><img src="assets/plastiquepallette.png" style="height:16px;vertical-align:middle;margin-right:6px" alt="">Palettes plastique</div>
-      <div class="form-grid-3">
-        <div class="field">
-          <label>Quantité</label>
-          <p-inputnumber formControlName="nc_plastique" [min]="0" [showButtons]="true" buttonLayout="horizontal"
-            decrementButtonIcon="pi pi-minus" incrementButtonIcon="pi pi-plus" [style]="{width:'100%'}" />
+    @if (editingDestinationType !== 'gros') {
+      <div class="field">
+        <label>Clients planifiés</label>
+        <p-multiselect
+          [(ngModel)]="editingClientIds"
+          [ngModelOptions]="{standalone: true}"
+          [options]="clientOptions.slice(1)"
+          optionLabel="label"
+          optionValue="value"
+          placeholder="Ajouter ou retirer des clients…"
+          [filter]="true"
+          filterPlaceholder="Rechercher…"
+          [style]="{width:'100%'}"
+          appendTo="body"
+        />
+      </div>
+    }
+
+    <div class="qty-grid" style="margin:1rem 0">
+      <div class="qty-tile">
+        <img src="assets/plastiquepallette.png" class="qty-tile__img" alt="">
+        <span class="qty-tile__name">Plastique</span>
+        <div class="qty-tile__counter">
+          <button type="button" class="qty-btn" (click)="form.get('nc_plastique')!.setValue(Math.max(0,(form.get('nc_plastique')!.value??0)-1))">−</button>
+          <input type="number" class="qty-input" [value]="form.get('nc_plastique')?.value" (change)="form.get('nc_plastique')!.setValue(Math.max(0,+$any($event.target).value||0))" min="0">
+          <button type="button" class="qty-btn qty-btn--plus" (click)="form.get('nc_plastique')!.setValue((form.get('nc_plastique')!.value??0)+1)">+</button>
         </div>
       </div>
-    </div>
-
-    <div class="palette-section">
-      <div class="palette-section-title"><img src="assets/woodpallette.png" style="height:16px;vertical-align:middle;margin-right:6px" alt="">Palettes bois</div>
-      <div class="form-grid-3">
-        <div class="field">
-          <label>Quantité</label>
-          <p-inputnumber formControlName="nc_bois" [min]="0" [showButtons]="true" buttonLayout="horizontal"
-            decrementButtonIcon="pi pi-minus" incrementButtonIcon="pi pi-plus" [style]="{width:'100%'}" />
+      <div class="qty-tile">
+        <img src="assets/woodpallette.png" class="qty-tile__img" alt="">
+        <span class="qty-tile__name">Bois</span>
+        <div class="qty-tile__counter">
+          <button type="button" class="qty-btn" (click)="form.get('nc_bois')!.setValue(Math.max(0,(form.get('nc_bois')!.value??0)-1))">−</button>
+          <input type="number" class="qty-input" [value]="form.get('nc_bois')?.value" (change)="form.get('nc_bois')!.setValue(Math.max(0,+$any($event.target).value||0))" min="0">
+          <button type="button" class="qty-btn qty-btn--plus" (click)="form.get('nc_bois')!.setValue((form.get('nc_bois')!.value??0)+1)">+</button>
         </div>
       </div>
     </div>

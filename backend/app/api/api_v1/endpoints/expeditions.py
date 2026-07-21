@@ -256,6 +256,28 @@ def get_expedition(expedition_id: int, session: Session = Depends(get_session)) 
     return _attach_retours([exp], session)[0]
 
 
+@router.put("/{expedition_id}/expedition-clients")
+def set_expedition_clients(
+    expedition_id: int,
+    client_ids: List[int],
+    session: Session = Depends(get_session),
+) -> Any:
+    exp = session.get(Expedition, expedition_id)
+    if not exp:
+        raise HTTPException(status_code=404, detail="Expédition introuvable")
+    existing = session.exec(
+        select(ExpeditionClient).where(ExpeditionClient.expedition_id == expedition_id)
+    ).all()
+    for ec in existing:
+        session.delete(ec)
+    for cid in client_ids:
+        client = session.get(Client, cid)
+        if client:
+            session.add(ExpeditionClient(expedition_id=expedition_id, client_id=client.id, client_name=client.name))
+    session.commit()
+    return {"ok": True}
+
+
 @router.get("/{expedition_id}/expedition-clients", response_model=List[ExpeditionClientRead])
 def get_expedition_clients(expedition_id: int, session: Session = Depends(get_session)) -> Any:
     exp = session.get(Expedition, expedition_id)
