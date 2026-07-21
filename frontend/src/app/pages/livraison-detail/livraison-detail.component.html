@@ -54,18 +54,18 @@
                   {{ ec.client_first_name }} {{ ec.client_last_name }}
                 </div>
               }
-              @if ((ec.client_plastic_out ?? 0) > 0 || (ec.client_wood_out ?? 0) > 0) {
+              @if ((ec.client_plastic_out ?? 0) - getInput(ec.client_id).recovered_plastique > 0 || (ec.client_wood_out ?? 0) - getInput(ec.client_id).recovered_bois > 0) {
                 <div style="display:flex;align-items:center;gap:0.4rem;margin-top:0.2rem;font-size:var(--font-size-xs);color:var(--color-warning,#f59e0b)">
                   <i class="pi pi-exclamation-triangle" style="font-size:0.6rem"></i>
                   <span>Solde :</span>
-                  @if ((ec.client_plastic_out ?? 0) > 0) {
+                  @if ((ec.client_plastic_out ?? 0) - getInput(ec.client_id).recovered_plastique > 0) {
                     <span style="display:flex;align-items:center;gap:0.2rem">
-                      <img src="assets/plastiquepallette.png" style="height:10px" alt="">{{ ec.client_plastic_out }}
+                      <img src="assets/plastiquepallette.png" style="height:10px" alt="">{{ (ec.client_plastic_out ?? 0) - getInput(ec.client_id).recovered_plastique }}
                     </span>
                   }
-                  @if ((ec.client_wood_out ?? 0) > 0) {
+                  @if ((ec.client_wood_out ?? 0) - getInput(ec.client_id).recovered_bois > 0) {
                     <span style="display:flex;align-items:center;gap:0.2rem">
-                      <img src="assets/woodpallette.png" style="height:10px" alt="">{{ ec.client_wood_out }}
+                      <img src="assets/woodpallette.png" style="height:10px" alt="">{{ (ec.client_wood_out ?? 0) - getInput(ec.client_id).recovered_bois }}
                     </span>
                   }
                 </div>
@@ -111,47 +111,73 @@
           @if (activeClientId === ec.client_id) {
           <div class="qty-grid" style="margin:1rem 0 0.75rem">
 
+            <!-- Plastique tile -->
             <div class="qty-tile qty-tile--sm">
               <img src="assets/plastiquepallette.png" class="qty-tile__img" alt="">
               <span class="qty-tile__name">Plastique</span>
+
+              @if ((ec.client_plastic_out ?? 0) > 0) {
+                <span style="font-size:0.6rem;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;color:var(--color-warning,#f59e0b)">
+                  Récupérer <span style="font-weight:400">(solde {{ (ec.client_plastic_out ?? 0) - getInput(ec.client_id).recovered_plastique }})</span>
+                </span>
+                <div class="qty-tile__counter">
+                  <button type="button" class="qty-btn" (click)="dec(ec.client_id, 'recovered_plastique')">−</button>
+                  <input type="number" class="qty-input" [value]="getInput(ec.client_id).recovered_plastique"
+                         (change)="setQty(ec.client_id, 'recovered_plastique', $event)" min="0">
+                  <button type="button" class="qty-btn qty-btn--plus" (click)="inc(ec.client_id, 'recovered_plastique')">+</button>
+                </div>
+                <div style="width:100%;height:1px;background:var(--surface-border);margin:0.25rem 0"></div>
+              }
+
+              <span style="font-size:0.6rem;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;color:var(--text-color-secondary)">Déposer</span>
               <div class="qty-tile__counter">
                 <button type="button" class="qty-btn" (click)="dec(ec.client_id, 'plastique')">−</button>
                 <input type="number" class="qty-input" [value]="getInput(ec.client_id).plastique"
                        (change)="setQty(ec.client_id, 'plastique', $event)" min="0">
                 <button type="button" class="qty-btn qty-btn--plus" (click)="inc(ec.client_id, 'plastique')">+</button>
               </div>
+
               <div class="qty-tile__consigne">
-                <span class="qty-tile__consigne-label">Nb. palettes consignées</span>
+                <span class="qty-tile__consigne-label">Nb. consignées</span>
                 <input type="number" class="qty-input qty-input--sm"
-                       [class.qty-input--error]="getInput(ec.client_id).retour_plastique > getInput(ec.client_id).plastique"
                        [value]="getInput(ec.client_id).retour_plastique"
                        (focus)="clearIfZero($event)"
                        (input)="setQty(ec.client_id, 'retour_plastique', $event)" min="0">
-                @if (getInput(ec.client_id).retour_plastique > getInput(ec.client_id).plastique) {
-                  <span class="qty-tile__consigne-error">Vous ne pouvez pas récupérer plus de consignes que le nombre de palettes laissées chez le client</span>
-                }
               </div>
             </div>
 
+            <!-- Bois tile -->
             <div class="qty-tile qty-tile--sm">
               <img src="assets/woodpallette.png" class="qty-tile__img" alt="">
               <span class="qty-tile__name">Bois</span>
+
+              @if ((ec.client_wood_out ?? 0) > 0) {
+                <span style="font-size:0.6rem;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;color:var(--color-warning,#f59e0b)">
+                  Récupérer <span style="font-weight:400">(solde {{ (ec.client_wood_out ?? 0) - getInput(ec.client_id).recovered_bois }})</span>
+                </span>
+                <div class="qty-tile__counter">
+                  <button type="button" class="qty-btn" (click)="dec(ec.client_id, 'recovered_bois')">−</button>
+                  <input type="number" class="qty-input" [value]="getInput(ec.client_id).recovered_bois"
+                         (change)="setQty(ec.client_id, 'recovered_bois', $event)" min="0">
+                  <button type="button" class="qty-btn qty-btn--plus" (click)="inc(ec.client_id, 'recovered_bois')">+</button>
+                </div>
+                <div style="width:100%;height:1px;background:var(--surface-border);margin:0.25rem 0"></div>
+              }
+
+              <span style="font-size:0.6rem;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;color:var(--text-color-secondary)">Déposer</span>
               <div class="qty-tile__counter">
                 <button type="button" class="qty-btn" (click)="dec(ec.client_id, 'bois')">−</button>
                 <input type="number" class="qty-input" [value]="getInput(ec.client_id).bois"
                        (change)="setQty(ec.client_id, 'bois', $event)" min="0">
                 <button type="button" class="qty-btn qty-btn--plus" (click)="inc(ec.client_id, 'bois')">+</button>
               </div>
+
               <div class="qty-tile__consigne">
-                <span class="qty-tile__consigne-label">Nb. palettes consignées</span>
+                <span class="qty-tile__consigne-label">Nb. consignées</span>
                 <input type="number" class="qty-input qty-input--sm"
-                       [class.qty-input--error]="getInput(ec.client_id).retour_bois > getInput(ec.client_id).bois"
                        [value]="getInput(ec.client_id).retour_bois"
                        (focus)="clearIfZero($event)"
                        (input)="setQty(ec.client_id, 'retour_bois', $event)" min="0">
-                @if (getInput(ec.client_id).retour_bois > getInput(ec.client_id).bois) {
-                  <span class="qty-tile__consigne-error">Max {{ getInput(ec.client_id).bois }} palettes chez ce client</span>
-                }
               </div>
             </div>
 

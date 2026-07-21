@@ -17,6 +17,8 @@ interface ClientInput {
   bois: number;
   retour_plastique: number;
   retour_bois: number;
+  recovered_plastique: number;
+  recovered_bois: number;
   notes: string;
   saving: boolean;
   locating: boolean;
@@ -97,11 +99,13 @@ export class LivraisonDetailComponent implements OnInit {
         this.expeditionClients = clients;
         for (const ec of clients) {
           this.inputs.set(ec.client_id, {
-            plastique:        ec.detail?.plastique        ?? 0,
-            bois:             ec.detail?.bois             ?? 0,
-            retour_plastique: ec.detail?.retour_plastique ?? 0,
-            retour_bois:      ec.detail?.retour_bois      ?? 0,
-            notes:            ec.detail?.notes            ?? '',
+            plastique:           ec.detail?.plastique           ?? 0,
+            bois:                ec.detail?.bois                ?? 0,
+            retour_plastique:    ec.detail?.retour_plastique    ?? 0,
+            retour_bois:         ec.detail?.retour_bois         ?? 0,
+            recovered_plastique: ec.detail?.recovered_plastique ?? 0,
+            recovered_bois:      ec.detail?.recovered_bois      ?? 0,
+            notes:               ec.detail?.notes               ?? '',
             saving: false,
             locating: false,
           });
@@ -117,7 +121,11 @@ export class LivraisonDetailComponent implements OnInit {
     return this.inputs.get(clientId)!;
   }
 
-  inc(clientId: number, field: 'plastique' | 'bois' | 'retour_plastique' | 'retour_bois') {
+  private getEc(clientId: number): ExpeditionClient | undefined {
+    return this.expeditionClients.find(c => c.client_id === clientId);
+  }
+
+  inc(clientId: number, field: 'plastique' | 'bois' | 'retour_plastique' | 'retour_bois' | 'recovered_plastique' | 'recovered_bois') {
     const inp = this.inputs.get(clientId)!;
     if (field === 'plastique' && this.restantPlastique <= 0) {
       this.messageService.add({ key: 'stock', severity: 'warn', summary: 'Stock épuisé', detail: `Toutes les palettes plastique chargées (${this.bl?.nc_plastique}) ont déjà été distribuées`, life: 3000 });
@@ -127,21 +135,34 @@ export class LivraisonDetailComponent implements OnInit {
       this.messageService.add({ key: 'stock', severity: 'warn', summary: 'Stock épuisé', detail: `Toutes les palettes bois chargées (${this.bl?.nc_bois}) ont déjà été distribuées`, life: 3000 });
       return;
     }
+    if (field === 'recovered_plastique') {
+      const max = this.getEc(clientId)?.client_plastic_out ?? 0;
+      if (inp.recovered_plastique >= max) return;
+    }
+    if (field === 'recovered_bois') {
+      const max = this.getEc(clientId)?.client_wood_out ?? 0;
+      if (inp.recovered_bois >= max) return;
+    }
     inp[field]++;
+    if (field === 'plastique' || field === 'bois') this.tourneeState.updateRestant(this.restantPlastique, this.restantBois);
   }
 
-  dec(clientId: number, field: 'plastique' | 'bois' | 'retour_plastique' | 'retour_bois') {
+  dec(clientId: number, field: 'plastique' | 'bois' | 'retour_plastique' | 'retour_bois' | 'recovered_plastique' | 'recovered_bois') {
     const inp = this.inputs.get(clientId)!;
     if (inp[field] > 0) inp[field]--;
+    if (field === 'plastique' || field === 'bois') this.tourneeState.updateRestant(this.restantPlastique, this.restantBois);
   }
 
-  setQty(clientId: number, field: 'plastique' | 'bois' | 'retour_plastique' | 'retour_bois', event: Event) {
+  setQty(clientId: number, field: 'plastique' | 'bois' | 'retour_plastique' | 'retour_bois' | 'recovered_plastique' | 'recovered_bois', event: Event) {
     const inp = this.inputs.get(clientId)!;
     let n = parseInt((event.target as HTMLInputElement).value, 10);
     if (isNaN(n) || n < 0) n = 0;
-    if (field === 'plastique') n = Math.min(n, inp.plastique + this.restantPlastique);
-    if (field === 'bois')      n = Math.min(n, inp.bois      + this.restantBois);
+    if (field === 'plastique')           n = Math.min(n, inp.plastique + this.restantPlastique);
+    if (field === 'bois')                n = Math.min(n, inp.bois + this.restantBois);
+    if (field === 'recovered_plastique') n = Math.min(n, this.getEc(clientId)?.client_plastic_out ?? 0);
+    if (field === 'recovered_bois')      n = Math.min(n, this.getEc(clientId)?.client_wood_out ?? 0);
     inp[field] = n;
+    if (field === 'plastique' || field === 'bois') this.tourneeState.updateRestant(this.restantPlastique, this.restantBois);
   }
 
   saveDetail(clientId: number) {
@@ -149,12 +170,14 @@ export class LivraisonDetailComponent implements OnInit {
     inp.saving = true;
 
     const body: LivraisonDetailCreate = {
-      client_id:        clientId,
-      plastique:        inp.plastique,
-      bois:             inp.bois,
-      retour_plastique: inp.retour_plastique,
-      retour_bois:      inp.retour_bois,
-      notes:            inp.notes || undefined,
+      client_id:           clientId,
+      plastique:           inp.plastique,
+      bois:                inp.bois,
+      retour_plastique:    inp.retour_plastique,
+      retour_bois:         inp.retour_bois,
+      recovered_plastique: inp.recovered_plastique,
+      recovered_bois:      inp.recovered_bois,
+      notes:               inp.notes || undefined,
     };
 
     this.expeditionsService.upsertDetail(this.expeditionId, body).subscribe({

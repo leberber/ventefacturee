@@ -14,6 +14,11 @@ export class TourneeStateService {
   deliveredCount   = signal(0);
   totalClients     = signal(0);
 
+  updateRestant(plastique: number, bois: number) {
+    this.restantPlastique.set(plastique);
+    this.restantBois.set(bois);
+  }
+
   refresh() {
     const userId = this.auth.currentUser()?.id;
     if (!userId) return;

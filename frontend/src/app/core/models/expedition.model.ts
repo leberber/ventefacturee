@@ -89,6 +89,8 @@ export interface LivraisonDetail {
   bois: number;
   retour_plastique: number;
   retour_bois: number;
+  recovered_plastique: number;
+  recovered_bois: number;
   notes?: string;
   recorded_at: string;
   updated_at?: string;
@@ -100,6 +102,8 @@ export interface LivraisonDetailCreate {
   bois: number;
   retour_plastique?: number;
   retour_bois?: number;
+  recovered_plastique?: number;
+  recovered_bois?: number;
   notes?: string;
 }
 
