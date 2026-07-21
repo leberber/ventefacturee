@@ -55,11 +55,11 @@ export class LivraisonDetailComponent implements OnInit {
   }
 
   get totalRetourPlastique(): number {
-    return this.expeditionClients.reduce((s, ec) => s + (ec.detail?.retour_plastique ?? 0), 0);
+    return this.restantPlastique;
   }
 
   get totalRetourBois(): number {
-    return this.expeditionClients.reduce((s, ec) => s + (ec.detail?.retour_bois ?? 0), 0);
+    return this.restantBois;
   }
 
   get expeditionId(): number { return +this.route.snapshot.paramMap.get('id')!; }

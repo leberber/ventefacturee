@@ -238,19 +238,27 @@
     }
   </div>
 
-  <!-- Retour livreur sentence -->
-  <div style="margin-top:1rem;padding:0.875rem;border-radius:var(--radius-lg);border:1px solid var(--surface-border);background:var(--surface-50)">
-    <div style="font-size:var(--font-size-xs);color:var(--text-color-secondary);margin-bottom:0.4rem;text-transform:uppercase;letter-spacing:0.05em;font-weight:600">Retour au dépôt</div>
-    <div style="font-size:var(--font-size-sm);color:var(--text-color)">
-      Le livreur ramène
-      <strong style="color:var(--primary-color)">
-        {{ totalRetourPlastique }} plastique{{ totalRetourPlastique !== 1 ? '' : '' }}
-      </strong>
-      et
-      <strong style="color:var(--primary-color)">
-        {{ totalRetourBois }} bois
-      </strong>
-      au dépôt.
+  <!-- Retour livreur -->
+  <div style="margin-top:1rem;padding:1rem;border-radius:var(--radius-xl);border:1px solid color-mix(in srgb,var(--primary-color) 25%,transparent);background:color-mix(in srgb,var(--primary-color) 6%,transparent)">
+    <div style="font-size:var(--font-size-xs);color:var(--primary-color);text-transform:uppercase;letter-spacing:0.06em;font-weight:700;margin-bottom:0.6rem">
+      <i class="pi pi-building" style="font-size:0.7rem;margin-right:0.3rem"></i>Palettes ramenées au dépôt
+    </div>
+    <div style="display:flex;align-items:center;gap:1.25rem">
+      <div style="display:flex;align-items:center;gap:0.5rem">
+        <img src="assets/plastiquepallette.png" style="height:32px" alt="Plastique">
+        <div>
+          <div style="font-size:1.5rem;font-weight:var(--font-weight-bold);line-height:1;color:var(--text-color)">{{ totalRetourPlastique }}</div>
+          <div style="font-size:var(--font-size-xs);color:var(--text-color-secondary)">plastique</div>
+        </div>
+      </div>
+      <div style="width:1px;height:2rem;background:var(--surface-border)"></div>
+      <div style="display:flex;align-items:center;gap:0.5rem">
+        <img src="assets/woodpallette.png" style="height:32px" alt="Bois">
+        <div>
+          <div style="font-size:1.5rem;font-weight:var(--font-weight-bold);line-height:1;color:var(--text-color)">{{ totalRetourBois }}</div>
+          <div style="font-size:var(--font-size-xs);color:var(--text-color-secondary)">bois</div>
+        </div>
+      </div>
     </div>
   </div>
 
