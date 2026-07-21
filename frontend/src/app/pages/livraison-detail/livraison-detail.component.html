@@ -79,18 +79,24 @@
           </div>
 
           <div style="display:flex;align-items:center;justify-content:space-between;gap:0.5rem;padding-top:0.5rem;border-top:1px solid var(--surface-border)">
-            <button type="button"
-              [class]="getInput(ec.client_id).lat ? 'gps-btn gps-btn--captured' : 'gps-btn'"
-              [disabled]="getInput(ec.client_id).locating"
-              (click)="captureLocation(ec.client_id)">
-              @if (getInput(ec.client_id).locating) {
-                <i class="pi pi-spin pi-spinner"></i><span>Localisation…</span>
-              } @else if (getInput(ec.client_id).lat) {
-                <i class="pi pi-check"></i><span>Position capturée</span>
-              } @else {
-                <i class="pi pi-crosshairs"></i><span>Ma position</span>
-              }
-            </button>
+            @if (!ec.has_location || getInput(ec.client_id).lat) {
+              <button type="button"
+                [class]="getInput(ec.client_id).lat ? 'gps-btn gps-btn--captured' : 'gps-btn'"
+                [disabled]="getInput(ec.client_id).locating"
+                (click)="captureLocation(ec.client_id)">
+                @if (getInput(ec.client_id).locating) {
+                  <i class="pi pi-spin pi-spinner"></i><span>Localisation…</span>
+                } @else if (getInput(ec.client_id).lat) {
+                  <i class="pi pi-check"></i><span>Position capturée</span>
+                } @else {
+                  <i class="pi pi-crosshairs"></i><span>Ma position</span>
+                }
+              </button>
+            } @else {
+              <span style="font-size:var(--font-size-xs);color:var(--text-color-secondary);display:flex;align-items:center;gap:0.3rem">
+                <i class="pi pi-map-marker" style="font-size:0.7rem;color:var(--color-success)"></i>Géolocalisation enregistrée
+              </span>
+            }
             <p-button
               [label]="ec.detail ? 'Mettre à jour' : 'Enregistrer'"
               [icon]="ec.detail ? 'pi pi-refresh' : 'pi pi-check'"

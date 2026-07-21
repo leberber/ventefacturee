@@ -270,6 +270,8 @@ def get_expedition_clients(expedition_id: int, session: Session = Depends(get_se
     result = []
     for ec in exp_clients:
         ec_read = ExpeditionClientRead.model_validate(ec)
+        client = session.get(Client, ec.client_id)
+        ec_read.has_location = bool(client and client.latitude is not None and client.longitude is not None)
         d = details_map.get(ec.client_id)
         ec_read.detail = LivraisonDetailRead.model_validate(d) if d else None
         result.append(ec_read)

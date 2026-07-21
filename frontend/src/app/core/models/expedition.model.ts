@@ -98,6 +98,7 @@ export interface ExpeditionClient {
   client_id: number;
   client_name: string;
   client_code?: string;
+  has_location: boolean;
   detail?: LivraisonDetail;
 }
 
