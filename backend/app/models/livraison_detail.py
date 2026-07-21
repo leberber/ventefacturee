@@ -71,4 +71,6 @@ class ExpeditionClientRead(SQLModel):
     client_first_name: Optional[str] = None
     client_last_name: Optional[str] = None
     has_location: bool = False
+    client_plastic_out: Optional[int] = None
+    client_wood_out: Optional[int] = None
     detail: Optional[LivraisonDetailRead] = None

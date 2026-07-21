@@ -7,6 +7,7 @@ from sqlmodel import Session, select, func
 from app.database import get_session
 from app.models.client import Client
 from app.models.user import User
+from app.api.api_v1.endpoints.clients import _compute_balance
 from app.models.expedition import Expedition, ExpeditionCreate, ExpeditionUpdate, ExpeditionRead, ExpeditionVerify
 from app.models.retour import Retour, RetourCreate, RetourRead
 from app.models.livraison_detail import (
@@ -303,6 +304,9 @@ def get_expedition_clients(expedition_id: int, session: Session = Depends(get_se
         if client:
             ec_read.client_first_name = client.first_name
             ec_read.client_last_name = client.last_name
+            bal = _compute_balance(client.id, session)
+            ec_read.client_plastic_out = bal["plastic_out"]
+            ec_read.client_wood_out = bal["wood_out"]
         d = details_map.get(ec.client_id)
         ec_read.detail = LivraisonDetailRead.model_validate(d) if d else None
         result.append(ec_read)

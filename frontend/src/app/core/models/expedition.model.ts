@@ -112,6 +112,8 @@ export interface ExpeditionClient {
   client_first_name?: string;
   client_last_name?: string;
   has_location: boolean;
+  client_plastic_out?: number | null;
+  client_wood_out?: number | null;
   detail?: LivraisonDetail;
 }
 

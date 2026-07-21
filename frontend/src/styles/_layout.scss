@@ -1890,6 +1890,7 @@
 }
 
 .client-delivery-card {
+  position: relative;
   background: var(--surface-card);
   border: var(--border-width) solid var(--surface-border);
   border-radius: var(--radius-2xl);

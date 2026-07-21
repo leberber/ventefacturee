@@ -46,6 +46,20 @@
       @for (ec of expeditionClients; track ec.client_id) {
         <div class="client-delivery-card" [class.client-delivery-card--done]="ec.detail">
 
+          @if ((ec.client_plastic_out ?? 0) > 0 || (ec.client_wood_out ?? 0) > 0) {
+            <div style="position:absolute;top:-0.5rem;right:0.75rem;display:flex;gap:0.35rem;z-index:1">
+              @if ((ec.client_plastic_out ?? 0) > 0) {
+                <span style="display:flex;align-items:center;gap:0.25rem;background:color-mix(in srgb,var(--color-warning,#f59e0b) 15%,var(--surface-card));border:1px solid color-mix(in srgb,var(--color-warning,#f59e0b) 35%,transparent);border-radius:999px;padding:0.15rem 0.5rem;font-size:0.65rem;font-weight:700;color:var(--color-warning,#f59e0b)">
+                  <img src="assets/plastiquepallette.png" style="height:10px" alt="">{{ ec.client_plastic_out }}
+                </span>
+              }
+              @if ((ec.client_wood_out ?? 0) > 0) {
+                <span style="display:flex;align-items:center;gap:0.25rem;background:color-mix(in srgb,var(--color-warning,#f59e0b) 15%,var(--surface-card));border:1px solid color-mix(in srgb,var(--color-warning,#f59e0b) 35%,transparent);border-radius:999px;padding:0.15rem 0.5rem;font-size:0.65rem;font-weight:700;color:var(--color-warning,#f59e0b)">
+                  <img src="assets/woodpallette.png" style="height:10px" alt="">{{ ec.client_wood_out }}
+                </span>
+              }
+            </div>
+          }
           <div class="client-delivery-header" [style.cursor]="isConfirmed ? 'default' : 'pointer'" (click)="!isConfirmed && toggleCard(ec.client_id)">
             <div>
               <span class="client-delivery-name">{{ ec.client_name }}</span>
