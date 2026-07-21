@@ -16,7 +16,7 @@ import { MessageService, ConfirmationService } from 'primeng/api';
 import { ExpeditionsService } from '../../core/services/expeditions.service';
 import { ClientsService } from '../../core/services/clients.service';
 import { UsersService } from '../../core/services/users.service';
-import { Expedition, ExpeditionUpdate } from '../../core/models/expedition.model';
+import { Expedition, ExpeditionClient, ExpeditionUpdate } from '../../core/models/expedition.model';
 import { Client } from '../../core/models/client.model';
 import { sortItems, toggleSort } from '../../core/utils/sort.util';
 
@@ -31,11 +31,14 @@ import { sortItems, toggleSort } from '../../core/utils/sort.util';
   templateUrl: './historique.component.html',
 })
 export class HistoriqueComponent implements OnInit {
-  @ViewChild('expPop')    expPop!: Popover;
-  @ViewChild('retourPop') retourPop!: Popover;
+  @ViewChild('expPop')     expPop!: Popover;
+  @ViewChild('retourPop')  retourPop!: Popover;
+  @ViewChild('livreurPop') livreurPop!: Popover;
   activeExpedition:  Expedition | null = null;
   activeType: 'plastique' | 'bois' = 'plastique';
   activeRetourExp: Expedition | null = null;
+  livreurPopClients: ExpeditionClient[] = [];
+  livreurPopLoading = false;
 
   openExpPop(event: Event, exp: Expedition, type: 'plastique' | 'bois') {
     this.activeExpedition = exp;
@@ -46,6 +49,16 @@ export class HistoriqueComponent implements OnInit {
   openRetourPop(event: Event, exp: Expedition) {
     this.activeRetourExp = exp;
     this.retourPop.toggle(event);
+  }
+
+  openLivreurPop(event: Event, exp: Expedition) {
+    this.livreurPopClients = [];
+    this.livreurPopLoading = true;
+    this.livreurPop.toggle(event);
+    this.expeditionsService.getExpeditionClients(exp.id).subscribe({
+      next: clients => { this.livreurPopClients = clients; this.livreurPopLoading = false; },
+      error: ()      => { this.livreurPopLoading = false; },
+    });
   }
 
   isReturned(exp: Expedition): boolean {

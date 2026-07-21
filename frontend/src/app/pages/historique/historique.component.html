@@ -77,15 +77,23 @@
                 <td><span [class]="destinationBadge[e.destination_type]">{{ destinationLabel[e.destination_type] }}</span></td>
                 <td>
                   <div class="table-item-info">
-                    @if (e.client_id && (clientsMap.get(e.client_id)?.first_name || clientsMap.get(e.client_id)?.last_name)) {
-                      <span class="table-item-name">{{ clientsMap.get(e.client_id)!.first_name }} {{ clientsMap.get(e.client_id)!.last_name }}</span>
-                      <span class="hist-store-pill">{{ e.client_name }}</span>
+                    @if (e.destination_type !== 'gros') {
+                      <div style="display:flex;align-items:center;gap:0.4rem">
+                        <span class="table-item-name">{{ e.livreur_name }}</span>
+                        <button class="palette-pill" (click)="openLivreurPop($event, e)" style="padding:0.2rem 0.4rem;gap:0.2rem">
+                          <i class="pi pi-users" style="font-size:0.65rem"></i>
+                          <i class="pi pi-chevron-down palette-pill__caret"></i>
+                        </button>
+                      </div>
+                      <span class="badge badge--warning" style="align-self:flex-start">Livreur</span>
                     } @else {
-                      <span class="table-item-name">{{ e.client_name || e.livreur_name }}</span>
+                      @if (e.client_id && (clientsMap.get(e.client_id)?.first_name || clientsMap.get(e.client_id)?.last_name)) {
+                        <span class="table-item-name">{{ clientsMap.get(e.client_id)!.first_name }} {{ clientsMap.get(e.client_id)!.last_name }}</span>
+                        <span class="hist-store-pill">{{ e.client_name }}</span>
+                      } @else {
+                        <span class="table-item-name">{{ e.client_name }}</span>
+                      }
                     }
-                    <span [class]="e.destination_type === 'gros' ? 'badge badge--info' : 'badge badge--warning'" style="align-self:flex-start">
-                      {{ e.destination_type === 'gros' ? 'Client' : 'Livreur' }}
-                    </span>
                   </div>
                 </td>
                 <td class="text-muted">{{ e.chauffeur_name }}</td>
@@ -357,6 +365,33 @@
 
     </div>
   }
+</p-popover>
+
+<!-- Popover: Livreur clients -->
+<p-popover #livreurPop>
+  <div style="min-width:240px;padding:0.25rem">
+    @if (livreurPopLoading) {
+      <div style="display:flex;flex-direction:column;gap:0.4rem">
+        <div style="height:28px;border-radius:var(--radius-lg);background:var(--surface-200);animation:skeleton 1.2s infinite alternate"></div>
+        <div style="height:28px;border-radius:var(--radius-lg);background:var(--surface-200);animation:skeleton 1.2s infinite alternate"></div>
+      </div>
+    } @else if (livreurPopClients.length === 0) {
+      <span style="font-size:var(--font-size-xs);color:var(--text-color-secondary)">Aucun client enregistré</span>
+    } @else {
+      <div style="font-size:0.65rem;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:var(--text-color-secondary);margin-bottom:0.5rem">Clients de la tournée</div>
+      @for (ec of livreurPopClients; track ec.client_id; let last = $last) {
+        <div style="display:flex;align-items:center;gap:0.5rem;padding:0.4rem 0" [style.border-bottom]="!last ? '1px solid var(--surface-border)' : null">
+          <span style="flex:1;font-size:var(--font-size-sm);font-weight:var(--font-weight-medium)">{{ ec.client_name }}</span>
+          <span style="display:flex;align-items:center;gap:0.25rem;font-size:var(--font-size-xs);color:var(--text-color-secondary)">
+            <img src="assets/plastiquepallette.png" style="height:11px" alt="">{{ ec.detail?.plastique ?? '—' }}
+          </span>
+          <span style="display:flex;align-items:center;gap:0.25rem;font-size:var(--font-size-xs);color:var(--text-color-secondary)">
+            <img src="assets/woodpallette.png" style="height:11px" alt="">{{ ec.detail?.bois ?? '—' }}
+          </span>
+        </div>
+      }
+    }
+  </div>
 </p-popover>
 
 <!-- Dialog: Edit expedition -->

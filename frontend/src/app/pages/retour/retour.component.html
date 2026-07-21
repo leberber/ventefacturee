@@ -51,6 +51,41 @@
 
         @if (isGros) {
 
+          <!-- BL info card -->
+          <div class="exp-card" style="padding:0;overflow:hidden;margin-bottom:0">
+            <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr))">
+              <div style="padding:1rem 1.25rem;border-right:1px solid var(--surface-border)">
+                <div style="font-size:0.65rem;color:var(--text-color-secondary);text-transform:uppercase;letter-spacing:0.06em;font-weight:700;margin-bottom:0.3rem">BL</div>
+                <code style="font-weight:var(--font-weight-bold);font-size:var(--font-size-sm)">{{ selectedExpedition.bl_number }}</code>
+              </div>
+              <div style="padding:1rem 1.25rem;border-right:1px solid var(--surface-border)">
+                <div style="font-size:0.65rem;color:var(--text-color-secondary);text-transform:uppercase;letter-spacing:0.06em;font-weight:700;margin-bottom:0.3rem">Date</div>
+                <span style="font-weight:var(--font-weight-semibold);font-size:var(--font-size-sm)">{{ selectedExpedition.date }}</span>
+              </div>
+              <div style="padding:1rem 1.25rem;border-right:1px solid var(--surface-border)">
+                <div style="font-size:0.65rem;color:var(--text-color-secondary);text-transform:uppercase;letter-spacing:0.06em;font-weight:700;margin-bottom:0.3rem">Type</div>
+                <span [class]="typeBadge[selectedExpedition.destination_type]" style="width:fit-content">{{ typeLabel[selectedExpedition.destination_type] }}</span>
+              </div>
+              @if (selectedExpedition.client_name) {
+                <div style="padding:1rem 1.25rem;border-right:1px solid var(--surface-border)">
+                  <div style="font-size:0.65rem;color:var(--text-color-secondary);text-transform:uppercase;letter-spacing:0.06em;font-weight:700;margin-bottom:0.3rem">Client</div>
+                  <span style="font-weight:var(--font-weight-semibold);font-size:var(--font-size-sm)">{{ selectedExpedition.client_name }}</span>
+                </div>
+              }
+              <div style="padding:1rem 1.25rem">
+                <div style="font-size:0.65rem;color:var(--text-color-secondary);text-transform:uppercase;letter-spacing:0.06em;font-weight:700;margin-bottom:0.3rem">Chargé</div>
+                <div style="display:flex;align-items:center;gap:0.75rem">
+                  <span style="display:flex;align-items:center;gap:0.3rem;font-weight:var(--font-weight-bold);font-size:var(--font-size-sm)">
+                    <img src="assets/plastiquepallette.png" style="height:13px" alt="">{{ selectedExpedition.nc_plastique }}
+                  </span>
+                  <span style="display:flex;align-items:center;gap:0.3rem;font-weight:var(--font-weight-bold);font-size:var(--font-size-sm)">
+                    <img src="assets/woodpallette.png" style="height:13px" alt="">{{ selectedExpedition.nc_bois }}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <div class="nbl-layout nbl-layout--wide-right">
             <div class="nbl-col">
               <div class="qty-grid">
