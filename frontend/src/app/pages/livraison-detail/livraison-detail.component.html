@@ -54,18 +54,18 @@
                   {{ ec.client_first_name }} {{ ec.client_last_name }}
                 </div>
               }
-              @if ((ec.client_plastic_out ?? 0) - getInput(ec.client_id).recovered_plastique > 0 || (ec.client_wood_out ?? 0) - getInput(ec.client_id).recovered_bois > 0) {
+              @if ((ec.client_plastic_out ?? 0) - getInput(ec.client_id).recovered_plastique + getInput(ec.client_id).plastique > 0 || (ec.client_wood_out ?? 0) - getInput(ec.client_id).recovered_bois + getInput(ec.client_id).bois > 0) {
                 <div style="display:flex;align-items:center;gap:0.4rem;margin-top:0.2rem;font-size:var(--font-size-xs);color:var(--color-warning,#f59e0b)">
                   <i class="pi pi-exclamation-triangle" style="font-size:0.6rem"></i>
                   <span>Solde :</span>
-                  @if ((ec.client_plastic_out ?? 0) - getInput(ec.client_id).recovered_plastique > 0) {
+                  @if ((ec.client_plastic_out ?? 0) - getInput(ec.client_id).recovered_plastique + getInput(ec.client_id).plastique > 0) {
                     <span style="display:flex;align-items:center;gap:0.2rem">
-                      <img src="assets/plastiquepallette.png" style="height:10px" alt="">{{ (ec.client_plastic_out ?? 0) - getInput(ec.client_id).recovered_plastique }}
+                      <img src="assets/plastiquepallette.png" style="height:10px" alt="">{{ (ec.client_plastic_out ?? 0) - getInput(ec.client_id).recovered_plastique + getInput(ec.client_id).plastique }}
                     </span>
                   }
-                  @if ((ec.client_wood_out ?? 0) - getInput(ec.client_id).recovered_bois > 0) {
+                  @if ((ec.client_wood_out ?? 0) - getInput(ec.client_id).recovered_bois + getInput(ec.client_id).bois > 0) {
                     <span style="display:flex;align-items:center;gap:0.2rem">
-                      <img src="assets/woodpallette.png" style="height:10px" alt="">{{ (ec.client_wood_out ?? 0) - getInput(ec.client_id).recovered_bois }}
+                      <img src="assets/woodpallette.png" style="height:10px" alt="">{{ (ec.client_wood_out ?? 0) - getInput(ec.client_id).recovered_bois + getInput(ec.client_id).bois }}
                     </span>
                   }
                 </div>
@@ -264,38 +264,65 @@
     (onClick)="confirmLivraison()"
   />
 
-  <div style="margin:1.25rem 0 0.75rem;font-weight:var(--font-weight-semibold);font-size:var(--font-size-sm);color:var(--text-color-secondary);text-transform:uppercase;letter-spacing:0.05em">
+  <!-- Initial load summary -->
+  @if (bl) {
+    <div style="display:flex;align-items:center;justify-content:space-between;margin:1.25rem 0 0.75rem;padding:0.65rem 0.875rem;border-radius:var(--radius-lg);background:var(--surface-100)">
+      <span style="font-size:var(--font-size-xs);text-transform:uppercase;letter-spacing:0.05em;font-weight:var(--font-weight-semibold);color:var(--text-color-secondary)">
+        <i class="pi pi-truck" style="font-size:0.7rem;margin-right:0.3rem"></i>Parti avec
+      </span>
+      <div style="display:flex;align-items:center;gap:0.75rem">
+        <span style="display:flex;align-items:center;gap:0.3rem;font-size:var(--font-size-sm)">
+          <img src="assets/plastiquepallette.png" style="height:14px" alt="">
+          <strong>{{ bl.nc_plastique }}</strong>
+        </span>
+        <span style="display:flex;align-items:center;gap:0.3rem;font-size:var(--font-size-sm)">
+          <img src="assets/woodpallette.png" style="height:14px" alt="">
+          <strong>{{ bl.nc_bois }}</strong>
+        </span>
+      </div>
+    </div>
+  }
+
+  <div style="margin-bottom:0.75rem;font-weight:var(--font-weight-semibold);font-size:var(--font-size-sm);color:var(--text-color-secondary);text-transform:uppercase;letter-spacing:0.05em">
     Récapitulatif
   </div>
 
   <!-- Client list -->
   <div style="display:flex;flex-direction:column;gap:0.5rem">
     @for (ec of expeditionClients; track ec.client_id) {
-      <div style="display:flex;align-items:center;justify-content:space-between;padding:0.65rem 0.875rem;border-radius:var(--radius-lg);background:var(--surface-100)">
-        <div>
-          <div style="font-weight:var(--font-weight-semibold);font-size:var(--font-size-sm)">{{ ec.client_name }}</div>
-          @if ((ec.detail?.retour_plastique ?? 0) > 0 || (ec.detail?.retour_bois ?? 0) > 0) {
-            <div style="font-size:var(--font-size-xs);color:var(--color-warning,#f59e0b);margin-top:0.15rem;display:flex;align-items:center;gap:0.3rem">
-              <i class="pi pi-replay" style="font-size:0.6rem"></i>
-              consigne :
-              @if ((ec.detail?.retour_plastique ?? 0) > 0) {
-                <img src="assets/plastiquepallette.png" style="height:11px" alt=""> {{ ec.detail?.retour_plastique }}
+      <div style="padding:0.65rem 0.875rem;border-radius:var(--radius-lg);background:var(--surface-100)">
+        <div style="font-weight:var(--font-weight-semibold);font-size:var(--font-size-sm);margin-bottom:0.35rem">{{ ec.client_name }}</div>
+        <div style="display:flex;align-items:center;gap:1rem">
+          @if ((ec.detail?.plastique ?? 0) > 0 || (ec.detail?.bois ?? 0) > 0) {
+            <div style="display:flex;align-items:center;gap:0.35rem;font-size:var(--font-size-xs);color:var(--text-color-secondary)">
+              <span>Déposé</span>
+              @if ((ec.detail?.plastique ?? 0) > 0) {
+                <span style="display:flex;align-items:center;gap:0.2rem">
+                  <img src="assets/plastiquepallette.png" style="height:11px" alt=""> <strong>{{ ec.detail?.plastique }}</strong>
+                </span>
               }
-              @if ((ec.detail?.retour_bois ?? 0) > 0) {
-                <img src="assets/woodpallette.png" style="height:11px" alt=""> {{ ec.detail?.retour_bois }}
+              @if ((ec.detail?.bois ?? 0) > 0) {
+                <span style="display:flex;align-items:center;gap:0.2rem">
+                  <img src="assets/woodpallette.png" style="height:11px" alt=""> <strong>{{ ec.detail?.bois }}</strong>
+                </span>
               }
             </div>
           }
-        </div>
-        <div style="display:flex;align-items:center;gap:0.5rem">
-          <span style="display:flex;align-items:center;gap:0.2rem;font-size:var(--font-size-sm)">
-            <img src="assets/plastiquepallette.png" style="height:14px" alt="">
-            <strong>{{ ec.detail?.plastique ?? 0 }}</strong>
-          </span>
-          <span style="display:flex;align-items:center;gap:0.2rem;font-size:var(--font-size-sm)">
-            <img src="assets/woodpallette.png" style="height:14px" alt="">
-            <strong>{{ ec.detail?.bois ?? 0 }}</strong>
-          </span>
+          @if (getInput(ec.client_id).recovered_plastique > 0 || getInput(ec.client_id).recovered_bois > 0) {
+            <div style="display:flex;align-items:center;gap:0.35rem;font-size:var(--font-size-xs);color:var(--color-success,#22c55e)">
+              <span>Récupéré</span>
+              @if (getInput(ec.client_id).recovered_plastique > 0) {
+                <span style="display:flex;align-items:center;gap:0.2rem">
+                  <img src="assets/plastiquepallette.png" style="height:11px" alt=""> <strong>{{ getInput(ec.client_id).recovered_plastique }}</strong>
+                </span>
+              }
+              @if (getInput(ec.client_id).recovered_bois > 0) {
+                <span style="display:flex;align-items:center;gap:0.2rem">
+                  <img src="assets/woodpallette.png" style="height:11px" alt=""> <strong>{{ getInput(ec.client_id).recovered_bois }}</strong>
+                </span>
+              }
+            </div>
+          }
         </div>
       </div>
     }
