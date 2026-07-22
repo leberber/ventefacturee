@@ -116,6 +116,7 @@ export class LivraisonDetailComponent implements OnInit {
         }
         this.activeClientId = null;
         this.loading = false;
+        this.tourneeState.updateRestant(this.restantPlastique, this.restantBois);
       },
       error: () => { this.loading = false; },
     });
@@ -229,7 +230,9 @@ export class LivraisonDetailComponent implements OnInit {
   }
 
   toggleCard(clientId: number) {
+    const y = window.scrollY;
     this.activeClientId = this.activeClientId === clientId ? null : clientId;
+    requestAnimationFrame(() => window.scrollTo({ top: y, behavior: 'instant' }));
   }
 
   clearIfZero(event: Event) {

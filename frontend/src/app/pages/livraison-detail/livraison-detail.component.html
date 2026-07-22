@@ -11,7 +11,7 @@
   </ng-template>
 </p-toast>
 
-<div class="page-content" style="padding-bottom:5rem">
+<div class="page-content" style="padding-bottom:calc(var(--mob-nav-h, 60px) + env(safe-area-inset-bottom, 0px) + 2rem)">
 
   <div class="page-header" style="max-width:680px;margin:0 auto var(--space-6)">
     @if (bl) {
@@ -109,75 +109,87 @@
           }
 
           @if (activeClientId === ec.client_id) {
-          <div class="qty-grid" style="margin:1rem 0 0.75rem">
+          <div class="pal-rows" style="margin:0.75rem 0">
 
-            <!-- Plastique tile -->
-            <div class="qty-tile qty-tile--sm">
-              <img src="assets/plastiquepallette.png" class="qty-tile__img" alt="">
-              <span class="qty-tile__name">Plastique</span>
-
-              @if ((ec.client_plastic_out ?? 0) > 0) {
-                <span style="font-size:0.6rem;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;color:var(--color-warning,#f59e0b)">
-                  Récupérer <span style="font-weight:400">(solde {{ (ec.client_plastic_out ?? 0) - getInput(ec.client_id).recovered_plastique }})</span>
-                </span>
-                <div class="qty-tile__counter">
-                  <button type="button" class="qty-btn" (click)="dec(ec.client_id, 'recovered_plastique')">−</button>
-                  <input type="number" class="qty-input" [value]="getInput(ec.client_id).recovered_plastique"
-                         (change)="setQty(ec.client_id, 'recovered_plastique', $event)" min="0">
-                  <button type="button" class="qty-btn qty-btn--plus" (click)="inc(ec.client_id, 'recovered_plastique')">+</button>
-                </div>
-                <div style="width:100%;height:1px;background:var(--surface-border);margin:0.25rem 0"></div>
-              }
-
-              <span style="font-size:0.6rem;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;color:var(--text-color-secondary)">Déposer</span>
-              <div class="qty-tile__counter">
-                <button type="button" class="qty-btn" (click)="dec(ec.client_id, 'plastique')">−</button>
-                <input type="number" class="qty-input" [value]="getInput(ec.client_id).plastique"
-                       (change)="setQty(ec.client_id, 'plastique', $event)" min="0">
-                <button type="button" class="qty-btn qty-btn--plus" (click)="inc(ec.client_id, 'plastique')">+</button>
+            <!-- Plastique section -->
+            <div class="pal-section">
+              <div class="pal-section__header">
+                <img src="assets/plastiquepallette.png" style="height:18px" alt="">
+                <span>Plastique</span>
               </div>
-
-              <div class="qty-tile__consigne">
-                <span class="qty-tile__consigne-label">Nb. consignées</span>
-                <input type="number" class="qty-input qty-input--sm"
+              @if ((ec.client_plastic_out ?? 0) > 0) {
+                <div class="pal-row pal-row--warn">
+                  <span class="pal-row__label">
+                    Récupérer
+                    <span class="pal-row__sub">(solde {{ (ec.client_plastic_out ?? 0) - getInput(ec.client_id).recovered_plastique }})</span>
+                  </span>
+                  <div class="pal-row__stepper">
+                    <button type="button" class="qty-btn" (click)="dec(ec.client_id, 'recovered_plastique')">−</button>
+                    <input type="text" inputmode="numeric" pattern="[0-9]*" class="qty-input"
+                           [value]="getInput(ec.client_id).recovered_plastique"
+                           (change)="setQty(ec.client_id, 'recovered_plastique', $event)">
+                    <button type="button" class="qty-btn qty-btn--plus" (click)="inc(ec.client_id, 'recovered_plastique')">+</button>
+                  </div>
+                </div>
+              }
+              <div class="pal-row">
+                <span class="pal-row__label">Déposer</span>
+                <div class="pal-row__stepper">
+                  <button type="button" class="qty-btn" (click)="dec(ec.client_id, 'plastique')">−</button>
+                  <input type="text" inputmode="numeric" pattern="[0-9]*" class="qty-input"
+                         [value]="getInput(ec.client_id).plastique"
+                         (change)="setQty(ec.client_id, 'plastique', $event)">
+                  <button type="button" class="qty-btn qty-btn--plus" (click)="inc(ec.client_id, 'plastique')">+</button>
+                </div>
+              </div>
+              <div class="pal-row pal-row--consigne">
+                <span class="pal-row__label">Nb. consignées</span>
+                <input type="text" inputmode="numeric" pattern="[0-9]*" class="qty-input qty-input--sm"
                        [value]="getInput(ec.client_id).retour_plastique"
                        (focus)="clearIfZero($event)"
-                       (input)="setQty(ec.client_id, 'retour_plastique', $event)" min="0">
+                       (input)="setQty(ec.client_id, 'retour_plastique', $event)">
               </div>
             </div>
 
-            <!-- Bois tile -->
-            <div class="qty-tile qty-tile--sm">
-              <img src="assets/woodpallette.png" class="qty-tile__img" alt="">
-              <span class="qty-tile__name">Bois</span>
+            <div class="pal-divider"></div>
 
-              @if ((ec.client_wood_out ?? 0) > 0) {
-                <span style="font-size:0.6rem;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;color:var(--color-warning,#f59e0b)">
-                  Récupérer <span style="font-weight:400">(solde {{ (ec.client_wood_out ?? 0) - getInput(ec.client_id).recovered_bois }})</span>
-                </span>
-                <div class="qty-tile__counter">
-                  <button type="button" class="qty-btn" (click)="dec(ec.client_id, 'recovered_bois')">−</button>
-                  <input type="number" class="qty-input" [value]="getInput(ec.client_id).recovered_bois"
-                         (change)="setQty(ec.client_id, 'recovered_bois', $event)" min="0">
-                  <button type="button" class="qty-btn qty-btn--plus" (click)="inc(ec.client_id, 'recovered_bois')">+</button>
-                </div>
-                <div style="width:100%;height:1px;background:var(--surface-border);margin:0.25rem 0"></div>
-              }
-
-              <span style="font-size:0.6rem;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;color:var(--text-color-secondary)">Déposer</span>
-              <div class="qty-tile__counter">
-                <button type="button" class="qty-btn" (click)="dec(ec.client_id, 'bois')">−</button>
-                <input type="number" class="qty-input" [value]="getInput(ec.client_id).bois"
-                       (change)="setQty(ec.client_id, 'bois', $event)" min="0">
-                <button type="button" class="qty-btn qty-btn--plus" (click)="inc(ec.client_id, 'bois')">+</button>
+            <!-- Bois section -->
+            <div class="pal-section">
+              <div class="pal-section__header">
+                <img src="assets/woodpallette.png" style="height:18px" alt="">
+                <span>Bois</span>
               </div>
-
-              <div class="qty-tile__consigne">
-                <span class="qty-tile__consigne-label">Nb. consignées</span>
-                <input type="number" class="qty-input qty-input--sm"
+              @if ((ec.client_wood_out ?? 0) > 0) {
+                <div class="pal-row pal-row--warn">
+                  <span class="pal-row__label">
+                    Récupérer
+                    <span class="pal-row__sub">(solde {{ (ec.client_wood_out ?? 0) - getInput(ec.client_id).recovered_bois }})</span>
+                  </span>
+                  <div class="pal-row__stepper">
+                    <button type="button" class="qty-btn" (click)="dec(ec.client_id, 'recovered_bois')">−</button>
+                    <input type="text" inputmode="numeric" pattern="[0-9]*" class="qty-input"
+                           [value]="getInput(ec.client_id).recovered_bois"
+                           (change)="setQty(ec.client_id, 'recovered_bois', $event)">
+                    <button type="button" class="qty-btn qty-btn--plus" (click)="inc(ec.client_id, 'recovered_bois')">+</button>
+                  </div>
+                </div>
+              }
+              <div class="pal-row">
+                <span class="pal-row__label">Déposer</span>
+                <div class="pal-row__stepper">
+                  <button type="button" class="qty-btn" (click)="dec(ec.client_id, 'bois')">−</button>
+                  <input type="text" inputmode="numeric" pattern="[0-9]*" class="qty-input"
+                         [value]="getInput(ec.client_id).bois"
+                         (change)="setQty(ec.client_id, 'bois', $event)">
+                  <button type="button" class="qty-btn qty-btn--plus" (click)="inc(ec.client_id, 'bois')">+</button>
+                </div>
+              </div>
+              <div class="pal-row pal-row--consigne">
+                <span class="pal-row__label">Nb. consignées</span>
+                <input type="text" inputmode="numeric" pattern="[0-9]*" class="qty-input qty-input--sm"
                        [value]="getInput(ec.client_id).retour_bois"
                        (focus)="clearIfZero($event)"
-                       (input)="setQty(ec.client_id, 'retour_bois', $event)" min="0">
+                       (input)="setQty(ec.client_id, 'retour_bois', $event)">
               </div>
             </div>
 
@@ -190,17 +202,15 @@
                 [disabled]="getInput(ec.client_id).locating"
                 (click)="captureLocation(ec.client_id)">
                 @if (getInput(ec.client_id).locating) {
-                  <i class="pi pi-spin pi-spinner"></i><span>Localisation…</span>
+                  <i class="pi pi-spin pi-spinner"></i>
                 } @else if (getInput(ec.client_id).lat) {
-                  <i class="pi pi-check"></i><span>Position capturée</span>
+                  <i class="pi pi-check"></i>
                 } @else {
-                  <i class="pi pi-crosshairs"></i><span>Ma position</span>
+                  <i class="pi pi-crosshairs"></i>
                 }
               </button>
             } @else {
-              <span style="font-size:var(--font-size-xs);color:var(--text-color-secondary);display:flex;align-items:center;gap:0.3rem">
-                <i class="pi pi-map-marker" style="font-size:0.7rem;color:var(--color-success)"></i>Géolocalisation enregistrée
-              </span>
+              <i class="pi pi-map-marker" style="font-size:0.85rem;color:var(--color-success)"></i>
             }
             <p-button
               [label]="ec.detail ? 'Mettre à jour' : 'Enregistrer'"

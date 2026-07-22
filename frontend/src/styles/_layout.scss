@@ -1983,6 +1983,78 @@
   .qty-input { width: 2.75rem; font-size: var(--font-size-base); }
 }
 
+// ── Palette rows (livraison-detail compact layout) ───────────────────────────
+.pal-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.pal-divider {
+  height: 1px;
+  background: var(--surface-border);
+  margin: 0.5rem 0;
+}
+
+.pal-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+
+  &__header {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-semibold);
+    color: var(--text-color);
+    padding: 0.25rem 0 0.35rem;
+  }
+}
+
+.pal-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.3rem 0;
+
+  &__label {
+    font-size: var(--font-size-sm);
+    color: var(--text-color-secondary);
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+  }
+
+  &__sub {
+    font-size: var(--font-size-xs);
+    color: var(--text-color-secondary);
+    font-weight: var(--font-weight-normal);
+  }
+
+  &__stepper {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+
+    .qty-btn  { width: 1.9rem; height: 1.9rem; font-size: 1.05rem; }
+    .qty-input { width: 2.75rem; font-size: var(--font-size-base); }
+  }
+
+  &--warn {
+    .pal-row__label { color: var(--color-warning, #f59e0b); }
+  }
+
+  &--consigne {
+    padding: 0.2rem 0 0.1rem;
+    .pal-row__label {
+      font-size: var(--font-size-xs);
+      color: var(--text-color-secondary);
+    }
+    .qty-input--sm { width: 3rem; }
+  }
+}
+
 // ── Tournée card (mes-tournees page) ─────────────────────────────────────────
 .tournee-card {
   display: flex;
