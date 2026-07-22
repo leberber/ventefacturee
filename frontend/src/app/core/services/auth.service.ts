@@ -47,7 +47,9 @@ export class AuthService {
 
   private decodeToken(token: string): User | null {
     try {
-      const payload = JSON.parse(atob(token.split('.')[1]));
+      const base64url = token.split('.')[1];
+      const base64 = base64url.replace(/-/g, '+').replace(/_/g, '/').padEnd(Math.ceil(base64url.length / 4) * 4, '=');
+      const payload = JSON.parse(atob(base64));
       if ((payload.exp as number) * 1000 < Date.now()) {
         localStorage.removeItem(TOKEN_KEY);
         return null;
