@@ -1,0 +1,14 @@
+services:
+
+  backend:
+    build: ./backend
+    env_file: ./backend/.env.docker
+    restart: unless-stopped
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "4200:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
