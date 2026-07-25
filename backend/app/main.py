@@ -10,7 +10,7 @@ from app.core.config import settings
 from app.database import create_db_and_tables, engine
 from app.api.api_v1.api import api_router
 
-FRONTEND_DIST = Path(__file__).parent.parent.parent / "frontend" / "dist" / "pallette" / "browser"
+FRONTEND_DIST = Path(__file__).parent.parent.parent / "frontend" / "dist" / "ventefacturee" / "browser"
 
 
 @asynccontextmanager

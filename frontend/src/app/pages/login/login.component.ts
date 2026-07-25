@@ -40,7 +40,7 @@ export class LoginComponent implements OnInit {
     this.loading.set(true);
     const { phone, password } = this.form.getRawValue();
     this.auth.login(phone!, password!).subscribe({
-      next: () => { this.loading.set(false); this.router.navigate([this.auth.isLivreur ? '/mes-tournees' : '/']); },
+      next: () => { this.loading.set(false); this.router.navigate(['/']); },
       error: err => {
         this.loading.set(false);
         this.errorMsg.set(err.error?.detail ?? 'Identifiants incorrects');

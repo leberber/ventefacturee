@@ -30,8 +30,8 @@ def create_user(
     current_user: User = Depends(get_current_user),
 ) -> Any:
     if current_user.role == UserRole.EMPLOYE:
-        if user_in.role not in (UserRole.LIVREUR, UserRole.CHAUFFEUR):
-            raise HTTPException(status_code=403, detail="Les employés ne peuvent créer que des livreurs ou chauffeurs")
+        if user_in.role not in (UserRole.PREVENDER,):
+            raise HTTPException(status_code=403, detail="Les employés ne peuvent créer que des prevenders")
     elif current_user.role not in (UserRole.ADMIN,):
         raise HTTPException(status_code=403, detail="Accès refusé")
 
