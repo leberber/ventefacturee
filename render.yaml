@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: pallette-backend
+    name:  Vente Facturee
     runtime: python
     plan: free
     rootDir: backend
