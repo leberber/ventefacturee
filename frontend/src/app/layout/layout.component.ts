@@ -1,8 +1,7 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
-import { RouterLink, RouterLinkActive, RouterOutlet, Router } from '@angular/router';
+import { Component, inject, signal } from '@angular/core';
+import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../core/services/auth.service';
-import { TourneeStateService } from '../core/services/tournee-state.service';
 
 @Component({
   selector: 'app-layout',
@@ -10,26 +9,15 @@ import { TourneeStateService } from '../core/services/tournee-state.service';
   imports: [CommonModule, RouterLink, RouterLinkActive, RouterOutlet],
   templateUrl: './layout.component.html',
 })
-export class LayoutComponent implements OnInit {
-  collapsed     = signal(false);
-  drawerOpen    = signal(false);
-  auth          = inject(AuthService);
-  tourneeState  = inject(TourneeStateService);
-  readonly router = inject(Router);
+export class LayoutComponent {
+  collapsed  = signal(false);
+  drawerOpen = signal(false);
+  auth       = inject(AuthService);
 
   get user()             { return this.auth.currentUser(); }
   get isAdminOrEmploye() { return this.auth.isAdminOrEmploye; }
   get isAdmin()          { return this.auth.isAdmin; }
-  get isLivreur()        { return this.auth.isLivreur; }
-
-  ngOnInit() {
-    if (this.isLivreur) this.tourneeState.refresh();
-  }
-
-  goToActiveTournee() {
-    const id = this.tourneeState.activeTourneeId();
-    if (id) this.router.navigate(['/expedition', id, 'livraison']);
-  }
+  get isPrevender()      { return this.auth.isPrevender; }
 
   logout() { this.auth.logout(); }
 }

@@ -34,8 +34,7 @@ export class UtilisateurFormComponent implements OnInit {
   private readonly allRoleOptions = [
     { label: 'Admin',     value: 'admin',     adminOnly: true  },
     { label: 'Employé',   value: 'employe',   adminOnly: true  },
-    { label: 'Livreur',   value: 'livreur',   adminOnly: false },
-    { label: 'Chauffeur', value: 'chauffeur', adminOnly: false },
+    { label: 'Prevender', value: 'prevender', adminOnly: false },
   ];
 
   get roleOptions() {
@@ -47,22 +46,19 @@ export class UtilisateurFormComponent implements OnInit {
   readonly roleBadgeMap: Record<string, string> = {
     admin:     'badge badge--danger',
     employe:   'badge badge--warning',
-    livreur:   'badge badge--info',
-    chauffeur: 'badge badge--success',
+    prevender: 'badge badge--info',
   };
 
   private readonly roleIcons: Record<string, string> = {
     admin:     'pi-shield',
     employe:   'pi-briefcase',
-    livreur:   'pi-send',
-    chauffeur: 'pi-truck',
+    prevender: 'pi-send',
   };
 
   private readonly roleLabels: Record<string, string> = {
     admin:     'Admin',
     employe:   'Employé',
-    livreur:   'Livreur',
-    chauffeur: 'Chauffeur',
+    prevender: 'Prevender',
   };
 
   get currentRole(): string { return this.form.get('role')?.value ?? 'employe'; }

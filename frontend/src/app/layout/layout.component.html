@@ -5,42 +5,24 @@
 
     <!-- Logo -->
     <div class="admin-sidebar__logo">
-      <img src="assets/logo.png" alt="CLR Freha" class="sidebar-logo-full" />
+      <img src="assets/logo.png" alt="Logo" class="sidebar-logo-full" />
     </div>
 
     <!-- Nav -->
     <nav class="admin-sidebar__nav">
-      @if(isLivreur) {
-        <button class="nav-item" (click)="goToActiveTournee()">
-          <i class="pi pi-truck"></i><span>Tournée active</span>
-        </button>
-        <a class="nav-item" routerLink="/mes-tournees" routerLinkActive="active">
-          <i class="pi pi-list"></i><span>Mes Tournées</span>
+      <a class="nav-item" routerLink="/dashboard" routerLinkActive="active">
+        <i class="pi pi-home"></i><span>Tableau de bord</span>
+      </a>
+      @if(isAdminOrEmploye) {
+        <a class="nav-item" routerLink="/clients" routerLinkActive="active">
+          <i class="pi pi-users"></i><span>Clients</span>
         </a>
-      } @else {
-        <a class="nav-item" routerLink="/dashboard" routerLinkActive="active">
-          <i class="pi pi-home"></i><span>Tableau de bord</span>
+        <a class="nav-item" routerLink="/utilisateurs" routerLinkActive="active">
+          <i class="pi pi-shield"></i><span>Fonctionnaires</span>
         </a>
-        @if(isAdminOrEmploye) {
-          <a class="nav-item nav-item--accent" routerLink="/expedition" routerLinkActive="active">
-            <i class="pi pi-file-plus"></i><span>Enregistrer une expédition</span>
-          </a>
-          <a class="nav-item" routerLink="/retour" routerLinkActive="active">
-            <i class="pi pi-replay"></i><span>Enregistrer un retour</span>
-          </a>
-          <a class="nav-item" routerLink="/clients" routerLinkActive="active">
-            <i class="pi pi-users"></i><span>Clients</span>
-          </a>
-          <a class="nav-item" routerLink="/historique" routerLinkActive="active">
-            <i class="pi pi-list"></i><span>Historique BLs</span>
-          </a>
-          <a class="nav-item" routerLink="/utilisateurs" routerLinkActive="active">
-            <i class="pi pi-shield"></i><span>Fonctionnaires</span>
-          </a>
-          <a class="nav-item" routerLink="/parametres" routerLinkActive="active">
-            <i class="pi pi-cog"></i><span>Paramètres</span>
-          </a>
-        }
+        <a class="nav-item" routerLink="/parametres" routerLinkActive="active">
+          <i class="pi pi-cog"></i><span>Paramètres</span>
+        </a>
       }
     </nav>
 
@@ -67,37 +49,7 @@
 
   <!-- Mobile top bar -->
   <header class="mob-topbar">
-    <img src="assets/logo.png" alt="CLR Freha" class="mob-topbar__logo" />
-    <div class="mob-topbar__user">
-      @if (isLivreur && router.url === '/mes-tournees') {
-        <span style="font-size:var(--font-size-sm);font-weight:var(--font-weight-semibold);color:var(--text-color)">Mes Tournées</span>
-      } @else if (isLivreur && tourneeState.totalClients() > 0) {
-        <span [class]="tourneeState.deliveredCount() === tourneeState.totalClients() ? 'badge badge--success' : 'badge badge--warning'" style="font-size:0.7rem">
-          {{ tourneeState.deliveredCount() }}/{{ tourneeState.totalClients() }} livrés
-        </span>
-      }
-    </div>
-    @if (isLivreur && router.url !== '/mes-tournees') {
-      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:0.1rem;flex-shrink:0;margin-left:auto">
-        <span style="font-size:0.6rem;text-transform:uppercase;letter-spacing:0.05em;color:var(--text-color-secondary);font-weight:600">Avec vous</span>
-        <div style="display:flex;align-items:center;gap:0.6rem">
-          <span style="display:flex;align-items:center;gap:0.25rem">
-            <img src="assets/plastiquepallette.png" style="height:14px" alt="">
-            <strong style="font-size:var(--font-size-sm)"
-              [style.color]="tourneeState.restantPlastique() === 0 ? 'var(--color-success,#22c55e)' : 'var(--color-warning,#f59e0b)'">
-              {{ tourneeState.restantPlastique() }}
-            </strong>
-          </span>
-          <span style="display:flex;align-items:center;gap:0.25rem">
-            <img src="assets/woodpallette.png" style="height:14px" alt="">
-            <strong style="font-size:var(--font-size-sm)"
-              [style.color]="tourneeState.restantBois() === 0 ? 'var(--color-success,#22c55e)' : 'var(--color-warning,#f59e0b)'">
-              {{ tourneeState.restantBois() }}
-            </strong>
-          </span>
-        </div>
-      </div>
-    }
+    <img src="assets/logo.png" alt="Logo" class="mob-topbar__logo" />
   </header>
 
   <!-- Main content -->
@@ -107,40 +59,15 @@
 
   <!-- Mobile bottom nav -->
   <nav class="mob-nav">
-    @if(isLivreur) {
-      <button class="mob-nav__item" (click)="goToActiveTournee()">
-        <i class="pi pi-truck"></i>
-        <span>Active</span>
-      </button>
-      <a class="mob-nav__item" routerLink="/mes-tournees" routerLinkActive="mob-nav__item--active">
-        <i class="pi pi-list"></i>
-        <span>Tournées</span>
+    <a class="mob-nav__item" routerLink="/dashboard" routerLinkActive="mob-nav__item--active" [routerLinkActiveOptions]="{exact:true}">
+      <i class="pi pi-home"></i>
+      <span>Accueil</span>
+    </a>
+    @if(isAdminOrEmploye) {
+      <a class="mob-nav__item" routerLink="/clients" routerLinkActive="mob-nav__item--active">
+        <i class="pi pi-users"></i>
+        <span>Clients</span>
       </a>
-    } @else {
-      <a class="mob-nav__item" routerLink="/dashboard" routerLinkActive="mob-nav__item--active" [routerLinkActiveOptions]="{exact:true}">
-        <i class="pi pi-home"></i>
-        <span>Accueil</span>
-      </a>
-      @if(isAdminOrEmploye) {
-        <a class="mob-nav__item" routerLink="/expedition" routerLinkActive="mob-nav__item--active">
-          <i class="pi pi-file-plus"></i>
-          <span>Expédition</span>
-        </a>
-        <a class="mob-nav__item" routerLink="/retour" routerLinkActive="mob-nav__item--active">
-          <i class="pi pi-replay"></i>
-          <span>Retour</span>
-        </a>
-      }
-      <a class="mob-nav__item" routerLink="/historique" routerLinkActive="mob-nav__item--active">
-        <i class="pi pi-list"></i>
-        <span>Historique</span>
-      </a>
-      @if(isAdminOrEmploye) {
-        <a class="mob-nav__item" routerLink="/clients" routerLinkActive="mob-nav__item--active">
-          <i class="pi pi-users"></i>
-          <span>Clients</span>
-        </a>
-      }
     }
     <button class="mob-nav__item" (click)="drawerOpen.set(true)">
       <i class="pi pi-bars"></i>
@@ -161,15 +88,6 @@
           <div class="mob-drawer__user-role">{{ user?.role | titlecase }}</div>
         </div>
       </div>
-
-      @if (isLivreur) {
-        <button class="mob-drawer__item" (click)="goToActiveTournee(); drawerOpen.set(false)">
-          <i class="pi pi-truck"></i><span>Tournée active</span>
-        </button>
-        <a class="mob-drawer__item" routerLink="/mes-tournees" (click)="drawerOpen.set(false)">
-          <i class="pi pi-list"></i><span>Mes Tournées</span>
-        </a>
-      }
 
       @if (isAdminOrEmploye) {
         <a class="mob-drawer__item" routerLink="/utilisateurs" (click)="drawerOpen.set(false)">

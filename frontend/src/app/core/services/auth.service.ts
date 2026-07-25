@@ -4,7 +4,7 @@ import { Router } from '@angular/router';
 import { tap } from 'rxjs/operators';
 import { User, UserRole, TokenResponse } from '../models/user.model';
 
-const TOKEN_KEY = 'pallette_token';
+const TOKEN_KEY = 'ventefacturee_token';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -20,7 +20,7 @@ export class AuthService {
     return r === 'admin' || r === 'employe';
   }
   get isAdmin(): boolean    { return this.currentUser()?.role === 'admin'; }
-  get isLivreur(): boolean  { return this.currentUser()?.role === 'livreur'; }
+  get isPrevender(): boolean  { return this.currentUser()?.role === 'prevender'; }
 
   login(username: string, password: string) {
     const body = new URLSearchParams({ username, password });

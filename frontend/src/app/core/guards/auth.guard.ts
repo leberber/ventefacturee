@@ -20,16 +20,16 @@ export const adminGuard: CanActivateFn = () => {
   return auth.isAdmin ? true : router.createUrlTree(['/dashboard']);
 };
 
-// Redirects livreurs away to their own page
-export const notLivreurGuard: CanActivateFn = () => {
+// Redirects prevenders away to their own page
+export const notPrevenderGuard: CanActivateFn = () => {
   const auth   = inject(AuthService);
   const router = inject(Router);
-  return auth.isLivreur ? router.createUrlTree(['/mes-tournees']) : true;
+  return auth.isPrevender ? router.createUrlTree(['/dashboard']) : true;
 };
 
-// Only livreurs can access
-export const livreurOnlyGuard: CanActivateFn = () => {
+// Only prevenders can access
+export const prevenderOnlyGuard: CanActivateFn = () => {
   const auth   = inject(AuthService);
   const router = inject(Router);
-  return auth.isLivreur ? true : router.createUrlTree(['/dashboard']);
+  return auth.isPrevender ? true : router.createUrlTree(['/dashboard']);
 };
