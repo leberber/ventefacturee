@@ -71,6 +71,7 @@
               [class.th-sort--desc]="sortCol()==='description_produit'&&sortDir()===-1">
               Désignation <i class="pi pi-sort-alt"></i>
             </th>
+            <th>Désignation courte</th>
             <th class="th-sort" (click)="sort('famille')"
               [class.th-sort--asc]="sortCol()==='famille'&&sortDir()===1"
               [class.th-sort--desc]="sortCol()==='famille'&&sortDir()===-1">
@@ -94,7 +95,7 @@
           @if (loading()) {
             @for (_ of [1,2,3,4,5,6,7,8]; track $index) {
               <tr>
-                <td colspan="7" style="padding:0.6rem 1rem">
+                <td colspan="8" style="padding:0.6rem 1rem">
                   <div style="height:1.1rem;border-radius:6px;background:var(--surface-200);animation:pulse 1.2s infinite alternate"></div>
                 </td>
               </tr>
@@ -107,6 +108,28 @@
 
                 <td>
                   <span class="item-name">{{ p.description_produit ?? '—' }}</span>
+                </td>
+
+                <td class="cell-editable"
+                  (click)="startEdit(p, 'nom_produit', $event)"
+                  [class.cell-editing]="isEditing(p.code_produit, 'nom_produit')">
+                  @if (isEditing(p.code_produit, 'nom_produit')) {
+                    <input type="text" class="cell-input" autofocus
+                      [value]="editingValue() ?? ''"
+                      (input)="editingValue.set($any($event.target).value || null)"
+                      (blur)="saveEdit(p)"
+                      (keydown.enter)="saveEdit(p)"
+                      (keydown.escape)="cancelEdit()" />
+                  } @else {
+                    <div class="cell-display">
+                      @if (savingCell()?.code === p.code_produit && savingCell()?.field === 'nom_produit') {
+                        <i class="pi pi-spin pi-spinner cell-spinner"></i>
+                      } @else {
+                        <span [class.text-muted]="!p.nom_produit">{{ p.nom_produit ?? '—' }}</span>
+                      }
+                      <i class="pi pi-pencil cell-pencil"></i>
+                    </div>
+                  }
                 </td>
 
                 <td>

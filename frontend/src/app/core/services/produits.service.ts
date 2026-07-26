@@ -8,6 +8,7 @@ export interface ProduitRead {
   sous_famille: string | null;
   uom_vente: string | null;
   uom_principale: string | null;
+  nom_produit: string | null;
   colisage: number | null;
   updated_at: string;
 }
@@ -34,7 +35,7 @@ export class ProduitsService {
     return this.http.get<string[]>('/api/v1/produits/familles');
   }
 
-  update(code: string, body: { colisage?: number | null }) {
+  update(code: string, body: { nom_produit?: string | null; colisage?: number | null }) {
     return this.http.patch<ProduitRead>(`/api/v1/produits/${encodeURIComponent(code)}`, body);
   }
 

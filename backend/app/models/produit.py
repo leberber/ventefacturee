@@ -14,6 +14,7 @@ class Produit(SQLModel, table=True):
     uom_principale: Optional[str] = Field(default=None, max_length=20)
 
     # Enrichment
+    nom_produit: Optional[str] = Field(default=None, max_length=200)
     colisage: Optional[float] = Field(default=None)
 
     updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
@@ -28,11 +29,13 @@ class ProduitRead(SQLModel):
     sous_famille: Optional[str] = None
     uom_vente: Optional[str] = None
     uom_principale: Optional[str] = None
+    nom_produit: Optional[str] = None
     colisage: Optional[float] = None
     updated_at: datetime
 
 
 class ProduitUpdate(SQLModel):
+    nom_produit: Optional[str] = None
     colisage: Optional[float] = None
 
 
