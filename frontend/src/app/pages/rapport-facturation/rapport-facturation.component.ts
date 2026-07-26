@@ -48,6 +48,7 @@ export class RapportFacturationComponent implements OnInit {
   loadingClients = false;
   rapport: RapportFacturation | null = null;
   displayMode: 'brut' | 'unites' = 'brut';
+  private autoGenerate = false;
 
   ngOnInit(): void {
     const qp = this.route.snapshot.queryParamMap;
@@ -62,6 +63,7 @@ export class RapportFacturationComponent implements OnInit {
         this.fdvs = fdvs;
         if (initFdv && fdvs.includes(initFdv)) {
           this.selectedFdv = initFdv;
+          this.autoGenerate = true;
           this.loadClients();
         }
       });
@@ -93,6 +95,10 @@ export class RapportFacturationComponent implements OnInit {
         this.allClients = d;
         this.selectedClients = new Set(d);
         this.loadingClients = false;
+        if (this.autoGenerate) {
+          this.autoGenerate = false;
+          this.generate();
+        }
       },
       error: () => this.loadingClients = false,
     });
