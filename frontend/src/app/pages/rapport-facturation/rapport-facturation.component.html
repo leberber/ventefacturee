@@ -271,6 +271,9 @@
             <div class="rapport-client__header">
               <span class="rc-avatar">{{ initials(client.nom_client) }}</span>
               <strong class="rc-name">{{ client.nom_client }}</strong>
+              <span class="rc-mode-badge" [class.rc-mode-badge--units]="displayMode === 'unites'">
+                {{ displayMode === 'unites' ? 'Quantités en unités' : 'Quantités en colis' }}
+              </span>
             </div>
 
             <div class="rc-table-wrap">
