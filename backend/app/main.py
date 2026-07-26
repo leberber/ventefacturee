@@ -9,6 +9,7 @@ from fastapi.staticfiles import StaticFiles
 from app.core.config import settings
 from app.database import create_db_and_tables, engine
 from app.api.api_v1.api import api_router
+from app.models import produit  # noqa — ensures Produit table is registered
 
 FRONTEND_DIST = Path(__file__).parent.parent.parent / "frontend" / "dist" / "ventefacturee" / "browser"
 

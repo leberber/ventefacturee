@@ -152,7 +152,13 @@
             @for (row of rows; track $index; let i = $index) {
               <tr class="table-row-animate" [style.--row-delay]="i < 20 ? i * 15 + 'ms' : '0ms'">
                 @for (col of visibleColumns; track col.field) {
-                  <td [style.min-width]="col.width">{{ row[col.field] ?? '—' }}</td>
+                  <td [style.min-width]="col.width">
+                    @if (col.field === 'famille' && row[col.field]) {
+                      <span class="famille-pill" [ngStyle]="getFamilleStyle(row.famille)">{{ row.famille }}</span>
+                    } @else {
+                      {{ row[col.field] ?? '—' }}
+                    }
+                  </td>
                 }
               </tr>
             }

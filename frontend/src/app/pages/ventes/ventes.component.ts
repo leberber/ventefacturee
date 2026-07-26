@@ -1,5 +1,5 @@
 import { Component, OnInit, AfterViewInit, OnDestroy, inject, ViewChild, ElementRef } from '@angular/core';
-import { DecimalPipe } from '@angular/common';
+import { DecimalPipe, NgStyle } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { TooltipModule } from 'primeng/tooltip';
 import { Select } from 'primeng/select';
@@ -19,7 +19,7 @@ interface ColDef {
 @Component({
   selector: 'app-ventes',
   standalone: true,
-  imports: [DecimalPipe, FormsModule, TooltipModule, Select, Popover],
+  imports: [DecimalPipe, NgStyle, FormsModule, TooltipModule, Select, Popover],
   templateUrl: './ventes.component.html',
   styleUrl: './ventes.component.scss',
 })
@@ -226,5 +226,25 @@ export class VentesComponent implements OnInit, AfterViewInit, OnDestroy {
     const state: Record<string, boolean> = {};
     this.allColumns.forEach(col => (state[col.field] = col.visible));
     localStorage.setItem(LS_KEY, JSON.stringify(state));
+  }
+
+  private readonly familleColors = [
+    { background: 'rgba(99,102,241,0.12)',  color: '#4f46e5' },  // indigo
+    { background: 'rgba(16,185,129,0.12)',  color: '#059669' },  // emerald
+    { background: 'rgba(245,158,11,0.12)',  color: '#d97706' },  // amber
+    { background: 'rgba(236,72,153,0.12)',  color: '#db2777' },  // pink
+    { background: 'rgba(20,184,166,0.12)',  color: '#0d9488' },  // teal
+    { background: 'rgba(239,68,68,0.12)',   color: '#dc2626' },  // red
+    { background: 'rgba(59,130,246,0.12)',  color: '#2563eb' },  // blue
+    { background: 'rgba(139,92,246,0.12)',  color: '#7c3aed' },  // violet
+    { background: 'rgba(234,88,12,0.12)',   color: '#c2410c' },  // orange
+    { background: 'rgba(15,118,110,0.12)',  color: '#0f766e' },  // dark-teal
+  ];
+
+  getFamilleStyle(famille: string | null): { background: string; color: string } {
+    if (!famille) return { background: 'transparent', color: 'inherit' };
+    let hash = 0;
+    for (let i = 0; i < famille.length; i++) hash = (hash * 31 + famille.charCodeAt(i)) >>> 0;
+    return this.familleColors[hash % this.familleColors.length];
   }
 }
