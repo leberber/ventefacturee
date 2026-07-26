@@ -1,0 +1,157 @@
+<!-- Page header -->
+<div class="page-header">
+  <div class="page-header__left">
+    <div class="page-icon"><i class="pi pi-box"></i></div>
+    <div>
+      <h1 class="page-header__title">Produits</h1>
+      <p class="page-header__sub">{{ totalCount() }} produits au catalogue</p>
+    </div>
+  </div>
+</div>
+
+<!-- Table Container -->
+<div class="table-container">
+
+  <!-- Toolbar -->
+  <div class="prod-toolbar">
+
+    <div class="prod-toolbar__top">
+      <div class="prod-toolbar__top-left">
+        <div class="table-search prod-search">
+          <div class="search-icon"><i class="pi pi-search"></i></div>
+          <input placeholder="Rechercher code, désignation…"
+            [ngModel]="searchText()" (ngModelChange)="searchText.set($event)" />
+        </div>
+      </div>
+      <div class="table-actions">
+        <button class="table-action-btn" pTooltip="Synchroniser depuis ventes" (click)="sync()">
+          <i class="pi pi-sync" [class.pi-spin]="syncing()"></i>
+        </button>
+        <button class="table-action-btn" pTooltip="Rafraîchir" (click)="load()">
+          <i class="pi pi-refresh" [class.pi-spin]="loading()"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Famille filter pills -->
+    <div class="famille-pills">
+      <button class="famille-pill" [class.famille-pill--active]="familleFilter() === null"
+        (click)="familleFilter.set(null)">
+        <span class="famille-pill__dot famille-pill__dot--all"><i class="pi pi-th-large"></i></span>
+        <span>Toutes</span>
+      </button>
+      @for (f of familles(); track f) {
+        <button class="famille-pill" [class.famille-pill--active]="familleFilter() === f"
+          (click)="familleFilter.set(f)"
+          [style.--pill-bg]="getFamilleStyle(f).background"
+          [style.--pill-color]="getFamilleStyle(f).color">
+          <span class="famille-pill__dot"></span>
+          <span>{{ f }}</span>
+        </button>
+      }
+    </div>
+
+  </div>
+
+  <!-- Table -->
+  <div class="table-wrapper">
+    @if (filtered().length === 0 && !loading()) {
+      <div class="table-empty">Aucun produit trouvé</div>
+    } @else {
+      <table class="table">
+        <thead>
+          <tr>
+            <th class="th-sort" (click)="sort('code_produit')"
+              [class.th-sort--asc]="sortCol()==='code_produit'&&sortDir()===1"
+              [class.th-sort--desc]="sortCol()==='code_produit'&&sortDir()===-1">
+              Code <i class="pi pi-sort-alt"></i>
+            </th>
+            <th class="th-sort" (click)="sort('description_produit')"
+              [class.th-sort--asc]="sortCol()==='description_produit'&&sortDir()===1"
+              [class.th-sort--desc]="sortCol()==='description_produit'&&sortDir()===-1">
+              Désignation <i class="pi pi-sort-alt"></i>
+            </th>
+            <th class="th-sort" (click)="sort('famille')"
+              [class.th-sort--asc]="sortCol()==='famille'&&sortDir()===1"
+              [class.th-sort--desc]="sortCol()==='famille'&&sortDir()===-1">
+              Famille <i class="pi pi-sort-alt"></i>
+            </th>
+            <th class="th-sort" (click)="sort('sous_famille')"
+              [class.th-sort--asc]="sortCol()==='sous_famille'&&sortDir()===1"
+              [class.th-sort--desc]="sortCol()==='sous_famille'&&sortDir()===-1">
+              Sous-famille <i class="pi pi-sort-alt"></i>
+            </th>
+            <th>UOM Vente</th>
+            <th>UOM Principale</th>
+            <th class="th-sort col-center" (click)="sort('colisage')"
+              [class.th-sort--asc]="sortCol()==='colisage'&&sortDir()===1"
+              [class.th-sort--desc]="sortCol()==='colisage'&&sortDir()===-1">
+              Colisage <i class="pi pi-sort-alt"></i>
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          @if (loading()) {
+            @for (_ of [1,2,3,4,5,6,7,8]; track $index) {
+              <tr>
+                <td colspan="7" style="padding:0.6rem 1rem">
+                  <div style="height:1.1rem;border-radius:6px;background:var(--surface-200);animation:pulse 1.2s infinite alternate"></div>
+                </td>
+              </tr>
+            }
+          } @else {
+            @for (p of filtered(); track p.code_produit; let i = $index) {
+              <tr class="table-row-animate" [style.--row-delay]="i < 30 ? i * 15 + 'ms' : '0ms'">
+
+                <td><code class="code-chip">{{ p.code_produit }}</code></td>
+
+                <td>
+                  <span class="item-name">{{ p.description_produit ?? '—' }}</span>
+                </td>
+
+                <td>
+                  @if (p.famille) {
+                    <span class="famille-pill-badge" [style.background]="getFamilleStyle(p.famille).background" [style.color]="getFamilleStyle(p.famille).color">
+                      {{ p.famille }}
+                    </span>
+                  } @else { — }
+                </td>
+
+                <td class="text-muted">{{ p.sous_famille ?? '—' }}</td>
+
+                <td class="text-muted">{{ p.uom_vente ?? '—' }}</td>
+                <td class="text-muted">{{ p.uom_principale ?? '—' }}</td>
+
+                <td class="col-center cell-editable"
+                  (click)="startEdit(p, 'colisage', $event)"
+                  [class.cell-editing]="isEditing(p.code_produit, 'colisage')">
+                  @if (isEditing(p.code_produit, 'colisage')) {
+                    <input type="number" class="cell-input" autofocus min="0" step="1"
+                      [value]="editingValue()"
+                      (input)="editingValue.set(+$any($event.target).value || null)"
+                      (blur)="saveEdit(p)"
+                      (keydown.enter)="saveEdit(p)"
+                      (keydown.escape)="cancelEdit()" />
+                  } @else {
+                    <div class="cell-display cell-display--center">
+                      @if (savingCell()?.code === p.code_produit && savingCell()?.field === 'colisage') {
+                        <i class="pi pi-spin pi-spinner cell-spinner"></i>
+                      } @else {
+                        <span [class.colisage-value]="p.colisage != null" [class.text-muted]="p.colisage == null">
+                          {{ p.colisage != null ? p.colisage : '—' }}
+                        </span>
+                      }
+                      <i class="pi pi-pencil cell-pencil"></i>
+                    </div>
+                  }
+                </td>
+
+              </tr>
+            }
+          }
+        </tbody>
+      </table>
+    }
+  </div>
+
+</div>
