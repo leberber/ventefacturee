@@ -1,0 +1,533 @@
+// =============================================================================
+// HOST — matches ventes page structure
+// =============================================================================
+
+:host {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  height: calc(100vh - 3rem);
+  overflow: visible;
+}
+
+// =============================================================================
+// PAGE HEADER (component-local layout, global styles come from _layout.scss)
+// =============================================================================
+
+.page-header__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  width: 100%;
+}
+
+.page-header__left {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.page-header__filters {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-shrink: 0;
+}
+
+.btn-back {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: var(--radius-lg);
+  border: var(--border-width) solid var(--border-color-light);
+  background: transparent;
+  color: var(--text-color-secondary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  flex-shrink: 0;
+
+  &:hover { border-color: var(--primary-color); color: var(--primary-color); }
+}
+
+// =============================================================================
+// FILTER CARDS — identical to ventes page
+// =============================================================================
+
+.filter-card {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.5rem 0.85rem 0.5rem 0.6rem;
+  background: var(--surface-card);
+  border: var(--border-width) solid var(--border-color-light);
+  border-radius: var(--radius-xl, 14px);
+  box-shadow: var(--shadow-sm);
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+  cursor: pointer;
+
+  &:hover {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.08);
+  }
+
+  &__icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    flex-shrink: 0;
+    border-radius: 10px;
+    background: rgba(var(--primary-rgb), 0.1);
+    color: var(--primary-color);
+    font-size: 1rem;
+  }
+
+  &__body {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  &__label {
+    font-size: 0.625rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-color-secondary);
+    white-space: nowrap;
+  }
+}
+
+.filter-card--period {
+  border-color: color-mix(in srgb, var(--primary-color) 30%, transparent);
+  background: color-mix(in srgb, var(--primary-color) 4%, var(--surface-card));
+
+  .filter-card__icon {
+    background: var(--primary-gradient);
+    color: #fff;
+  }
+
+  .filter-card__label { color: var(--primary-color); }
+}
+
+::ng-deep .filter-card-select.p-select {
+  border: none !important;
+  box-shadow: none !important;
+  background: transparent !important;
+  padding: 0;
+  min-width: 200px;
+
+  .p-select-label {
+    padding: 0;
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-semibold);
+    color: var(--text-color);
+    line-height: 1.4;
+  }
+
+  .p-select-dropdown { width: 1.5rem; color: var(--text-color-secondary); }
+  .p-select-clear-icon { right: 1.5rem; }
+
+  &.p-select-open, &.p-focus {
+    border: none !important;
+    box-shadow: none !important;
+    outline: none !important;
+  }
+}
+
+::ng-deep .filter-card--period .filter-card-select.p-select {
+  min-width: 120px;
+  width: 120px;
+
+  .p-select-label {
+    color: var(--primary-color);
+    font-weight: var(--font-weight-semibold);
+  }
+}
+
+// =============================================================================
+// CLIENTS PILL
+// =============================================================================
+
+.rf-clients-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.38rem 1rem;
+  border-radius: 999px;
+  border: 1.5px solid var(--primary-color);
+  background: rgba(var(--primary-rgb), 0.07);
+  color: var(--primary-color);
+  font-size: 0.82rem;
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+  transition: background var(--transition-fast);
+
+  &:hover { background: rgba(var(--primary-rgb), 0.14); }
+
+  &--loading {
+    border-color: var(--border-color-light);
+    color: var(--text-color-secondary);
+    background: transparent;
+    cursor: default;
+  }
+
+  i { font-size: 0.78rem; }
+}
+
+.rf-pill-sep {
+  font-weight: 400;
+  color: var(--text-color-secondary);
+  font-size: 0.85em;
+}
+
+// =============================================================================
+// POPOVER CONTENT
+// =============================================================================
+
+.rf-pop {
+  width: 780px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 0.75rem;
+
+  &__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: 0.6rem;
+    border-bottom: var(--border-width) solid var(--border-color-light);
+  }
+
+  &__title {
+    font-size: 0.85rem;
+    font-weight: var(--font-weight-bold);
+    color: var(--text-color);
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+
+    &::before {
+      content: '';
+      display: inline-block;
+      width: 3px;
+      height: 14px;
+      border-radius: 2px;
+      background: var(--primary-gradient);
+    }
+  }
+
+  &__actions {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  &__dot { color: var(--border-color-light); font-size: 0.9rem; }
+
+  &__list {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.3rem;
+    max-height: 480px;
+    overflow-y: auto;
+    padding-right: 2px;
+
+    &::-webkit-scrollbar { width: 4px; }
+    &::-webkit-scrollbar-track { background: transparent; }
+    &::-webkit-scrollbar-thumb { background: var(--border-color-light); border-radius: 4px; }
+  }
+}
+
+.rf-pop-search {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  height: 46px;
+
+  input { font-size: 0.85rem; }
+}
+
+.btn-text {
+  background: none;
+  border: none;
+  color: var(--primary-color);
+  font-size: 0.72rem;
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+  padding: 0.2rem 0.5rem;
+  border-radius: var(--radius-md);
+  transition: background var(--transition-fast);
+  &:hover { background: rgba(var(--primary-rgb), 0.08); }
+}
+
+// =============================================================================
+// CLIENT LIST ITEMS (grid card style)
+// =============================================================================
+
+.rf-client-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.65rem 0.5rem 0.55rem;
+  border-radius: var(--radius-lg);
+  border: var(--border-width) solid var(--border-color-light);
+  background: var(--surface-ground);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  user-select: none;
+  text-align: center;
+  position: relative;
+
+  &:hover {
+    border-color: rgba(var(--primary-rgb), 0.4);
+    background: var(--surface-card);
+    box-shadow: 0 2px 8px rgba(var(--primary-rgb), 0.08);
+  }
+
+  &--on {
+    border-color: var(--primary-color);
+    background: rgba(var(--primary-rgb), 0.06);
+
+    .rf-avatar {
+      background: var(--primary-gradient);
+      color: #fff;
+      box-shadow: 0 2px 6px rgba(var(--primary-rgb), 0.35);
+    }
+
+    .rf-client-name { color: var(--text-color); font-weight: var(--font-weight-semibold); }
+  }
+}
+
+.rf-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--surface-200, #e5e7eb);
+  color: var(--text-color-secondary);
+  font-size: 0.65rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: background var(--transition-fast), color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.rf-client-name {
+  font-size: 0.7rem;
+  color: var(--text-color-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  width: 100%;
+  transition: color var(--transition-fast);
+}
+
+.rf-check {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--primary-color);
+  color: #fff;
+  font-size: 0.45rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.rf-no-results {
+  grid-column: 1 / -1;
+  font-size: 0.75rem;
+  color: var(--text-color-secondary);
+  text-align: center;
+  padding: 1.5rem 0;
+  margin: 0;
+}
+
+// =============================================================================
+// REPORT CONTAINER
+// =============================================================================
+
+.rf-container {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+// =============================================================================
+// TOOLBAR (inside table-container)
+// =============================================================================
+
+.rf-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.75rem 1.5rem;
+  border-bottom: var(--border-width) solid var(--border-color-light);
+  flex-shrink: 0;
+  min-height: 56px;
+
+  &__left {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+}
+
+.rf-meta-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.78rem;
+  color: var(--text-color-secondary);
+
+  i { font-size: 0.7rem; color: var(--primary-color); }
+
+  &--count {
+    font-weight: var(--font-weight-semibold);
+    color: var(--primary-color);
+  }
+}
+
+.rf-meta-sep {
+  color: var(--border-color-light);
+  font-size: 0.9rem;
+}
+
+// =============================================================================
+// ACTION BUTTONS
+// =============================================================================
+
+.btn-generate {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.45rem 1rem;
+  border-radius: var(--radius-lg);
+  border: none;
+  background: var(--primary-gradient);
+  color: #fff;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+  box-shadow: var(--shadow-add);
+  transition: box-shadow var(--transition-fast), opacity var(--transition-fast);
+
+  &:disabled { opacity: 0.45; cursor: not-allowed; }
+  &:not(:disabled):hover { box-shadow: var(--shadow-add-lg); }
+}
+
+.btn-print {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.45rem 1rem;
+  border-radius: var(--radius-lg);
+  border: var(--border-width) solid var(--border-color-light);
+  background: var(--surface-card);
+  color: var(--text-color);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+
+  &:hover { border-color: var(--primary-color); color: var(--primary-color); }
+}
+
+// =============================================================================
+// MAIN SCROLL AREA
+// =============================================================================
+
+.rf-main {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.rf-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  gap: 0.4rem;
+  color: var(--text-color-secondary);
+
+  &__icon { font-size: 3.5rem; opacity: 0.1; margin-bottom: 0.5rem; }
+  p { font-size: 0.9rem; font-weight: 500; margin: 0; }
+  span { font-size: 0.78rem; opacity: 0.65; text-align: center; }
+}
+
+// =============================================================================
+// PRINTABLE REPORT
+// =============================================================================
+
+.rapport-print {
+  padding: 1.5rem 2rem 3rem;
+  font-family: 'Arial', sans-serif;
+}
+
+.rapport-client {
+  margin-bottom: 1.5rem;
+  page-break-inside: avoid;
+
+  &__header {
+    background: #f0f0f0;
+    border: 1px solid #000;
+    border-bottom: none;
+    padding: 0.3rem 0.6rem;
+    font-size: 0.82rem;
+  }
+}
+
+.rapport-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.75rem;
+
+  th, td {
+    border: 1px solid #000;
+    padding: 0.28rem 0.45rem;
+    text-align: center;
+    white-space: nowrap;
+  }
+
+  th { background: #e8e8e8; font-weight: 700; font-size: 0.68rem; }
+
+  .col-semaine {
+    text-align: left;
+    font-weight: 600;
+    min-width: 90px;
+    background: #f5f5f5;
+  }
+
+  .row-total td { background: #e0e0e0; font-weight: 700; }
+}
+
+// =============================================================================
+// PRINT
+// =============================================================================
+
+@media print {
+  :host { height: auto !important; overflow: visible !important; }
+  .no-print { display: none !important; }
+  .rf-container { border: none; box-shadow: none; border-radius: 0; }
+  .rf-main { overflow: visible; }
+  .rapport-print { padding: 0; }
+  .rapport-client { page-break-inside: avoid; margin-bottom: 0.75rem; }
+  @page { size: A4 landscape; margin: 12mm; }
+}

@@ -1,4 +1,5 @@
 import { Component, OnInit, AfterViewInit, OnDestroy, inject, ViewChild, ElementRef } from '@angular/core';
+import { Router } from '@angular/router';
 import { DecimalPipe, NgStyle } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { TooltipModule } from 'primeng/tooltip';
@@ -25,6 +26,7 @@ interface ColDef {
 })
 export class VentesComponent implements OnInit, AfterViewInit, OnDestroy {
   private ventesService = inject(VentesService);
+  private router = inject(Router);
 
   @ViewChild('tableWrapper') tableWrapper!: ElementRef<HTMLElement>;
   private boundScrollFn = () => this.checkScroll();
@@ -138,6 +140,15 @@ export class VentesComponent implements OnInit, AfterViewInit, OnDestroy {
     this.selectedFamille = null;
     this.loadFdvsAndClients();
     this.reset();
+  }
+
+  goToRapport(): void {
+    this.router.navigate(['/rapport-facturation'], {
+      queryParams: {
+        annee_mois: this.selectedMois || undefined,
+        nom_fdv:    this.selectedFdv  || undefined,
+      },
+    });
   }
 
   reload(): void {

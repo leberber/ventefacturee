@@ -42,6 +42,11 @@
             panelStyleClass="filter-card-panel"
           />
         </div>
+        @if (selectedFdv) {
+          <button class="btn-rapport" pTooltip="Rapport de facturation" (click)="goToRapport()">
+            <i class="pi pi-file-pdf"></i>
+          </button>
+        }
       </div>
 
       <div class="filter-card">

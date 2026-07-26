@@ -36,6 +36,24 @@ html, body {
 .p-component { font-family: var(--font-family-base); }
 
 // =============================================================================
+// PRINT — hide shell chrome, show only .rapport-print
+// =============================================================================
+@media print {
+  .admin-sidebar,
+  .mob-topbar,
+  .mob-nav,
+  .mob-drawer,
+  .mob-drawer-backdrop { display: none !important; }
+
+  .admin-content {
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+}
+
+// =============================================================================
 // TERMINER DIALOG — bottom drawer style
 // =============================================================================
 

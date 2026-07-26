@@ -248,6 +248,33 @@
 }
 
 // =============================================================================
+// RAPPORT BUTTON
+// =============================================================================
+
+.btn-rapport {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  border: none;
+  background: var(--primary-gradient);
+  color: #fff;
+  font-size: 0.8rem;
+  cursor: pointer;
+  box-shadow: var(--shadow-add);
+  transition: box-shadow var(--transition-fast), transform var(--transition-fast);
+  margin-left: 0.25rem;
+
+  &:hover {
+    box-shadow: var(--shadow-add-lg);
+    transform: scale(1.08);
+  }
+}
+
+// =============================================================================
 // ROW COUNT BADGE
 // =============================================================================
 

@@ -1,0 +1,189 @@
+<!-- ══════════════════ PAGE HEADER ══════════════════ -->
+<div class="page-header no-print">
+  <div class="page-header__top">
+
+    <div class="page-header__left">
+      <button class="btn-back" (click)="goBack()">
+        <i class="pi pi-arrow-left"></i>
+      </button>
+      <div class="page-icon">
+        <i class="pi pi-file-pdf"></i>
+      </div>
+      <div>
+        <h1 class="page-header__title">Rapport de facturation</h1>
+        <p class="page-header__sub">
+          @if (rapport) {
+            {{ rapport.fdv }} &nbsp;·&nbsp; {{ formatPeriodLabel(rapport.periode) }}
+          } @else {
+            Sélectionnez la période et le prévendeur
+          }
+        </p>
+      </div>
+    </div>
+
+    <div class="page-header__filters">
+
+      <div class="filter-card filter-card--period">
+        <div class="filter-card__icon"><i class="pi pi-calendar"></i></div>
+        <div class="filter-card__body">
+          <span class="filter-card__label">Période</span>
+          <p-select
+            [options]="periodes"
+            [(ngModel)]="selectedMois"
+            optionLabel="label"
+            optionValue="value"
+            placeholder="Sélectionner"
+            (onChange)="onPeriodChange()"
+            class="filter-card-select"
+          />
+        </div>
+      </div>
+
+      <div class="filter-card">
+        <div class="filter-card__icon"><i class="pi pi-id-card"></i></div>
+        <div class="filter-card__body">
+          <span class="filter-card__label">Prévendeur</span>
+          <p-select
+            [options]="fdvs"
+            [(ngModel)]="selectedFdv"
+            placeholder="Sélectionner"
+            [filter]="true"
+            [showClear]="true"
+            (onChange)="onFdvChange()"
+            class="filter-card-select"
+            [disabled]="!selectedMois"
+          />
+        </div>
+      </div>
+
+      @if (selectedFdv) {
+        <button class="rf-clients-pill"
+          [class.rf-clients-pill--loading]="loadingClients"
+          (click)="!loadingClients && clientsPopover.toggle($event)">
+          @if (loadingClients) {
+            <i class="pi pi-spinner pi-spin"></i>
+            <span>Chargement…</span>
+          } @else {
+            <i class="pi pi-users"></i>
+            <span>{{ selectedClients.size }}<span class="rf-pill-sep">/{{ allClients.length }}</span></span>
+          }
+        </button>
+
+        <p-popover #clientsPopover>
+          <div class="rf-pop">
+            <div class="rf-pop__head">
+              <span class="rf-pop__title">Clients</span>
+              <div class="rf-pop__actions">
+                <button class="btn-text" (click)="selectAll()">Tous</button>
+                <span class="rf-pop__dot">·</span>
+                <button class="btn-text" (click)="deselectAll()">Aucun</button>
+              </div>
+            </div>
+            <div class="table-search rf-pop-search">
+              <div class="search-icon"><i class="pi pi-search"></i></div>
+              <input [(ngModel)]="clientSearch" placeholder="Rechercher un client…" />
+            </div>
+            <div class="rf-pop__list">
+              @for (c of filteredClients; track c) {
+                <div class="rf-client-item"
+                  [class.rf-client-item--on]="selectedClients.has(c)"
+                  (click)="toggleClient(c)">
+                  <span class="rf-avatar">{{ initials(c) }}</span>
+                  <span class="rf-client-name">{{ c }}</span>
+                  @if (selectedClients.has(c)) {
+                    <span class="rf-check"><i class="pi pi-check"></i></span>
+                  }
+                </div>
+              }
+              @if (filteredClients.length === 0) {
+                <p class="rf-no-results">Aucun résultat</p>
+              }
+            </div>
+          </div>
+        </p-popover>
+      }
+
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════ REPORT CARD ══════════════════ -->
+<div class="table-container rf-container">
+
+  <div class="rf-toolbar no-print">
+    <div class="rf-toolbar__left">
+      @if (rapport) {
+        <span class="rf-meta-tag"><i class="pi pi-user"></i> {{ rapport.fdv }}</span>
+        <span class="rf-meta-sep">·</span>
+        <span class="rf-meta-tag"><i class="pi pi-calendar"></i> {{ formatPeriodLabel(rapport.periode) }}</span>
+        <span class="rf-meta-sep">·</span>
+        <span class="rf-meta-tag rf-meta-tag--count">{{ rapport.clients.length }} clients</span>
+      }
+    </div>
+    <div class="table-actions">
+      @if (allClients.length > 0) {
+        <button class="btn-generate" (click)="generate()"
+          [disabled]="selectedClients.size === 0 || loading">
+          <i class="pi" [class.pi-chart-bar]="!loading" [class.pi-spin]="loading" [class.pi-spinner]="loading"></i>
+          Générer
+        </button>
+      }
+      @if (rapport) {
+        <button class="btn-print" (click)="print()">
+          <i class="pi pi-print"></i>
+          Imprimer / PDF
+        </button>
+      }
+    </div>
+  </div>
+
+  <div class="rf-main">
+
+    @if (!rapport) {
+      <div class="table-empty rf-empty">
+        <i class="pi pi-file-pdf rf-empty__icon"></i>
+        <p>Le rapport apparaîtra ici</p>
+        <span>Sélectionnez la période, le prévendeur puis cliquez sur Générer</span>
+      </div>
+    } @else {
+      <div class="rapport-print">
+
+        @for (client of rapport.clients; track client.nom_client) {
+          <div class="rapport-client">
+            <div class="rapport-client__header">
+              Client : <strong>{{ client.nom_client }}</strong>
+            </div>
+            <table class="rapport-table">
+              <thead>
+                <tr>
+                  <th class="col-semaine">SEMAINE</th>
+                  @for (p of rapport.products; track p) {
+                    <th>{{ p }}</th>
+                  }
+                </tr>
+              </thead>
+              <tbody>
+                @for (week of rapport.weeks; track week) {
+                  <tr>
+                    <td class="col-semaine">{{ week }}</td>
+                    @for (p of rapport.products; track p) {
+                      <td>{{ val(client.semaines[week]?.[p] ?? null) }}</td>
+                    }
+                  </tr>
+                }
+                <tr class="row-total">
+                  <td class="col-semaine">Total</td>
+                  @for (p of rapport.products; track p) {
+                    <td>{{ val(client.totaux[p] ?? null) }}</td>
+                  }
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        }
+
+      </div>
+    }
+
+  </div>
+</div>
