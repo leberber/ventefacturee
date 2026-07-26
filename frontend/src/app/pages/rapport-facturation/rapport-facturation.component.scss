@@ -619,15 +619,37 @@
 // =============================================================================
 
 @media print {
-  :host { height: auto !important; overflow: visible !important; }
+  :host {
+    height: auto !important;
+    overflow: visible !important;
+    display: block !important;
+  }
   .no-print { display: none !important; }
-  .rf-container { border: none; box-shadow: none; border-radius: 0; }
-  .rf-main { overflow: visible; }
-  .rapport-print { padding: 0; gap: 0.6rem; }
+  .rf-container {
+    border: none !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    overflow: visible !important;
+    height: auto !important;
+    min-height: 0 !important;
+    flex: none !important;
+    display: block !important;
+  }
+  .rf-main {
+    overflow: visible !important;
+    height: auto !important;
+    min-height: 0 !important;
+    flex: none !important;
+    display: block !important;
+  }
+  .rapport-print { padding: 0; gap: 0.6rem; display: block !important; }
   .rapport-client {
     page-break-inside: avoid;
+    break-inside: avoid;
     box-shadow: none;
     border-color: #d0d8e8;
+    margin-bottom: 0.6rem;
   }
+  .rc-table-wrap { overflow: visible !important; }
   @page { size: A4 landscape; margin: 10mm; }
 }

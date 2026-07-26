@@ -39,17 +39,39 @@ html, body {
 // PRINT — hide shell chrome, show only .rapport-print
 // =============================================================================
 @media print {
+  html, body {
+    height: auto !important;
+    overflow: visible !important;
+  }
+
+  app-root {
+    display: block !important;
+    height: auto !important;
+    overflow: visible !important;
+  }
+
   .admin-sidebar,
   .mob-topbar,
   .mob-nav,
   .mob-drawer,
   .mob-drawer-backdrop { display: none !important; }
 
+  .admin-shell {
+    display: block !important;
+    height: auto !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+  }
+
   .admin-content {
+    display: block !important;
     margin: 0 !important;
     padding: 0 !important;
     width: 100% !important;
     max-width: 100% !important;
+    height: auto !important;
+    min-height: 0 !important;
+    overflow: visible !important;
   }
 }
 
