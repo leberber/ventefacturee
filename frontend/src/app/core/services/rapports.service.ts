@@ -3,6 +3,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 
 export interface RapportClient {
   nom_client: string;
+  weeks: string[];
   semaines: Record<string, Record<string, number | null>>;
   totaux: Record<string, number | null>;
 }

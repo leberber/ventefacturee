@@ -16,17 +16,6 @@ router = APIRouter()
 FAMILLES_RAPPORT = ['sucre', 'huile']
 
 
-def _month_weeks(year: int, month: int) -> list:
-    """Return ISO week numbers that contain at least one day of the month, in order."""
-    first = date(year, month, 1)
-    last = date(year, month, calendar.monthrange(year, month)[1])
-    seen, current = [], first
-    while current <= last:
-        w = current.isocalendar()[1]
-        if w not in seen:
-            seen.append(w)
-        current += timedelta(days=1)
-    return seen  # e.g. [27, 28, 29, 30]
 
 
 @router.get("/facturation-clients", response_model=List[str])
@@ -56,8 +45,6 @@ def get_rapport_facturation(
     current_user: Any = Depends(get_current_user),
 ) -> Any:
     year, month = int(annee_mois[:4]), int(annee_mois[5:7])
-    week_nums = _month_weeks(year, month)
-    week_labels = {w: f"Semaine {i + 1}" for i, w in enumerate(week_nums)}
 
     rows = session.exec(
         select(Vente)
@@ -85,37 +72,46 @@ def get_rapport_facturation(
     # Distinct clients (rows), sorted
     client_names = sorted({r.nom_client for r in rows if r.nom_client})
 
-    # Aggregate: client -> iso_week -> product -> qty
+    # Distinct dates that have actual orders, sorted
+    dates = sorted({r.date_commande for r in rows if r.date_commande})
+    date_labels = [d.strftime('%d/%m/%y') for d in dates]
+
+    # Aggregate: client -> date_label -> product -> qty
     agg: dict = defaultdict(lambda: defaultdict(lambda: defaultdict(float)))
     for r in rows:
         if not r.nom_client or not r.description_produit or not r.date_commande:
             continue
-        _, wk, _ = r.date_commande.isocalendar()
-        agg[r.nom_client][wk][display_label(r)] += r.qte_facturee or 0
+        label = r.date_commande.strftime('%d/%m/%y')
+        agg[r.nom_client][label][display_label(r)] += r.qte_facturee or 0
 
     clients_out = []
     for nom in client_names:
+        # Only keep dates where this client has at least one product qty
+        client_dates = [
+            label for label in date_labels
+            if any(agg[nom][label][p] for p in products)
+        ]
         semaines = {}
-        for wk in week_nums:
-            label = week_labels[wk]
+        for label in client_dates:
             semaines[label] = {
-                p: (agg[nom][wk][p] if agg[nom][wk][p] else None)
+                p: (agg[nom][label][p] if agg[nom][label][p] else None)
                 for p in products
             }
         totaux = {
-            p: (sum(agg[nom][wk][p] for wk in week_nums) or None)
+            p: (sum(agg[nom][label][p] for label in client_dates) or None)
             for p in products
         }
         clients_out.append({
             "nom_client": nom,
             "semaines": semaines,
             "totaux": totaux,
+            "weeks": client_dates,
         })
 
     return {
         "fdv": nom_fdv,
         "periode": annee_mois,
-        "weeks": [week_labels[w] for w in week_nums],
+        "weeks": date_labels,
         "products": products,
         "clients": clients_out,
     }

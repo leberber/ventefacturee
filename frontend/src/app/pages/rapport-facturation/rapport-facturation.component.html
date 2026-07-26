@@ -260,7 +260,7 @@
                   </tr>
                 </thead>
                 <tbody>
-                  @for (week of rapport.weeks; track week) {
+                  @for (week of client.weeks; track week) {
                     <tr>
                       <td class="col-semaine">{{ week }}</td>
                       @for (p of rapport.products; track p) {

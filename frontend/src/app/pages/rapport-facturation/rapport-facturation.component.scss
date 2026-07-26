@@ -834,23 +834,15 @@
   }
 }
 
-// Product column headers — vertical (rotated)
+// Product column headers — horizontal on screen
 .col-product {
-  vertical-align: bottom;
-  min-width: 36px;
-  max-width: 50px;
-  padding: 0 0 0.5rem !important;
+  min-width: 60px;
   text-align: center;
 }
 
 .col-product-text {
-  display: inline-block;
-  writing-mode: vertical-rl;
-  transform: rotate(180deg);
+  display: block;
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-height: 100px;
   font-size: 0.65rem;
   font-weight: 600;
   text-transform: none;
@@ -894,6 +886,54 @@
   }
   .rc-breakdown__list { border-color: #d0d8e8; }
   .rc-breakdown-row:nth-child(even) { background: #f9fbff !important; }
+
+  // Prevent cards from overflowing page width
+  .rapport-client {
+    width: 100%;
+    overflow: hidden;
+  }
+  .rc-table-wrap {
+    overflow: hidden !important;
+    width: 100%;
+  }
+  .rapport-table {
+    width: 100%;
+    table-layout: fixed;
+    font-size: 10px;
+  }
+  .rapport-table td,
+  .rapport-table th {
+    padding: 0.3rem 0.25rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .rapport-table .col-semaine {
+    width: 76px;
+    min-width: 76px;
+    font-size: 8.5px;
+    white-space: nowrap;
+    overflow: visible;
+    text-overflow: clip;
+    padding-left: 6px !important;
+    padding-right: 6px !important;
+  }
+  .col-product {
+    vertical-align: bottom;
+    min-width: 0;
+    max-width: none;
+    padding: 0 0 0.4rem !important;
+    text-align: center;
+  }
+  .col-product-text {
+    display: inline-block;
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    white-space: nowrap;
+    max-height: 80px;
+    font-size: 0.6rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
   .rapport-client {
     page-break-inside: avoid;
     break-inside: avoid;
