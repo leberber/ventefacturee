@@ -34,7 +34,7 @@ export class UtilisateurFormComponent implements OnInit {
   private readonly allRoleOptions = [
     { label: 'Admin',     value: 'admin',     adminOnly: true  },
     { label: 'Employé',   value: 'employe',   adminOnly: true  },
-    { label: 'Prevender', value: 'prevender', adminOnly: false },
+    { label: 'Prévendeur', value: 'prevender', adminOnly: false },
   ];
 
   get roleOptions() {
@@ -58,7 +58,7 @@ export class UtilisateurFormComponent implements OnInit {
   private readonly roleLabels: Record<string, string> = {
     admin:     'Admin',
     employe:   'Employé',
-    prevender: 'Prevender',
+    prevender: 'Prévendeur',
   };
 
   get currentRole(): string { return this.form.get('role')?.value ?? 'employe'; }

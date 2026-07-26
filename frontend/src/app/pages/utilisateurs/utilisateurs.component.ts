@@ -31,12 +31,11 @@ export class UtilisateursComponent implements OnInit {
   sortCol = 'full_name';
   sortDir: 1 | -1 = 1;
 
-  readonly roleLabel: Record<string, string> = { admin: 'Admin', employe: 'Employé', livreur: 'Livreur', chauffeur: 'Chauffeur' };
+  readonly roleLabel: Record<string, string> = { admin: 'Admin', employe: 'Employé', prevender: 'Prévendeur' };
   readonly roleBadge: Record<string, string> = {
     admin:     'badge badge--danger',
     employe:   'badge badge--warning',
-    livreur:   'badge badge--info',
-    chauffeur: 'badge badge--success',
+    prevender: 'badge badge--info',
   };
 
   get sorted(): User[] {
