@@ -65,6 +65,7 @@ export interface VenteListParams {
   annee_mois?: string;
   famille?: string;
   nom_fdv?: string;
+  nom_client?: string;
   search?: string;
 }
 
@@ -74,17 +75,37 @@ export class VentesService {
 
   list(params: VenteListParams = {}) {
     let p = new HttpParams();
-    if (params.page)       p = p.set('page', params.page);
-    if (params.per_page)   p = p.set('per_page', params.per_page);
-    if (params.annee_mois) p = p.set('annee_mois', params.annee_mois);
-    if (params.famille)    p = p.set('famille', params.famille);
-    if (params.nom_fdv)    p = p.set('nom_fdv', params.nom_fdv);
-    if (params.search)     p = p.set('search', params.search);
+    if (params.page)        p = p.set('page', params.page);
+    if (params.per_page)    p = p.set('per_page', params.per_page);
+    if (params.annee_mois)  p = p.set('annee_mois', params.annee_mois);
+    if (params.famille)     p = p.set('famille', params.famille);
+    if (params.nom_fdv)     p = p.set('nom_fdv', params.nom_fdv);
+    if (params.nom_client)  p = p.set('nom_client', params.nom_client);
+    if (params.search)      p = p.set('search', params.search);
     return this.http.get<VentePage>('/api/v1/ventes', { params: p });
   }
 
   getPeriodes() {
     return this.http.get<string[]>('/api/v1/ventes/periodes');
+  }
+
+  getFamilles(annee_mois?: string) {
+    let p = new HttpParams();
+    if (annee_mois) p = p.set('annee_mois', annee_mois);
+    return this.http.get<string[]>('/api/v1/ventes/familles', { params: p });
+  }
+
+  getFdvs(annee_mois?: string) {
+    let p = new HttpParams();
+    if (annee_mois) p = p.set('annee_mois', annee_mois);
+    return this.http.get<string[]>('/api/v1/ventes/fdvs', { params: p });
+  }
+
+  getClients(annee_mois?: string, nom_fdv?: string) {
+    let p = new HttpParams();
+    if (annee_mois) p = p.set('annee_mois', annee_mois);
+    if (nom_fdv) p = p.set('nom_fdv', nom_fdv);
+    return this.http.get<string[]>('/api/v1/ventes/clients', { params: p });
   }
 
   upload(file: File) {

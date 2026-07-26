@@ -70,12 +70,47 @@ textarea[pTextarea] {
   overflow: hidden !important;
 }
 
+// Filter-card dropdown panel — constrained width
+.filter-card-panel.p-select-overlay {
+  max-width: 220px !important;
+  width: 220px !important;
+}
+
+.period-panel.p-select-overlay {
+  max-width: 90px !important;
+  width: 90px !important;
+}
+
+// Filter input inside dropdown (search box)
+.p-select-filter-container {
+  padding: 0.4rem 0.5rem !important;
+  border-bottom: 1px solid var(--border-color-light) !important;
+
+  .p-select-filter {
+    border-radius: var(--radius-lg) !important;
+    font-size: var(--font-size-sm) !important;
+    padding: 0.4rem 0.75rem !important;
+    background: var(--surface-ground) !important;
+    border-color: transparent !important;
+    width: 100% !important;
+
+    &:focus {
+      border-color: var(--primary-color) !important;
+      box-shadow: 0 0 0 2px rgba(var(--primary-rgb), 0.12) !important;
+    }
+  }
+}
+
 .p-select-list { padding: 0.3rem !important; }
 
 .p-select-option {
   border-radius: var(--radius-md) !important;
   font-size: var(--font-size-sm) !important;
-  transition: background 0.15s, color 0.15s !important;
+  padding: 0.45rem 0.65rem !important;
+  transition: background 0.12s, color 0.12s !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.5rem !important;
 
   &.p-focus:not(.p-select-option-selected) {
     background: color-mix(in srgb, var(--primary-color) 8%, transparent) !important;
@@ -85,5 +120,21 @@ textarea[pTextarea] {
     background: color-mix(in srgb, var(--primary-color) 12%, transparent) !important;
     color: var(--primary-color) !important;
     font-weight: var(--font-weight-semibold) !important;
+
+    &::after {
+      content: '\e909'; // pi-check
+      font-family: 'primeicons';
+      margin-left: auto;
+      font-size: 0.7rem;
+      opacity: 0.8;
+    }
   }
+}
+
+// Empty message
+.p-select-empty-message {
+  padding: 0.75rem 1rem !important;
+  font-size: var(--font-size-sm) !important;
+  color: var(--text-color-secondary) !important;
+  text-align: center !important;
 }

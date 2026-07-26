@@ -117,6 +117,7 @@ def list_ventes(
     annee_mois: Optional[str] = Query(default=None),
     famille: Optional[str] = Query(default=None),
     nom_fdv: Optional[str] = Query(default=None),
+    nom_client: Optional[str] = Query(default=None),
     search: Optional[str] = Query(default=None),
     session: Session = Depends(get_session),
 ) -> Any:
@@ -127,6 +128,8 @@ def list_ventes(
         conditions.append(Vente.famille == famille)
     if nom_fdv:
         conditions.append(Vente.nom_fdv == nom_fdv)
+    if nom_client:
+        conditions.append(Vente.nom_client == nom_client)
     if search:
         term = f"%{search}%"
         conditions.append(
@@ -159,6 +162,42 @@ def list_periodes(session: Session = Depends(get_session)) -> Any:
         select(Vente.annee_mois).distinct().order_by(Vente.annee_mois.desc())
     ).all()
     return list(result)
+
+
+@router.get("/fdvs", response_model=List[str])
+def list_fdvs(
+    annee_mois: Optional[str] = Query(default=None),
+    session: Session = Depends(get_session),
+) -> Any:
+    q = select(Vente.nom_fdv).distinct().order_by(Vente.nom_fdv)
+    if annee_mois:
+        q = q.where(Vente.annee_mois == annee_mois)
+    return [v for v in session.exec(q).all() if v]
+
+
+@router.get("/familles", response_model=List[str])
+def list_familles(
+    annee_mois: Optional[str] = Query(default=None),
+    session: Session = Depends(get_session),
+) -> Any:
+    q = select(Vente.famille).distinct().order_by(Vente.famille)
+    if annee_mois:
+        q = q.where(Vente.annee_mois == annee_mois)
+    return [v for v in session.exec(q).all() if v]
+
+
+@router.get("/clients", response_model=List[str])
+def list_clients(
+    annee_mois: Optional[str] = Query(default=None),
+    nom_fdv: Optional[str] = Query(default=None),
+    session: Session = Depends(get_session),
+) -> Any:
+    q = select(Vente.nom_client).distinct().order_by(Vente.nom_client)
+    if annee_mois:
+        q = q.where(Vente.annee_mois == annee_mois)
+    if nom_fdv:
+        q = q.where(Vente.nom_fdv == nom_fdv)
+    return [v for v in session.exec(q).all() if v]
 
 
 @router.post("/upload", response_model=UploadResponse)

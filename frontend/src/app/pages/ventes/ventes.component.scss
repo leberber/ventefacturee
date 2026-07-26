@@ -8,6 +8,11 @@
   flex-direction: column;
   gap: 0.75rem;
   height: calc(100vh - 3rem);
+  overflow: visible;
+}
+
+// Contain scroll inside table-container, not host
+.table-container {
   overflow: hidden;
 }
 
@@ -48,7 +53,7 @@
     &-left {
       display: flex;
       align-items: center;
-      gap: 0.6rem;
+      gap: 1.25rem;
     }
   }
 }
@@ -58,68 +63,187 @@
 // =============================================================================
 
 .prod-search {
-  width: 500px;
+  width: 680px;
   max-width: 100%;
-  height: 46px;
+  height: 50px;
 
   input { line-height: 28px; }
 }
 
+
 // =============================================================================
-// PERIOD FILTER PILLS
+// PAGE HEADER — two-row layout
 // =============================================================================
 
-.period-filter-pills {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 0.4rem;
-  padding: 0 0.25rem;
-  margin-bottom: 0.5rem;
+.page-header {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.75rem;
 }
 
-.period-pill {
-  display: inline-flex;
+.page-header__top {
+  display: flex;
   align-items: center;
-  gap: 0.45rem;
-  padding: 0.3rem 0.75rem 0.3rem 0.35rem;
-  border-radius: 999px;
-  border: var(--border-width) solid var(--surface-border);
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.page-header__filters {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-shrink: 0;
+}
+
+// Period card — primary icon + compact width
+.filter-card--period {
+  border-color: color-mix(in srgb, var(--primary-color) 30%, transparent);
+  background: color-mix(in srgb, var(--primary-color) 4%, var(--surface-card));
+
+  .filter-card__icon {
+    background: var(--primary-gradient);
+    color: #fff;
+  }
+
+  .filter-card__label {
+    color: var(--primary-color);
+  }
+}
+
+::ng-deep .filter-card--period .filter-card-select.p-select {
+  min-width: 120px;
+  width: 120px;
+
+  .p-select-label {
+    color: var(--primary-color);
+    font-weight: var(--font-weight-semibold);
+  }
+}
+
+// =============================================================================
+// FILTER CARDS (Prévendeur / Client)
+// =============================================================================
+
+.filter-card {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.5rem 0.85rem 0.5rem 0.6rem;
   background: var(--surface-card);
-  color: var(--text-color-secondary);
-  font-size: 0.82rem;
-  font-weight: var(--font-weight-semibold);
+  border: var(--border-width) solid var(--border-color-light);
+  border-radius: var(--radius-xl, 14px);
+  box-shadow: var(--shadow-sm);
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
   cursor: pointer;
-  transition: all var(--transition-fast);
-  white-space: nowrap;
 
   &:hover {
     border-color: var(--primary-color);
-    color: var(--primary-color);
-  }
-
-  &--active {
-    background: rgba(var(--primary-rgb), 0.1);
-    border-color: var(--primary-color);
-    color: var(--primary-color);
-
-    .period-pill__icon {
-      background: rgba(var(--primary-rgb), 0.08);
-      i { color: var(--primary-color); }
-    }
+    box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.08);
   }
 
   &__icon {
-    width: 1.5rem;
-    height: 1.5rem;
-    border-radius: 50%;
-    background: var(--surface-ground);
     display: flex;
     align-items: center;
     justify-content: center;
+    width: 36px;
+    height: 36px;
     flex-shrink: 0;
+    border-radius: 10px;
+    background: rgba(var(--primary-rgb), 0.1);
+    color: var(--primary-color);
+    font-size: 1rem;
+  }
 
-    i { font-size: 0.65rem; color: var(--text-color-secondary); }
+  &__body {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  &__label {
+    font-size: 0.625rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-color-secondary);
+    white-space: nowrap;
+  }
+}
+
+::ng-deep .filter-card-select.p-select {
+  border: none !important;
+  box-shadow: none !important;
+  background: transparent !important;
+  padding: 0;
+  min-width: 280px;
+
+  .p-select-label {
+    padding: 0;
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-semibold);
+    color: var(--text-color);
+    line-height: 1.4;
+  }
+
+  .p-select-dropdown {
+    width: 1.5rem;
+    color: var(--text-color-secondary);
+  }
+
+  .p-select-clear-icon {
+    right: 1.5rem;
+  }
+
+  &.p-select-open,
+  &.p-focus {
+    border: none !important;
+    box-shadow: none !important;
+    outline: none !important;
+  }
+}
+
+
+// =============================================================================
+// FAMILLE SELECT (toolbar)
+// =============================================================================
+
+::ng-deep .famille-select.p-select {
+  height: 50px;
+  min-width: 220px;
+  width: 220px;
+  border-radius: 9999px !important;
+  border: 1.5px solid rgba(234, 143, 50, 0.35);
+  background: linear-gradient(135deg, rgba(255, 183, 77, 0.08), rgba(255, 138, 0, 0.05));
+  box-shadow: 0 1px 4px rgba(234, 143, 50, 0.12);
+  transition: border-color 0.18s, box-shadow 0.18s, background 0.18s;
+
+  .p-select-label {
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-semibold);
+    color: #b45309;
+    display: flex;
+    align-items: center;
+    height: 100%;
+    padding-left: 1rem;
+
+    &.p-placeholder { color: #c07a30; font-weight: 500; }
+  }
+
+  .p-select-dropdown { color: #c07a30; }
+
+  .p-select-clear-icon { color: #c07a30; right: 2rem; }
+
+  &:hover {
+    border-color: rgba(234, 143, 50, 0.7);
+    background: linear-gradient(135deg, rgba(255, 183, 77, 0.13), rgba(255, 138, 0, 0.08));
+    box-shadow: 0 2px 8px rgba(234, 143, 50, 0.2);
+  }
+
+  &.p-select-open,
+  &.p-focus {
+    border-color: #ea8f32;
+    box-shadow: 0 0 0 3px rgba(234, 143, 50, 0.15);
+    outline: none;
   }
 }
 

@@ -2,6 +2,7 @@ import { Component, OnInit, AfterViewInit, OnDestroy, inject, ViewChild, Element
 import { DecimalPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { TooltipModule } from 'primeng/tooltip';
+import { Select } from 'primeng/select';
 import { Popover } from 'primeng/popover';
 import { VentesService, VenteRead } from '../../core/services/ventes.service';
 
@@ -18,7 +19,7 @@ interface ColDef {
 @Component({
   selector: 'app-ventes',
   standalone: true,
-  imports: [DecimalPipe, FormsModule, TooltipModule, Popover],
+  imports: [DecimalPipe, FormsModule, TooltipModule, Select, Popover],
   templateUrl: './ventes.component.html',
   styleUrl: './ventes.component.scss',
 })
@@ -35,6 +36,12 @@ export class VentesComponent implements OnInit, AfterViewInit, OnDestroy {
   periodes: { label: string; value: string }[] = [];
   selectedMois = '';
   searchTerm = '';
+  fdvs: string[] = [];
+  clients: string[] = [];
+  familles: string[] = [];
+  selectedFdv: string | null = null;
+  selectedClient: string | null = null;
+  selectedFamille: string | null = null;
   private currentPage = 1;
   private searchTimeout: any;
 
@@ -95,6 +102,7 @@ export class VentesComponent implements OnInit, AfterViewInit, OnDestroy {
       this.periodes = periodes.map(p => ({ label: this.formatPeriod(p), value: p }));
       if (periodes.length) {
         this.selectedMois = periodes[0];
+        this.loadFdvsAndClients();
         this.reset();
       }
     });
@@ -125,10 +133,25 @@ export class VentesComponent implements OnInit, AfterViewInit, OnDestroy {
 
   selectPeriod(mois: string): void {
     this.selectedMois = mois;
+    this.selectedFdv = null;
+    this.selectedClient = null;
+    this.selectedFamille = null;
+    this.loadFdvsAndClients();
     this.reset();
   }
 
   reload(): void {
+    this.reset();
+  }
+
+  onFdvChange(): void {
+    this.selectedClient = null;
+    this.ventesService.getClients(this.selectedMois, this.selectedFdv || undefined)
+      .subscribe(d => this.clients = d);
+    this.reset();
+  }
+
+  onFilterChange(): void {
     this.reset();
   }
 
@@ -141,6 +164,12 @@ export class VentesComponent implements OnInit, AfterViewInit, OnDestroy {
     const col = this.allColumns.find(c => c.field === field);
     if (col) col.visible = !col.visible;
     this.saveColumnState();
+  }
+
+  private loadFdvsAndClients(): void {
+    this.ventesService.getFdvs(this.selectedMois).subscribe(d => this.fdvs = d);
+    this.ventesService.getClients(this.selectedMois).subscribe(d => this.clients = d);
+    this.ventesService.getFamilles(this.selectedMois).subscribe(d => this.familles = d);
   }
 
   formatPeriod(period: string): string {
@@ -164,6 +193,9 @@ export class VentesComponent implements OnInit, AfterViewInit, OnDestroy {
       page: this.currentPage,
       per_page: BATCH,
       annee_mois: this.selectedMois,
+      famille: this.selectedFamille || undefined,
+      nom_fdv: this.selectedFdv || undefined,
+      nom_client: this.selectedClient || undefined,
       search: this.searchTerm || undefined,
     }).subscribe({
       next: res => {

@@ -1,12 +1,65 @@
 <!-- Page header -->
 <div class="page-header">
-  <div class="page-header__left">
-    <div class="page-icon"><i class="pi pi-chart-line"></i></div>
-    <div>
-      <h1 class="page-header__title">Ventes</h1>
-      <p class="page-header__sub">
-        @if (total > 0) { {{ total | number }} lignes au total } @else { Consultez les données de vente par période }
-      </p>
+  <div class="page-header__top">
+    <div class="page-header__left">
+      <div class="page-icon"><i class="pi pi-chart-line"></i></div>
+      <div>
+        <h1 class="page-header__title">Ventes</h1>
+        <p class="page-header__sub">
+          @if (total > 0) { {{ total | number }} lignes au total } @else { Consultez les données de vente par période }
+        </p>
+      </div>
+    </div>
+    <div class="page-header__filters">
+      <div class="filter-card filter-card--period">
+        <div class="filter-card__icon"><i class="pi pi-calendar"></i></div>
+        <div class="filter-card__body">
+          <span class="filter-card__label">Période</span>
+          <p-select
+            [options]="periodes"
+            [(ngModel)]="selectedMois"
+            optionLabel="label"
+            optionValue="value"
+            placeholder="Sélectionner"
+            (onChange)="selectPeriod($event.value)"
+            class="filter-card-select"
+            panelStyleClass="filter-card-panel period-panel"
+          />
+        </div>
+      </div>
+      <div class="filter-card">
+        <div class="filter-card__icon"><i class="pi pi-id-card"></i></div>
+        <div class="filter-card__body">
+          <span class="filter-card__label">Prévendeur</span>
+          <p-select
+            [options]="fdvs"
+            [(ngModel)]="selectedFdv"
+            placeholder="Tous"
+            [filter]="true"
+            [showClear]="true"
+            (onChange)="onFdvChange()"
+            class="filter-card-select"
+            panelStyleClass="filter-card-panel"
+          />
+        </div>
+      </div>
+
+      <div class="filter-card">
+        <div class="filter-card__icon"><i class="pi pi-building"></i></div>
+        <div class="filter-card__body">
+          <span class="filter-card__label">Client</span>
+          <p-select
+            [options]="clients"
+            [(ngModel)]="selectedClient"
+            placeholder="Tous"
+            [filter]="true"
+            [showClear]="true"
+            (onChange)="onFilterChange()"
+            class="filter-card-select"
+            panelStyleClass="filter-card-panel"
+          />
+        </div>
+      </div>
     </div>
   </div>
 </div>
@@ -26,6 +79,15 @@
             [(ngModel)]="searchTerm"
             (input)="onSearch()" />
         </div>
+        <p-select
+          [options]="familles"
+          [(ngModel)]="selectedFamille"
+          placeholder="Famille"
+          [showClear]="true"
+          (onChange)="onFilterChange()"
+          class="famille-select"
+          panelStyleClass="filter-card-panel"
+        />
       </div>
       <div class="table-actions">
         @if (total > 0) {
@@ -55,16 +117,6 @@
       </div>
     </div>
 
-    <!-- Period pills row -->
-    <div class="period-filter-pills">
-      @for (p of periodes; track p.value) {
-        <button class="period-pill" [class.period-pill--active]="selectedMois === p.value"
-          (click)="selectPeriod(p.value)">
-          <span class="period-pill__icon"><i class="pi pi-calendar"></i></span>
-          <span>{{ p.label }}</span>
-        </button>
-      }
-    </div>
 
   </div>
 
