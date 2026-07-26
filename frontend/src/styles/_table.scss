@@ -34,6 +34,19 @@
   flex-wrap: wrap;
 }
 
+.inline-input {
+  width: 100%;
+  border: 1px solid var(--primary-color);
+  border-radius: var(--radius-md);
+  padding: 0.2rem 0.4rem;
+  font-size: 0.8rem;
+  font-family: var(--font-mono, monospace);
+  outline: none;
+  background: var(--surface-card);
+  color: var(--text-color);
+  box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.1);
+}
+
 .table-action-btn {
   width: 36px;
   height: 36px;

@@ -31,6 +31,9 @@ export class UtilisateursComponent implements OnInit {
   sortCol = 'full_name';
   sortDir: 1 | -1 = 1;
 
+  editingPhoneId: number | null = null;
+  editingPhoneValue = '';
+
   readonly roleLabel: Record<string, string> = { admin: 'Admin', employe: 'Employé', prevender: 'Prévendeur' };
   readonly roleBadge: Record<string, string> = {
     admin:     'badge badge--danger',
@@ -80,6 +83,25 @@ export class UtilisateursComponent implements OnInit {
       },
     });
   }
+
+  startEditPhone(u: User): void {
+    this.editingPhoneId = u.id;
+    this.editingPhoneValue = u.phone;
+  }
+
+  savePhone(u: User): void {
+    const phone = this.editingPhoneValue.replace(/\s/g, '');
+    if (!phone || phone === u.phone) { this.editingPhoneId = null; return; }
+    this.usersService.update(u.id, { phone }).subscribe({
+      next: updated => {
+        u.phone = updated.phone;
+        this.editingPhoneId = null;
+      },
+      error: e => this.toast('error', e.error?.detail ?? 'Erreur'),
+    });
+  }
+
+  cancelEditPhone(): void { this.editingPhoneId = null; }
 
   get isAdmin(): boolean { return this.auth.isAdmin; }
 
