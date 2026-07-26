@@ -6,6 +6,7 @@ export interface User {
   full_name: string;
   role: UserRole;
   is_active: boolean;
+  employe_code?: string | null;
   created_at: string;
 }
 
@@ -14,6 +15,7 @@ export interface UserCreate {
   full_name: string;
   password: string;
   role: UserRole;
+  employe_code?: string | null;
 }
 
 export interface UserUpdate {
@@ -22,6 +24,7 @@ export interface UserUpdate {
   password?: string;
   role?: UserRole;
   is_active?: boolean;
+  employe_code?: string | null;
 }
 
 export interface TokenResponse {

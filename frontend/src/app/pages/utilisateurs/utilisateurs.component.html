@@ -50,6 +50,7 @@
                 [class.th-sort--desc]="sortCol==='full_name'&&sortDir===-1">
                 Nom complet <i class="pi pi-sort-alt"></i>
               </th>
+              <th>Code employé</th>
               <th>Téléphone</th>
               <th>Rôle</th>
               <th>Statut</th>
@@ -67,6 +68,7 @@
                     </span>
                   </div>
                 </td>
+                <td><code class="font-mono text-muted">{{ u.employe_code ?? '—' }}</code></td>
                 <td><code class="font-mono text-muted">{{ formatPhone(u.phone) }}</code></td>
                 <td><span [class]="roleBadge[u.role]">{{ roleLabel[u.role] }}</span></td>
                 <td>

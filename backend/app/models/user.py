@@ -14,6 +14,7 @@ class User(SQLModel, table=True):
     __tablename__ = "users"
 
     id: Optional[int] = Field(default=None, primary_key=True)
+    employe_code: Optional[str] = Field(default=None, max_length=50)
     phone: str = Field(max_length=20, index=True, unique=True)
     full_name: str = Field(max_length=100)
     hashed_password: str = Field(max_length=200)
@@ -27,6 +28,7 @@ class UserCreate(SQLModel):
     full_name: str
     password: str
     role: UserRole = UserRole.EMPLOYE
+    employe_code: Optional[str] = None
 
 
 class UserUpdate(SQLModel):
@@ -35,6 +37,7 @@ class UserUpdate(SQLModel):
     password: Optional[str] = None
     role: Optional[UserRole] = None
     is_active: Optional[bool] = None
+    employe_code: Optional[str] = None
 
 
 class UserRead(SQLModel):
@@ -45,4 +48,5 @@ class UserRead(SQLModel):
     full_name: str
     role: UserRole
     is_active: bool
+    employe_code: Optional[str] = None
     created_at: datetime
