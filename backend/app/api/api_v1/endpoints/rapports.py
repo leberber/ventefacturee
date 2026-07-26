@@ -60,6 +60,7 @@ def get_rapport_facturation(
     codes = {r.code_produit for r in rows if r.code_produit}
     produits = session.exec(select(Produit).where(Produit.code_produit.in_(codes))).all()
     code_to_label = {p.code_produit: (p.nom_produit or p.description_produit) for p in produits}
+    code_to_uom = {p.code_produit: p.uom_vente for p in produits}
 
     def display_label(r: Vente) -> str:
         if r.code_produit and r.code_produit in code_to_label and code_to_label[r.code_produit]:
@@ -68,6 +69,15 @@ def get_rapport_facturation(
 
     # Distinct products (columns), sorted
     products = sorted({display_label(r) for r in rows if r.description_produit})
+
+    # label -> uom_vente
+    def uom_for_label(label: str) -> Optional[str]:
+        for r in rows:
+            if display_label(r) == label and r.code_produit:
+                return code_to_uom.get(r.code_produit)
+        return None
+
+    products_meta = {p: uom_for_label(p) for p in products}
 
     # Distinct clients (rows), sorted
     client_names = sorted({r.nom_client for r in rows if r.nom_client})
@@ -113,5 +123,6 @@ def get_rapport_facturation(
         "periode": annee_mois,
         "weeks": date_labels,
         "products": products,
+        "products_meta": products_meta,
         "clients": clients_out,
     }

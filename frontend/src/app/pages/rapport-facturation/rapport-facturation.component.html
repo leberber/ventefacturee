@@ -246,7 +246,12 @@
                     <div class="rc-breakdown-row__bar"
                          [style.width.%]="gt.total / maxGrandTotal * 100"></div>
                   </div>
-                  <span class="rc-breakdown-row__qty">{{ gt.total }}</span>
+                  <div class="rc-breakdown-row__qty-cell">
+                    <span class="rc-breakdown-row__qty">{{ gt.total }}</span>
+                    @if (rapport!.products_meta[gt.product]) {
+                      <span class="rc-breakdown-row__uom">{{ rapport!.products_meta[gt.product] }}</span>
+                    }
+                  </div>
                 </div>
               }
             </div>

@@ -706,7 +706,7 @@
 
 .rc-breakdown-row {
   display: grid;
-  grid-template-columns: 160px 1fr 70px;
+  grid-template-columns: 160px 1fr 110px;
   align-items: center;
   gap: 1rem;
   padding: 0.35rem 0.75rem;
@@ -716,6 +716,13 @@
 
   &:nth-child(even) { background: #f9fbff; }
 
+  &__qty-cell {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.35rem;
+  }
+
   &__name {
     font-size: 0.75rem;
     font-weight: 600;
@@ -723,6 +730,19 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+  }
+
+  &__uom {
+    font-size: 0.6rem;
+    font-weight: 700;
+    color: #1a5fc8;
+    background: #eef2ff;
+    border-radius: 4px;
+    padding: 0.1rem 0.35rem;
+    white-space: nowrap;
+    flex-shrink: 0;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
   }
 
   &__bar-wrap {
@@ -744,7 +764,6 @@
     font-size: 0.85rem;
     font-weight: 800;
     color: #041f58;
-    text-align: right;
   }
 }
 

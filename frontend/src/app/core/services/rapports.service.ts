@@ -13,6 +13,7 @@ export interface RapportFacturation {
   periode: string;
   weeks: string[];
   products: string[];
+  products_meta: Record<string, string | null>;
   clients: RapportClient[];
 }
 
