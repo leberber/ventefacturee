@@ -1,13 +1,14 @@
 from typing import Any, List, Optional
 
 import pandas as pd
-from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
+from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile
+from sqlalchemy import func
 from sqlmodel import Session, select
 
 from app.api.deps import get_current_user
 from app.database import get_session
 from app.models.user import User
-from app.models.vente import Vente, UploadResponse
+from app.models.vente import Vente, VentePage, VenteRead, UploadResponse
 from app.utils.parse import parse_file
 
 router = APIRouter()
@@ -64,28 +65,39 @@ def _row_to_vente(row: pd.Series, annee_mois: str, uploaded_by_id: int) -> Vente
         code_client=_safe_str(row.get('Code Client'), 50),
         nom_client=_safe_str(row.get('Nom client'), 150),
         categorie_client=_safe_str(row.get('Categories Client'), 20),
+        adresse_client=_safe_str(row.get('Adresse Client'), 200),
         route=_safe_str(row.get('Route'), 50),
         commune=_safe_str(row.get('Commune'), 60),
-        wilaya=_safe_str(row.get('Wilya'), 60),          # source has typo "Wilya"
+        wilaya=_safe_str(row.get('Wilya'), 60),           # source typo
         zone=_safe_str(row.get('Zone'), 30),
         region=_safe_str(row.get('Region'), 30),
+        tel_client=_safe_str(row.get('Tél'), 30),
         type_client=_safe_str(row.get('Type Client'), 20),
         code_fdv=_safe_str(row.get('Code-FDV'), 30),
         nom_fdv=_safe_str(row.get('Nom-FDV'), 100),
         type_fdv=_safe_str(row.get('Type-FDV'), 30),
         code_sup=_safe_str(row.get('Code-Sup'), 30),
         nom_sup=_safe_str(row.get('Nom-Sup'), 100),
+        buid=_safe_str(row.get('BUID'), 30),
         code_distributeur=_safe_str(row.get('Code Distributeur'), 30),
         nom_distributeur=_safe_str(row.get('Nom Distributeur'), 100),
         depot_livraison=_safe_str(row.get('Dépôt Livraison'), 50),
         statut_commande=_safe_str(row.get('Statut Commande'), 30),
+        date_creation=_safe_date(row.get('Date Création')),
+        date_confirmation=_safe_date(row.get('Date Confirmation')),
         date_facturation=_safe_date(row.get('Date Facturation')),
+        code_livreur=_safe_str(row.get('Code Livreur'), 30),
+        nom_livreur=_safe_str(row.get('Nom Livreur'), 100),
+        matricule_van=_safe_str(row.get('Matricule VAN'), 30),
         code_produit=_safe_str(row.get('Code Produit'), 30),
         description_produit=_safe_str(row.get('Description Produit'), 200),
         famille=_safe_str(row.get('Famille'), 50),
         sous_famille=_safe_str(row.get('Sous Famille'), 80),
         uom_vente=_safe_str(row.get('UOM Vente'), 20),
+        cout_produit=_safe_float(row.get('Cout Produit')),
         prix_unitaire=_safe_float(row.get('Prix Unitaire')),
+        uom_principale=_safe_str(row.get('UOM principale'), 20),
+        prix_unitaire_uom_pr=_safe_float(row.get('Prix unitaire UOM PR')),
         qte_commandee=_safe_float(row.get('Qte Commandée')),
         qte_chargee=_safe_float(row.get('Qte Chargée')),
         qte_livree=_safe_float(row.get('Qte Livrée')),
@@ -96,6 +108,57 @@ def _row_to_vente(row: pd.Series, annee_mois: str, uploaded_by_id: int) -> Vente
         gratuite=_safe_float(row.get('Gratuité')),
         uploaded_by_id=uploaded_by_id,
     )
+
+
+@router.get("", response_model=VentePage)
+def list_ventes(
+    page: int = Query(default=1, ge=1),
+    per_page: int = Query(default=50, ge=1, le=200),
+    annee_mois: Optional[str] = Query(default=None),
+    famille: Optional[str] = Query(default=None),
+    nom_fdv: Optional[str] = Query(default=None),
+    search: Optional[str] = Query(default=None),
+    session: Session = Depends(get_session),
+) -> Any:
+    conditions = []
+    if annee_mois:
+        conditions.append(Vente.annee_mois == annee_mois)
+    if famille:
+        conditions.append(Vente.famille == famille)
+    if nom_fdv:
+        conditions.append(Vente.nom_fdv == nom_fdv)
+    if search:
+        term = f"%{search}%"
+        conditions.append(
+            Vente.nom_client.ilike(term) |
+            Vente.description_produit.ilike(term) |
+            Vente.num_commande.ilike(term)
+        )
+
+    count_q = select(func.count(Vente.id))
+    items_q = select(Vente)
+    for c in conditions:
+        count_q = count_q.where(c)
+        items_q = items_q.where(c)
+
+    total = session.exec(count_q).one()
+    offset = (page - 1) * per_page
+    items = session.exec(
+        items_q.order_by(Vente.date_commande.desc()).offset(offset).limit(per_page)
+    ).all()
+
+    return VentePage(
+        total=total,
+        items=[VenteRead.model_validate(v) for v in items],
+    )
+
+
+@router.get("/periodes", response_model=List[str])
+def list_periodes(session: Session = Depends(get_session)) -> Any:
+    result = session.exec(
+        select(Vente.annee_mois).distinct().order_by(Vente.annee_mois.desc())
+    ).all()
+    return list(result)
 
 
 @router.post("/upload", response_model=UploadResponse)
@@ -117,7 +180,6 @@ async def upload_ventes(
 
     months_in_file = df['Date'].dt.strftime('%Y-%m').unique().tolist()
 
-    # Reject if any of those months already exist in DB
     existing = session.exec(
         select(Vente.annee_mois).where(Vente.annee_mois.in_(months_in_file)).distinct()
     ).first()
@@ -127,7 +189,6 @@ async def upload_ventes(
             detail=f"Les données pour {existing} sont déjà importées",
         )
 
-    # Build and insert rows
     ventes = []
     for _, row in df.iterrows():
         date_val = row.get('Date')
@@ -145,12 +206,3 @@ async def upload_ventes(
         annee_mois=dominant_month,
         message=f"{len(ventes):,} lignes importées pour {dominant_month}",
     )
-
-
-@router.get("/periodes", response_model=List[str])
-def list_periodes(session: Session = Depends(get_session)) -> Any:
-    """Returns list of months that have data, most recent first."""
-    result = session.exec(
-        select(Vente.annee_mois).distinct().order_by(Vente.annee_mois.desc())
-    ).all()
-    return list(result)

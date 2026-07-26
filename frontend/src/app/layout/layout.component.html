@@ -14,6 +14,9 @@
         <i class="pi pi-home"></i><span>Tableau de bord</span>
       </a>
       @if(isAdminOrEmploye) {
+        <a class="nav-item" routerLink="/ventes" routerLinkActive="active">
+          <i class="pi pi-table"></i><span>Données ventes</span>
+        </a>
         <a class="nav-item nav-item--accent" routerLink="/upload" routerLinkActive="active">
           <i class="pi pi-upload"></i><span>Importer des données</span>
         </a>

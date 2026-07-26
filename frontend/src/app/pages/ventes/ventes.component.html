@@ -1,0 +1,130 @@
+<!-- Page header -->
+<div class="page-header">
+  <div class="page-header__left">
+    <div class="page-icon"><i class="pi pi-chart-line"></i></div>
+    <div>
+      <h1 class="page-header__title">Ventes</h1>
+      <p class="page-header__sub">
+        @if (total > 0) { {{ total | number }} lignes au total } @else { Consultez les données de vente par période }
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- Table Container -->
+<div class="table-container">
+
+  <!-- Toolbar -->
+  <div class="prod-toolbar">
+
+    <!-- Row 1: search + actions -->
+    <div class="prod-toolbar__top">
+      <div class="prod-toolbar__top-left">
+        <div class="table-search prod-search">
+          <div class="search-icon"><i class="pi pi-search"></i></div>
+          <input placeholder="Rechercher client, produit, commande…"
+            [(ngModel)]="searchTerm"
+            (input)="onSearch()" />
+        </div>
+      </div>
+      <div class="table-actions">
+        @if (total > 0) {
+          <span class="ventes-count">{{ rows.length | number }} / {{ total | number }}</span>
+        }
+        <button class="table-action-btn" pTooltip="Colonnes visibles" (click)="colMenu.toggle($event)">
+          <i class="pi pi-sliders-h"></i>
+        </button>
+        <p-popover #colMenu>
+          <div class="table-options-menu">
+            <div class="table-options-section">
+              <span class="table-options-label">Colonnes visibles</span>
+              <div class="table-options-columns">
+                @for (col of allColumns; track col.field) {
+                  <label class="column-toggle">
+                    <input type="checkbox" [checked]="col.visible" (change)="toggleColumn(col.field)" />
+                    <span>{{ col.header }}</span>
+                  </label>
+                }
+              </div>
+            </div>
+          </div>
+        </p-popover>
+        <button class="table-action-btn" pTooltip="Rafraîchir" (click)="reload()">
+          <i class="pi pi-refresh" [class.pi-spin]="loading"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Period pills row -->
+    <div class="period-filter-pills">
+      @for (p of periodes; track p.value) {
+        <button class="period-pill" [class.period-pill--active]="selectedMois === p.value"
+          (click)="selectPeriod(p.value)">
+          <span class="period-pill__icon"><i class="pi pi-calendar"></i></span>
+          <span>{{ p.label }}</span>
+        </button>
+      }
+    </div>
+
+  </div>
+
+  <!-- Table -->
+  <div class="table-wrapper" #tableWrapper>
+    @if (rows.length === 0 && !loading) {
+      <div class="table-empty">
+        @if (!selectedMois) {
+          Sélectionnez un mois pour afficher les données
+        } @else {
+          Aucune donnée pour ce mois
+        }
+      </div>
+    } @else {
+      <table class="table">
+        <thead>
+          <tr>
+            @for (col of visibleColumns; track col.field) {
+              <th [style.min-width]="col.width">{{ col.header }}</th>
+            }
+          </tr>
+        </thead>
+        <tbody>
+          @if (loading) {
+            @for (_ of [1,2,3,4,5,6,7,8]; track $index) {
+              <tr>
+                <td [attr.colspan]="visibleColumns.length" style="padding:0.6rem 1rem">
+                  <div style="height:1.1rem;border-radius:6px;background:var(--surface-200);animation:pulse 1.2s infinite alternate"></div>
+                </td>
+              </tr>
+            }
+          } @else {
+            @for (row of rows; track $index; let i = $index) {
+              <tr class="table-row-animate" [style.--row-delay]="i < 20 ? i * 15 + 'ms' : '0ms'">
+                @for (col of visibleColumns; track col.field) {
+                  <td [style.min-width]="col.width">{{ row[col.field] ?? '—' }}</td>
+                }
+              </tr>
+            }
+          }
+        </tbody>
+      </table>
+    }
+  </div>
+
+  <!-- Footer -->
+  <div class="table-footer">
+    @if (loadingMore) {
+      <div class="results-info">
+        <i class="pi pi-spin pi-spinner"></i>
+        <span>Chargement…</span>
+      </div>
+    } @else if (hasMore && !loading) {
+      <div class="scroll-hint">
+        <i class="pi pi-angle-double-down"></i>
+        <span>Faites défiler pour charger plus</span>
+      </div>
+    } @else if (total > 0 && !loading) {
+      <div class="results-info">{{ total | number }} lignes au total</div>
+    }
+  </div>
+
+</div>
