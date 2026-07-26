@@ -9,6 +9,7 @@ from sqlmodel import Session, select
 from app.api.deps import get_current_user
 from app.database import get_session
 from app.models.vente import Vente
+from app.models.produit import Produit
 
 router = APIRouter()
 
@@ -68,8 +69,18 @@ def get_rapport_facturation(
     if clients:
         rows = [r for r in rows if r.nom_client in clients]
 
+    # Build code_produit -> display name map (nom_produit if set, else description_produit)
+    codes = {r.code_produit for r in rows if r.code_produit}
+    produits = session.exec(select(Produit).where(Produit.code_produit.in_(codes))).all()
+    code_to_label = {p.code_produit: (p.nom_produit or p.description_produit) for p in produits}
+
+    def display_label(r: Vente) -> str:
+        if r.code_produit and r.code_produit in code_to_label and code_to_label[r.code_produit]:
+            return code_to_label[r.code_produit]
+        return r.description_produit or ''
+
     # Distinct products (columns), sorted
-    products = sorted({r.description_produit for r in rows if r.description_produit})
+    products = sorted({display_label(r) for r in rows if r.description_produit})
 
     # Distinct clients (rows), sorted
     client_names = sorted({r.nom_client for r in rows if r.nom_client})
@@ -80,7 +91,7 @@ def get_rapport_facturation(
         if not r.nom_client or not r.description_produit or not r.date_commande:
             continue
         _, wk, _ = r.date_commande.isocalendar()
-        agg[r.nom_client][wk][r.description_produit] += r.qte_facturee or 0
+        agg[r.nom_client][wk][display_label(r)] += r.qte_facturee or 0
 
     clients_out = []
     for nom in client_names:

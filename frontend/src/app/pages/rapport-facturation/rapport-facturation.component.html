@@ -150,35 +150,45 @@
 
         @for (client of rapport.clients; track client.nom_client) {
           <div class="rapport-client">
+
             <div class="rapport-client__header">
-              Client : <strong>{{ client.nom_client }}</strong>
+              <span class="rc-avatar">{{ initials(client.nom_client) }}</span>
+              <strong class="rc-name">{{ client.nom_client }}</strong>
             </div>
-            <table class="rapport-table">
-              <thead>
-                <tr>
-                  <th class="col-semaine">SEMAINE</th>
-                  @for (p of rapport.products; track p) {
-                    <th>{{ p }}</th>
-                  }
-                </tr>
-              </thead>
-              <tbody>
-                @for (week of rapport.weeks; track week) {
+
+            <div class="rc-table-wrap">
+              <table class="rapport-table">
+                <thead>
                   <tr>
-                    <td class="col-semaine">{{ week }}</td>
+                    <th class="col-semaine">Semaine</th>
                     @for (p of rapport.products; track p) {
-                      <td>{{ val(client.semaines[week]?.[p] ?? null) }}</td>
+                      <th class="col-product"><span class="col-product-text">{{ p }}</span></th>
                     }
                   </tr>
-                }
-                <tr class="row-total">
-                  <td class="col-semaine">Total</td>
-                  @for (p of rapport.products; track p) {
-                    <td>{{ val(client.totaux[p] ?? null) }}</td>
+                </thead>
+                <tbody>
+                  @for (week of rapport.weeks; track week) {
+                    <tr>
+                      <td class="col-semaine">{{ week }}</td>
+                      @for (p of rapport.products; track p) {
+                        <td [class.has-value]="val(client.semaines[week]?.[p] ?? null) !== ''">
+                          {{ val(client.semaines[week]?.[p] ?? null) }}
+                        </td>
+                      }
+                    </tr>
                   }
-                </tr>
-              </tbody>
-            </table>
+                  <tr class="row-total">
+                    <td class="col-semaine">Total</td>
+                    @for (p of rapport.products; track p) {
+                      <td [class.has-value]="val(client.totaux[p] ?? null) !== ''">
+                        {{ val(client.totaux[p] ?? null) }}
+                      </td>
+                    }
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
           </div>
         }
 
