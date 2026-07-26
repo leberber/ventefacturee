@@ -1,7 +1,7 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { DecimalPipe, DatePipe } from '@angular/common';
+import { DatePipe } from '@angular/common';
 import { TooltipModule } from 'primeng/tooltip';
 import { Select } from 'primeng/select';
 import { Popover } from 'primeng/popover';
@@ -12,7 +12,7 @@ import { RapportsService, RapportFacturation } from '../../core/services/rapport
 @Component({
   selector: 'app-rapport-facturation',
   standalone: true,
-  imports: [FormsModule, DecimalPipe, DatePipe, TooltipModule, Select, Popover],
+  imports: [FormsModule, DatePipe, TooltipModule, Select, Popover],
   templateUrl: './rapport-facturation.component.html',
   styleUrl: './rapport-facturation.component.scss',
 })

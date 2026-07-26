@@ -994,6 +994,11 @@
   .rc-breakdown { flex: 1; }
   .rc-breakdown__list { border-color: #d0d8e8; }
   .rc-breakdown-row:nth-child(even) { background: #f9fbff !important; }
+  .rc-breakdown-row__bar-wrap,
+  .rc-breakdown-row__bar {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
 
   // Prevent cards from overflowing page width
   .rapport-client {

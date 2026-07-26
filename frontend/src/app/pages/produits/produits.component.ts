@@ -1,5 +1,4 @@
 import { Component, OnInit, inject, signal, computed } from '@angular/core';
-import { DecimalPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { TooltipModule } from 'primeng/tooltip';
 import { ProduitsService, ProduitRead } from '../../core/services/produits.service';
@@ -10,7 +9,7 @@ type EditField = 'nom_produit' | 'colisage' | 'unite' | 'volume' | 'poids';
 @Component({
   selector: 'app-produits',
   standalone: true,
-  imports: [DecimalPipe, FormsModule, TooltipModule],
+  imports: [FormsModule, TooltipModule],
   templateUrl: './produits.component.html',
   styleUrl:    './produits.component.scss',
 })
