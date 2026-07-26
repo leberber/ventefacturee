@@ -5,7 +5,7 @@ import { TooltipModule } from 'primeng/tooltip';
 import { ProduitsService, ProduitRead } from '../../core/services/produits.service';
 
 type SortCol = 'code_produit' | 'description_produit' | 'famille' | 'sous_famille' | 'uom_vente' | 'colisage';
-type EditField = 'nom_produit' | 'colisage';
+type EditField = 'nom_produit' | 'colisage' | 'unite' | 'volume' | 'poids';
 
 @Component({
   selector: 'app-produits',

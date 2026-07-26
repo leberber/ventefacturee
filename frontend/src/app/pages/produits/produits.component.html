@@ -89,13 +89,16 @@
               [class.th-sort--desc]="sortCol()==='colisage'&&sortDir()===-1">
               Colisage <i class="pi pi-sort-alt"></i>
             </th>
+            <th class="col-center">Unité</th>
+            <th class="col-center">Volume</th>
+            <th class="col-center">Poids</th>
           </tr>
         </thead>
         <tbody>
           @if (loading()) {
             @for (_ of [1,2,3,4,5,6,7,8]; track $index) {
               <tr>
-                <td colspan="8" style="padding:0.6rem 1rem">
+                <td colspan="11" style="padding:0.6rem 1rem">
                   <div style="height:1.1rem;border-radius:6px;background:var(--surface-200);animation:pulse 1.2s infinite alternate"></div>
                 </td>
               </tr>
@@ -163,6 +166,77 @@
                         <span [class.colisage-value]="p.colisage != null" [class.text-muted]="p.colisage == null">
                           {{ p.colisage != null ? p.colisage : '—' }}
                         </span>
+                      }
+                      <i class="pi pi-pencil cell-pencil"></i>
+                    </div>
+                  }
+                </td>
+
+                <!-- Unité -->
+                <td class="col-center cell-editable"
+                  (click)="startEdit(p, 'unite', $event)"
+                  [class.cell-editing]="isEditing(p.code_produit, 'unite')">
+                  @if (isEditing(p.code_produit, 'unite')) {
+                    <select class="cell-select" autofocus
+                      [value]="editingValue() ?? ''"
+                      (change)="editingValue.set($any($event.target).value || null); saveEdit(p)"
+                      (keydown.escape)="cancelEdit()">
+                      <option value="">—</option>
+                      <option value="KG">KG</option>
+                      <option value="L">L</option>
+                    </select>
+                  } @else {
+                    <div class="cell-display cell-display--center">
+                      @if (savingCell()?.code === p.code_produit && savingCell()?.field === 'unite') {
+                        <i class="pi pi-spin pi-spinner cell-spinner"></i>
+                      } @else {
+                        <span [class.text-muted]="!p.unite">{{ p.unite ?? '—' }}</span>
+                      }
+                      <i class="pi pi-pencil cell-pencil"></i>
+                    </div>
+                  }
+                </td>
+
+                <!-- Volume -->
+                <td class="col-center cell-editable"
+                  (click)="startEdit(p, 'volume', $event)"
+                  [class.cell-editing]="isEditing(p.code_produit, 'volume')">
+                  @if (isEditing(p.code_produit, 'volume')) {
+                    <input type="number" class="cell-input" autofocus min="0" step="0.01"
+                      [value]="editingValue()"
+                      (input)="editingValue.set(+$any($event.target).value || null)"
+                      (blur)="saveEdit(p)"
+                      (keydown.enter)="saveEdit(p)"
+                      (keydown.escape)="cancelEdit()" />
+                  } @else {
+                    <div class="cell-display cell-display--center">
+                      @if (savingCell()?.code === p.code_produit && savingCell()?.field === 'volume') {
+                        <i class="pi pi-spin pi-spinner cell-spinner"></i>
+                      } @else {
+                        <span [class.text-muted]="p.volume == null">{{ p.volume != null ? p.volume : '—' }}</span>
+                      }
+                      <i class="pi pi-pencil cell-pencil"></i>
+                    </div>
+                  }
+                </td>
+
+                <!-- Poids -->
+                <td class="col-center cell-editable"
+                  (click)="startEdit(p, 'poids', $event)"
+                  [class.cell-editing]="isEditing(p.code_produit, 'poids')">
+                  @if (isEditing(p.code_produit, 'poids')) {
+                    <input type="number" class="cell-input" autofocus min="0" step="0.01"
+                      [value]="editingValue()"
+                      (input)="editingValue.set(+$any($event.target).value || null)"
+                      (blur)="saveEdit(p)"
+                      (keydown.enter)="saveEdit(p)"
+                      (keydown.escape)="cancelEdit()" />
+                  } @else {
+                    <div class="cell-display cell-display--center">
+                      @if (savingCell()?.code === p.code_produit && savingCell()?.field === 'poids') {
+                        <i class="pi pi-spin pi-spinner cell-spinner"></i>
+                      } @else {
+                        <span [class.text-muted]="p.poids == null">{{ p.poids != null ? p.poids : '—' }}</span>
                       }
                       <i class="pi pi-pencil cell-pencil"></i>
                     </div>

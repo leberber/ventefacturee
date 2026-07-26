@@ -16,6 +16,9 @@ class Produit(SQLModel, table=True):
     # Enrichment
     nom_produit: Optional[str] = Field(default=None, max_length=200)
     colisage: Optional[float] = Field(default=None)
+    unite: Optional[str] = Field(default=None, max_length=10)
+    volume: Optional[float] = Field(default=None)
+    poids: Optional[float] = Field(default=None)
 
     updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
@@ -31,12 +34,18 @@ class ProduitRead(SQLModel):
     uom_principale: Optional[str] = None
     nom_produit: Optional[str] = None
     colisage: Optional[float] = None
+    unite: Optional[str] = None
+    volume: Optional[float] = None
+    poids: Optional[float] = None
     updated_at: datetime
 
 
 class ProduitUpdate(SQLModel):
     nom_produit: Optional[str] = None
     colisage: Optional[float] = None
+    unite: Optional[str] = None
+    volume: Optional[float] = None
+    poids: Optional[float] = None
 
 
 class ProduitPage(SQLModel):
