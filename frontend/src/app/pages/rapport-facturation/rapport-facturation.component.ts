@@ -1,7 +1,7 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { DatePipe } from '@angular/common';
+import { DatePipe, NgClass } from '@angular/common';
 import { TooltipModule } from 'primeng/tooltip';
 import { Select } from 'primeng/select';
 import { Popover } from 'primeng/popover';
@@ -12,7 +12,7 @@ import { RapportsService, RapportFacturation } from '../../core/services/rapport
 @Component({
   selector: 'app-rapport-facturation',
   standalone: true,
-  imports: [FormsModule, DatePipe, TooltipModule, Select, Popover],
+  imports: [FormsModule, DatePipe, NgClass, TooltipModule, Select, Popover],
   templateUrl: './rapport-facturation.component.html',
   styleUrl: './rapport-facturation.component.scss',
 })
@@ -158,5 +158,12 @@ export class RapportFacturationComponent implements OnInit {
 
   get totalQty(): number {
     return this.grandTotals.reduce((sum, g) => sum + g.total, 0);
+  }
+
+  familleClass(product: string): string {
+    const f = this.rapport?.products_meta[product]?.famille ?? '';
+    if (f === 'huile') return 'col-product--huile';
+    if (f === 'sucre') return 'col-product--sucre';
+    return '';
   }
 }

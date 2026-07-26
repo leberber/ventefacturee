@@ -72,10 +72,13 @@ def get_rapport_facturation(
 
     def meta_for_label(label: str) -> dict:
         for r in rows:
-            if display_label(r) == label and r.code_produit and r.code_produit in code_to_produit:
-                p = code_to_produit[r.code_produit]
-                return {"uom_vente": p.uom_vente, "colisage": p.colisage}
-        return {"uom_vente": None, "colisage": None}
+            if display_label(r) == label:
+                famille = (r.famille or '').lower()
+                if r.code_produit and r.code_produit in code_to_produit:
+                    p = code_to_produit[r.code_produit]
+                    return {"uom_vente": p.uom_vente, "colisage": p.colisage, "famille": famille}
+                return {"uom_vente": None, "colisage": None, "famille": famille}
+        return {"uom_vente": None, "colisage": None, "famille": None}
 
     products_meta = {p: meta_for_label(p) for p in products}
 

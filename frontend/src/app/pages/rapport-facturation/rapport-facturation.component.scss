@@ -941,6 +941,9 @@
 .col-product {
   min-width: 60px;
   text-align: center;
+
+  &--huile { border-top: 3px solid #eab308; }
+  &--sucre { border-top: 3px solid #818cf8; }
 }
 
 .col-product-text {

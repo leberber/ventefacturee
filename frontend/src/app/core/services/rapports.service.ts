@@ -11,6 +11,7 @@ export interface RapportClient {
 export interface ProductMeta {
   uom_vente: string | null;
   colisage: number | null;
+  famille: string | null;
 }
 
 export interface RapportFacturation {
