@@ -1,0 +1,47 @@
+<div class="upload-page">
+  <div class="upload-card">
+    <div class="upload-card__header">
+      <h2>Importer des données</h2>
+      <p>Déposez votre fichier mensuel Excel ou CSV pour l'enregistrer dans la base</p>
+    </div>
+
+    <div
+      class="drop-zone"
+      [class.drop-zone--over]="dragOver()"
+      [class.drop-zone--loading]="loading()"
+      (dragover)="onDragOver($event)"
+      (dragleave)="onDragLeave()"
+      (drop)="onDrop($event)"
+      (click)="!loading() && fileInput.click()"
+    >
+      @if (loading()) {
+        <i class="pi pi-spin pi-spinner drop-zone__icon"></i>
+        <span class="drop-zone__text">Traitement en cours...</span>
+      } @else {
+        <i class="pi pi-cloud-upload drop-zone__icon"></i>
+        <span class="drop-zone__text">Déposer un fichier ici</span>
+        <span class="drop-zone__hint">ou cliquer pour sélectionner</span>
+        <div class="drop-zone__badges">
+          <span class="badge badge--info">.xlsx</span>
+          <span class="badge badge--info">.xls</span>
+          <span class="badge badge--success">.csv</span>
+        </div>
+      }
+    </div>
+
+    <input
+      #fileInput
+      type="file"
+      accept=".xlsx,.xls,.csv"
+      style="display:none"
+      (change)="onFileSelect($event)"
+    />
+
+    @if (result()) {
+      <div class="upload-result" [class.upload-result--success]="result()!.success" [class.upload-result--error]="!result()!.success">
+        <i [class]="result()!.success ? 'pi pi-check-circle' : 'pi pi-times-circle'"></i>
+        <span>{{ result()!.message }}</span>
+      </div>
+    }
+  </div>
+</div>
