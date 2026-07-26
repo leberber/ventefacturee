@@ -141,11 +141,16 @@ export class RapportFacturationComponent implements OnInit {
         product: p,
         total: this.rapport!.clients.reduce((sum, c) => sum + (c.totaux[p] ?? 0), 0),
       }))
-      .filter(g => g.total > 0);
+      .filter(g => g.total > 0)
+      .sort((a, b) => b.total - a.total);
   }
 
   get maxGrandTotal(): number {
     const tots = this.grandTotals;
     return tots.length > 0 ? Math.max(...tots.map(g => g.total)) : 1;
+  }
+
+  get totalQty(): number {
+    return this.grandTotals.reduce((sum, g) => sum + g.total, 0);
   }
 }

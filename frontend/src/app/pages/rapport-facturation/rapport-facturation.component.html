@@ -178,48 +178,61 @@
         <!-- Cover page — print only, page 1 -->
         <div class="rapport-cover print-only">
 
-          <!-- Dark header bar -->
-          <div class="rc-topbar">
-            <div class="rc-topbar__left">
-              <div class="rc-topbar__doc">RAPPORT DE FACTURATION</div>
-              <div class="rc-topbar__sub">Données de vente · {{ formatPeriodLabel(rapport.periode) }}</div>
-            </div>
-            <div class="rc-topbar__right">
-              <div class="rc-topbar__meta">
-                <span class="rc-topbar__meta-label">Prévendeur</span>
-                <span class="rc-topbar__meta-value">{{ rapport.fdv }}</span>
+          <!-- Header: logo + title + metadata -->
+          <div class="rc-header">
+            <div class="rc-header__left">
+              <img class="rc-header__logo" src="assets/logo.png" alt="Logo" />
+              <div class="rc-header__sep"></div>
+              <div>
+                <div class="rc-header__title">Rapport de Facturation</div>
+                <div class="rc-header__sub">{{ formatPeriodLabel(rapport.periode) }}</div>
               </div>
-              <div class="rc-topbar__meta">
-                <span class="rc-topbar__meta-label">Imprimé le</span>
-                <span class="rc-topbar__meta-value rc-topbar__meta-value--green">{{ today | date:'dd/MM/yyyy' }}</span>
+            </div>
+            <div class="rc-header__right">
+              <div class="rc-header__tag">
+                <span class="rc-header__tag-label">Prévendeur</span>
+                <span class="rc-header__tag-value">{{ rapport.fdv }}</span>
+              </div>
+              <div class="rc-header__tag">
+                <span class="rc-header__tag-label">Imprimé le</span>
+                <span class="rc-header__tag-value">{{ today | date:'dd/MM/yyyy' }}</span>
               </div>
             </div>
           </div>
 
-          <!-- KPI strip -->
-          <div class="rc-kpis">
-            <div class="rc-kpi">
-              <span class="rc-kpi__num rc-kpi__num--accent">{{ rapport.clients.length }}</span>
-              <span class="rc-kpi__label">Clients facturés</span>
+          <!-- KPI cards -->
+          <div class="rc-kpi-row">
+            <div class="rc-kpi-card rc-kpi-card--accent">
+              <div class="rc-kpi-card__icon"><i class="pi pi-users"></i></div>
+              <div>
+                <span class="rc-kpi-card__num">{{ rapport.clients.length }}</span>
+                <span class="rc-kpi-card__label">Clients facturés</span>
+              </div>
             </div>
-            <div class="rc-kpi-sep"></div>
-            <div class="rc-kpi">
-              <span class="rc-kpi__num">{{ rapport.products.length }}</span>
-              <span class="rc-kpi__label">Références produits</span>
+            <div class="rc-kpi-card">
+              <div class="rc-kpi-card__icon"><i class="pi pi-box"></i></div>
+              <div>
+                <span class="rc-kpi-card__num">{{ rapport.products.length }}</span>
+                <span class="rc-kpi-card__label">Références produits</span>
+              </div>
             </div>
-            <div class="rc-kpi-sep"></div>
-            <div class="rc-kpi">
-              <span class="rc-kpi__num">{{ rapport.weeks.length }}</span>
-              <span class="rc-kpi__label">Semaines</span>
+            <div class="rc-kpi-card">
+              <div class="rc-kpi-card__icon"><i class="pi pi-calendar"></i></div>
+              <div>
+                <span class="rc-kpi-card__num">{{ rapport.weeks.length }}</span>
+                <span class="rc-kpi-card__label">Tournées</span>
+              </div>
             </div>
-            <div class="rc-kpi-sep"></div>
-            <div class="rc-kpi">
-              <span class="rc-kpi__num">{{ grandTotals.length }}</span>
-              <span class="rc-kpi__label">Produits vendus</span>
+            <div class="rc-kpi-card">
+              <div class="rc-kpi-card__icon"><i class="pi pi-chart-bar"></i></div>
+              <div>
+                <span class="rc-kpi-card__num">{{ totalQty }}</span>
+                <span class="rc-kpi-card__label">Quantité totale</span>
+              </div>
             </div>
           </div>
 
-          <!-- Product breakdown -->
+          <!-- Product breakdown, sorted biggest → smallest -->
           <div class="rc-breakdown">
             <div class="rc-breakdown__title">
               <i class="pi pi-chart-bar"></i>

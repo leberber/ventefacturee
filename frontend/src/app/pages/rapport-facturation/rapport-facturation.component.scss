@@ -551,100 +551,127 @@
   height: 100%;
 }
 
-// ── Dark top bar ──────────────────────────────────────────────────────────────
-.rc-topbar {
-  background: linear-gradient(135deg, #041f58, #0f3d8c);
-  color: #fff;
-  padding: 0.85rem 1rem;
+// ── Cover header ──────────────────────────────────────────────────────────────
+.rc-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 2rem;
+  padding: 1rem 1.25rem;
 
-  &__doc {
-    font-size: 1.35rem;
-    font-weight: 900;
-    letter-spacing: 0.06em;
+  &__left {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  &__logo {
+    height: 48px;
+    width: auto;
+    object-fit: contain;
+  }
+
+  &__sep {
+    width: 1px;
+    height: 40px;
+    background: #e4ecf5;
+    flex-shrink: 0;
+  }
+
+  &__title {
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: #071b4d;
+    letter-spacing: 0.02em;
     line-height: 1;
   }
 
   &__sub {
-    font-size: 0.7rem;
-    opacity: 0.65;
-    margin-top: 0.3rem;
-    letter-spacing: 0.03em;
+    font-size: 0.72rem;
+    color: #8a99b8;
+    margin-top: 0.25rem;
+    font-weight: 500;
   }
 
   &__right {
     display: flex;
-    gap: 2rem;
-    align-items: flex-start;
-  }
-
-  &__meta {
-    display: flex;
     flex-direction: column;
     align-items: flex-end;
-    gap: 0.15rem;
+    gap: 0.3rem;
   }
 
-  &__meta-label {
+  &__tag {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  &__tag-label {
     font-size: 0.58rem;
-    opacity: 0.55;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.07em;
-  }
-
-  &__meta-value {
-    font-size: 0.85rem;
-    font-weight: 700;
-
-    &--green { color: #6ee7b7; }
-  }
-}
-
-// ── KPI strip ─────────────────────────────────────────────────────────────────
-.rc-kpis {
-  display: flex;
-  align-items: center;
-  background: #f4f7ff;
-  border-bottom: 1px solid #dce8f7;
-  padding: 0 1.5rem;
-}
-
-.rc-kpi {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.15rem;
-  padding: 1rem 0.5rem;
-
-  &__num {
-    font-size: 2rem;
-    font-weight: 900;
-    color: #041f58;
-    line-height: 1;
-
-    &--accent { color: #1a5fc8; }
-  }
-
-  &__label {
-    font-size: 0.6rem;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.07em;
     color: #8a99b8;
-    text-align: center;
+  }
+
+  &__tag-value {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: #071b4d;
   }
 }
 
-.rc-kpi-sep {
-  width: 1px;
-  height: 40px;
-  background: #dce8f7;
-  flex-shrink: 0;
+// ── KPI cards ─────────────────────────────────────────────────────────────────
+.rc-kpi-row {
+  display: flex;
+  gap: 0.75rem;
+  padding: 1rem 1.25rem;
+}
+
+.rc-kpi-card {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.7rem 0.9rem;
+  border-radius: 10px;
+  border: 1px solid #e8eef7;
+  box-shadow: 0 2px 8px rgba(4, 31, 88, 0.06);
+
+  &__icon {
+    width: 38px;
+    height: 38px;
+    border-radius: 9px;
+    background: #f0f4ff;
+    color: #1a5fc8;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.95rem;
+    flex-shrink: 0;
+  }
+
+  &--accent .rc-kpi-card__icon {
+    background: linear-gradient(135deg, #1a5fc8, #041f58);
+    color: #fff;
+  }
+
+  &__num {
+    display: block;
+    font-size: 1.5rem;
+    font-weight: 900;
+    color: #041f58;
+    line-height: 1;
+  }
+
+  &__label {
+    display: block;
+    font-size: 0.57rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #8a99b8;
+    margin-top: 0.15rem;
+  }
 }
 
 // ── Product breakdown ─────────────────────────────────────────────────────────
@@ -881,9 +908,15 @@
   .rapport-summary { display: none !important; }
   .print-only { display: block !important; }
   .rapport-cover {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
     page-break-after: always;
     break-after: page;
   }
+  .rc-header { flex-shrink: 0; }
+  .rc-kpi-row { flex-shrink: 0; }
+  .rc-breakdown { flex: 1; }
   .rc-breakdown__list { border-color: #d0d8e8; }
   .rc-breakdown-row:nth-child(even) { background: #f9fbff !important; }
 
