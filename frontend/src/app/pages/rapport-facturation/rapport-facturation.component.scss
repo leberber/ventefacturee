@@ -412,6 +412,43 @@
 // ACTION BUTTONS
 // =============================================================================
 
+// =============================================================================
+// SEGMENTED CONTROL
+// =============================================================================
+
+.rf-seg {
+  display: inline-flex;
+  border-radius: var(--radius-lg);
+  border: var(--border-width) solid var(--border-color-light);
+  overflow: hidden;
+  background: var(--surface-ground);
+
+  &__btn {
+    padding: 0.38rem 0.85rem;
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-semibold);
+    color: var(--text-color-secondary);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+
+    &--active {
+      background: var(--primary-gradient);
+      color: #fff;
+    }
+
+    &:not(.rf-seg__btn--active):hover {
+      background: var(--surface-card);
+      color: var(--text-color);
+    }
+  }
+}
+
+// =============================================================================
+// ACTION BUTTONS
+// =============================================================================
+
 .btn-generate {
   display: inline-flex;
   align-items: center;
@@ -718,9 +755,9 @@
 
   &__qty-cell {
     display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    gap: 0.35rem;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.1rem;
   }
 
   &__name {

@@ -47,6 +47,7 @@ export class RapportFacturationComponent implements OnInit {
   loading        = false;
   loadingClients = false;
   rapport: RapportFacturation | null = null;
+  displayMode: 'brut' | 'unites' = 'brut';
 
   ngOnInit(): void {
     const qp = this.route.snapshot.queryParamMap;
@@ -130,8 +131,13 @@ export class RapportFacturationComponent implements OnInit {
     return new Date(+y, +m - 1).toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
   }
 
-  val(v: number | null): string {
-    return v != null && v !== 0 ? String(v) : '';
+  val(v: number | null, product?: string): string {
+    if (v == null || v === 0) return '';
+    if (this.displayMode === 'unites' && product && this.rapport) {
+      const colisage = this.rapport.products_meta[product]?.colisage;
+      if (colisage) return String(v * colisage);
+    }
+    return String(v);
   }
 
   get grandTotals(): { product: string; total: number }[] {

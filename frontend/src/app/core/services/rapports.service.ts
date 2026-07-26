@@ -8,12 +8,17 @@ export interface RapportClient {
   totaux: Record<string, number | null>;
 }
 
+export interface ProductMeta {
+  uom_vente: string | null;
+  colisage: number | null;
+}
+
 export interface RapportFacturation {
   fdv: string;
   periode: string;
   weeks: string[];
   products: string[];
-  products_meta: Record<string, string | null>;
+  products_meta: Record<string, ProductMeta>;
   clients: RapportClient[];
 }
 

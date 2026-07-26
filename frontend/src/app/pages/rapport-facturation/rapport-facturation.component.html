@@ -121,6 +121,12 @@
       }
     </div>
     <div class="table-actions">
+      @if (rapport) {
+        <div class="rf-seg">
+          <button class="rf-seg__btn" [class.rf-seg__btn--active]="displayMode === 'brut'" (click)="displayMode = 'brut'">Brut</button>
+          <button class="rf-seg__btn" [class.rf-seg__btn--active]="displayMode === 'unites'" (click)="displayMode = 'unites'">Unités</button>
+        </div>
+      }
       @if (allClients.length > 0) {
         <button class="btn-generate" (click)="generate()"
           [disabled]="selectedClients.size === 0 || loading">
@@ -248,8 +254,8 @@
                   </div>
                   <div class="rc-breakdown-row__qty-cell">
                     <span class="rc-breakdown-row__qty">{{ gt.total }}</span>
-                    @if (rapport!.products_meta[gt.product]) {
-                      <span class="rc-breakdown-row__uom">{{ rapport!.products_meta[gt.product] }}</span>
+                    @if (rapport!.products_meta[gt.product]?.uom_vente) {
+                      <span class="rc-breakdown-row__uom">{{ rapport!.products_meta[gt.product].uom_vente }}</span>
                     }
                   </div>
                 </div>
@@ -282,8 +288,8 @@
                     <tr>
                       <td class="col-semaine">{{ week }}</td>
                       @for (p of rapport.products; track p) {
-                        <td [class.has-value]="val(client.semaines[week]?.[p] ?? null) !== ''">
-                          {{ val(client.semaines[week]?.[p] ?? null) }}
+                        <td [class.has-value]="val(client.semaines[week]?.[p] ?? null, p) !== ''">
+                          {{ val(client.semaines[week]?.[p] ?? null, p) }}
                         </td>
                       }
                     </tr>
@@ -291,8 +297,8 @@
                   <tr class="row-total">
                     <td class="col-semaine">Total</td>
                     @for (p of rapport.products; track p) {
-                      <td [class.has-value]="val(client.totaux[p] ?? null) !== ''">
-                        {{ val(client.totaux[p] ?? null) }}
+                      <td [class.has-value]="val(client.totaux[p] ?? null, p) !== ''">
+                        {{ val(client.totaux[p] ?? null, p) }}
                       </td>
                     }
                   </tr>
