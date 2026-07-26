@@ -148,6 +148,99 @@
     } @else {
       <div class="rapport-print">
 
+        <!-- Summary card — screen only -->
+        <div class="rapport-summary no-print">
+          <div class="rapport-summary__title">Rapport de Facturation</div>
+          <div class="rapport-summary__grid">
+            <div class="rapport-summary__item">
+              <span class="rapport-summary__label">Prévendeur</span>
+              <span class="rapport-summary__value">{{ rapport.fdv }}</span>
+            </div>
+            <div class="rapport-summary__item">
+              <span class="rapport-summary__label">Période</span>
+              <span class="rapport-summary__value">{{ formatPeriodLabel(rapport.periode) }}</span>
+            </div>
+            <div class="rapport-summary__item">
+              <span class="rapport-summary__label">Clients facturés</span>
+              <span class="rapport-summary__value rapport-summary__value--accent">{{ rapport.clients.length }}</span>
+            </div>
+            <div class="rapport-summary__item">
+              <span class="rapport-summary__label">Produits</span>
+              <span class="rapport-summary__value">{{ rapport.products.length }}</span>
+            </div>
+            <div class="rapport-summary__item">
+              <span class="rapport-summary__label">Imprimé le</span>
+              <span class="rapport-summary__value">{{ today | date:'dd/MM/yyyy' }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Cover page — print only, page 1 -->
+        <div class="rapport-cover print-only">
+
+          <!-- Dark header bar -->
+          <div class="rc-topbar">
+            <div class="rc-topbar__left">
+              <div class="rc-topbar__doc">RAPPORT DE FACTURATION</div>
+              <div class="rc-topbar__sub">Données de vente · {{ formatPeriodLabel(rapport.periode) }}</div>
+            </div>
+            <div class="rc-topbar__right">
+              <div class="rc-topbar__meta">
+                <span class="rc-topbar__meta-label">Prévendeur</span>
+                <span class="rc-topbar__meta-value">{{ rapport.fdv }}</span>
+              </div>
+              <div class="rc-topbar__meta">
+                <span class="rc-topbar__meta-label">Imprimé le</span>
+                <span class="rc-topbar__meta-value rc-topbar__meta-value--green">{{ today | date:'dd/MM/yyyy' }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- KPI strip -->
+          <div class="rc-kpis">
+            <div class="rc-kpi">
+              <span class="rc-kpi__num rc-kpi__num--accent">{{ rapport.clients.length }}</span>
+              <span class="rc-kpi__label">Clients facturés</span>
+            </div>
+            <div class="rc-kpi-sep"></div>
+            <div class="rc-kpi">
+              <span class="rc-kpi__num">{{ rapport.products.length }}</span>
+              <span class="rc-kpi__label">Références produits</span>
+            </div>
+            <div class="rc-kpi-sep"></div>
+            <div class="rc-kpi">
+              <span class="rc-kpi__num">{{ rapport.weeks.length }}</span>
+              <span class="rc-kpi__label">Semaines</span>
+            </div>
+            <div class="rc-kpi-sep"></div>
+            <div class="rc-kpi">
+              <span class="rc-kpi__num">{{ grandTotals.length }}</span>
+              <span class="rc-kpi__label">Produits vendus</span>
+            </div>
+          </div>
+
+          <!-- Product breakdown -->
+          <div class="rc-breakdown">
+            <div class="rc-breakdown__title">
+              <i class="pi pi-chart-bar"></i>
+              Répartition par produit
+            </div>
+            <div class="rc-breakdown__list">
+              @for (gt of grandTotals; track gt.product) {
+                <div class="rc-breakdown-row">
+                  <span class="rc-breakdown-row__name">{{ gt.product }}</span>
+                  <div class="rc-breakdown-row__bar-wrap">
+                    <div class="rc-breakdown-row__bar"
+                         [style.width.%]="gt.total / maxGrandTotal * 100"></div>
+                  </div>
+                  <span class="rc-breakdown-row__qty">{{ gt.total }}</span>
+                </div>
+              }
+            </div>
+          </div>
+
+        </div>
+
         @for (client of rapport.clients; track client.nom_client) {
           <div class="rapport-client">
 

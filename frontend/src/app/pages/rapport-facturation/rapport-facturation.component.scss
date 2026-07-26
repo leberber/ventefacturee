@@ -476,11 +476,249 @@
 // PRINTABLE REPORT
 // =============================================================================
 
+// Print-only utility — hidden on screen, shown in print media
+.print-only { display: none; }
+
+// Summary header
+.rapport-summary {
+  border-radius: 12px;
+  border: 1px solid #e4ecf5;
+  background: #fff;
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+
+  &__title {
+    padding: 0.65rem 1rem;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--text-color);
+    border-bottom: 1px solid #e4ecf5;
+    background: var(--surface-ground);
+    letter-spacing: 0.01em;
+  }
+
+  &__grid {
+    display: flex;
+    gap: 0;
+  }
+
+  &__item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    padding: 0.85rem 1rem;
+    border-right: 1px solid #e4ecf5;
+
+    &:last-child { border-right: none; }
+  }
+
+  &__label {
+    font-size: 0.62rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-color-secondary);
+  }
+
+  &__value {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-color);
+
+    &--accent {
+      color: var(--primary-color);
+      font-size: 1rem;
+      font-weight: 800;
+    }
+  }
+}
+
 .rapport-print {
-  padding: 1.25rem 1.5rem 3rem;
+  padding: 0.75rem 1rem 2rem;
   display: flex;
   flex-direction: column;
+  gap: 0.75rem;
+}
+
+// =============================================================================
+// COVER PAGE (print only)
+// =============================================================================
+
+.rapport-cover {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+// ── Dark top bar ──────────────────────────────────────────────────────────────
+.rc-topbar {
+  background: linear-gradient(135deg, #041f58, #0f3d8c);
+  color: #fff;
+  padding: 0.85rem 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+
+  &__doc {
+    font-size: 1.35rem;
+    font-weight: 900;
+    letter-spacing: 0.06em;
+    line-height: 1;
+  }
+
+  &__sub {
+    font-size: 0.7rem;
+    opacity: 0.65;
+    margin-top: 0.3rem;
+    letter-spacing: 0.03em;
+  }
+
+  &__right {
+    display: flex;
+    gap: 2rem;
+    align-items: flex-start;
+  }
+
+  &__meta {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.15rem;
+  }
+
+  &__meta-label {
+    font-size: 0.58rem;
+    opacity: 0.55;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+  }
+
+  &__meta-value {
+    font-size: 0.85rem;
+    font-weight: 700;
+
+    &--green { color: #6ee7b7; }
+  }
+}
+
+// ── KPI strip ─────────────────────────────────────────────────────────────────
+.rc-kpis {
+  display: flex;
+  align-items: center;
+  background: #f4f7ff;
+  border-bottom: 1px solid #dce8f7;
+  padding: 0 1.5rem;
+}
+
+.rc-kpi {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.15rem;
+  padding: 1rem 0.5rem;
+
+  &__num {
+    font-size: 2rem;
+    font-weight: 900;
+    color: #041f58;
+    line-height: 1;
+
+    &--accent { color: #1a5fc8; }
+  }
+
+  &__label {
+    font-size: 0.6rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: #8a99b8;
+    text-align: center;
+  }
+}
+
+.rc-kpi-sep {
+  width: 1px;
+  height: 40px;
+  background: #dce8f7;
+  flex-shrink: 0;
+}
+
+// ── Product breakdown ─────────────────────────────────────────────────────────
+.rc-breakdown {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 0.85rem 1rem 1rem;
+
+  &__title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: #8a99b8;
+    margin-bottom: 0.85rem;
+
+    i { color: #1a5fc8; font-size: 0.65rem; }
+  }
+
+  &__list {
+    display: flex;
+    flex-direction: column;
+    border: 1px solid #dce8f7;
+    border-radius: 10px;
+    overflow: hidden;
+  }
+}
+
+.rc-breakdown-row {
+  display: grid;
+  grid-template-columns: 160px 1fr 70px;
+  align-items: center;
   gap: 1rem;
+  padding: 0.35rem 0.75rem;
+  border-bottom: 1px solid #e4ecf5;
+
+  &:last-child { border-bottom: none; }
+
+  &:nth-child(even) { background: #f9fbff; }
+
+  &__name {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #071b4d;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &__bar-wrap {
+    height: 7px;
+    background: #eef2ff;
+    border-radius: 99px;
+    overflow: hidden;
+  }
+
+  &__bar {
+    height: 100%;
+    background: linear-gradient(90deg, #041f58, #1a5fc8);
+    border-radius: 99px;
+    min-width: 4px;
+    transition: width 0.3s ease;
+  }
+
+  &__qty {
+    font-size: 0.85rem;
+    font-weight: 800;
+    color: #041f58;
+    text-align: right;
+  }
 }
 
 .rapport-client {
@@ -596,22 +834,27 @@
   }
 }
 
-// Product column headers — horizontal, wrapping
+// Product column headers — vertical (rotated)
 .col-product {
   vertical-align: bottom;
-  min-width: 52px;
-  max-width: 80px;
+  min-width: 36px;
+  max-width: 50px;
+  padding: 0 0 0.5rem !important;
+  text-align: center;
 }
 
 .col-product-text {
-  display: block;
-  white-space: normal;
-  word-break: break-word;
+  display: inline-block;
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-height: 100px;
   font-size: 0.65rem;
   font-weight: 600;
   text-transform: none;
   letter-spacing: 0;
-  line-height: 1.3;
 }
 
 // =============================================================================
@@ -642,7 +885,15 @@
     flex: none !important;
     display: block !important;
   }
-  .rapport-print { padding: 0; gap: 0.6rem; display: block !important; }
+  .rapport-print { padding: 0; gap: 0.5rem; display: block !important; }
+  .rapport-summary { display: none !important; }
+  .print-only { display: block !important; }
+  .rapport-cover {
+    page-break-after: always;
+    break-after: page;
+  }
+  .rc-breakdown__list { border-color: #d0d8e8; }
+  .rc-breakdown-row:nth-child(even) { background: #f9fbff !important; }
   .rapport-client {
     page-break-inside: avoid;
     break-inside: avoid;
@@ -651,5 +902,5 @@
     margin-bottom: 0.6rem;
   }
   .rc-table-wrap { overflow: visible !important; }
-  @page { size: A4 landscape; margin: 10mm; }
+  @page { size: A4 portrait; margin: 8mm; }
 }
