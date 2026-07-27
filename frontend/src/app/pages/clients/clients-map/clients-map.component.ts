@@ -165,7 +165,7 @@ export class ClientsMapComponent implements OnInit, OnDestroy {
 
   selectClient(client: Client): void {
     this.selectedClient = client;
-    this.map.panTo([client.latitude!, client.longitude!]);
+    this.map.flyTo([client.latitude!, client.longitude!], 15, { duration: 1 });
   }
 
   closePanel(): void {
@@ -173,12 +173,25 @@ export class ClientsMapComponent implements OnInit, OnDestroy {
   }
 
   onSearch(): void {
-    if (this.map) this.renderMarkers();
+    if (!this.map) return;
+    this.renderMarkers();
+    const results = this.filteredClients;
+    if (results.length === 1) {
+      // Single match — select it and fly to it
+      this.selectClient(results[0]);
+    } else if (results.length > 1) {
+      // Multiple matches — fit bounds to show all of them
+      this.fitBounds();
+    }
   }
 
   clearSearch(): void {
     this.searchQuery = '';
-    if (this.map) this.renderMarkers();
+    this.selectedClient = null;
+    if (this.map) {
+      this.renderMarkers();
+      this.fitBounds();
+    }
   }
 
   goBack(): void {
