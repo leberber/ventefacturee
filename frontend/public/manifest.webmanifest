@@ -1,7 +1,7 @@
 {
-  "name": "Pallette — CLR Freha",
-  "short_name": "Pallette",
-  "description": "Gestion des palettes — CLR Freha",
+  "name": "Sodichn",
+  "short_name": "Sodichn",
+  "description": "Sodichn — Gestion des ventes",
   "start_url": "/",
   "display": "standalone",
   "orientation": "portrait",

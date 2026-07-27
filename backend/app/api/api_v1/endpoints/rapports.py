@@ -6,9 +6,6 @@ import io
 import re
 import zipfile
 
-import openpyxl
-from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
-
 from fastapi import APIRouter, Depends, Query
 from fastapi.responses import StreamingResponse
 from sqlmodel import Session, select
@@ -148,6 +145,8 @@ def export_clients_zip(
     current_user: Any = Depends(get_current_user),
 ) -> StreamingResponse:
     """One .xlsx per client (all products), bundled as ZIP."""
+    import openpyxl
+    from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
 
     rows = session.exec(
         select(Vente)

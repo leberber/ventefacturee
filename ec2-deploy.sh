@@ -113,14 +113,25 @@ cleanup_files() {
 
 health_check() {
     print_step "Running health checks..."
-    sleep 10
 
-    if curl -sf http://localhost:8000/docs > /dev/null 2>&1; then
-        print_success "Backend is healthy"
-        BACKEND_HEALTHY=true
-    else
-        print_error "Backend health check failed"
-        BACKEND_HEALTHY=false
+    # Retry backend up to 12 times (every 5s = 60s max)
+    BACKEND_HEALTHY=false
+    for i in $(seq 1 12); do
+        sleep 5
+        if curl -sf http://localhost:8000/docs > /dev/null 2>&1; then
+            print_success "Backend is healthy (attempt $i)"
+            BACKEND_HEALTHY=true
+            break
+        else
+            echo "  Waiting for backend... ($i/12)"
+        fi
+    done
+
+    if [ "$BACKEND_HEALTHY" = false ]; then
+        print_error "Backend health check failed after 60s"
+        echo "--- Backend logs ---"
+        sudo docker logs ec2-user-backend-1 --tail=30
+        echo "--------------------"
     fi
 
     if curl -sf http://localhost:4200 > /dev/null 2>&1; then
