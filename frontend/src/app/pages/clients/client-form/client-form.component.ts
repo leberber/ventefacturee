@@ -46,18 +46,38 @@ export class ClientFormComponent implements OnInit {
   ];
 
   form = this.fb.group({
+    // Identification
     code:       [''],
+    customer_no: [''],
     first_name: [''],
     last_name:  [''],
     store_name: [''],
     name:       [''],
     phone:      [''],
     category:   ['gros' as ClientCategory, Validators.required],
+    // Classification
+    type_client:   [''],
+    categorie_bdd: [''],
+    tarification:  [''],
+    vendeur:       [''],
+    route_id:      [''],
+    buid:          [''],
+    // Location
+    wilaya:     [''],
+    region:     [''],
     daira:      [''],
     commune:    [''],
     address:    [''],
     latitude:   [null as number | null],
     longitude:  [null as number | null],
+    // Codes Sodichn
+    code_sodichn:     [''],
+    nom_sodichn:      [''],
+    // Fiscal
+    rc:               [''],
+    nif:              [''],
+    ai:               [''],
+    activite_sodichn: [''],
   });
 
   ngOnInit() {
@@ -81,7 +101,6 @@ export class ClientFormComponent implements OnInit {
   private prefill(c: Client) {
     const category = (c.category as string).toLowerCase() as ClientCategory;
 
-    // Case-insensitive lookup so DB values don't need to be an exact case match
     const dairaEntry = this.dairasData.find(
       d => d.daira_name.toLowerCase() === (c.daira ?? '').toLowerCase()
     );
@@ -95,10 +114,18 @@ export class ClientFormComponent implements OnInit {
 
     const store_name = c.store_name ?? ((!c.first_name && !c.last_name) ? c.name : '') ?? '';
     this.form.patchValue({
-      code: c.code ?? '', first_name: c.first_name ?? '', last_name: c.last_name ?? '',
+      code: c.code ?? '', customer_no: c.customer_no ?? '',
+      first_name: c.first_name ?? '', last_name: c.last_name ?? '',
       store_name, name: c.name, phone: c.phone ?? '',
       category, daira: dairaName,
+      type_client: c.type_client ?? '', categorie_bdd: c.categorie_bdd ?? '',
+      tarification: c.tarification ?? '', vendeur: c.vendeur ?? '',
+      route_id: c.route_id ?? '', buid: c.buid ?? '',
+      wilaya: c.wilaya ?? '', region: c.region ?? '',
       address: c.address ?? '', latitude: c.latitude ?? null, longitude: c.longitude ?? null,
+      code_sodichn: c.code_sodichn ?? '', nom_sodichn: c.nom_sodichn ?? '',
+      rc: c.rc ?? '', nif: c.nif ?? '', ai: c.ai ?? '',
+      activite_sodichn: c.activite_sodichn ?? '',
     });
 
     if (communeName) setTimeout(() => this.form.patchValue({ commune: communeName }), 0);
@@ -133,18 +160,33 @@ export class ClientFormComponent implements OnInit {
     this.saving = true;
     const v = this.form.value;
     const body: ClientCreate = {
-      code:       v.code       || undefined,
-      first_name: v.first_name || undefined,
-      last_name:  v.last_name  || undefined,
-      store_name: v.store_name || undefined,
-      name:       [v.first_name, v.last_name].filter(Boolean).join(' ') || v.store_name || v.name || '',
-      phone:      v.phone      || undefined,
-      category:   v.category as ClientCategory,
-      daira:      v.daira      || undefined,
-      commune:    v.commune    || undefined,
-      address:    v.address    || undefined,
-      latitude:   v.latitude   ?? undefined,
-      longitude:  v.longitude  ?? undefined,
+      customer_no:      v.customer_no      || undefined,
+      code:             v.code             || undefined,
+      code_sodichn:     v.code_sodichn     || undefined,
+      nom_sodichn:      v.nom_sodichn      || undefined,
+      first_name:       v.first_name       || undefined,
+      last_name:        v.last_name        || undefined,
+      store_name:       v.store_name       || undefined,
+      name:             [v.first_name, v.last_name].filter(Boolean).join(' ') || v.store_name || v.name || '',
+      phone:            v.phone            || undefined,
+      category:         v.category as ClientCategory,
+      type_client:      v.type_client      || undefined,
+      categorie_bdd:    v.categorie_bdd    || undefined,
+      tarification:     v.tarification     || undefined,
+      vendeur:          v.vendeur          || undefined,
+      route_id:         v.route_id         || undefined,
+      buid:             v.buid             || undefined,
+      wilaya:           v.wilaya           || undefined,
+      region:           v.region           || undefined,
+      daira:            v.daira            || undefined,
+      commune:          v.commune          || undefined,
+      address:          v.address          || undefined,
+      latitude:         v.latitude         ?? undefined,
+      longitude:        v.longitude        ?? undefined,
+      rc:               v.rc               || undefined,
+      nif:              v.nif              || undefined,
+      ai:               v.ai               || undefined,
+      activite_sodichn: v.activite_sodichn || undefined,
     };
     const obs = this.editingId
       ? this.clientsService.update(this.editingId, body)

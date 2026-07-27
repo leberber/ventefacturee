@@ -1,0 +1,19 @@
+-- Add new columns to clients table
+
+ALTER TABLE clients
+  ADD COLUMN IF NOT EXISTS customer_no    VARCHAR(50),
+  ADD COLUMN IF NOT EXISTS type_client    VARCHAR(50),
+  ADD COLUMN IF NOT EXISTS wilaya         VARCHAR(100),
+  ADD COLUMN IF NOT EXISTS region         VARCHAR(100),
+  ADD COLUMN IF NOT EXISTS tarification   VARCHAR(50),
+  ADD COLUMN IF NOT EXISTS categorie_bdd  VARCHAR(10),
+  ADD COLUMN IF NOT EXISTS status_bdd     SMALLINT,
+  ADD COLUMN IF NOT EXISTS route_id       VARCHAR(50),
+  ADD COLUMN IF NOT EXISTS vendeur        VARCHAR(100),
+  ADD COLUMN IF NOT EXISTS buid           VARCHAR(50),
+  ADD COLUMN IF NOT EXISTS code_sodichn   VARCHAR(50),
+  ADD COLUMN IF NOT EXISTS nom_sodichn    VARCHAR(200),
+  ADD COLUMN IF NOT EXISTS rc             VARCHAR(100),
+  ADD COLUMN IF NOT EXISTS nif            VARCHAR(100),
+  ADD COLUMN IF NOT EXISTS ai             VARCHAR(100),
+  ADD COLUMN IF NOT EXISTS activite_sodichn VARCHAR(200);

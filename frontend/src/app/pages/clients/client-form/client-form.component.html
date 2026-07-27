@@ -64,14 +64,112 @@
           </div>
         </div>
 
-        <!-- Localisation card (fields only) -->
+        <!-- Codes & Référencement card -->
         <div class="form-card form-card--anim" style="--card-i:1">
+          <div class="form-card__header">
+            <div class="form-card__icon form-card__icon--amber"><i class="pi pi-barcode"></i></div>
+            <span class="form-card__title">Codes & Référencement</span>
+          </div>
+          <div class="form-card__body">
+            <div class="form-grid-3">
+              <div class="field">
+                <label>N° client (BDD)</label>
+                <input pInputText formControlName="customer_no" placeholder="CustomerNo" class="w-full">
+              </div>
+              <div class="field">
+                <label>Code Sodichn</label>
+                <input pInputText formControlName="code_sodichn" placeholder="ex: 1501-CL001" class="w-full">
+              </div>
+              <div class="field">
+                <label>Route ID</label>
+                <input pInputText formControlName="route_id" placeholder="ex: R01" class="w-full">
+              </div>
+            </div>
+            <div class="field">
+              <label>Nom Sodichn (Tiers)</label>
+              <input pInputText formControlName="nom_sodichn" placeholder="Nom tel qu'enregistré dans Sodichn" class="w-full">
+            </div>
+          </div>
+        </div>
+
+        <!-- Classification card -->
+        <div class="form-card form-card--anim" style="--card-i:2">
+          <div class="form-card__header">
+            <div class="form-card__icon form-card__icon--purple"><i class="pi pi-tag"></i></div>
+            <span class="form-card__title">Classification</span>
+          </div>
+          <div class="form-card__body">
+            <div class="form-grid-3">
+              <div class="field">
+                <label>Type client</label>
+                <input pInputText formControlName="type_client" placeholder="ex: GROSSISTE" class="w-full">
+              </div>
+              <div class="field">
+                <label>Catégorie BDD</label>
+                <input pInputText formControlName="categorie_bdd" placeholder="ex: A" class="w-full">
+              </div>
+              <div class="field">
+                <label>Tarification</label>
+                <input pInputText formControlName="tarification" placeholder="ex: T1" class="w-full">
+              </div>
+              <div class="field">
+                <label>Vendeur</label>
+                <input pInputText formControlName="vendeur" placeholder="Nom du vendeur" class="w-full">
+              </div>
+              <div class="field">
+                <label>BUID</label>
+                <input pInputText formControlName="buid" placeholder="ex: BU01" class="w-full">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Fiscal card -->
+        <div class="form-card form-card--anim" style="--card-i:3">
+          <div class="form-card__header">
+            <div class="form-card__icon form-card__icon--teal"><i class="pi pi-file"></i></div>
+            <span class="form-card__title">Informations fiscales</span>
+          </div>
+          <div class="form-card__body">
+            <div class="form-grid-3">
+              <div class="field">
+                <label>RC</label>
+                <input pInputText formControlName="rc" placeholder="Registre de commerce" class="w-full">
+              </div>
+              <div class="field">
+                <label>NIF</label>
+                <input pInputText formControlName="nif" placeholder="N° d'identification fiscale" class="w-full">
+              </div>
+              <div class="field">
+                <label>AI</label>
+                <input pInputText formControlName="ai" placeholder="Article d'imposition" class="w-full">
+              </div>
+            </div>
+            <div class="field">
+              <label>Activité</label>
+              <input pInputText formControlName="activite_sodichn" placeholder="Activité principale" class="w-full">
+            </div>
+          </div>
+        </div>
+
+        <!-- Localisation card (fields only) -->
+        <div class="form-card form-card--anim" style="--card-i:4">
           <div class="form-card__header">
             <div class="form-card__icon form-card__icon--teal"><i class="pi pi-map-marker"></i></div>
             <span class="form-card__title">Localisation</span>
             <span class="wilaya-badge"><i class="pi pi-map"></i> Wilaya de Tizi-Ouzou</span>
           </div>
           <div class="form-card__body">
+            <div class="form-grid-2">
+              <div class="field">
+                <label>Wilaya</label>
+                <input pInputText formControlName="wilaya" placeholder="ex: Tizi-Ouzou" class="w-full">
+              </div>
+              <div class="field">
+                <label>Région</label>
+                <input pInputText formControlName="region" placeholder="ex: Centre" class="w-full">
+              </div>
+            </div>
             <div class="form-grid-2">
               <div class="field">
                 <label>Daïra</label>
