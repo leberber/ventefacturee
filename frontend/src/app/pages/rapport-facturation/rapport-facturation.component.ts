@@ -48,7 +48,7 @@ export class RapportFacturationComponent implements OnInit {
   loadingClients = false;
   exporting      = false;
   rapport: RapportFacturation | null = null;
-  displayMode: 'brut' | 'unites' = 'brut';
+  displayMode: 'brut' | 'unites' = 'unites';
   private autoGenerate = false;
 
   ngOnInit(): void {
