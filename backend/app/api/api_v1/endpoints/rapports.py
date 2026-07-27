@@ -186,8 +186,10 @@ def export_clients_zip(
         e = agg[r.nom_client][key]
         e["label"] = product_label(r)
         e["qty"] += r.qte_facturee or 0
-        if r.prix_unitaire and e["prix"] is None:
-            e["prix"] = r.prix_unitaire
+        if e["prix"] is None:
+            prod = code_to_produit.get(r.code_produit or "")
+            if prod and prod.prix:
+                e["prix"] = prod.prix
         if e["colisage"] is None:
             e["colisage"] = colisage_for(r.code_produit or "")
 
