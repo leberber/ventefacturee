@@ -120,30 +120,31 @@
         <span class="rf-meta-tag rf-meta-tag--count">{{ rapport.clients.length }} clients</span>
       }
     </div>
-    <div class="table-actions">
+    <div class="rf-actions-bar">
       @if (selectedFdv) {
-        <label class="rf-switch-label">
+        <label class="rf-bo-toggle" [class.rf-bo-toggle--on]="excludeBackOffice">
           <p-toggleswitch [(ngModel)]="excludeBackOffice" (onChange)="onExcludeChange()" />
-          <span>Exclure Back Office</span>
+          <span>Exclure BO</span>
         </label>
       }
       @if (rapport) {
+        <div class="rf-actions-sep"></div>
         <div class="rf-seg">
           <button class="rf-seg__btn" [class.rf-seg__btn--active]="displayMode === 'brut'" (click)="displayMode = 'brut'">Brut</button>
           <button class="rf-seg__btn" [class.rf-seg__btn--active]="displayMode === 'unites'" (click)="displayMode = 'unites'">Unités</button>
         </div>
+        <div class="rf-actions-sep"></div>
       }
       @if (selectedFdv) {
-        <button class="btn-export" (click)="exportZip()"
-          [disabled]="selectedClients.size === 0 || exporting">
+        <button class="rf-btn rf-btn--excel" (click)="exportZip()" [disabled]="selectedClients.size === 0 || exporting">
           <i class="pi" [class.pi-download]="!exporting" [class.pi-spin]="exporting" [class.pi-spinner]="exporting"></i>
-          {{ exporting ? 'Export…' : 'Exporter Excel' }}
+          <span>{{ exporting ? 'Export…' : 'Excel' }}</span>
         </button>
       }
       @if (rapport) {
-        <button class="btn-print" (click)="print()">
+        <button class="rf-btn rf-btn--print" (click)="print()">
           <i class="pi pi-print"></i>
-          Imprimer / PDF
+          <span>PDF</span>
         </button>
       }
     </div>

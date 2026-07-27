@@ -409,18 +409,78 @@
 }
 
 // =============================================================================
-// ACTION BUTTONS
+// ACTIONS BAR
 // =============================================================================
 
-.rf-switch-label {
+.rf-actions-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.rf-actions-sep {
+  width: 1px;
+  height: 1.25rem;
+  background: var(--border-color-light);
+  flex-shrink: 0;
+  margin: 0 0.25rem;
+}
+
+.rf-bo-toggle {
   display: flex;
   align-items: center;
   gap: 0.5rem;
   cursor: pointer;
-  font-size: 0.8rem;
-  font-weight: 500;
-  color: var(--text-color-secondary);
   user-select: none;
+  padding: 0.3rem 0.65rem 0.3rem 0.5rem;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-color-light);
+  background: var(--surface-ground);
+  transition: border-color 0.15s, background 0.15s;
+
+  span {
+    font-size: 0.775rem;
+    font-weight: 600;
+    color: var(--text-color-secondary);
+    white-space: nowrap;
+  }
+
+  &--on {
+    border-color: color-mix(in srgb, var(--primary-color) 35%, transparent);
+    background: color-mix(in srgb, var(--primary-color) 5%, var(--surface-ground));
+
+    span { color: var(--primary-color); }
+  }
+}
+
+.rf-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.38rem 0.8rem;
+  border-radius: var(--radius-lg);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all var(--transition-fast);
+  white-space: nowrap;
+
+  &:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  &--excel {
+    background: color-mix(in srgb, #22c55e 10%, var(--surface-ground));
+    color: #16a34a;
+    border-color: color-mix(in srgb, #22c55e 30%, transparent);
+    &:not(:disabled):hover { background: color-mix(in srgb, #22c55e 18%, var(--surface-ground)); }
+  }
+
+  &--print {
+    background: var(--surface-card);
+    color: var(--text-color-secondary);
+    border-color: var(--border-color-light);
+    &:hover { color: var(--text-color); border-color: var(--border-color); }
+  }
 }
 
 // =============================================================================
@@ -456,63 +516,6 @@
   }
 }
 
-// =============================================================================
-// ACTION BUTTONS
-// =============================================================================
-
-.btn-generate {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  padding: 0.45rem 1rem;
-  border-radius: var(--radius-lg);
-  border: none;
-  background: var(--primary-gradient);
-  color: #fff;
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-semibold);
-  cursor: pointer;
-  box-shadow: var(--shadow-add);
-  transition: box-shadow var(--transition-fast), opacity var(--transition-fast);
-
-  &:disabled { opacity: 0.45; cursor: not-allowed; }
-  &:not(:disabled):hover { box-shadow: var(--shadow-add-lg); }
-}
-
-.btn-export {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  padding: 0.45rem 1rem;
-  border-radius: var(--radius-lg);
-  border: var(--border-width) solid #22c55e;
-  background: rgba(34,197,94,.08);
-  color: #16a34a;
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-semibold);
-  cursor: pointer;
-  transition: all var(--transition-fast);
-
-  &:disabled { opacity: 0.45; cursor: not-allowed; }
-  &:not(:disabled):hover { background: rgba(34,197,94,.16); }
-}
-
-.btn-print {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  padding: 0.45rem 1rem;
-  border-radius: var(--radius-lg);
-  border: var(--border-width) solid var(--border-color-light);
-  background: var(--surface-card);
-  color: var(--text-color);
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-semibold);
-  cursor: pointer;
-  transition: all var(--transition-fast);
-
-  &:hover { border-color: var(--primary-color); color: var(--primary-color); }
-}
 
 // =============================================================================
 // MAIN SCROLL AREA
