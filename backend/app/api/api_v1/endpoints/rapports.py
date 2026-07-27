@@ -144,9 +144,9 @@ def export_clients_zip(
     session: Session = Depends(get_session),
     current_user: Any = Depends(get_current_user),
 ) -> StreamingResponse:
-    """One .xlsx per client (all products), bundled as ZIP."""
+    """One .xlsx per client (all products pre-filled), bundled as ZIP."""
     import openpyxl
-    from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
+    from openpyxl.styles import Font
 
     rows = session.exec(
         select(Vente)
@@ -163,125 +163,56 @@ def export_clients_zip(
     produits_db = session.exec(select(Produit).where(Produit.code_produit.in_(codes))).all()
     code_to_produit = {p.code_produit: p for p in produits_db}
 
-    def product_label(r: Vente) -> str:
-        p = code_to_produit.get(r.code_produit or "")
-        if p and (p.nom_produit or p.description_produit):
-            return p.nom_produit or p.description_produit
-        return r.description_produit or r.code_produit or ""
-
-    def colisage_for(code: str) -> Optional[float]:
-        p = code_to_produit.get(code or "")
-        return p.colisage if p else None
-
     use_unites = display_mode == "unites"
 
-    # Aggregate: client → product_key → {label, qty, prix}
-    agg: dict = defaultdict(lambda: defaultdict(
-        lambda: {"label": "", "qty": 0.0, "prix": None, "colisage": None}
-    ))
+    # All distinct product keys for the period, sorted
+    all_product_keys = sorted({
+        r.code_produit or r.description_produit or ""
+        for r in rows if r.code_produit or r.description_produit
+    })
+
+    def get_prix(key: str) -> Optional[float]:
+        p = code_to_produit.get(key)
+        return p.prix if p else None
+
+    def get_colisage(key: str) -> Optional[float]:
+        p = code_to_produit.get(key)
+        return p.colisage if p else None
+
+    # Aggregate: client → product_key → qty
+    client_qty: dict = defaultdict(lambda: defaultdict(float))
+    all_client_names: set = set()
     for r in rows:
         if not r.nom_client:
             continue
+        all_client_names.add(r.nom_client)
         key = r.code_produit or r.description_produit or ""
-        e = agg[r.nom_client][key]
-        e["label"] = product_label(r)
-        e["qty"] += r.qte_facturee or 0
-        if e["prix"] is None:
-            prod = code_to_produit.get(r.code_produit or "")
-            if prod and prod.prix:
-                e["prix"] = prod.prix
-        if e["colisage"] is None:
-            e["colisage"] = colisage_for(r.code_produit or "")
+        client_qty[r.nom_client][key] += r.qte_facturee or 0
 
     def safe_name(s: str) -> str:
         return re.sub(r'[\\/*?:"<>|]', "_", s)[:80]
 
-    # Styles
-    HDR_FILL = PatternFill("solid", fgColor="1E3A5F")
-    HDR_FONT = Font(bold=True, color="FFFFFF", size=11)
-    TTL_FILL = PatternFill("solid", fgColor="D6E4F0")
-    TTL_FONT = Font(bold=True, size=11)
-    THIN = Side(border_style="thin", color="CCCCCC")
-    BORDER = Border(left=THIN, right=THIN, top=THIN, bottom=THIN)
-    CENTER = Alignment(horizontal="center", vertical="center")
-    MID = Alignment(vertical="center")
-
-    period_label = f"{annee_mois[5:7]}/{annee_mois[:4]}"
-
     zip_buf = io.BytesIO()
     with zipfile.ZipFile(zip_buf, "w", zipfile.ZIP_DEFLATED) as zf:
-        for client_name, products in agg.items():
+        for client_name in sorted(all_client_names):
             wb = openpyxl.Workbook()
             ws = wb.active
             ws.title = "Détail"
 
-            # Title rows
-            ws.append([client_name])
-            ws.merge_cells("A1:D1")
-            ws["A1"].font = Font(bold=True, size=14, color="1E3A5F")
-            ws["A1"].alignment = CENTER
-            ws.row_dimensions[1].height = 22
+            # Header row
+            ws.append(["Code", "Quantity", "UnitPrice"])
+            for cell in ws[1]:
+                cell.font = Font(bold=True, size=10)
 
-            ws.append([f"Prévendeur : {nom_fdv}   |   Période : {period_label}"])
-            ws.merge_cells("A2:D2")
-            ws["A2"].font = Font(italic=True, size=10, color="555555")
-            ws["A2"].alignment = CENTER
-            ws.row_dimensions[2].height = 15
-
-            ws.append([])  # blank spacer
-
-            # Header row (row 4)
-            qty_header = "Quantité (unités)" if use_unites else "Quantité (colis)"
-            headers = ["Code Produit", qty_header, "Prix Unitaire", "Total"]
-            ws.append(headers)
-            for cell in ws[4]:
-                cell.fill = HDR_FILL
-                cell.font = HDR_FONT
-                cell.alignment = CENTER
-                cell.border = BORDER
-            ws.row_dimensions[4].height = 18
-
-            ws.column_dimensions["A"].width = 28
-            ws.column_dimensions["B"].width = 14
-            ws.column_dimensions["C"].width = 16
-            ws.column_dimensions["D"].width = 16
-
-            # Data rows
-            grand_qty = 0.0
-            grand_total = 0.0
-            for key in sorted(products.keys(), key=lambda k: products[k]["label"]):
-                e = products[key]
-                if e["qty"] == 0:
-                    continue
-                prix = e["prix"]
-                qty = e["qty"]
-                if use_unites and e["colisage"]:
-                    qty = qty * e["colisage"]
+            # One row per product; qty=0 if client didn't purchase it
+            for key in all_product_keys:
+                qty = client_qty[client_name].get(key, 0.0)
+                col = get_colisage(key)
+                if use_unites and col:
+                    qty = qty * col
                 qty = round(qty, 2)
-                line_total = round(qty * prix, 2) if prix else None
-                ws.append([e["label"], qty, prix, line_total])
-                row = ws[ws.max_row]
-                for cell in row:
-                    cell.border = BORDER
-                    cell.alignment = MID
-                row[1].alignment = CENTER  # qty centered
-                if prix is not None:
-                    row[2].number_format = "#,##0.00"
-                if line_total is not None:
-                    row[3].number_format = "#,##0.00"
-                grand_qty += e["qty"]
-                grand_total += line_total or 0
-
-            # Total row
-            ws.append(["TOTAL", grand_qty, "", round(grand_total, 2)])
-            total_row = ws[ws.max_row]
-            for cell in total_row:
-                cell.fill = TTL_FILL
-                cell.font = TTL_FONT
-                cell.border = BORDER
-                cell.alignment = MID
-            total_row[1].alignment = CENTER
-            total_row[3].number_format = "#,##0.00"
+                prix = get_prix(key)
+                ws.append([key, qty, prix])
 
             xl_buf = io.BytesIO()
             wb.save(xl_buf)
