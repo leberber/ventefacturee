@@ -46,6 +46,7 @@ export class RapportFacturationComponent implements OnInit {
 
   loading        = false;
   loadingClients = false;
+  exporting      = false;
   rapport: RapportFacturation | null = null;
   displayMode: 'brut' | 'unites' = 'brut';
   private autoGenerate = false;
@@ -124,6 +125,24 @@ export class RapportFacturationComponent implements OnInit {
   }
 
   print(): void { window.print(); }
+
+  exportZip(): void {
+    const clients = [...this.selectedClients];
+    if (!clients.length || this.exporting) return;
+    this.exporting = true;
+    this.rapportSvc.exportClientsZip(this.selectedMois, this.selectedFdv, clients, this.displayMode).subscribe({
+      next: blob => {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `export_${this.selectedFdv}_${this.selectedMois}.zip`;
+        a.click();
+        URL.revokeObjectURL(url);
+        this.exporting = false;
+      },
+      error: () => { this.exporting = false; },
+    });
+  }
 
   goBack(): void { this.router.navigate(['/ventes']); }
 

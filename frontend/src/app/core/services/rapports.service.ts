@@ -37,4 +37,13 @@ export class RapportsService {
     clients.forEach(c => (p = p.append('clients', c)));
     return this.http.get<RapportFacturation>('/api/v1/rapports/facturation', { params: p });
   }
+
+  exportClientsZip(annee_mois: string, nom_fdv: string, clients: string[], displayMode: string) {
+    let p = new HttpParams()
+      .set('annee_mois', annee_mois)
+      .set('nom_fdv', nom_fdv)
+      .set('display_mode', displayMode);
+    clients.forEach(c => (p = p.append('clients', c)));
+    return this.http.get('/api/v1/rapports/export-clients-zip', { params: p, responseType: 'blob' });
+  }
 }

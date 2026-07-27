@@ -134,6 +134,13 @@
           Générer
         </button>
       }
+      @if (allClients.length > 0) {
+        <button class="btn-export" (click)="exportZip()"
+          [disabled]="selectedClients.size === 0 || exporting">
+          <i class="pi" [class.pi-download]="!exporting" [class.pi-spin]="exporting" [class.pi-spinner]="exporting"></i>
+          {{ exporting ? 'Export…' : 'Exporter Excel' }}
+        </button>
+      }
       @if (rapport) {
         <button class="btn-print" (click)="print()">
           <i class="pi pi-print"></i>
