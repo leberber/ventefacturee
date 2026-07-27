@@ -24,7 +24,6 @@
         <div class="drop-zone__badges">
           <span class="badge badge--info">.xlsx</span>
           <span class="badge badge--info">.xls</span>
-          <span class="badge badge--success">.csv</span>
         </div>
       }
     </div>
@@ -32,7 +31,7 @@
     <input
       #fileInput
       type="file"
-      accept=".xlsx,.xls,.csv"
+      accept=".xlsx,.xls"
       style="display:none"
       (change)="onFileSelect($event)"
     />
