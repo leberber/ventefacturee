@@ -68,20 +68,27 @@
 
   <!-- Mobile bottom nav -->
   <nav class="mob-nav">
-    <a class="mob-nav__item" routerLink="/dashboard" routerLinkActive="mob-nav__item--active" [routerLinkActiveOptions]="{exact:true}">
-      <i class="pi pi-home"></i>
-      <span>Accueil</span>
-    </a>
-    @if(isAdminOrEmploye) {
-      <a class="mob-nav__item" routerLink="/clients" routerLinkActive="mob-nav__item--active">
-        <i class="pi pi-users"></i>
-        <span>Clients</span>
+    @if (isPrevender) {
+      <a class="mob-nav__item" routerLink="/prevendeur" routerLinkActive="mob-nav__item--active">
+        <i class="pi pi-map-marker"></i>
+        <span>Mes tournées</span>
       </a>
+    } @else {
+      <a class="mob-nav__item" routerLink="/dashboard" routerLinkActive="mob-nav__item--active" [routerLinkActiveOptions]="{exact:true}">
+        <i class="pi pi-home"></i>
+        <span>Accueil</span>
+      </a>
+      @if(isAdminOrEmploye) {
+        <a class="mob-nav__item" routerLink="/clients" routerLinkActive="mob-nav__item--active">
+          <i class="pi pi-users"></i>
+          <span>Clients</span>
+        </a>
+      }
+      <button class="mob-nav__item" (click)="drawerOpen.set(true)">
+        <i class="pi pi-bars"></i>
+        <span>Menu</span>
+      </button>
     }
-    <button class="mob-nav__item" (click)="drawerOpen.set(true)">
-      <i class="pi pi-bars"></i>
-      <span>Menu</span>
-    </button>
   </nav>
 
   <!-- Mobile drawer -->

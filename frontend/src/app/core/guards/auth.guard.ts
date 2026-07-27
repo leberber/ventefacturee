@@ -33,3 +33,12 @@ export const prevenderOnlyGuard: CanActivateFn = () => {
   const router = inject(Router);
   return auth.isPrevender ? true : router.createUrlTree(['/dashboard']);
 };
+
+// Root redirect: prevenders → /prevendeur, everyone else → /ventes
+export const rootGuard: CanActivateFn = () => {
+  const auth   = inject(AuthService);
+  const router = inject(Router);
+  return auth.isPrevender
+    ? router.createUrlTree(['/prevendeur'])
+    : router.createUrlTree(['/ventes']);
+};

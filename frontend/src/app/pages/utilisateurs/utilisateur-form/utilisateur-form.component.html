@@ -74,6 +74,22 @@
         </div>
       </div>
 
+      <!-- Code FDV (prévendeur uniquement) -->
+      @if (currentRole === 'prevender') {
+        <div class="uform-section">
+          <div class="uform-section__title">
+            <i class="pi pi-tag"></i> Liaison données
+          </div>
+          <div class="field" style="margin-bottom:0">
+            <label>Code FDV <small class="text-muted">(doit correspondre au code_fdv dans les ventes)</small></label>
+            <div class="icon-input">
+              <i class="pi pi-tag"></i>
+              <input pInputText formControlName="employe_code" placeholder="ex. FDV001">
+            </div>
+          </div>
+        </div>
+      }
+
       <!-- Sécurité -->
       <div class="uform-section">
         <div class="uform-section__title">

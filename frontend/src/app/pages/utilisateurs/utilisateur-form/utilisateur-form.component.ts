@@ -67,11 +67,12 @@ export class UtilisateurFormComponent implements OnInit {
   get roleDisplayLabel(): string { return this.roleLabels[this.currentRole] ?? ''; }
 
   form = this.fb.group({
-    phone:     ['', Validators.required],
-    full_name: ['', Validators.required],
-    password:  [''],
-    role:      ['employe' as UserRole, Validators.required],
-    is_active: [true],
+    phone:        ['', Validators.required],
+    full_name:    ['', Validators.required],
+    password:     [''],
+    role:         ['employe' as UserRole, Validators.required],
+    is_active:    [true],
+    employe_code: [null as string | null],
   });
 
   ngOnInit() {
@@ -81,7 +82,7 @@ export class UtilisateurFormComponent implements OnInit {
       const state = history.state as { utilisateur?: User };
       if (state?.utilisateur) {
         const u = state.utilisateur;
-        this.form.patchValue({ phone: u.phone, full_name: u.full_name, role: u.role, is_active: u.is_active, password: '' });
+        this.form.patchValue({ phone: u.phone, full_name: u.full_name, role: u.role, is_active: u.is_active, password: '', employe_code: u.employe_code ?? null });
       } else {
         this.router.navigate(['/utilisateurs']);
       }
@@ -97,14 +98,14 @@ export class UtilisateurFormComponent implements OnInit {
     const v = this.form.value;
 
     if (this.editingId) {
-      const body: UserUpdate = { full_name: v.full_name!, phone: v.phone!, role: v.role as UserRole, is_active: v.is_active! };
+      const body: UserUpdate = { full_name: v.full_name!, phone: v.phone!, role: v.role as UserRole, is_active: v.is_active!, employe_code: v.employe_code || null };
       if (v.password) body.password = v.password;
       this.usersService.update(this.editingId, body).subscribe({
         next: () => this.done('Utilisateur modifié'),
         error: e => this.err(e),
       });
     } else {
-      const body: UserCreate = { phone: v.phone!, full_name: v.full_name!, password: v.password!, role: v.role as UserRole };
+      const body: UserCreate = { phone: v.phone!, full_name: v.full_name!, password: v.password!, role: v.role as UserRole, employe_code: v.employe_code || null };
       this.usersService.create(body).subscribe({
         next: () => this.done('Utilisateur créé'),
         error: e => this.err(e),

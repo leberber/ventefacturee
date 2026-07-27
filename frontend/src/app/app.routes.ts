@@ -1,6 +1,6 @@
 import { Routes } from '@angular/router';
 import { LayoutComponent } from './layout/layout.component';
-import { authGuard, adminOrEmployeGuard, adminGuard } from './core/guards/auth.guard';
+import { authGuard, adminOrEmployeGuard, adminGuard, rootGuard, prevenderOnlyGuard } from './core/guards/auth.guard';
 
 export const routes: Routes = [
   { path: 'login', loadComponent: () => import('./pages/login/login.component').then(m => m.LoginComponent) },
@@ -9,7 +9,7 @@ export const routes: Routes = [
     component: LayoutComponent,
     canActivate: [authGuard],
     children: [
-      { path: '', redirectTo: 'ventes', pathMatch: 'full' },
+      { path: '', canActivate: [rootGuard], children: [] },
       { path: 'dashboard', loadComponent: () => import('./pages/dashboard/dashboard.component').then(m => m.DashboardComponent) },
 
       { path: 'ventes',   canActivate: [adminOrEmployeGuard], loadComponent: () => import('./pages/ventes/ventes.component').then(m => m.VentesComponent) },
@@ -27,6 +27,8 @@ export const routes: Routes = [
       { path: 'utilisateurs/:id/modifier', canActivate: [adminGuard],          loadComponent: () => import('./pages/utilisateurs/utilisateur-form/utilisateur-form.component').then(m => m.UtilisateurFormComponent) },
 
       { path: 'parametres', canActivate: [adminOrEmployeGuard], loadComponent: () => import('./pages/settings/settings.component').then(m => m.SettingsComponent) },
+
+      { path: 'prevendeur', canActivate: [prevenderOnlyGuard], loadComponent: () => import('./pages/prevendeur/prevendeur.component').then(m => m.PrevendeurComponent) },
     ],
   },
   { path: '**', redirectTo: '' },

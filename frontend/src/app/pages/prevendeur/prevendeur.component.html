@@ -1,0 +1,134 @@
+<div class="pv-page">
+
+  <!-- Header -->
+  <div class="pv-header">
+    <div class="pv-header__name">{{ userName }}</div>
+    <div class="pv-period">
+      <button class="pv-period__btn" (click)="prevPeriod()" [disabled]="!canGoPrev">
+        <i class="pi pi-chevron-left"></i>
+      </button>
+      <span class="pv-period__label">{{ formatPeriod(selectedMois) }}</span>
+      <button class="pv-period__btn" (click)="nextPeriod()" [disabled]="!canGoNext">
+        <i class="pi pi-chevron-right"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- Summary strip -->
+  @if (data && !loading) {
+    <div class="pv-summary">
+      <div class="pv-kpi">
+        <span class="pv-kpi__val">{{ data.total_clients }}</span>
+        <span class="pv-kpi__label">Clients</span>
+      </div>
+      <div class="pv-kpi-sep"></div>
+      <div class="pv-kpi pv-kpi--sucre">
+        <span class="pv-kpi__val">{{ totalSucre }}</span>
+        <span class="pv-kpi__label">Sucre</span>
+      </div>
+      <div class="pv-kpi-sep"></div>
+      <div class="pv-kpi pv-kpi--huile">
+        <span class="pv-kpi__val">{{ totalHuile }}</span>
+        <span class="pv-kpi__label">Huile</span>
+      </div>
+    </div>
+  }
+
+  <!-- Skeleton -->
+  @if (loading) {
+    <div class="pv-summary pv-summary--sk">
+      <div class="pv-sk-kpi"></div>
+      <div class="pv-sk-kpi"></div>
+      <div class="pv-sk-kpi"></div>
+    </div>
+    <div class="pv-routes">
+      @for (_ of skeletonRows; track $index; let i = $index) {
+        <div class="pv-sk-card" [style.animation-delay]="i * 60 + 'ms'"></div>
+      }
+    </div>
+  }
+
+  <!-- Routes -->
+  @if (data && !loading) {
+    @if (data.routes.length === 0) {
+      <div class="pv-empty">
+        <i class="pi pi-inbox"></i>
+        <p>Aucune donnée pour cette période</p>
+      </div>
+    } @else {
+      <div class="pv-routes">
+        @for (route of data.routes; track route.route) {
+          <div class="pv-route">
+
+            <div class="pv-route__header">
+              <i class="pi pi-map-marker"></i>
+              <span>{{ route.route }}</span>
+              <span class="pv-route__count">{{ route.clients.length }}</span>
+            </div>
+
+            @for (client of route.clients; track client.nom_client) {
+              <div class="pv-client-card"
+                   [class.pv-client-card--open]="isExpanded(route.route + client.nom_client)"
+                   (click)="toggleClient(route.route + client.nom_client)">
+
+                <div class="pv-client-head">
+                  <div class="pv-avatar">{{ client.nom_client.charAt(0) }}</div>
+                  <div class="pv-client-info">
+                    <span class="pv-client-name">{{ client.nom_client }}</span>
+                    @if (client.derniere_visite) {
+                      <span class="pv-client-last">{{ client.derniere_visite }}</span>
+                    }
+                  </div>
+                  <span class="pv-client-total">{{ clientTotal(client) }}</span>
+                  <i class="pi pv-chevron"
+                     [class.pi-chevron-down]="!isExpanded(route.route + client.nom_client)"
+                     [class.pi-chevron-up]="isExpanded(route.route + client.nom_client)"></i>
+                </div>
+
+                @if (isExpanded(route.route + client.nom_client)) {
+                  <div class="pv-client-detail" (click)="$event.stopPropagation()">
+                    <div class="pv-table-wrap">
+                      <table class="pv-table">
+                        <thead>
+                          <tr>
+                            <th class="pv-th-date">Date</th>
+                            @for (p of data!.products; track p) {
+                              <th [class]="familleClass(p)">{{ p }}</th>
+                            }
+                          </tr>
+                        </thead>
+                        <tbody>
+                          @for (week of client.weeks; track week) {
+                            <tr>
+                              <td class="pv-td-date">{{ week }}</td>
+                              @for (p of data!.products; track p) {
+                                <td [class.pv-td--val]="val(client.semaines[week]?.[p] ?? null, p) !== ''">
+                                  {{ val(client.semaines[week]?.[p] ?? null, p) }}
+                                </td>
+                              }
+                            </tr>
+                          }
+                          <tr class="pv-tr-total">
+                            <td class="pv-td-date">Total</td>
+                            @for (p of data!.products; track p) {
+                              <td [class.pv-td--val]="val(client.totaux[p] ?? null, p) !== ''">
+                                <strong>{{ val(client.totaux[p] ?? null, p) }}</strong>
+                              </td>
+                            }
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                }
+
+              </div>
+            }
+
+          </div>
+        }
+      </div>
+    }
+  }
+
+</div>
