@@ -25,6 +25,28 @@
         </div>
       </div>
       <div class="table-actions">
+        <button class="table-action-btn" pTooltip="Colonnes visibles" (click)="colMenu.toggle($event)">
+          <i class="pi pi-sliders-h"></i>
+        </button>
+        <p-popover #colMenu>
+          <div class="table-options-menu">
+            <div class="table-options-section">
+              <span class="table-options-label">Colonnes visibles</span>
+              <div class="table-options-columns">
+                @for (col of allColumns; track col.field) {
+                  <label class="column-toggle">
+                    <input type="checkbox" [checked]="col.visible" (change)="toggleColumn(col.field)" />
+                    <span>{{ col.header }}</span>
+                  </label>
+                }
+              </div>
+            </div>
+          </div>
+        </p-popover>
+        <button class="btn-secondary" (click)="openMap()">
+          <i class="pi pi-map"></i>
+          <span>Carte</span>
+        </button>
         <button class="btn-add" (click)="openAdd()">
           <i class="pi pi-plus"></i>
           <span>Ajouter</span>
@@ -48,35 +70,33 @@
         <table class="table">
           <thead>
             <tr>
-              <th class="th-sort" (click)="sortBy('code')"
-                [class.th-sort--asc]="sortCol==='code'&&sortDir===1"
-                [class.th-sort--desc]="sortCol==='code'&&sortDir===-1">
-                Code <i class="pi pi-sort-alt"></i>
-              </th>
+              <!-- Name always first -->
               <th class="th-sort" (click)="sortBy('name')"
                 [class.th-sort--asc]="sortCol==='name'&&sortDir===1"
                 [class.th-sort--desc]="sortCol==='name'&&sortDir===-1">
                 Nom / Magasin <i class="pi pi-sort-alt"></i>
               </th>
-              <th>Catégorie</th>
-              <th>Téléphone</th>
-              <th class="th-sort" (click)="sortBy('plastic_balance')"
-                [class.th-sort--asc]="sortCol==='plastic_balance'&&sortDir===1"
-                [class.th-sort--desc]="sortCol==='plastic_balance'&&sortDir===-1">
-                <img src="assets/plastiquepallette.png" style="height:18px;vertical-align:middle;margin-right:4px" alt="">Plastique <i class="pi pi-sort-alt"></i>
-              </th>
-              <th class="th-sort" (click)="sortBy('wood_balance')"
-                [class.th-sort--asc]="sortCol==='wood_balance'&&sortDir===1"
-                [class.th-sort--desc]="sortCol==='wood_balance'&&sortDir===-1">
-                <img src="assets/woodpallette.png" style="height:18px;vertical-align:middle;margin-right:4px" alt="">Bois <i class="pi pi-sort-alt"></i>
-              </th>
+              <!-- Dynamic columns -->
+              @for (col of visibleColumns; track col.field) {
+                @if (col.sortable) {
+                  <th class="th-sort" [style.min-width]="col.width"
+                    (click)="sortBy(col.field)"
+                    [class.th-sort--asc]="sortCol===col.field&&sortDir===1"
+                    [class.th-sort--desc]="sortCol===col.field&&sortDir===-1">
+                    {{ col.header }} <i class="pi pi-sort-alt"></i>
+                  </th>
+                } @else {
+                  <th [style.min-width]="col.width">{{ col.header }}</th>
+                }
+              }
+              <!-- Actions always last -->
               <th style="width:7rem"></th>
             </tr>
           </thead>
           <tbody>
             @for (c of sorted; track c.id; let i = $index) {
               <tr class="table-row-animate" [style.--row-delay]="i * 20 + 'ms'">
-                <td><code class="font-mono text-muted">{{ c.code || '—' }}</code></td>
+                <!-- Name always first -->
                 <td>
                   <div class="table-item-info">
                     <span class="table-item-name">{{ c.name }}</span>
@@ -85,30 +105,44 @@
                     }
                   </div>
                 </td>
-                <td><span [class]="categoryBadge[c.category]">{{ categoryLabel[c.category] }}</span></td>
-                <td class="text-muted">{{ c.phone || '—' }}</td>
-                <td>
-                  @if ((c.plastic_out ?? 0) > 0) {
-                    <button class="palette-pill" (click)="openPop($event, c, 'plastique')">
-                      <img src="assets/plastiquepallette.png" class="palette-pill__img" alt="">
-                      <span class="palette-pill__count palette-pill__count--plastic">{{ c.plastic_out }}</span>
-                      <i class="pi pi-chevron-down palette-pill__caret"></i>
-                    </button>
-                  } @else {
-                    <span class="text-muted">0</span>
-                  }
-                </td>
-                <td>
-                  @if ((c.wood_out ?? 0) > 0) {
-                    <button class="palette-pill" (click)="openPop($event, c, 'bois')">
-                      <img src="assets/woodpallette.png" class="palette-pill__img" alt="">
-                      <span class="palette-pill__count palette-pill__count--wood">{{ c.wood_out }}</span>
-                      <i class="pi pi-chevron-down palette-pill__caret"></i>
-                    </button>
-                  } @else {
-                    <span class="text-muted">0</span>
-                  }
-                </td>
+                <!-- Dynamic columns -->
+                @for (col of visibleColumns; track col.field) {
+                  <td>
+                    @switch (col.field) {
+                      @case ('code') {
+                        <code class="font-mono text-muted">{{ c.code || '—' }}</code>
+                      }
+                      @case ('category') {
+                        <span [class]="categoryBadge[c.category]">{{ categoryLabel[c.category] }}</span>
+                      }
+                      @case ('phone') {
+                        <span class="text-muted">{{ c.phone || '—' }}</span>
+                      }
+                      @case ('nom_sodichn') {
+                        @if (editingSodichnId === c.id) {
+                          <input class="inline-input"
+                            [(ngModel)]="editingSodichnValue"
+                            [placeholder]="sodichnPlaceholder"
+                            (keydown.enter)="saveSodichn(c)"
+                            (keydown.escape)="cancelEditSodichn()"
+                            (blur)="cancelEditSodichn()"
+                            (click)="$event.stopPropagation()"
+                            autofocus />
+                        } @else {
+                          <span (click)="startEditSodichn(c)"
+                            [style]="!c.nom_sodichn ? 'cursor:pointer;min-width:120px;display:inline-block;font-size:0.65rem' : 'cursor:pointer;min-width:120px;display:inline-block'"
+                            [class.text-muted]="!c.nom_sodichn">
+                            {{ c.nom_sodichn || sodichnPlaceholder }}
+                          </span>
+                        }
+                      }
+                      @default {
+                        <span class="text-muted">{{ getVal(c, col.field) }}</span>
+                      }
+                    }
+                  </td>
+                }
+                <!-- Actions always last -->
                 <td class="actions-cell">
                   <button class="table-action-btn" title="Modifier" (click)="openEdit(c)">
                     <i class="pi pi-pencil"></i>

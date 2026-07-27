@@ -1,0 +1,105 @@
+<div class="cm-container">
+
+  <!-- Stats bar -->
+  <div class="cm-stats-bar">
+    <div class="cm-stats-left">
+      <button class="back-btn" type="button" (click)="goBack()">
+        <i class="pi pi-arrow-left"></i>
+        <span>Clients</span>
+      </button>
+      <div class="cm-stat-divider"></div>
+      <div class="cm-stat">
+        <i class="pi pi-map-marker"></i>
+        <span class="cm-stat-val">{{ filteredClients.length }}</span>
+        <span class="cm-stat-lbl">sur la carte</span>
+      </div>
+      @for (def of categoryDefs; track def.key) {
+        <div class="cm-stat">
+          <span class="cm-dot" [style.background]="def.color"></span>
+          <span class="cm-stat-val">{{ countByCategory(def.key) }}</span>
+          <span class="cm-stat-lbl">{{ def.label }}</span>
+        </div>
+      }
+    </div>
+    <div class="cm-stats-right">
+      <span class="cm-stat-lbl">{{ clientsWithLocation.length }} / {{ allClients.length }} géolocalisés</span>
+    </div>
+  </div>
+
+  <!-- Map wrapper -->
+  <div class="cm-map-wrap">
+
+    @if (loading) {
+      <div class="cm-loading">
+        <i class="pi pi-spin pi-spinner"></i>
+        <span>Chargement des clients…</span>
+      </div>
+    }
+
+    <div id="clients-map-el" class="cm-map"></div>
+
+    <!-- Floating search -->
+    <div class="cm-search-overlay">
+      <div class="table-search">
+        <div class="search-icon"><i class="pi pi-search"></i></div>
+        <input type="text" placeholder="Rechercher un client, commune…"
+          [(ngModel)]="searchQuery" (input)="onSearch()">
+        @if (searchQuery) {
+          <button class="clear-search" type="button" (click)="clearSearch()">
+            <i class="pi pi-times"></i>
+          </button>
+          <span class="cm-count-badge">{{ filteredClients.length }}</span>
+        }
+      </div>
+    </div>
+
+    <!-- Client detail panel -->
+    @if (selectedClient) {
+      <div class="cm-panel">
+        <div class="cm-panel-header">
+          <div class="cm-panel-avatar" [style.background]="categoryColor(selectedClient.category)">
+            {{ selectedClient.name.charAt(0).toUpperCase() }}
+          </div>
+          <div class="cm-panel-info">
+            <div class="cm-panel-name">{{ selectedClient.name }}</div>
+            <span class="cm-panel-badge"
+              [style.background]="categoryColor(selectedClient.category) + '22'"
+              [style.color]="categoryColor(selectedClient.category)">
+              {{ categoryLabel(selectedClient.category) }}
+            </span>
+          </div>
+          <button class="cm-panel-close" type="button" (click)="closePanel()">
+            <i class="pi pi-times"></i>
+          </button>
+        </div>
+        <div class="cm-panel-body">
+          @if (selectedClient.phone) {
+            <div class="cm-panel-row">
+              <i class="pi pi-phone"></i>
+              <span>{{ selectedClient.phone }}</span>
+            </div>
+          }
+          @if (selectedClient.commune || selectedClient.daira) {
+            <div class="cm-panel-row">
+              <i class="pi pi-map-marker"></i>
+              <span>{{ locationLabel(selectedClient) }}</span>
+            </div>
+          }
+          @if (selectedClient.address) {
+            <div class="cm-panel-row">
+              <i class="pi pi-home"></i>
+              <span>{{ selectedClient.address }}</span>
+            </div>
+          }
+          @if (selectedClient.vendeur) {
+            <div class="cm-panel-row">
+              <i class="pi pi-user"></i>
+              <span>{{ selectedClient.vendeur }}</span>
+            </div>
+          }
+        </div>
+      </div>
+    }
+
+  </div>
+</div>

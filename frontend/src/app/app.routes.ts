@@ -18,6 +18,7 @@ export const routes: Routes = [
       { path: 'upload',   canActivate: [adminOrEmployeGuard], loadComponent: () => import('./pages/upload/upload.component').then(m => m.UploadComponent) },
 
       { path: 'clients',              canActivate: [adminOrEmployeGuard], loadComponent: () => import('./pages/clients/clients.component').then(m => m.ClientsComponent) },
+      { path: 'clients/carte',        canActivate: [adminOrEmployeGuard], loadComponent: () => import('./pages/clients/clients-map/clients-map.component').then(m => m.ClientsMapComponent) },
       { path: 'clients/nouveau',      canActivate: [adminOrEmployeGuard], loadComponent: () => import('./pages/clients/client-form/client-form.component').then(m => m.ClientFormComponent) },
       { path: 'clients/:id/modifier', canActivate: [adminOrEmployeGuard], loadComponent: () => import('./pages/clients/client-form/client-form.component').then(m => m.ClientFormComponent) },
 

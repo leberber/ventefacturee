@@ -1,9 +1,5 @@
 import { Component, OnInit, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
-import { Toast } from 'primeng/toast';
-import { Button } from 'primeng/button';
-import { InputNumber } from 'primeng/inputnumber';
 import { MessageService } from 'primeng/api';
 
 import { ConfigService } from '../../core/services/config.service';
@@ -11,7 +7,7 @@ import { ConfigService } from '../../core/services/config.service';
 @Component({
   selector: 'app-settings',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, Toast, Button, InputNumber],
+  imports: [ReactiveFormsModule],
   providers: [MessageService],
   templateUrl: './settings.component.html',
 })

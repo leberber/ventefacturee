@@ -41,6 +41,32 @@
   }
 }
 
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius-lg);
+  border: var(--border-width) solid var(--surface-border);
+  background: var(--surface-card);
+  color: var(--text-color-secondary);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  white-space: nowrap;
+
+  i { font-size: 0.8rem; }
+
+  &:hover {
+    background: var(--surface-hover);
+    color: var(--text-color);
+    border-color: var(--primary-color);
+  }
+
+  &:active { transform: scale(0.98); }
+}
+
 .btn-add {
   display: inline-flex;
   align-items: center;
