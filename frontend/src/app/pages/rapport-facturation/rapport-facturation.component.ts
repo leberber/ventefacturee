@@ -51,6 +51,14 @@ export class RapportFacturationComponent implements OnInit {
   rapport: RapportFacturation | null = null;
   displayMode: 'brut' | 'unites' = 'unites';
   excludeBackOffice = true;
+  private _sourceStats: Record<string, { lignes: number }> | null = null;
+
+  get boRatio(): string {
+    if (!this._sourceStats) return '';
+    const bo = this._sourceStats['BackOffice']?.lignes ?? 0;
+    const total = Object.values(this._sourceStats).reduce((s, v) => s + v.lignes, 0);
+    return `${bo.toLocaleString('fr-FR')} / ${total.toLocaleString('fr-FR')}`;
+  }
 
   ngOnInit(): void {
     const qp = this.route.snapshot.queryParamMap;
@@ -66,6 +74,8 @@ export class RapportFacturationComponent implements OnInit {
         if (initFdv && fdvs.includes(initFdv)) {
           this.selectedFdv = initFdv;
           this.loadClients();
+          this.rapportSvc.getSourceStats(this.selectedMois, this.selectedFdv)
+            .subscribe(d => this._sourceStats = d);
         }
       });
     });
@@ -83,8 +93,11 @@ export class RapportFacturationComponent implements OnInit {
     this.allClients = [];
     this.selectedClients = new Set();
     this.rapport = null;
+    this._sourceStats = null;
     if (this.selectedFdv) {
       this.loadClients();
+      this.rapportSvc.getSourceStats(this.selectedMois, this.selectedFdv)
+        .subscribe(d => this._sourceStats = d);
     }
   }
 

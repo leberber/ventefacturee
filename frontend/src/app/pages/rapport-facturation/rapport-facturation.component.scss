@@ -453,6 +453,16 @@
   }
 }
 
+.rf-bo-ratio {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--text-color-secondary);
+  background: var(--surface-200, #e5e7eb);
+  border-radius: 999px;
+  padding: 0.1rem 0.45rem;
+  margin-left: 0.1rem;
+}
+
 .rf-btn {
   display: inline-flex;
   align-items: center;

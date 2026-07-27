@@ -8,7 +8,7 @@ import zipfile
 
 from fastapi import APIRouter, Depends, Query
 from fastapi.responses import StreamingResponse
-from sqlalchemy import or_
+from sqlalchemy import func, distinct as sa_distinct, or_, select as sql_select
 from sqlmodel import Session, select
 
 from app.api.deps import get_current_user
@@ -19,6 +19,28 @@ from app.models.produit import Produit
 router = APIRouter()
 
 FAMILLES_RAPPORT = ['sucre', 'huile']
+
+
+@router.get("/source-stats")
+def get_source_stats(
+    annee_mois: str = Query(...),
+    nom_fdv: str = Query(...),
+    session: Session = Depends(get_session),
+) -> Any:
+    stmt = (
+        sql_select(
+            Vente.source,
+            func.count(Vente.id).label("lignes"),
+        )
+        .where(Vente.annee_mois == annee_mois)
+        .where(Vente.nom_fdv == nom_fdv)
+        .group_by(Vente.source)
+    )
+    result: dict = {}
+    for r in session.execute(stmt).all():
+        key = r.source if r.source else "Inconnu"
+        result[key] = {"lignes": r.lignes}
+    return result
 
 
 

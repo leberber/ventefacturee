@@ -27,6 +27,11 @@ export interface RapportFacturation {
 export class RapportsService {
   private http = inject(HttpClient);
 
+  getSourceStats(annee_mois: string, nom_fdv: string) {
+    const p = new HttpParams().set('annee_mois', annee_mois).set('nom_fdv', nom_fdv);
+    return this.http.get<Record<string, { lignes: number }>>('/api/v1/rapports/source-stats', { params: p });
+  }
+
   getClients(annee_mois: string, nom_fdv: string, source: string) {
     const p = new HttpParams()
       .set('annee_mois', annee_mois)
