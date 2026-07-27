@@ -257,6 +257,8 @@ def export_clients_zip(
                 if use_unites and col:
                     qty = qty * col
                 qty = round(qty, 2)
+                if qty == 0:
+                    continue
                 prix = get_prix(key)
                 ws.append([key, qty, prix])
 
