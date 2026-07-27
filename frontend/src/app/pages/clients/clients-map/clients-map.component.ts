@@ -3,7 +3,6 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import * as L from 'leaflet';
-import 'leaflet.markercluster';
 
 import { ClientsService } from '../../../core/services/clients.service';
 import { Client } from '../../../core/models/client.model';
@@ -81,7 +80,9 @@ export class ClientsMapComponent implements OnInit, OnDestroy {
     this.map?.remove();
   }
 
-  private initMap(): void {
+  private async initMap(): Promise<void> {
+    (window as any).L = L;
+    await import('leaflet.markercluster');
     this.clusterGroup = (L as any).markerClusterGroup({
       maxClusterRadius: 50,
       iconCreateFunction: (cluster: any) => {
