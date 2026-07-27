@@ -92,13 +92,14 @@
             <th class="col-center">Unité</th>
             <th class="col-center">Volume</th>
             <th class="col-center">Poids</th>
+            <th class="col-center">Prix</th>
           </tr>
         </thead>
         <tbody>
           @if (loading()) {
             @for (_ of [1,2,3,4,5,6,7,8]; track $index) {
               <tr>
-                <td colspan="11" style="padding:0.6rem 1rem">
+                <td colspan="12" style="padding:0.6rem 1rem">
                   <div style="height:1.1rem;border-radius:6px;background:var(--surface-200);animation:pulse 1.2s infinite alternate"></div>
                 </td>
               </tr>
@@ -237,6 +238,29 @@
                         <i class="pi pi-spin pi-spinner cell-spinner"></i>
                       } @else {
                         <span [class.text-muted]="p.poids == null">{{ p.poids != null ? p.poids : '—' }}</span>
+                      }
+                      <i class="pi pi-pencil cell-pencil"></i>
+                    </div>
+                  }
+                </td>
+
+                <!-- Prix -->
+                <td class="col-center cell-editable"
+                  (click)="startEdit(p, 'prix', $event)"
+                  [class.cell-editing]="isEditing(p.code_produit, 'prix')">
+                  @if (isEditing(p.code_produit, 'prix')) {
+                    <input type="number" class="cell-input" autofocus min="0" step="0.01"
+                      [value]="editingValue()"
+                      (input)="editingValue.set(+$any($event.target).value || null)"
+                      (blur)="saveEdit(p)"
+                      (keydown.enter)="saveEdit(p)"
+                      (keydown.escape)="cancelEdit()" />
+                  } @else {
+                    <div class="cell-display cell-display--center">
+                      @if (savingCell()?.code === p.code_produit && savingCell()?.field === 'prix') {
+                        <i class="pi pi-spin pi-spinner cell-spinner"></i>
+                      } @else {
+                        <span [class.text-muted]="p.prix == null">{{ p.prix != null ? p.prix : '—' }}</span>
                       }
                       <i class="pi pi-pencil cell-pencil"></i>
                     </div>

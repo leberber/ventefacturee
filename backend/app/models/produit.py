@@ -19,6 +19,7 @@ class Produit(SQLModel, table=True):
     unite: Optional[str] = Field(default=None, max_length=10)
     volume: Optional[float] = Field(default=None)
     poids: Optional[float] = Field(default=None)
+    prix: Optional[float] = Field(default=None)
 
     updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
@@ -37,6 +38,7 @@ class ProduitRead(SQLModel):
     unite: Optional[str] = None
     volume: Optional[float] = None
     poids: Optional[float] = None
+    prix: Optional[float] = None
     updated_at: datetime
 
 
@@ -46,6 +48,7 @@ class ProduitUpdate(SQLModel):
     unite: Optional[str] = None
     volume: Optional[float] = None
     poids: Optional[float] = None
+    prix: Optional[float] = None
 
 
 class ProduitPage(SQLModel):
