@@ -1,14 +1,16 @@
+import json
 from typing import Any, List, Optional
 
 import pandas as pd
-from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile
-from sqlalchemy import func
+from fastapi import APIRouter, Depends, File, Query, UploadFile
+from fastapi.responses import StreamingResponse
+from sqlalchemy import func, delete as sa_delete
 from sqlmodel import Session, select
 
 from app.api.deps import get_current_user
 from app.database import get_session
 from app.models.user import User
-from app.models.vente import Vente, VentePage, VenteRead, UploadResponse
+from app.models.vente import Vente, VentePage, VenteRead
 from app.utils.parse import parse_file
 
 router = APIRouter()
@@ -200,48 +202,105 @@ def list_clients(
     return [v for v in session.exec(q).all() if v]
 
 
-@router.post("/upload", response_model=UploadResponse)
+@router.post("/upload")
 async def upload_ventes(
     file: UploadFile = File(...),
+    mode: Optional[str] = Query(default=None),  # 'skip' | 'replace'
     session: Session = Depends(get_session),
     current_user: User = Depends(get_current_user),
-) -> Any:
+) -> StreamingResponse:
     content = await file.read()
+    filename = file.filename or ''
 
-    try:
-        df = parse_file(content, file.filename or '')
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=f"Impossible de lire le fichier : {e}")
+    def event(data: dict) -> str:
+        return f"data: {json.dumps(data, ensure_ascii=False)}\n\n"
 
-    df = df.dropna(subset=['Date'])
-    if df.empty:
-        raise HTTPException(status_code=400, detail="Aucune ligne valide trouvée dans le fichier")
+    def generate():
+        yield event({"progress": 5, "message": "Lecture du fichier..."})
 
-    months_in_file = df['Date'].dt.strftime('%Y-%m').unique().tolist()
+        try:
+            df = parse_file(content, filename)
+        except Exception as e:
+            yield event({"error": f"Impossible de lire le fichier : {e}"})
+            return
 
-    existing = session.exec(
-        select(Vente.annee_mois).where(Vente.annee_mois.in_(months_in_file)).distinct()
-    ).first()
-    if existing:
-        raise HTTPException(
-            status_code=409,
-            detail=f"Les données pour {existing} sont déjà importées",
-        )
+        df = df.dropna(subset=['Date'])
+        if df.empty:
+            yield event({"error": "Aucune ligne valide trouvée dans le fichier"})
+            return
 
-    ventes = []
-    for _, row in df.iterrows():
-        date_val = row.get('Date')
-        if pd.isna(date_val):
-            continue
-        row_month = date_val.strftime('%Y-%m')
-        ventes.append(_row_to_vente(row, row_month, current_user.id))
+        total_rows = len(df)
+        date_min = df['Date'].min().strftime('%d/%m/%Y')
+        date_max = df['Date'].max().strftime('%d/%m/%Y')
+        yield event({
+            "progress": 15,
+            "message": f"{total_rows:,} lignes trouvées...",
+            "file_info": {"total_rows": total_rows, "date_min": date_min, "date_max": date_max},
+        })
 
-    session.add_all(ventes)
-    session.commit()
+        # Date overlap check
+        file_dates = list({d for d in df['Date'].dt.date if d is not None})
+        existing_dates = set(session.exec(
+            select(Vente.date_commande)
+            .where(Vente.date_commande.in_(file_dates))
+            .distinct()
+        ).all())
+        existing_dates.discard(None)
 
-    dominant_month = df['Date'].dt.strftime('%Y-%m').value_counts().idxmax()
-    return UploadResponse(
-        lignes=len(ventes),
-        annee_mois=dominant_month,
-        message=f"{len(ventes):,} lignes importées pour {dominant_month}",
-    )
+        if existing_dates and mode is None:
+            overlap_sorted = sorted(existing_dates)
+            yield event({
+                "type": "overlap",
+                "overlap_min": overlap_sorted[0].strftime('%d/%m/%Y'),
+                "overlap_max": overlap_sorted[-1].strftime('%d/%m/%Y'),
+                "overlap_count": len(overlap_sorted),
+            })
+            return
+
+        if mode == 'replace' and existing_dates:
+            yield event({"progress": 20, "message": "Suppression des données existantes..."})
+            session.exec(sa_delete(Vente).where(Vente.date_commande.in_(list(existing_dates))))
+            session.commit()
+        elif mode == 'skip' and existing_dates:
+            df = df[~df['Date'].dt.date.isin(existing_dates)]
+            if df.empty:
+                yield event({"error": "Toutes les dates sont déjà présentes dans la base"})
+                return
+
+        yield event({"progress": 25, "message": "Préparation des enregistrements..."})
+
+        ventes = []
+        for _, row in df.iterrows():
+            date_val = row.get('Date')
+            if pd.isna(date_val):
+                continue
+            row_month = date_val.strftime('%Y-%m')
+            ventes.append(_row_to_vente(row, row_month, current_user.id))
+
+        total = len(ventes)
+        if total == 0:
+            yield event({"error": "Aucune ligne valide à insérer"})
+            return
+
+        BATCH = 1000
+        for i in range(0, total, BATCH):
+            batch = ventes[i:i + BATCH]
+            session.add_all(batch)
+            session.flush()
+            inserted = min(i + len(batch), total)
+            progress = 30 + int(65 * inserted / total)
+            yield event({
+                "progress": progress,
+                "message": f"{inserted:,} / {total:,} lignes insérées...",
+            })
+
+        session.commit()
+
+        dominant_month = df['Date'].dt.strftime('%Y-%m').value_counts().idxmax()
+        yield event({
+            "progress": 100,
+            "done": True,
+            "message": f"{total:,} lignes importées avec succès",
+        })
+
+    return StreamingResponse(generate(), media_type="text/event-stream")

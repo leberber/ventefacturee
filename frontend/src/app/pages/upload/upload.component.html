@@ -2,7 +2,7 @@
   <div class="upload-card">
     <div class="upload-card__header">
       <h2>Importer des données</h2>
-      <p>Déposez votre fichier mensuel Excel ou CSV pour l'enregistrer dans la base</p>
+      <p>Déposez votre fichier Excel Sales Out pour l'enregistrer dans la base</p>
     </div>
 
     <div
@@ -12,11 +12,11 @@
       (dragover)="onDragOver($event)"
       (dragleave)="onDragLeave()"
       (drop)="onDrop($event)"
-      (click)="!loading() && fileInput.click()"
+      (click)="!loading() && !overlap() && fileInput.click()"
     >
       @if (loading()) {
         <i class="pi pi-spin pi-spinner drop-zone__icon"></i>
-        <span class="drop-zone__text">Traitement en cours...</span>
+        <span class="drop-zone__text">{{ progressMessage() || 'Traitement en cours...' }}</span>
       } @else {
         <i class="pi pi-cloud-upload drop-zone__icon"></i>
         <span class="drop-zone__text">Déposer un fichier ici</span>
@@ -27,6 +27,57 @@
         </div>
       }
     </div>
+
+    <!-- Progress bar -->
+    @if (loading()) {
+      <div class="progress-bar-wrap">
+        <div class="progress-bar-track">
+          <div class="progress-bar-fill" [style.width.%]="progress()"></div>
+        </div>
+        <span class="progress-pct">{{ progress() }}%</span>
+      </div>
+    }
+
+    <!-- File info summary -->
+    @if (fileInfo()) {
+      <div class="file-info-box">
+        <div class="file-info-box__item">
+          <i class="pi pi-calendar"></i>
+          <span>{{ fileInfo()!.date_min }} → {{ fileInfo()!.date_max }}</span>
+        </div>
+        <div class="file-info-box__sep"></div>
+        <div class="file-info-box__item">
+          <i class="pi pi-list"></i>
+          <span>{{ fileInfo()!.total_rows | number }} lignes</span>
+        </div>
+      </div>
+    }
+
+    <!-- Overlap dialog -->
+    @if (overlap()) {
+      <div class="overlap-box">
+        <div class="overlap-box__icon"><i class="pi pi-exclamation-triangle"></i></div>
+        <div class="overlap-box__body">
+          <p class="overlap-box__title">Données déjà présentes</p>
+          <p class="overlap-box__msg">
+            {{ overlap()!.overlap_count }} dates déjà dans la base
+            ({{ overlap()!.overlap_min }} → {{ overlap()!.overlap_max }}).
+            Que souhaitez-vous faire ?
+          </p>
+          <div class="overlap-box__actions">
+            <button class="btn-overlap btn-overlap--skip" (click)="skip()">
+              <i class="pi pi-forward"></i> Ignorer ces dates
+            </button>
+            <button class="btn-overlap btn-overlap--replace" (click)="replace()">
+              <i class="pi pi-refresh"></i> Remplacer
+            </button>
+            <button class="btn-overlap btn-overlap--cancel" (click)="cancel()">
+              Annuler
+            </button>
+          </div>
+        </div>
+      </div>
+    }
 
     <input
       #fileInput
