@@ -146,11 +146,15 @@
         </thead>
         <tbody>
           @if (loading) {
-            @for (_ of [1,2,3,4,5,6,7,8]; track $index) {
-              <tr>
-                <td [attr.colspan]="visibleColumns.length" style="padding:0.6rem 1rem">
-                  <div style="height:1.1rem;border-radius:6px;background:var(--surface-200);animation:pulse 1.2s infinite alternate"></div>
-                </td>
+            @for (_ of skeletonRows; track $index; let ri = $index) {
+              <tr class="sk-row">
+                @for (col of visibleColumns; track col.field; let ci = $index) {
+                  <td [style.min-width]="col.width">
+                    <div class="sk-cell"
+                         [style.width]="skWidths[(ri + ci) % skWidths.length]"
+                         [style.animation-delay]="((ri * 3 + ci) % 18) * 60 + 'ms'"></div>
+                  </td>
+                }
               </tr>
             }
           } @else {

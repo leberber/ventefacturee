@@ -152,11 +152,39 @@
 
   <div class="rf-main">
 
-    @if (!rapport) {
+    @if (loading) {
+      <div class="rf-skeleton">
+        @for (_ of [1,2,3]; track $index; let bi = $index) {
+          <div class="rf-sk-block">
+            <div class="rf-sk-header">
+              <div class="rf-sk-avatar"></div>
+              <div class="rf-sk-name" [style.width]="bi === 0 ? '38%' : bi === 1 ? '52%' : '44%'"></div>
+            </div>
+            <div class="rf-sk-table">
+              <div class="rf-sk-row rf-sk-row--head">
+                @for (_ of [1,2,3,4,5,6]; track $index) {
+                  <div class="rf-sk-th"></div>
+                }
+              </div>
+              @for (_ of [1,2,3]; track $index; let ri = $index) {
+                <div class="rf-sk-row">
+                  <div class="rf-sk-date"></div>
+                  @for (_ of [1,2,3,4,5]; track $index; let ci = $index) {
+                    <div class="rf-sk-cell"
+                         [class.rf-sk-cell--empty]="(bi + ri + ci) % 3 === 0"
+                         [style.animation-delay]="((bi * 15 + ri * 5 + ci) % 24) * 55 + 'ms'"></div>
+                  }
+                </div>
+              }
+            </div>
+          </div>
+        }
+      </div>
+    } @else if (!rapport) {
       <div class="table-empty rf-empty">
         <i class="pi pi-file-pdf rf-empty__icon"></i>
         <p>Le rapport apparaîtra ici</p>
-        <span>Sélectionnez la période, le prévendeur puis cliquez sur Générer</span>
+        <span>Sélectionnez la période et le prévendeur</span>
       </div>
     } @else {
       <div class="rapport-print">

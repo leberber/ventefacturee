@@ -94,6 +94,9 @@ export class VentesComponent implements OnInit, AfterViewInit, OnDestroy {
     return this.allColumns.filter(c => c.visible);
   }
 
+  readonly skeletonRows = Array(12).fill(0);
+  readonly skWidths = ['72%','55%','88%','50%','78%','63%','90%','42%','70%','82%','58%','68%'];
+
   get hasMore(): boolean {
     return this.rows.length < this.total;
   }
