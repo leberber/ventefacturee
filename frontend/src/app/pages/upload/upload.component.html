@@ -1,10 +1,18 @@
 <div class="upload-page">
   <div class="upload-card">
+
+    <!-- Header -->
     <div class="upload-card__header">
-      <h2>Importer des données</h2>
-      <p>Déposez votre fichier Excel Sales Out pour l'enregistrer dans la base</p>
+      <div class="upload-card__icon">
+        <i class="pi pi-cloud-upload"></i>
+      </div>
+      <div>
+        <h2>Importer des données</h2>
+        <p>Déposez votre fichier Excel Sales Out pour l'enregistrer dans la base</p>
+      </div>
     </div>
 
+    <!-- Drop zone -->
     <div
       class="drop-zone"
       [class.drop-zone--over]="dragOver()"
@@ -15,8 +23,19 @@
       (click)="!loading() && !overlap() && fileInput.click()"
     >
       @if (loading()) {
-        <i class="pi pi-spin pi-spinner drop-zone__icon"></i>
-        <span class="drop-zone__text">{{ progressMessage() || 'Traitement en cours...' }}</span>
+        <div class="skeleton-wrap">
+          <div class="skeleton-row">
+            <div class="skeleton-block skeleton-block--icon"></div>
+          </div>
+          <div class="skeleton-block skeleton-block--title"></div>
+          <div class="skeleton-block skeleton-block--sub"></div>
+          <div class="skeleton-lines">
+            <div class="skeleton-block skeleton-block--line skeleton-block--line-a"></div>
+            <div class="skeleton-block skeleton-block--line skeleton-block--line-b"></div>
+            <div class="skeleton-block skeleton-block--line skeleton-block--line-c"></div>
+          </div>
+          <span class="skeleton-label">{{ progressMessage() || 'Traitement en cours…' }}</span>
+        </div>
       } @else {
         <i class="pi pi-cloud-upload drop-zone__icon"></i>
         <span class="drop-zone__text">Déposer un fichier ici</span>
@@ -30,7 +49,7 @@
 
     <!-- Progress bar -->
     @if (loading()) {
-      <div class="progress-bar-wrap">
+      <div class="progress-section">
         <div class="progress-bar-track">
           <div class="progress-bar-fill" [style.width.%]="progress()"></div>
         </div>
@@ -38,17 +57,26 @@
       </div>
     }
 
-    <!-- File info summary -->
+    <!-- File info stats -->
     @if (fileInfo()) {
-      <div class="file-info-box">
-        <div class="file-info-box__item">
-          <i class="pi pi-calendar"></i>
-          <span>{{ fileInfo()!.date_min }} → {{ fileInfo()!.date_max }}</span>
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-card__icon-wrap">
+            <i class="pi pi-calendar stat-card__icon"></i>
+          </div>
+          <div class="stat-card__body">
+            <span class="stat-card__value">{{ fileInfo()!.date_min }} → {{ fileInfo()!.date_max }}</span>
+            <span class="stat-card__label">Période</span>
+          </div>
         </div>
-        <div class="file-info-box__sep"></div>
-        <div class="file-info-box__item">
-          <i class="pi pi-list"></i>
-          <span>{{ fileInfo()!.total_rows | number }} lignes</span>
+        <div class="stat-card">
+          <div class="stat-card__icon-wrap">
+            <i class="pi pi-database stat-card__icon"></i>
+          </div>
+          <div class="stat-card__body">
+            <span class="stat-card__value">{{ fileInfo()!.total_rows | number }}</span>
+            <span class="stat-card__label">Lignes</span>
+          </div>
         </div>
       </div>
     }
@@ -93,5 +121,6 @@
         <span>{{ result()!.message }}</span>
       </div>
     }
+
   </div>
 </div>
