@@ -20,6 +20,7 @@ class Produit(SQLModel, table=True):
     volume: Optional[float] = Field(default=None)
     poids: Optional[float] = Field(default=None)
     prix: Optional[float] = Field(default=None)
+    facturable: bool = Field(default=True)
 
     updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
@@ -39,6 +40,7 @@ class ProduitRead(SQLModel):
     volume: Optional[float] = None
     poids: Optional[float] = None
     prix: Optional[float] = None
+    facturable: bool = True
     updated_at: datetime
 
 
@@ -49,6 +51,7 @@ class ProduitUpdate(SQLModel):
     volume: Optional[float] = None
     poids: Optional[float] = None
     prix: Optional[float] = None
+    facturable: Optional[bool] = None
 
 
 class ProduitPage(SQLModel):

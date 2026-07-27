@@ -66,6 +66,12 @@ def get_rapport_facturation(
     code_to_label = {p.code_produit: (p.nom_produit or p.description_produit) for p in produits}
     code_to_produit = {p.code_produit: p for p in produits}
 
+    # Exclude products explicitly marked non-facturable
+    rows = [
+        r for r in rows
+        if not (r.code_produit and r.code_produit in code_to_produit and not code_to_produit[r.code_produit].facturable)
+    ]
+
     def display_label(r: Vente) -> str:
         if r.code_produit and r.code_produit in code_to_label and code_to_label[r.code_produit]:
             return code_to_label[r.code_produit]
@@ -162,6 +168,12 @@ def export_clients_zip(
     codes = {r.code_produit for r in rows if r.code_produit}
     produits_db = session.exec(select(Produit).where(Produit.code_produit.in_(codes))).all()
     code_to_produit = {p.code_produit: p for p in produits_db}
+
+    # Exclude products explicitly marked non-facturable
+    rows = [
+        r for r in rows
+        if not (r.code_produit and r.code_produit in code_to_produit and not code_to_produit[r.code_produit].facturable)
+    ]
 
     use_unites = display_mode == "unites"
 

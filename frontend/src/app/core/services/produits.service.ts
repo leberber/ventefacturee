@@ -14,6 +14,7 @@ export interface ProduitRead {
   volume: number | null;
   poids: number | null;
   prix: number | null;
+  facturable: boolean;
   updated_at: string;
 }
 
@@ -39,7 +40,7 @@ export class ProduitsService {
     return this.http.get<string[]>('/api/v1/produits/familles');
   }
 
-  update(code: string, body: { nom_produit?: string | null; colisage?: number | null; unite?: string | null; volume?: number | null; poids?: number | null; prix?: number | null }) {
+  update(code: string, body: { nom_produit?: string | null; colisage?: number | null; unite?: string | null; volume?: number | null; poids?: number | null; prix?: number | null; facturable?: boolean }) {
     return this.http.patch<ProduitRead>(`/api/v1/produits/${encodeURIComponent(code)}`, body);
   }
 

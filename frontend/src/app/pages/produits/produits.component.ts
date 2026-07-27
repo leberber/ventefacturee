@@ -1,20 +1,70 @@
 import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { TooltipModule } from 'primeng/tooltip';
+import { Popover } from 'primeng/popover';
 import { ProduitsService, ProduitRead } from '../../core/services/produits.service';
+
+const LS_KEY = 'ventefacturee_produits_columns';
 
 type SortCol = 'code_produit' | 'description_produit' | 'famille' | 'sous_famille' | 'uom_vente' | 'colisage';
 type EditField = 'nom_produit' | 'colisage' | 'unite' | 'volume' | 'poids' | 'prix';
 
+interface ColDef {
+  field: string;
+  header: string;
+  visible: boolean;
+}
+
 @Component({
   selector: 'app-produits',
   standalone: true,
-  imports: [FormsModule, TooltipModule],
+  imports: [FormsModule, TooltipModule, Popover],
   templateUrl: './produits.component.html',
   styleUrl:    './produits.component.scss',
 })
 export class ProduitsComponent implements OnInit {
   private svc = inject(ProduitsService);
+
+  readonly allColumns: ColDef[] = [
+    { field: 'code_produit',        header: 'Code',              visible: true  },
+    { field: 'description_produit', header: 'Désignation',       visible: true  },
+    { field: 'nom_produit',         header: 'Désignation courte',visible: true  },
+    { field: 'famille',             header: 'Famille',           visible: true  },
+    { field: 'sous_famille',        header: 'Sous-famille',      visible: true  },
+    { field: 'uom_vente',           header: 'UOM Vente',         visible: true  },
+    { field: 'uom_principale',      header: 'UOM P.',            visible: true  },
+    { field: 'colisage',            header: 'Colisage',          visible: true  },
+    { field: 'unite',               header: 'Unité',             visible: true  },
+    { field: 'volume',              header: 'Volume',            visible: false },
+    { field: 'poids',               header: 'Poids',             visible: false },
+    { field: 'prix',                header: 'Prix',              visible: true  },
+    { field: 'facturable',          header: 'Facturable',        visible: true  },
+  ];
+
+  isColVisible(field: string): boolean {
+    return this.allColumns.find(c => c.field === field)?.visible ?? true;
+  }
+
+  toggleColumn(field: string): void {
+    const col = this.allColumns.find(c => c.field === field);
+    if (col) col.visible = !col.visible;
+    this.saveColumnState();
+  }
+
+  private saveColumnState(): void {
+    const state: Record<string, boolean> = {};
+    this.allColumns.forEach(c => (state[c.field] = c.visible));
+    localStorage.setItem(LS_KEY, JSON.stringify(state));
+  }
+
+  private loadColumnState(): void {
+    try {
+      const saved = localStorage.getItem(LS_KEY);
+      if (!saved) return;
+      const state: Record<string, boolean> = JSON.parse(saved);
+      this.allColumns.forEach(c => { if (c.field in state) c.visible = state[c.field]; });
+    } catch { /* ignore */ }
+  }
 
   readonly allProduits  = signal<ProduitRead[]>([]);
   readonly familles     = signal<string[]>([]);
@@ -53,6 +103,7 @@ export class ProduitsComponent implements OnInit {
   readonly totalCount = computed(() => this.allProduits().length);
 
   ngOnInit(): void {
+    this.loadColumnState();
     this.load();
     this.svc.getFamilles().subscribe(d => this.familles.set(d));
   }
@@ -129,6 +180,13 @@ export class ProduitsComponent implements OnInit {
     { background: 'rgba(234,88,12,0.12)',   color: '#c2410c' },
     { background: 'rgba(15,118,110,0.12)',  color: '#0f766e' },
   ];
+
+  toggleFacturable(p: ProduitRead): void {
+    const newVal = !p.facturable;
+    this.svc.update(p.code_produit, { facturable: newVal }).subscribe({
+      next: updated => this.allProduits.update(list => list.map(x => x.code_produit === updated.code_produit ? updated : x)),
+    });
+  }
 
   getFamilleStyle(famille: string | null): { background: string; color: string } {
     if (!famille) return { background: 'transparent', color: 'inherit' };
