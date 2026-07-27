@@ -412,6 +412,17 @@
 // ACTION BUTTONS
 // =============================================================================
 
+.rf-switch-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--text-color-secondary);
+  user-select: none;
+}
+
 // =============================================================================
 // SEGMENTED CONTROL
 // =============================================================================

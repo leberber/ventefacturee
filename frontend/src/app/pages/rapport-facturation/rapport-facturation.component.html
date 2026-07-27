@@ -121,20 +121,19 @@
       }
     </div>
     <div class="table-actions">
+      @if (selectedFdv) {
+        <label class="rf-switch-label">
+          <p-toggleswitch [(ngModel)]="excludeBackOffice" (onChange)="onExcludeChange()" />
+          <span>Exclure Back Office</span>
+        </label>
+      }
       @if (rapport) {
         <div class="rf-seg">
           <button class="rf-seg__btn" [class.rf-seg__btn--active]="displayMode === 'brut'" (click)="displayMode = 'brut'">Brut</button>
           <button class="rf-seg__btn" [class.rf-seg__btn--active]="displayMode === 'unites'" (click)="displayMode = 'unites'">Unités</button>
         </div>
       }
-      @if (allClients.length > 0) {
-        <button class="btn-generate" (click)="generate()"
-          [disabled]="selectedClients.size === 0 || loading">
-          <i class="pi" [class.pi-chart-bar]="!loading" [class.pi-spin]="loading" [class.pi-spinner]="loading"></i>
-          Générer
-        </button>
-      }
-      @if (allClients.length > 0) {
+      @if (selectedFdv) {
         <button class="btn-export" (click)="exportZip()"
           [disabled]="selectedClients.size === 0 || exporting">
           <i class="pi" [class.pi-download]="!exporting" [class.pi-spin]="exporting" [class.pi-spinner]="exporting"></i>

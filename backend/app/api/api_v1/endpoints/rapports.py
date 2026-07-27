@@ -8,6 +8,7 @@ import zipfile
 
 from fastapi import APIRouter, Depends, Query
 from fastapi.responses import StreamingResponse
+from sqlalchemy import or_
 from sqlmodel import Session, select
 
 from app.api.deps import get_current_user
@@ -26,18 +27,21 @@ FAMILLES_RAPPORT = ['sucre', 'huile']
 def list_facturation_clients(
     annee_mois: str = Query(...),
     nom_fdv: str = Query(...),
+    source: Optional[str] = Query(default=None),
     session: Session = Depends(get_session),
 ) -> Any:
     """Return distinct clients for a given FDV/period that have sucre or huile sales."""
-    rows = session.exec(
+    q = (
         select(Vente.nom_client)
         .distinct()
         .where(Vente.annee_mois == annee_mois)
         .where(Vente.nom_fdv == nom_fdv)
         .where(Vente.famille.ilike('sucre') | Vente.famille.ilike('huile'))
         .order_by(Vente.nom_client)
-    ).all()
-    return [r for r in rows if r]
+    )
+    if source and source != 'both':
+        q = q.where(or_(Vente.source != 'BackOffice', Vente.source.is_(None)))
+    return [r for r in session.exec(q).all() if r]
 
 
 @router.get("/facturation")
@@ -45,17 +49,21 @@ def get_rapport_facturation(
     annee_mois: str = Query(...),
     nom_fdv: str = Query(...),
     clients: Optional[List[str]] = Query(default=None),
+    source: Optional[str] = Query(default=None),
     session: Session = Depends(get_session),
     current_user: Any = Depends(get_current_user),
 ) -> Any:
     year, month = int(annee_mois[:4]), int(annee_mois[5:7])
 
-    rows = session.exec(
+    q = (
         select(Vente)
         .where(Vente.annee_mois == annee_mois)
         .where(Vente.nom_fdv == nom_fdv)
         .where(Vente.famille.ilike('sucre') | Vente.famille.ilike('huile'))
-    ).all()
+    )
+    if source and source != 'both':
+        q = q.where(or_(Vente.source != 'BackOffice', Vente.source.is_(None)))
+    rows = session.exec(q).all()
 
     if clients:
         rows = [r for r in rows if r.nom_client in clients]
@@ -147,6 +155,7 @@ def export_clients_zip(
     nom_fdv: str = Query(...),
     clients: Optional[List[str]] = Query(default=None),
     display_mode: str = Query(default="brut"),
+    source: Optional[str] = Query(default=None),
     session: Session = Depends(get_session),
     current_user: Any = Depends(get_current_user),
 ) -> StreamingResponse:
@@ -154,12 +163,15 @@ def export_clients_zip(
     import openpyxl
     from openpyxl.styles import Font
 
-    rows = session.exec(
+    q = (
         select(Vente)
         .where(Vente.annee_mois == annee_mois)
         .where(Vente.nom_fdv == nom_fdv)
         .where(Vente.famille.ilike('sucre') | Vente.famille.ilike('huile'))
-    ).all()
+    )
+    if source and source != 'both':
+        q = q.where(or_(Vente.source != 'BackOffice', Vente.source.is_(None)))
+    rows = session.exec(q).all()
 
     if clients:
         rows = [r for r in rows if r.nom_client in clients]

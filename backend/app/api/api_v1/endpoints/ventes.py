@@ -64,6 +64,7 @@ def _row_to_vente(row: pd.Series, annee_mois: str, uploaded_by_id: int) -> Vente
         date_commande=date_obj,
         num_commande=_safe_str(row.get('N° Commande'), 60),
         type_commande=_safe_str(row.get('Type'), 30),
+        source=_safe_str(row.get('Source'), 30),
         code_client=_safe_str(row.get('Code Client'), 50),
         nom_client=_safe_str(row.get('Nom client'), 150),
         categorie_client=_safe_str(row.get('Categories Client'), 20),

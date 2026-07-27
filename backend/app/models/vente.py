@@ -13,6 +13,7 @@ class Vente(SQLModel, table=True):
     date_commande: Optional[date] = Field(default=None)
     num_commande: Optional[str] = Field(default=None, max_length=60)
     type_commande: Optional[str] = Field(default=None, max_length=30)
+    source: Optional[str] = Field(default=None, max_length=30)
 
     # Client
     code_client: Optional[str] = Field(default=None, max_length=50)
@@ -81,6 +82,7 @@ class VenteRead(SQLModel):
     date_commande: Optional[date] = None
     num_commande: Optional[str] = None
     type_commande: Optional[str] = None
+    source: Optional[str] = None
     code_client: Optional[str] = None
     nom_client: Optional[str] = None
     categorie_client: Optional[str] = None

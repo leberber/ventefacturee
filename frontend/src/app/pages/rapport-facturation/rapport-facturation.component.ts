@@ -5,6 +5,7 @@ import { DatePipe, NgClass } from '@angular/common';
 import { TooltipModule } from 'primeng/tooltip';
 import { Select } from 'primeng/select';
 import { Popover } from 'primeng/popover';
+import { ToggleSwitch } from 'primeng/toggleswitch';
 
 import { VentesService } from '../../core/services/ventes.service';
 import { RapportsService, RapportFacturation } from '../../core/services/rapports.service';
@@ -12,7 +13,7 @@ import { RapportsService, RapportFacturation } from '../../core/services/rapport
 @Component({
   selector: 'app-rapport-facturation',
   standalone: true,
-  imports: [FormsModule, DatePipe, NgClass, TooltipModule, Select, Popover],
+  imports: [FormsModule, DatePipe, NgClass, TooltipModule, Select, Popover, ToggleSwitch],
   templateUrl: './rapport-facturation.component.html',
   styleUrl: './rapport-facturation.component.scss',
 })
@@ -49,7 +50,7 @@ export class RapportFacturationComponent implements OnInit {
   exporting      = false;
   rapport: RapportFacturation | null = null;
   displayMode: 'brut' | 'unites' = 'unites';
-  private autoGenerate = false;
+  excludeBackOffice = true;
 
   ngOnInit(): void {
     const qp = this.route.snapshot.queryParamMap;
@@ -64,7 +65,6 @@ export class RapportFacturationComponent implements OnInit {
         this.fdvs = fdvs;
         if (initFdv && fdvs.includes(initFdv)) {
           this.selectedFdv = initFdv;
-          this.autoGenerate = true;
           this.loadClients();
         }
       });
@@ -88,18 +88,22 @@ export class RapportFacturationComponent implements OnInit {
     }
   }
 
+  get source(): string { return this.excludeBackOffice ? 'FrontOffice' : 'both'; }
+
+  onExcludeChange(): void {
+    this.rapport = null;
+    this.generate();
+  }
+
   loadClients(): void {
     if (!this.selectedMois || !this.selectedFdv) return;
     this.loadingClients = true;
-    this.rapportSvc.getClients(this.selectedMois, this.selectedFdv).subscribe({
+    this.rapportSvc.getClients(this.selectedMois, this.selectedFdv, this.source).subscribe({
       next: d => {
         this.allClients = d;
         this.selectedClients = new Set(d);
         this.loadingClients = false;
-        if (this.autoGenerate) {
-          this.autoGenerate = false;
-          this.generate();
-        }
+        this.generate();
       },
       error: () => this.loadingClients = false,
     });
@@ -109,16 +113,17 @@ export class RapportFacturationComponent implements OnInit {
     const s = new Set(this.selectedClients);
     s.has(name) ? s.delete(name) : s.add(name);
     this.selectedClients = s;
+    this.generate();
   }
 
-  selectAll(): void   { this.selectedClients = new Set(this.allClients); }
-  deselectAll(): void { this.selectedClients = new Set(); }
+  selectAll(): void   { this.selectedClients = new Set(this.allClients); this.generate(); }
+  deselectAll(): void { this.selectedClients = new Set(); this.rapport = null; }
 
   generate(): void {
     const clients = [...this.selectedClients];
     if (!clients.length) return;
     this.loading = true;
-    this.rapportSvc.getFacturation(this.selectedMois, this.selectedFdv, clients).subscribe({
+    this.rapportSvc.getFacturation(this.selectedMois, this.selectedFdv, clients, this.source).subscribe({
       next: d => { this.rapport = d; this.loading = false; },
       error: () => this.loading = false,
     });
@@ -130,7 +135,7 @@ export class RapportFacturationComponent implements OnInit {
     const clients = [...this.selectedClients];
     if (!clients.length || this.exporting) return;
     this.exporting = true;
-    this.rapportSvc.exportClientsZip(this.selectedMois, this.selectedFdv, clients, this.displayMode).subscribe({
+    this.rapportSvc.exportClientsZip(this.selectedMois, this.selectedFdv, clients, this.displayMode, this.source).subscribe({
       next: blob => {
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
