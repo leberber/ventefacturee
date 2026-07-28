@@ -2,7 +2,16 @@
 
   <!-- Header -->
   <div class="pv-header">
-    <div class="pv-header__name">{{ userName }}</div>
+    <div class="pv-header__left">
+      <div class="pv-header__name">{{ userName }}</div>
+      @if (data && !loading) {
+        <div class="pv-header__meta">
+          <span>{{ data.routes.length }} routes</span>
+          <span class="pv-meta-sep">·</span>
+          <span>{{ data.total_clients }} clients</span>
+        </div>
+      }
+    </div>
     <div class="pv-period">
       <button class="pv-period__btn" (click)="prevPeriod()" [disabled]="!canGoPrev">
         <i class="pi pi-chevron-left"></i>
@@ -57,27 +66,34 @@
       </div>
     } @else {
       <div class="pv-routes">
-        @for (route of data.routes; track route.route) {
+        @for (route of data.routes; track route.route; let ri = $index) {
           <div class="pv-route">
 
             <div class="pv-route__header">
+              <span class="pv-route__idx">{{ ri + 1 }}</span>
               <i class="pi pi-map-marker"></i>
               <span>{{ route.route }}</span>
               <span class="pv-route__count">{{ route.clients.length }}</span>
             </div>
 
-            @for (client of route.clients; track client.nom_client) {
+            @for (client of route.clients; track client.nom_client; let ci = $index) {
               <div class="pv-client-card"
                    [class.pv-client-card--open]="isExpanded(route.route + client.nom_client)"
                    (click)="toggleClient(route.route + client.nom_client)">
 
                 <div class="pv-client-head">
+                  <div class="pv-stop-num">{{ ci + 1 }}</div>
                   <div class="pv-avatar">{{ client.nom_client.charAt(0) }}</div>
                   <div class="pv-client-info">
                     <span class="pv-client-name">{{ client.nom_client }}</span>
-                    @if (client.derniere_visite) {
-                      <span class="pv-client-last">{{ client.derniere_visite }}</span>
-                    }
+                    <div class="pv-client-tags">
+                      @for (f of clientFamilies(client); track f) {
+                        <span class="pv-fam-tag pv-fam-tag--{{ f }}">{{ f }}</span>
+                      }
+                      @if (client.derniere_visite) {
+                        <span class="pv-client-last">{{ client.derniere_visite }}</span>
+                      }
+                    </div>
                   </div>
                   <span class="pv-client-total">{{ clientTotal(client) }}</span>
                   <i class="pi pv-chevron"

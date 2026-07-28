@@ -98,5 +98,17 @@ export class PrevendeurComponent implements OnInit {
     return '';
   }
 
+  clientFamilies(client: PrevClient): string[] {
+    if (!this.data) return [];
+    const fams = new Set<string>();
+    for (const [prod, qty] of Object.entries(client.totaux)) {
+      if (qty && qty > 0) {
+        const f = this.data.products_meta[prod]?.famille;
+        if (f) fams.add(f);
+      }
+    }
+    return Array.from(fams);
+  }
+
   readonly skeletonRows = Array(6).fill(0);
 }
