@@ -6,6 +6,10 @@ services:
     env_file:
       - /home/ec2-user/.env
     restart: unless-stopped
+    volumes:
+      - /home/ec2-user/logs:/app/logs
+    networks:
+      - app-net
 
   frontend:
     image: frontend:latest
@@ -14,3 +18,9 @@ services:
     depends_on:
       - backend
     restart: unless-stopped
+    networks:
+      - app-net
+
+networks:
+  app-net:
+    driver: bridge
