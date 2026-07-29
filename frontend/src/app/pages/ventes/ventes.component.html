@@ -11,21 +11,12 @@
       </div>
     </div>
     <div class="page-header__filters">
-      <div class="filter-card filter-card--daterange">
-        <div class="filter-card__icon"><i class="pi pi-calendar"></i></div>
-        <div class="filter-card__body">
-          <span class="filter-card__label">Période</span>
-          <div class="date-range">
-            <input type="date" class="date-input" [(ngModel)]="dateFrom"
-                   [min]="minDate" [max]="dateTo || maxDate"
-                   (change)="onDateRangeChange()">
-            <span class="date-range__sep">→</span>
-            <input type="date" class="date-input" [(ngModel)]="dateTo"
-                   [min]="dateFrom || minDate" [max]="maxDate"
-                   (change)="onDateRangeChange()">
-          </div>
-        </div>
-      </div>
+      <app-date-range-picker
+        [periodes]="periodes"
+        [dateFrom]="dateFrom"
+        [dateTo]="dateTo"
+        (rangeChange)="onRangeChange($event)"
+      />
       <div class="filter-card">
         <div class="filter-card__icon"><i class="pi pi-id-card"></i></div>
         <div class="filter-card__body">

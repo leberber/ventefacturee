@@ -21,9 +21,17 @@ router = APIRouter()
 FAMILLES_RAPPORT = ['sucre', 'huile']
 
 
+def _normalize_date(d: str) -> str:
+    """Accept YYYY-MM or YYYY-MM-DD, always return YYYY-MM-DD."""
+    if d and len(d) == 7:
+        return d + '-01'
+    return d
+
+
 @router.get("/source-stats")
 def get_source_stats(
-    annee_mois: str = Query(...),
+    date_from: str = Query(...),
+    date_to: str = Query(...),
     nom_fdv: str = Query(...),
     session: Session = Depends(get_session),
 ) -> Any:
@@ -32,7 +40,8 @@ def get_source_stats(
             Vente.source,
             func.count(Vente.id).label("lignes"),
         )
-        .where(Vente.annee_mois == annee_mois)
+        .where(Vente.date_commande >= date.fromisoformat(_normalize_date(date_from)))
+        .where(Vente.date_commande <= date.fromisoformat(_normalize_date(date_to)))
         .where(Vente.nom_fdv == nom_fdv)
         .group_by(Vente.source)
     )
@@ -47,16 +56,17 @@ def get_source_stats(
 
 @router.get("/facturation-clients", response_model=List[str])
 def list_facturation_clients(
-    annee_mois: str = Query(...),
+    date_from: str = Query(...),
+    date_to: str = Query(...),
     nom_fdv: str = Query(...),
     source: Optional[str] = Query(default=None),
     session: Session = Depends(get_session),
 ) -> Any:
-    """Return distinct clients for a given FDV/period that have sucre or huile sales."""
     q = (
         select(Vente.nom_client)
         .distinct()
-        .where(Vente.annee_mois == annee_mois)
+        .where(Vente.date_commande >= date.fromisoformat(_normalize_date(date_from)))
+        .where(Vente.date_commande <= date.fromisoformat(_normalize_date(date_to)))
         .where(Vente.nom_fdv == nom_fdv)
         .where(Vente.famille.ilike('sucre') | Vente.famille.ilike('huile'))
         .order_by(Vente.nom_client)
@@ -68,18 +78,18 @@ def list_facturation_clients(
 
 @router.get("/facturation")
 def get_rapport_facturation(
-    annee_mois: str = Query(...),
+    date_from: str = Query(...),
+    date_to: str = Query(...),
     nom_fdv: str = Query(...),
     clients: Optional[List[str]] = Query(default=None),
     source: Optional[str] = Query(default=None),
     session: Session = Depends(get_session),
     current_user: Any = Depends(get_current_user),
 ) -> Any:
-    year, month = int(annee_mois[:4]), int(annee_mois[5:7])
-
     q = (
         select(Vente)
-        .where(Vente.annee_mois == annee_mois)
+        .where(Vente.date_commande >= date.fromisoformat(_normalize_date(date_from)))
+        .where(Vente.date_commande <= date.fromisoformat(_normalize_date(date_to)))
         .where(Vente.nom_fdv == nom_fdv)
         .where(Vente.famille.ilike('sucre') | Vente.famille.ilike('huile'))
     )
@@ -163,7 +173,7 @@ def get_rapport_facturation(
 
     return {
         "fdv": nom_fdv,
-        "periode": annee_mois,
+        "periode": f"{date_from} → {date_to}",
         "weeks": date_labels,
         "products": products,
         "products_meta": products_meta,
@@ -173,7 +183,8 @@ def get_rapport_facturation(
 
 @router.get("/export-clients-zip")
 def export_clients_zip(
-    annee_mois: str = Query(...),
+    date_from: str = Query(...),
+    date_to: str = Query(...),
     nom_fdv: str = Query(...),
     clients: Optional[List[str]] = Query(default=None),
     display_mode: str = Query(default="brut"),
@@ -187,7 +198,8 @@ def export_clients_zip(
 
     q = (
         select(Vente)
-        .where(Vente.annee_mois == annee_mois)
+        .where(Vente.date_commande >= date.fromisoformat(_normalize_date(date_from)))
+        .where(Vente.date_commande <= date.fromisoformat(_normalize_date(date_to)))
         .where(Vente.nom_fdv == nom_fdv)
         .where(Vente.famille.ilike('sucre') | Vente.famille.ilike('huile'))
     )
@@ -268,7 +280,7 @@ def export_clients_zip(
             zf.writestr(f"{safe_name(client_name)}.xlsx", xl_buf.read())
 
     zip_buf.seek(0)
-    zip_name = f"export_{safe_name(nom_fdv)}_{annee_mois}.zip"
+    zip_name = f"export_{safe_name(nom_fdv)}_{date_from}_{date_to}.zip"
     return StreamingResponse(
         zip_buf,
         media_type="application/zip",

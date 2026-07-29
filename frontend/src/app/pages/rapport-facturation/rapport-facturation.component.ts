@@ -9,11 +9,12 @@ import { ToggleSwitch } from 'primeng/toggleswitch';
 
 import { VentesService } from '../../core/services/ventes.service';
 import { RapportsService, RapportFacturation } from '../../core/services/rapports.service';
+import { DateRangePickerComponent, DateRange } from '../../shared/components/date-range-picker.component';
 
 @Component({
   selector: 'app-rapport-facturation',
   standalone: true,
-  imports: [FormsModule, DatePipe, NgClass, TooltipModule, Select, Popover, ToggleSwitch],
+  imports: [FormsModule, DatePipe, NgClass, TooltipModule, Select, Popover, ToggleSwitch, DateRangePickerComponent],
   templateUrl: './rapport-facturation.component.html',
   styleUrl: './rapport-facturation.component.scss',
 })
@@ -24,10 +25,11 @@ export class RapportFacturationComponent implements OnInit {
   private rapportSvc = inject(RapportsService);
 
 
-  periodes: { label: string; value: string }[] = [];
+  periodes: string[] = [];
   fdvs: string[] = [];
-  selectedMois = '';
-  selectedFdv  = '';
+  dateFrom = '';
+  dateTo   = '';
+  selectedFdv = '';
 
   allClients: string[]      = [];
   selectedClients: Set<string> = new Set();
@@ -61,32 +63,48 @@ export class RapportFacturationComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    const qp = this.route.snapshot.queryParamMap;
-    const initMois = qp.get('annee_mois') ?? '';
-    const initFdv  = qp.get('nom_fdv')    ?? '';
+    const qp      = this.route.snapshot.queryParamMap;
+    const initFrom = qp.get('date_from') ?? '';
+    const initTo   = qp.get('date_to')   ?? '';
+    const initFdv  = qp.get('nom_fdv')   ?? '';
 
     this.ventesSvc.getPeriodes().subscribe(periodes => {
-      this.periodes = periodes.map(v => ({ label: this.formatPeriod(v), value: v }));
-      this.selectedMois = initMois || (periodes[0] ?? '');
-
-      this.ventesSvc.getFdvs(this.selectedMois).subscribe(fdvs => {
-        this.fdvs = fdvs;
-        if (initFdv && fdvs.includes(initFdv)) {
-          this.selectedFdv = initFdv;
-          this.loadClients();
-          this.rapportSvc.getSourceStats(this.selectedMois, this.selectedFdv)
-            .subscribe(d => this._sourceStats = d);
-        }
-      });
+      this.periodes = periodes;
+      if (initFrom && initTo) {
+        this.dateFrom = initFrom;
+        this.dateTo   = initTo;
+      } else if (periodes.length) {
+        this.dateFrom = periodes[0] + '-01';
+        this.dateTo   = this.lastDayOf(periodes[0]);
+      }
+      this.loadFdvs();
+      if (initFdv) {
+        this.selectedFdv = initFdv;
+        this.loadClients();
+        this.rapportSvc.getSourceStats(this.dateFrom, this.dateTo, this.selectedFdv)
+          .subscribe(d => this._sourceStats = d);
+      }
     });
   }
 
-  onPeriodChange(): void {
+  private lastDayOf(period: string): string {
+    const [y, m] = period.split('-').map(Number);
+    return `${period}-${String(new Date(y, m, 0).getDate()).padStart(2, '0')}`;
+  }
+
+  onRangeChange(range: DateRange): void {
+    this.dateFrom    = range.from;
+    this.dateTo      = range.to;
     this.selectedFdv = '';
-    this.allClients = [];
+    this.allClients  = [];
     this.selectedClients = new Set();
-    this.rapport = null;
-    this.ventesSvc.getFdvs(this.selectedMois).subscribe(d => this.fdvs = d);
+    this.rapport     = null;
+    this._sourceStats = null;
+    this.loadFdvs();
+  }
+
+  private loadFdvs(): void {
+    this.ventesSvc.getFdvs(this.dateFrom, this.dateTo).subscribe(d => this.fdvs = d);
   }
 
   onFdvChange(): void {
@@ -96,7 +114,7 @@ export class RapportFacturationComponent implements OnInit {
     this._sourceStats = null;
     if (this.selectedFdv) {
       this.loadClients();
-      this.rapportSvc.getSourceStats(this.selectedMois, this.selectedFdv)
+      this.rapportSvc.getSourceStats(this.dateFrom, this.dateTo, this.selectedFdv)
         .subscribe(d => this._sourceStats = d);
     }
   }
@@ -109,9 +127,9 @@ export class RapportFacturationComponent implements OnInit {
   }
 
   loadClients(): void {
-    if (!this.selectedMois || !this.selectedFdv) return;
+    if (!this.dateFrom || !this.selectedFdv) return;
     this.loadingClients = true;
-    this.rapportSvc.getClients(this.selectedMois, this.selectedFdv, this.source).subscribe({
+    this.rapportSvc.getClients(this.dateFrom, this.dateTo, this.selectedFdv, this.source).subscribe({
       next: d => {
         this.allClients = d;
         this.selectedClients = new Set(d);
@@ -136,7 +154,7 @@ export class RapportFacturationComponent implements OnInit {
     const clients = [...this.selectedClients];
     if (!clients.length) return;
     this.loading = true;
-    this.rapportSvc.getFacturation(this.selectedMois, this.selectedFdv, clients, this.source).subscribe({
+    this.rapportSvc.getFacturation(this.dateFrom, this.dateTo, this.selectedFdv, clients, this.source).subscribe({
       next: d => { this.rapport = d; this.loading = false; },
       error: () => this.loading = false,
     });
@@ -148,12 +166,12 @@ export class RapportFacturationComponent implements OnInit {
     const clients = [...this.selectedClients];
     if (!clients.length || this.exporting) return;
     this.exporting = true;
-    this.rapportSvc.exportClientsZip(this.selectedMois, this.selectedFdv, clients, this.displayMode, this.source).subscribe({
+    this.rapportSvc.exportClientsZip(this.dateFrom, this.dateTo, this.selectedFdv, clients, this.displayMode, this.source).subscribe({
       next: blob => {
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `export_${this.selectedFdv}_${this.selectedMois}.zip`;
+        a.download = `export_${this.selectedFdv}_${this.dateFrom}_${this.dateTo}.zip`;
         a.click();
         URL.revokeObjectURL(url);
         this.exporting = false;
@@ -162,16 +180,23 @@ export class RapportFacturationComponent implements OnInit {
     });
   }
 
-  goBack(): void { this.router.navigate(['/ventes']); }
-
-  formatPeriod(p: string): string {
-    const [y, m] = p.split('-');
-    return new Date(+y, +m - 1).toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
+  get periodLabel(): string {
+    if (!this.dateFrom) return '';
+    const fmt = (iso: string) => new Date(iso + 'T00:00:00')
+      .toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' });
+    return this.dateTo && this.dateTo !== this.dateFrom
+      ? `${fmt(this.dateFrom)} → ${fmt(this.dateTo)}`
+      : fmt(this.dateFrom);
   }
 
-  formatPeriodLabel(p: string): string {
-    const [y, m] = p.split('-');
-    return new Date(+y, +m - 1).toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
+  goBack(): void { this.router.navigate(['/ventes']); }
+
+  formatPeriodLabel(periode: string): string {
+    // periode comes from backend as "YYYY-MM-DD → YYYY-MM-DD"
+    const parts = periode.split(' → ');
+    const fmt = (iso: string) => new Date(iso + 'T00:00:00')
+      .toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' });
+    return parts.length === 2 ? `${fmt(parts[0])} → ${fmt(parts[1])}` : periode;
   }
 
   val(v: number | null, product?: string): string {

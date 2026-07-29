@@ -6,6 +6,7 @@ import { TooltipModule } from 'primeng/tooltip';
 import { Select } from 'primeng/select';
 import { Popover } from 'primeng/popover';
 import { VentesService, VenteRead } from '../../core/services/ventes.service';
+import { DateRangePickerComponent } from '../../shared/components/date-range-picker.component';
 
 const LS_KEY = 'ventefacturee_ventes_columns';
 const BATCH = 100;
@@ -20,7 +21,7 @@ interface ColDef {
 @Component({
   selector: 'app-ventes',
   standalone: true,
-  imports: [DecimalPipe, NgStyle, FormsModule, TooltipModule, Select, Popover],
+  imports: [DecimalPipe, NgStyle, FormsModule, TooltipModule, Select, Popover, DateRangePickerComponent],
   templateUrl: './ventes.component.html',
   styleUrl: './ventes.component.scss',
 })
@@ -35,8 +36,7 @@ export class VentesComponent implements OnInit, AfterViewInit, OnDestroy {
   total = 0;
   loading = false;
   loadingMore = false;
-  minDate = '';
-  maxDate = '';
+  periodes: string[] = [];
   dateFrom = '';
   dateTo = '';
   searchTerm = '';
@@ -105,17 +105,21 @@ export class VentesComponent implements OnInit, AfterViewInit, OnDestroy {
 
   ngOnInit() {
     this.loadColumnState();
-    this.ventesService.getDateRange().subscribe(range => {
-      if (range.min_date && range.max_date) {
-        this.minDate = range.min_date;
-        this.maxDate = range.max_date;
-        // Default: show only the latest month
-        this.dateTo = range.max_date;
-        this.dateFrom = range.max_date.substring(0, 7) + '-01';
+    this.ventesService.getPeriodes().subscribe(periodes => {
+      this.periodes = periodes;
+      if (periodes.length) {
+        this.dateFrom = periodes[0] + '-01';
+        this.dateTo   = this.lastDayOf(periodes[0]);
         this.loadFdvsAndClients();
         this.reset();
       }
     });
+  }
+
+  private lastDayOf(period: string): string {
+    const [y, m] = period.split('-').map(Number);
+    const d = new Date(y, m, 0).getDate();
+    return `${period}-${String(d).padStart(2, '0')}`;
   }
 
   ngAfterViewInit() {
@@ -141,7 +145,9 @@ export class VentesComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
-  onDateRangeChange(): void {
+  onRangeChange(range: { from: string; to: string }): void {
+    this.dateFrom = range.from;
+    this.dateTo   = range.to;
     this.selectedFdv = null;
     this.selectedClient = null;
     this.selectedFamille = null;

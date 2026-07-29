@@ -20,6 +20,13 @@ from app.utils.parse import parse_file
 router = APIRouter()
 
 
+def _normalize_date(d: str) -> str:
+    """Accept YYYY-MM or YYYY-MM-DD, always return YYYY-MM-DD."""
+    if d and len(d) == 7:
+        return d + '-01'
+    return d
+
+
 def _safe_str(val: Any, max_len: int) -> Optional[str]:
     if val is None:
         return None
@@ -134,9 +141,9 @@ def list_ventes(
     if annee_mois:
         conditions.append(Vente.annee_mois == annee_mois)
     if date_from:
-        conditions.append(Vente.date_commande >= date_type.fromisoformat(date_from))
+        conditions.append(Vente.date_commande >= date_type.fromisoformat(_normalize_date(date_from)))
     if date_to:
-        conditions.append(Vente.date_commande <= date_type.fromisoformat(date_to))
+        conditions.append(Vente.date_commande <= date_type.fromisoformat(_normalize_date(date_to)))
     if famille:
         conditions.append(Vente.famille == famille)
     if nom_fdv:
@@ -198,9 +205,9 @@ def list_fdvs(
     if annee_mois:
         q = q.where(Vente.annee_mois == annee_mois)
     if date_from:
-        q = q.where(Vente.date_commande >= date_type.fromisoformat(date_from))
+        q = q.where(Vente.date_commande >= date_type.fromisoformat(_normalize_date(date_from)))
     if date_to:
-        q = q.where(Vente.date_commande <= date_type.fromisoformat(date_to))
+        q = q.where(Vente.date_commande <= date_type.fromisoformat(_normalize_date(date_to)))
     return [v for v in session.exec(q).all() if v]
 
 
@@ -215,9 +222,9 @@ def list_familles(
     if annee_mois:
         q = q.where(Vente.annee_mois == annee_mois)
     if date_from:
-        q = q.where(Vente.date_commande >= date_type.fromisoformat(date_from))
+        q = q.where(Vente.date_commande >= date_type.fromisoformat(_normalize_date(date_from)))
     if date_to:
-        q = q.where(Vente.date_commande <= date_type.fromisoformat(date_to))
+        q = q.where(Vente.date_commande <= date_type.fromisoformat(_normalize_date(date_to)))
     return [v for v in session.exec(q).all() if v]
 
 
@@ -233,9 +240,9 @@ def list_clients(
     if annee_mois:
         q = q.where(Vente.annee_mois == annee_mois)
     if date_from:
-        q = q.where(Vente.date_commande >= date_type.fromisoformat(date_from))
+        q = q.where(Vente.date_commande >= date_type.fromisoformat(_normalize_date(date_from)))
     if date_to:
-        q = q.where(Vente.date_commande <= date_type.fromisoformat(date_to))
+        q = q.where(Vente.date_commande <= date_type.fromisoformat(_normalize_date(date_to)))
     if nom_fdv:
         q = q.where(Vente.nom_fdv == nom_fdv)
     return [v for v in session.exec(q).all() if v]

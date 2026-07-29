@@ -27,31 +27,37 @@ export interface RapportFacturation {
 export class RapportsService {
   private http = inject(HttpClient);
 
-  getSourceStats(annee_mois: string, nom_fdv: string) {
-    const p = new HttpParams().set('annee_mois', annee_mois).set('nom_fdv', nom_fdv);
+  getSourceStats(date_from: string, date_to: string, nom_fdv: string) {
+    const p = new HttpParams()
+      .set('date_from', date_from)
+      .set('date_to', date_to)
+      .set('nom_fdv', nom_fdv);
     return this.http.get<Record<string, { lignes: number }>>('/api/v1/rapports/source-stats', { params: p });
   }
 
-  getClients(annee_mois: string, nom_fdv: string, source: string) {
+  getClients(date_from: string, date_to: string, nom_fdv: string, source: string) {
     const p = new HttpParams()
-      .set('annee_mois', annee_mois)
+      .set('date_from', date_from)
+      .set('date_to', date_to)
       .set('nom_fdv', nom_fdv)
       .set('source', source);
     return this.http.get<string[]>('/api/v1/rapports/facturation-clients', { params: p });
   }
 
-  getFacturation(annee_mois: string, nom_fdv: string, clients: string[], source: string) {
+  getFacturation(date_from: string, date_to: string, nom_fdv: string, clients: string[], source: string) {
     let p = new HttpParams()
-      .set('annee_mois', annee_mois)
+      .set('date_from', date_from)
+      .set('date_to', date_to)
       .set('nom_fdv', nom_fdv)
       .set('source', source);
     clients.forEach(c => (p = p.append('clients', c)));
     return this.http.get<RapportFacturation>('/api/v1/rapports/facturation', { params: p });
   }
 
-  exportClientsZip(annee_mois: string, nom_fdv: string, clients: string[], displayMode: string, source: string) {
+  exportClientsZip(date_from: string, date_to: string, nom_fdv: string, clients: string[], displayMode: string, source: string) {
     let p = new HttpParams()
-      .set('annee_mois', annee_mois)
+      .set('date_from', date_from)
+      .set('date_to', date_to)
       .set('nom_fdv', nom_fdv)
       .set('display_mode', displayMode)
       .set('source', source);

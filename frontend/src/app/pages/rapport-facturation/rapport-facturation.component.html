@@ -13,7 +13,7 @@
         <h1 class="page-header__title">Rapport de facturation</h1>
         <p class="page-header__sub">
           @if (rapport) {
-            {{ rapport.fdv }} &nbsp;·&nbsp; {{ formatPeriodLabel(rapport.periode) }}
+            {{ rapport.fdv }} &nbsp;·&nbsp; {{ periodLabel }}
           } @else {
             Sélectionnez la période et le prévendeur
           }
@@ -23,21 +23,12 @@
 
     <div class="page-header__filters">
 
-      <div class="filter-card filter-card--period">
-        <div class="filter-card__icon"><i class="pi pi-calendar"></i></div>
-        <div class="filter-card__body">
-          <span class="filter-card__label">Période</span>
-          <p-select
-            [options]="periodes"
-            [(ngModel)]="selectedMois"
-            optionLabel="label"
-            optionValue="value"
-            placeholder="Sélectionner"
-            (onChange)="onPeriodChange()"
-            class="filter-card-select"
-          />
-        </div>
-      </div>
+      <app-date-range-picker
+        [periodes]="periodes"
+        [dateFrom]="dateFrom"
+        [dateTo]="dateTo"
+        (rangeChange)="onRangeChange($event)"
+      />
 
       <div class="filter-card">
         <div class="filter-card__icon"><i class="pi pi-id-card"></i></div>
@@ -51,7 +42,7 @@
             [showClear]="true"
             (onChange)="onFdvChange()"
             class="filter-card-select"
-            [disabled]="!selectedMois"
+            [disabled]="!dateFrom"
           />
         </div>
       </div>
