@@ -11,20 +11,19 @@
       </div>
     </div>
     <div class="page-header__filters">
-      <div class="filter-card filter-card--period">
+      <div class="filter-card filter-card--daterange">
         <div class="filter-card__icon"><i class="pi pi-calendar"></i></div>
         <div class="filter-card__body">
           <span class="filter-card__label">Période</span>
-          <p-select
-            [options]="periodes"
-            [(ngModel)]="selectedMois"
-            optionLabel="label"
-            optionValue="value"
-            placeholder="Sélectionner"
-            (onChange)="selectPeriod($event.value)"
-            class="filter-card-select"
-            panelStyleClass="filter-card-panel period-panel"
-          />
+          <div class="date-range">
+            <input type="date" class="date-input" [(ngModel)]="dateFrom"
+                   [min]="minDate" [max]="dateTo || maxDate"
+                   (change)="onDateRangeChange()">
+            <span class="date-range__sep">→</span>
+            <input type="date" class="date-input" [(ngModel)]="dateTo"
+                   [min]="dateFrom || minDate" [max]="maxDate"
+                   (change)="onDateRangeChange()">
+          </div>
         </div>
       </div>
       <div class="filter-card">
@@ -129,10 +128,10 @@
   <div class="table-wrapper" #tableWrapper>
     @if (rows.length === 0 && !loading) {
       <div class="table-empty">
-        @if (!selectedMois) {
-          Sélectionnez un mois pour afficher les données
+        @if (!dateFrom && !dateTo) {
+          Sélectionnez une période pour afficher les données
         } @else {
-          Aucune donnée pour ce mois
+          Aucune donnée pour cette période
         }
       </div>
     } @else {

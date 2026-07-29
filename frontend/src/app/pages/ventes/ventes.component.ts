@@ -35,8 +35,10 @@ export class VentesComponent implements OnInit, AfterViewInit, OnDestroy {
   total = 0;
   loading = false;
   loadingMore = false;
-  periodes: { label: string; value: string }[] = [];
-  selectedMois = '';
+  minDate = '';
+  maxDate = '';
+  dateFrom = '';
+  dateTo = '';
   searchTerm = '';
   fdvs: string[] = [];
   clients: string[] = [];
@@ -103,10 +105,13 @@ export class VentesComponent implements OnInit, AfterViewInit, OnDestroy {
 
   ngOnInit() {
     this.loadColumnState();
-    this.ventesService.getPeriodes().subscribe(periodes => {
-      this.periodes = periodes.map(p => ({ label: this.formatPeriod(p), value: p }));
-      if (periodes.length) {
-        this.selectedMois = periodes[0];
+    this.ventesService.getDateRange().subscribe(range => {
+      if (range.min_date && range.max_date) {
+        this.minDate = range.min_date;
+        this.maxDate = range.max_date;
+        // Default: show only the latest month
+        this.dateTo = range.max_date;
+        this.dateFrom = range.max_date.substring(0, 7) + '-01';
         this.loadFdvsAndClients();
         this.reset();
       }
@@ -136,8 +141,7 @@ export class VentesComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
-  selectPeriod(mois: string): void {
-    this.selectedMois = mois;
+  onDateRangeChange(): void {
     this.selectedFdv = null;
     this.selectedClient = null;
     this.selectedFamille = null;
@@ -148,8 +152,9 @@ export class VentesComponent implements OnInit, AfterViewInit, OnDestroy {
   goToRapport(): void {
     this.router.navigate(['/rapport-facturation'], {
       queryParams: {
-        annee_mois: this.selectedMois || undefined,
-        nom_fdv:    this.selectedFdv  || undefined,
+        date_from: this.dateFrom || undefined,
+        date_to:   this.dateTo   || undefined,
+        nom_fdv:   this.selectedFdv || undefined,
       },
     });
   }
@@ -160,7 +165,7 @@ export class VentesComponent implements OnInit, AfterViewInit, OnDestroy {
 
   onFdvChange(): void {
     this.selectedClient = null;
-    this.ventesService.getClients(this.selectedMois, this.selectedFdv || undefined)
+    this.ventesService.getClients(this.dateFrom || undefined, this.dateTo || undefined, this.selectedFdv || undefined)
       .subscribe(d => this.clients = d);
     this.reset();
   }
@@ -181,14 +186,9 @@ export class VentesComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private loadFdvsAndClients(): void {
-    this.ventesService.getFdvs(this.selectedMois).subscribe(d => this.fdvs = d);
-    this.ventesService.getClients(this.selectedMois).subscribe(d => this.clients = d);
-    this.ventesService.getFamilles(this.selectedMois).subscribe(d => this.familles = d);
-  }
-
-  formatPeriod(period: string): string {
-    const [year, month] = period.split('-');
-    return new Date(+year, +month - 1).toLocaleDateString('fr-FR', { month: 'short', year: 'numeric' });
+    this.ventesService.getFdvs(this.dateFrom || undefined, this.dateTo || undefined).subscribe(d => this.fdvs = d);
+    this.ventesService.getClients(this.dateFrom || undefined, this.dateTo || undefined).subscribe(d => this.clients = d);
+    this.ventesService.getFamilles(this.dateFrom || undefined, this.dateTo || undefined).subscribe(d => this.familles = d);
   }
 
   private reset() {
@@ -199,14 +199,15 @@ export class VentesComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private loadBatch(append: boolean) {
-    if (!this.selectedMois) return;
+    if (!this.dateFrom && !this.dateTo) return;
     if (append) this.loadingMore = true;
     else this.loading = true;
 
     this.ventesService.list({
       page: this.currentPage,
       per_page: BATCH,
-      annee_mois: this.selectedMois,
+      date_from: this.dateFrom || undefined,
+      date_to: this.dateTo || undefined,
       famille: this.selectedFamille || undefined,
       nom_fdv: this.selectedFdv || undefined,
       nom_client: this.selectedClient || undefined,

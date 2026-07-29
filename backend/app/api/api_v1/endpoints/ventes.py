@@ -1,5 +1,6 @@
 import json
 import logging
+from datetime import date as date_type
 from typing import Any, List, Optional
 
 import pandas as pd
@@ -121,6 +122,8 @@ def list_ventes(
     page: int = Query(default=1, ge=1),
     per_page: int = Query(default=50, ge=1, le=200),
     annee_mois: Optional[str] = Query(default=None),
+    date_from: Optional[str] = Query(default=None),
+    date_to: Optional[str] = Query(default=None),
     famille: Optional[str] = Query(default=None),
     nom_fdv: Optional[str] = Query(default=None),
     nom_client: Optional[str] = Query(default=None),
@@ -130,6 +133,10 @@ def list_ventes(
     conditions = []
     if annee_mois:
         conditions.append(Vente.annee_mois == annee_mois)
+    if date_from:
+        conditions.append(Vente.date_commande >= date_type.fromisoformat(date_from))
+    if date_to:
+        conditions.append(Vente.date_commande <= date_type.fromisoformat(date_to))
     if famille:
         conditions.append(Vente.famille == famille)
     if nom_fdv:
@@ -170,37 +177,65 @@ def list_periodes(session: Session = Depends(get_session)) -> Any:
     return list(result)
 
 
+@router.get("/date-range")
+def get_date_range(session: Session = Depends(get_session)) -> Any:
+    min_date = session.exec(select(func.min(Vente.date_commande))).one()
+    max_date = session.exec(select(func.max(Vente.date_commande))).one()
+    return {
+        "min_date": str(min_date) if min_date else None,
+        "max_date": str(max_date) if max_date else None,
+    }
+
+
 @router.get("/fdvs", response_model=List[str])
 def list_fdvs(
     annee_mois: Optional[str] = Query(default=None),
+    date_from: Optional[str] = Query(default=None),
+    date_to: Optional[str] = Query(default=None),
     session: Session = Depends(get_session),
 ) -> Any:
     q = select(Vente.nom_fdv).distinct().order_by(Vente.nom_fdv)
     if annee_mois:
         q = q.where(Vente.annee_mois == annee_mois)
+    if date_from:
+        q = q.where(Vente.date_commande >= date_type.fromisoformat(date_from))
+    if date_to:
+        q = q.where(Vente.date_commande <= date_type.fromisoformat(date_to))
     return [v for v in session.exec(q).all() if v]
 
 
 @router.get("/familles", response_model=List[str])
 def list_familles(
     annee_mois: Optional[str] = Query(default=None),
+    date_from: Optional[str] = Query(default=None),
+    date_to: Optional[str] = Query(default=None),
     session: Session = Depends(get_session),
 ) -> Any:
     q = select(Vente.famille).distinct().order_by(Vente.famille)
     if annee_mois:
         q = q.where(Vente.annee_mois == annee_mois)
+    if date_from:
+        q = q.where(Vente.date_commande >= date_type.fromisoformat(date_from))
+    if date_to:
+        q = q.where(Vente.date_commande <= date_type.fromisoformat(date_to))
     return [v for v in session.exec(q).all() if v]
 
 
 @router.get("/clients", response_model=List[str])
 def list_clients(
     annee_mois: Optional[str] = Query(default=None),
+    date_from: Optional[str] = Query(default=None),
+    date_to: Optional[str] = Query(default=None),
     nom_fdv: Optional[str] = Query(default=None),
     session: Session = Depends(get_session),
 ) -> Any:
     q = select(Vente.nom_client).distinct().order_by(Vente.nom_client)
     if annee_mois:
         q = q.where(Vente.annee_mois == annee_mois)
+    if date_from:
+        q = q.where(Vente.date_commande >= date_type.fromisoformat(date_from))
+    if date_to:
+        q = q.where(Vente.date_commande <= date_type.fromisoformat(date_to))
     if nom_fdv:
         q = q.where(Vente.nom_fdv == nom_fdv)
     return [v for v in session.exec(q).all() if v]

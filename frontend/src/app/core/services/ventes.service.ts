@@ -59,10 +59,17 @@ export interface UploadResponse {
   message: string;
 }
 
+export interface DateRange {
+  min_date: string | null;
+  max_date: string | null;
+}
+
 export interface VenteListParams {
   page?: number;
   per_page?: number;
   annee_mois?: string;
+  date_from?: string;
+  date_to?: string;
   famille?: string;
   nom_fdv?: string;
   nom_client?: string;
@@ -78,6 +85,8 @@ export class VentesService {
     if (params.page)        p = p.set('page', params.page);
     if (params.per_page)    p = p.set('per_page', params.per_page);
     if (params.annee_mois)  p = p.set('annee_mois', params.annee_mois);
+    if (params.date_from)   p = p.set('date_from', params.date_from);
+    if (params.date_to)     p = p.set('date_to', params.date_to);
     if (params.famille)     p = p.set('famille', params.famille);
     if (params.nom_fdv)     p = p.set('nom_fdv', params.nom_fdv);
     if (params.nom_client)  p = p.set('nom_client', params.nom_client);
@@ -85,26 +94,33 @@ export class VentesService {
     return this.http.get<VentePage>('/api/v1/ventes', { params: p });
   }
 
+  getDateRange() {
+    return this.http.get<DateRange>('/api/v1/ventes/date-range');
+  }
+
   getPeriodes() {
     return this.http.get<string[]>('/api/v1/ventes/periodes');
   }
 
-  getFamilles(annee_mois?: string) {
+  getFamilles(date_from?: string, date_to?: string) {
     let p = new HttpParams();
-    if (annee_mois) p = p.set('annee_mois', annee_mois);
+    if (date_from) p = p.set('date_from', date_from);
+    if (date_to)   p = p.set('date_to', date_to);
     return this.http.get<string[]>('/api/v1/ventes/familles', { params: p });
   }
 
-  getFdvs(annee_mois?: string) {
+  getFdvs(date_from?: string, date_to?: string) {
     let p = new HttpParams();
-    if (annee_mois) p = p.set('annee_mois', annee_mois);
+    if (date_from) p = p.set('date_from', date_from);
+    if (date_to)   p = p.set('date_to', date_to);
     return this.http.get<string[]>('/api/v1/ventes/fdvs', { params: p });
   }
 
-  getClients(annee_mois?: string, nom_fdv?: string) {
+  getClients(date_from?: string, date_to?: string, nom_fdv?: string) {
     let p = new HttpParams();
-    if (annee_mois) p = p.set('annee_mois', annee_mois);
-    if (nom_fdv) p = p.set('nom_fdv', nom_fdv);
+    if (date_from) p = p.set('date_from', date_from);
+    if (date_to)   p = p.set('date_to', date_to);
+    if (nom_fdv)   p = p.set('nom_fdv', nom_fdv);
     return this.http.get<string[]>('/api/v1/ventes/clients', { params: p });
   }
 

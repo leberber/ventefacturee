@@ -95,8 +95,8 @@
   flex-shrink: 0;
 }
 
-// Period card — primary icon + compact width
-.filter-card--period {
+// Date range card
+.filter-card--daterange {
   border-color: color-mix(in srgb, var(--primary-color) 30%, transparent);
   background: color-mix(in srgb, var(--primary-color) 4%, var(--surface-card));
 
@@ -110,13 +110,33 @@
   }
 }
 
-::ng-deep .filter-card--period .filter-card-select.p-select {
-  min-width: 120px;
-  width: 120px;
+.date-range {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
 
-  .p-select-label {
-    color: var(--primary-color);
-    font-weight: var(--font-weight-semibold);
+  &__sep {
+    color: var(--text-color-secondary);
+    font-size: 0.75rem;
+    flex-shrink: 0;
+  }
+}
+
+.date-input {
+  border: none;
+  background: transparent;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--primary-color);
+  font-family: inherit;
+  padding: 0;
+  cursor: pointer;
+  outline: none;
+  min-width: 108px;
+
+  &::-webkit-calendar-picker-indicator {
+    cursor: pointer;
+    opacity: 0.5;
   }
 }
 
