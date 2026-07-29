@@ -317,25 +317,26 @@ async def upload_ventes(
 
         yield event({"progress": 25, "message": "Préparation des enregistrements..."})
 
-        ventes = []
-        for _, row in df.iterrows():
-            date_val = row.get('Date')
-            if pd.isna(date_val):
-                continue
-            row_month = date_val.strftime('%Y-%m')
-            ventes.append(_row_to_vente(row, row_month, current_user.id))
-
-        total = len(ventes)
+        total = len(df)
         if total == 0:
             yield event({"error": "Aucune ligne valide à insérer"})
             return
 
-        BATCH = 1000
-        for i in range(0, total, BATCH):
-            batch = ventes[i:i + BATCH]
-            session.add_all(batch)
+        BATCH = 500
+        inserted = 0
+        for batch_start in range(0, total, BATCH):
+            batch_df = df.iloc[batch_start:batch_start + BATCH]
+            batch_ventes = []
+            for _, row in batch_df.iterrows():
+                date_val = row.get('Date')
+                if pd.isna(date_val):
+                    continue
+                row_month = date_val.strftime('%Y-%m')
+                batch_ventes.append(_row_to_vente(row, row_month, current_user.id))
+            session.add_all(batch_ventes)
             session.flush()
-            inserted = min(i + len(batch), total)
+            del batch_ventes
+            inserted += len(batch_df)
             progress = 30 + int(65 * inserted / total)
             yield event({
                 "progress": progress,
@@ -345,11 +346,14 @@ async def upload_ventes(
         session.commit()
 
         dominant_month = df['Date'].dt.strftime('%Y-%m').value_counts().idxmax()
-        logger.info(f"Upload terminé : {total:,} lignes importées ({dominant_month}) par {current_user.full_name}")
+        msg = f"{total:,} lignes importées avec succès"
+        log_line = f"Upload terminé : {total:,} lignes importées ({dominant_month}) par {current_user.full_name}"
+        del df
+        logger.info(log_line)
         yield event({
             "progress": 100,
             "done": True,
-            "message": f"{total:,} lignes importées avec succès",
+            "message": msg,
         })
 
     return StreamingResponse(
