@@ -1,8 +1,11 @@
 import json
+import logging
 from typing import Any, List, Optional
 
 import pandas as pd
 from fastapi import APIRouter, Depends, File, Query, UploadFile
+
+logger = logging.getLogger("app.upload")
 from fastapi.responses import StreamingResponse
 from sqlalchemy import func, delete as sa_delete
 from sqlmodel import Session, select
@@ -217,11 +220,13 @@ async def upload_ventes(
         return f"data: {json.dumps(data, ensure_ascii=False)}\n\n"
 
     def generate():
+        logger.info(f"Upload démarré : {filename} par {current_user.full_name} ({len(content) // 1024} KB)")
         yield event({"progress": 5, "message": "Lecture du fichier..."})
 
         try:
             df = parse_file(content, filename)
         except Exception as e:
+            logger.error(f"Upload échoué (lecture fichier) : {filename} — {e}")
             yield event({"error": f"Impossible de lire le fichier : {e}"})
             return
 
@@ -298,10 +303,18 @@ async def upload_ventes(
         session.commit()
 
         dominant_month = df['Date'].dt.strftime('%Y-%m').value_counts().idxmax()
+        logger.info(f"Upload terminé : {total:,} lignes importées ({dominant_month}) par {current_user.full_name}")
         yield event({
             "progress": 100,
             "done": True,
             "message": f"{total:,} lignes importées avec succès",
         })
 
-    return StreamingResponse(generate(), media_type="text/event-stream")
+    return StreamingResponse(
+        generate(),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "X-Accel-Buffering": "no",
+        },
+    )

@@ -1,0 +1,9 @@
+2026-07-29 13:36:42 | INFO     | app | Application démarrée
+2026-07-29 13:36:47 | INFO     | app | Application démarrée
+2026-07-29 13:39:57 | INFO     | app | GET /api/v1/admin/logs → 200 (0.065s)
+2026-07-29 13:40:09 | INFO     | app | GET /api/v1/admin/logs → 200 (0.010s)
+2026-07-29 13:40:18 | INFO     | app | POST /api/v1/ventes/upload → 200 (1.210s)
+2026-07-29 13:40:18 | INFO     | app.upload | Upload démarré : salesout mai.xls par Aghiles Benamara (40816 KB)
+2026-07-29 13:40:22 | INFO     | app | GET /api/v1/admin/logs → 200 (0.373s)
+2026-07-29 13:40:34 | INFO     | app | GET /api/v1/produits/familles → 200 (0.070s)
+2026-07-29 13:40:34 | INFO     | app | GET /api/v1/produits → 200 (0.073s)

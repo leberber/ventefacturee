@@ -1,0 +1,96 @@
+<div class="page-content">
+
+  <!-- Header -->
+  <div class="page-header">
+    <div class="page-header__left">
+      <div class="page-icon"><i class="pi pi-list"></i></div>
+      <div>
+        <h1 class="page-header__title">Logs serveur</h1>
+        @if (stats()) {
+          <p class="page-header__sub">{{ stats()!.file_size_human }} · {{ stats()!.total_lines | number }} lignes</p>
+        }
+      </div>
+    </div>
+    <div class="logs-actions">
+      <button class="logs-btn" [class.logs-btn--active]="autoRefresh()" (click)="toggleAutoRefresh()" title="Auto-refresh 15s">
+        <i class="pi" [class.pi-play]="!autoRefresh()" [class.pi-pause]="autoRefresh()"></i>
+        {{ autoRefresh() ? 'Stop' : 'Auto' }}
+      </button>
+      <button class="logs-btn" (click)="load()" [disabled]="loading()" title="Rafraîchir">
+        <i class="pi pi-refresh" [class.pi-spin]="loading()"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- Toolbar -->
+  <div class="logs-toolbar">
+    <!-- Level filter -->
+    <div class="logs-toolbar__group">
+      @for (opt of levelOptions; track opt.label) {
+        <button class="logs-seg-btn"
+                [class.logs-seg-btn--active]="selectedLevel() === opt.value"
+                (click)="selectedLevel.set(opt.value); load()">
+          {{ opt.label }}
+        </button>
+      }
+    </div>
+
+    <!-- Lines selector -->
+    <div class="logs-toolbar__group">
+      @for (n of linesOptions; track n) {
+        <button class="logs-seg-btn"
+                [class.logs-seg-btn--active]="selectedLines() === n"
+                (click)="selectedLines.set(n); load()">
+          {{ n }}
+        </button>
+      }
+    </div>
+
+    <!-- Badges -->
+    <div class="logs-toolbar__badges">
+      @if (errorCount() > 0) {
+        <span class="logs-badge logs-badge--error">{{ errorCount() }} erreurs</span>
+      }
+      @if (warnCount() > 0) {
+        <span class="logs-badge logs-badge--warn">{{ warnCount() }} warnings</span>
+      }
+    </div>
+
+    <!-- Scroll -->
+    <div class="logs-toolbar__scroll">
+      <button class="logs-btn logs-btn--icon" (click)="scrollTo('top')" title="Haut"><i class="pi pi-arrow-up"></i></button>
+      <button class="logs-btn logs-btn--icon" (click)="scrollTo('bottom')" title="Bas"><i class="pi pi-arrow-down"></i></button>
+    </div>
+  </div>
+
+  <!-- Log entries -->
+  <div class="logs-body">
+    @if (loading() && filteredEntries().length === 0) {
+      <div class="logs-state">
+        <i class="pi pi-spin pi-spinner"></i>
+        <span>Chargement...</span>
+      </div>
+    } @else if (filteredEntries().length === 0) {
+      <div class="logs-state">
+        <i class="pi pi-inbox"></i>
+        <span>Aucun log trouvé</span>
+      </div>
+    } @else {
+      @for (entry of filteredEntries(); track $index) {
+        <div class="log-entry" [class.log-entry--error]="entry.level === 'ERROR'" [class.log-entry--warn]="entry.level === 'WARNING'">
+          <span class="log-time">{{ entry.timestamp }}</span>
+          <span class="log-level" [class]="levelClass(entry.level)">{{ entry.level }}</span>
+          <span class="log-logger">{{ entry.logger }}</span>
+          <span class="log-msg">{{ entry.message }}</span>
+        </div>
+      }
+    }
+  </div>
+
+  @if (autoRefresh()) {
+    <div class="logs-refresh-indicator">
+      <i class="pi pi-sync pi-spin"></i> Auto-refresh actif (15s)
+    </div>
+  }
+
+</div>

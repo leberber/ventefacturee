@@ -32,6 +32,11 @@
         <a class="nav-item" routerLink="/parametres" routerLinkActive="active">
           <i class="pi pi-cog"></i><span>Paramètres</span>
         </a>
+        @if (isAdmin) {
+          <a class="nav-item" routerLink="/logs" routerLinkActive="active">
+            <i class="pi pi-list"></i><span>Logs</span>
+          </a>
+        }
       }
     </nav>
 

@@ -1,27 +1,33 @@
+import logging
+import time
 from contextlib import asynccontextmanager
 from pathlib import Path
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
 from app.core.config import settings
+from app.core.logging_config import setup_logging
 from app.database import create_db_and_tables, engine
 from app.api.api_v1.api import api_router
 from app.models import produit  # noqa — ensures Produit table is registered
+
+setup_logging()
+logger = logging.getLogger("app")
 
 FRONTEND_DIST = Path(__file__).parent.parent.parent / "frontend" / "dist" / "ventefacturee" / "browser"
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    logger.info("Application démarrée")
     create_db_and_tables()
     from sqlmodel import Session
     from app.seed_data import run_all
     with Session(engine) as session:
         run_all(session)
-    print(f"  {settings.PROJECT_NAME} — démarré")
     yield
 
 
@@ -37,6 +43,17 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+@app.middleware("http")
+async def log_requests(request: Request, call_next):
+    start = time.time()
+    response = await call_next(request)
+    duration = time.time() - start
+    level = logging.WARNING if response.status_code >= 400 else logging.INFO
+    logger.log(level, f"{request.method} {request.url.path} → {response.status_code} ({duration:.3f}s)")
+    return response
+
 
 app.include_router(api_router, prefix=settings.API_V1_STR)
 
