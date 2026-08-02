@@ -33,6 +33,40 @@
   flex-shrink: 0;
 }
 
+.pv-header__right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.pv-unit-toggle {
+  display: flex;
+  background: #e9ecf2;
+  border-radius: 8px;
+  padding: 2px;
+  gap: 2px;
+
+  &__btn {
+    padding: 3px 10px;
+    border-radius: 6px;
+    border: none;
+    background: transparent;
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: #8b95b0;
+    cursor: pointer;
+    transition: all 0.15s;
+
+    &--active {
+      background: #fff;
+      color: #1a1f36;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+  }
+}
+
 .pv-header__left {
   display: flex;
   flex-direction: column;

@@ -21,6 +21,7 @@ export class PrevendeurComponent implements OnInit {
   data: PrevFacturation | null = null;
   activeTab: 'tournees' | 'clients' | 'objectifs' | 'menu' = 'tournees';
   expandedClients = new Set<string>();
+  showUnites = false;
   editingKey: string | null = null;
   editingValue = '';
   savingKey: string | null = null;
@@ -73,7 +74,13 @@ export class PrevendeurComponent implements OnInit {
   }
 
   clientTotal(client: PrevClient): number {
-    return Object.values(client.totaux).reduce<number>((s, v) => s + (v ?? 0), 0);
+    if (!this.data) return 0;
+    return Object.entries(client.totaux).reduce<number>((s, [prod, v]) => {
+      if (!v) return s;
+      if (!this.showUnites) return s + v;
+      const colisage = this.data!.products_meta[prod]?.colisage;
+      return s + (colisage ? Math.round(v * colisage) : v);
+    }, 0);
   }
 
   get totalSucre(): number {
@@ -92,6 +99,7 @@ export class PrevendeurComponent implements OnInit {
 
   val(v: number | null, product: string): string {
     if (!v) return '';
+    if (!this.showUnites) return String(v);
     const colisage = this.data?.products_meta[product]?.colisage;
     return colisage ? String(Math.round(v * colisage)) : String(v);
   }

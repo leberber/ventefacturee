@@ -15,14 +15,20 @@
     </div>
 
     @if (activeTab === 'tournees') {
-      <div class="pv-period">
-        <button class="pv-period__btn" (click)="prevPeriod()" [disabled]="!canGoPrev">
-          <i class="pi pi-chevron-left"></i>
-        </button>
-        <span class="pv-period__label">{{ formatPeriod(selectedMois) }}</span>
-        <button class="pv-period__btn" (click)="nextPeriod()" [disabled]="!canGoNext">
-          <i class="pi pi-chevron-right"></i>
-        </button>
+      <div class="pv-header__right">
+        <div class="pv-unit-toggle">
+          <button class="pv-unit-toggle__btn" [class.pv-unit-toggle__btn--active]="!showUnites" (click)="showUnites = false">Brut</button>
+          <button class="pv-unit-toggle__btn" [class.pv-unit-toggle__btn--active]="showUnites" (click)="showUnites = true">Unités</button>
+        </div>
+        <div class="pv-period">
+          <button class="pv-period__btn" (click)="prevPeriod()" [disabled]="!canGoPrev">
+            <i class="pi pi-chevron-left"></i>
+          </button>
+          <span class="pv-period__label">{{ formatPeriod(selectedMois) }}</span>
+          <button class="pv-period__btn" (click)="nextPeriod()" [disabled]="!canGoNext">
+            <i class="pi pi-chevron-right"></i>
+          </button>
+        </div>
       </div>
     }
   </div>
