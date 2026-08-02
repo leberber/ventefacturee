@@ -3,13 +3,13 @@ from collections import defaultdict
 from datetime import datetime, timezone
 
 from fastapi import APIRouter, Body, Depends, Query
-from sqlalchemy import or_
+from sqlalchemy import or_, func
 from sqlmodel import Session, select
 
 from app.api.deps import get_current_user
 from app.database import get_session
 from app.models.client import Client
-from app.models.user import User
+from app.models.user import User, UserRole
 from app.models.vente import Vente
 from app.models.produit import Produit
 
@@ -148,6 +148,57 @@ def prevendeur_facturation(
         "total_clients": sum(len(r["clients"]) for r in routes_out),
         "routes": routes_out,
     }
+
+
+@router.get("/admin/stats")
+def prevendeur_admin_stats(
+    current_user: User = Depends(get_current_user),
+    session: Session = Depends(get_session),
+) -> Any:
+    prevendeurs = session.exec(
+        select(User)
+        .where(User.role == UserRole.PREVENDER)
+        .where(User.is_active == True)
+        .order_by(User.full_name)
+    ).all()
+
+    result = []
+    for pv in prevendeurs:
+        if not pv.employe_code:
+            continue
+
+        client_codes = session.exec(
+            select(Vente.code_client).distinct()
+            .where(Vente.code_fdv == pv.employe_code)
+            .where(Vente.code_client != None)
+        ).all()
+        total_clients = len(client_codes)
+
+        matched = 0
+        if client_codes:
+            matched = session.exec(
+                select(func.count(Client.id))
+                .where(Client.code.in_(client_codes))
+                .where(Client.nom_sodichn != None)
+                .where(Client.nom_sodichn != '')
+            ).one()
+
+        last_sale = session.exec(
+            select(func.max(Vente.date_commande))
+            .where(Vente.code_fdv == pv.employe_code)
+        ).one()
+
+        result.append({
+            "id": pv.id,
+            "full_name": pv.full_name,
+            "employe_code": pv.employe_code,
+            "total_clients": total_clients,
+            "clients_with_sodichn": matched,
+            "completion_pct": round(matched / total_clients * 100) if total_clients > 0 else 0,
+            "last_activity": last_sale.strftime('%Y-%m-%d') if last_sale else None,
+        })
+
+    return result
 
 
 @router.patch("/clients/{code_client}")

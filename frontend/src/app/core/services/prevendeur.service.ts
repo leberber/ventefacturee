@@ -31,6 +31,16 @@ export interface PrevFacturation {
   routes: PrevRoute[];
 }
 
+export interface PrevAdminStat {
+  id: number;
+  full_name: string;
+  employe_code: string;
+  total_clients: number;
+  clients_with_sodichn: number;
+  completion_pct: number;
+  last_activity: string | null;
+}
+
 @Injectable({ providedIn: 'root' })
 export class PrevendeurService {
   private http = inject(HttpClient);
@@ -46,5 +56,9 @@ export class PrevendeurService {
 
   updateNomSodichn(code_client: string, nom_sodichn: string, nom_client: string) {
     return this.http.patch(`/api/v1/prevendeur/clients/${encodeURIComponent(code_client)}`, { nom_sodichn, nom_client });
+  }
+
+  getAdminStats() {
+    return this.http.get<PrevAdminStat[]>('/api/v1/prevendeur/admin/stats');
   }
 }

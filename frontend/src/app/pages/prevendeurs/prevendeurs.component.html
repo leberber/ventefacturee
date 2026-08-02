@@ -1,0 +1,60 @@
+<div class="page-content">
+
+  <div class="page-header">
+    <div style="display:flex;align-items:center;gap:0.75rem">
+      <div class="page-icon"><i class="pi pi-id-card"></i></div>
+      <div>
+        <h1 class="page-header__title">Prévendeurs</h1>
+        <p class="page-header__sub">{{ stats.length }} prévendeurs actifs</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="table-container">
+    <div class="table-wrapper">
+      @if (loading) {
+        @for (_ of [1,2,3,4]; track $index) {
+          <div style="padding:0.65rem 1rem;border-bottom:1px solid var(--border-color-light)">
+            <div style="height:1rem;border-radius:6px;background:var(--surface-200);animation:skeleton 1.2s infinite alternate"></div>
+          </div>
+        }
+      } @else if (stats.length === 0) {
+        <div class="table-empty">Aucun prévendeur actif</div>
+      } @else {
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Prévendeur</th>
+              <th>Code</th>
+              <th>Clients visités</th>
+              <th>Nom RC complété</th>
+              <th>Complétion</th>
+              <th>Dernière activité</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (s of stats; track s.id) {
+              <tr>
+                <td><strong>{{ s.full_name }}</strong></td>
+                <td><span class="badge badge--info">{{ s.employe_code }}</span></td>
+                <td>{{ s.total_clients }}</td>
+                <td>{{ s.clients_with_sodichn }} / {{ s.total_clients }}</td>
+                <td>
+                  <div class="pv-progress">
+                    <div class="pv-progress__bar"
+                         [style.width.%]="s.completion_pct"
+                         [style.background]="progressColor(s.completion_pct)">
+                    </div>
+                    <span class="pv-progress__label">{{ s.completion_pct }}%</span>
+                  </div>
+                </td>
+                <td class="td-muted">{{ s.last_activity ?? '—' }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      }
+    </div>
+  </div>
+
+</div>

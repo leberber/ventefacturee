@@ -1,0 +1,31 @@
+.table-wrapper {
+  height: calc(100vh - 140px);
+}
+
+.pv-progress {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pv-progress__bar {
+  flex: 1;
+  height: 6px;
+  border-radius: 99px;
+  background: var(--surface-300);
+  min-width: 0;
+  transition: width 0.3s ease;
+}
+
+.pv-progress__label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-secondary, #6b7280);
+  min-width: 2.5rem;
+  text-align: right;
+}
+
+.td-muted {
+  color: var(--text-secondary, #6b7280);
+  font-size: 0.85rem;
+}
