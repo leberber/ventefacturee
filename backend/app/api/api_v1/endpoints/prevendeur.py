@@ -112,8 +112,8 @@ def prevendeur_facturation(
 
     # Fetch nom_sodichn from clients table for all client codes
     client_codes = [m['code_client'] for m in client_meta.values() if m.get('code_client')]
-    clients_db = session.exec(select(Client).where(Client.code.in_(client_codes))).all() if client_codes else []
-    nom_sodichn_map = {c.code: c.nom_sodichn for c in clients_db}
+    clients_db = session.exec(select(Client).where(Client.customer_no.in_(client_codes))).all() if client_codes else []
+    nom_sodichn_map = {c.customer_no: c.nom_sodichn for c in clients_db}
 
     routes_out = []
     for route in sorted(route_clients.keys()):
@@ -178,7 +178,7 @@ def prevendeur_admin_stats(
         if client_codes:
             matched = session.exec(
                 select(func.count(Client.id))
-                .where(Client.code.in_(client_codes))
+                .where(Client.customer_no.in_(client_codes))
                 .where(Client.nom_sodichn != None)
                 .where(Client.nom_sodichn != '')
             ).one()
@@ -209,12 +209,12 @@ def update_nom_sodichn(
     current_user: User = Depends(get_current_user),
     session: Session = Depends(get_session),
 ) -> Any:
-    client = session.exec(select(Client).where(Client.code == code_client)).first()
+    client = session.exec(select(Client).where(Client.customer_no == code_client)).first()
     if client:
         client.nom_sodichn = nom_sodichn or None
         client.updated_at = datetime.now(timezone.utc)
     else:
-        client = Client(code=code_client, name=nom_client, nom_sodichn=nom_sodichn or None)
+        client = Client(customer_no=code_client, name=nom_client, nom_sodichn=nom_sodichn or None)
         session.add(client)
     session.commit()
     return {"ok": True}

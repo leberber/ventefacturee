@@ -2,18 +2,24 @@
   height: calc(100vh - 140px);
 }
 
+
 .pv-progress {
   display: flex;
   align-items: center;
   gap: 8px;
 }
 
-.pv-progress__bar {
+.pv-progress__track {
   flex: 1;
   height: 6px;
   border-radius: 99px;
   background: var(--surface-300);
-  min-width: 0;
+  overflow: hidden;
+}
+
+.pv-progress__fill {
+  height: 100%;
+  border-radius: 99px;
   transition: width 0.3s ease;
 }
 
