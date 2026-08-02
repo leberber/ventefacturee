@@ -154,6 +154,13 @@
     margin-left: 0;
     padding: calc(var(--mob-topbar-h) + var(--space-4)) var(--space-4) calc(var(--mob-nav-h) + env(safe-area-inset-bottom) + var(--space-4));
   }
+
+  &--prevendeur {
+    @include mobile-only {
+      padding-top: 0;
+      padding-bottom: 0;
+    }
+  }
 }
 
 // ---- Mobile top bar ----

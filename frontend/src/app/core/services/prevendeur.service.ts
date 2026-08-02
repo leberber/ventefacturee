@@ -4,6 +4,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 export interface PrevClient {
   nom_client: string;
   code_client: string | null;
+  nom_sodichn: string | null;
   derniere_visite: string | null;
   weeks: string[];
   semaines: Record<string, Record<string, number | null>>;
@@ -41,5 +42,9 @@ export class PrevendeurService {
   getFacturation(annee_mois: string) {
     const p = new HttpParams().set('annee_mois', annee_mois);
     return this.http.get<PrevFacturation>('/api/v1/prevendeur/facturation', { params: p });
+  }
+
+  updateNomSodichn(code_client: string, nom_sodichn: string, nom_client: string) {
+    return this.http.patch(`/api/v1/prevendeur/clients/${encodeURIComponent(code_client)}`, { nom_sodichn, nom_client });
   }
 }

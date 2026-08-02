@@ -1,12 +1,14 @@
 from typing import Any, List
 from collections import defaultdict
+from datetime import datetime, timezone
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Body, Depends, Query
 from sqlalchemy import or_
 from sqlmodel import Session, select
 
 from app.api.deps import get_current_user
 from app.database import get_session
+from app.models.client import Client
 from app.models.user import User
 from app.models.vente import Vente
 from app.models.produit import Produit
@@ -108,6 +110,11 @@ def prevendeur_facturation(
 
     fdv_nom = rows[0].nom_fdv if rows else current_user.full_name
 
+    # Fetch nom_sodichn from clients table for all client codes
+    client_codes = [m['code_client'] for m in client_meta.values() if m.get('code_client')]
+    clients_db = session.exec(select(Client).where(Client.code.in_(client_codes))).all() if client_codes else []
+    nom_sodichn_map = {c.code: c.nom_sodichn for c in clients_db}
+
     routes_out = []
     for route in sorted(route_clients.keys()):
         clients_out = []
@@ -120,9 +127,11 @@ def prevendeur_facturation(
                 for l in client_dates
             }
             totaux = {p: (sum(agg[nom][l][p] for l in client_dates) or None) for p in products}
+            code = client_meta[nom]['code_client']
             clients_out.append({
                 "nom_client": nom,
-                "code_client": client_meta[nom]['code_client'],
+                "code_client": code,
+                "nom_sodichn": nom_sodichn_map.get(code),
                 "derniere_visite": client_dates[-1],
                 "weeks": client_dates,
                 "semaines": semaines,
@@ -139,3 +148,22 @@ def prevendeur_facturation(
         "total_clients": sum(len(r["clients"]) for r in routes_out),
         "routes": routes_out,
     }
+
+
+@router.patch("/clients/{code_client}")
+def update_nom_sodichn(
+    code_client: str,
+    nom_sodichn: str = Body(..., embed=True),
+    nom_client: str = Body(..., embed=True),
+    current_user: User = Depends(get_current_user),
+    session: Session = Depends(get_session),
+) -> Any:
+    client = session.exec(select(Client).where(Client.code == code_client)).first()
+    if client:
+        client.nom_sodichn = nom_sodichn or None
+        client.updated_at = datetime.now(timezone.utc)
+    else:
+        client = Client(code=code_client, name=nom_client, nom_sodichn=nom_sodichn or None)
+        session.add(client)
+    session.commit()
+    return {"ok": True}

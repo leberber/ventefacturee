@@ -1,24 +1,29 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { PrevendeurService, PrevFacturation, PrevClient } from '../../core/services/prevendeur.service';
 import { AuthService } from '../../core/services/auth.service';
 
 @Component({
   selector: 'app-prevendeur',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './prevendeur.component.html',
   styleUrl: './prevendeur.component.scss',
 })
 export class PrevendeurComponent implements OnInit {
   private svc  = inject(PrevendeurService);
-  private auth = inject(AuthService);
+  auth = inject(AuthService);
 
   periodes: string[] = [];
   selectedMois = '';
   loading = false;
   data: PrevFacturation | null = null;
+  activeTab: 'tournees' | 'clients' | 'objectifs' | 'menu' = 'tournees';
   expandedClients = new Set<string>();
+  editingKey: string | null = null;
+  editingValue = '';
+  savingKey: string | null = null;
 
   get userName(): string { return this.auth.currentUser()?.full_name ?? ''; }
 
@@ -108,6 +113,47 @@ export class PrevendeurComponent implements OnInit {
       }
     }
     return Array.from(fams);
+  }
+
+  get allClients(): PrevClient[] {
+    if (!this.data) return [];
+    return this.data.routes.flatMap(r => r.clients)
+      .sort((a, b) => a.nom_client.localeCompare(b.nom_client, 'fr'));
+  }
+
+  clientKey(route: string, client: PrevClient): string {
+    return route + '|' + client.nom_client;
+  }
+
+  startEdit(route: string, client: PrevClient, event: Event) {
+    event.stopPropagation();
+    this.editingKey = this.clientKey(route, client);
+    this.editingValue = client.nom_sodichn ?? '';
+    setTimeout(() => {
+      const el = document.querySelector('.pv-rc-input') as HTMLInputElement;
+      if (el) el.focus();
+    }, 30);
+  }
+
+  saveEdit(client: PrevClient, event: Event) {
+    event.stopPropagation();
+    if (!this.editingKey || !client.code_client) { this.editingKey = null; return; }
+    const value = this.editingValue.trim();
+    const key = this.editingKey;
+    this.editingKey = null;
+    this.savingKey = key;
+    this.svc.updateNomSodichn(client.code_client, value, client.nom_client).subscribe({
+      next: () => {
+        client.nom_sodichn = value || null;
+        this.savingKey = null;
+      },
+      error: () => { this.savingKey = null; },
+    });
+  }
+
+  cancelEdit(event: Event) {
+    event.stopPropagation();
+    this.editingKey = null;
   }
 
   readonly skeletonRows = Array(6).fill(0);

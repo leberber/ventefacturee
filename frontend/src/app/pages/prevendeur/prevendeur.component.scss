@@ -2,14 +2,14 @@
 
 :host {
   display: block;
-  background: #f4f6fb;
+  background: var(--surface-ground);
   min-height: 100vh;
   /* bleed to screen edges by cancelling admin-content horizontal padding */
   margin: 0 -1rem;
 }
 
 .pv-page {
-  padding: 0 0 96px; /* room for mobile bottom nav */
+  padding: 0 0 96px;
 }
 
 /* ── Header ────────────────────────────────────────────────────────── */
@@ -18,13 +18,19 @@
   position: sticky;
   top: 0;
   z-index: 10;
-  background: #fff;
+  background: var(--surface-ground);
   border-bottom: 1px solid #e9ecf2;
   padding: 12px 16px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 8px;
+}
+
+.pv-header__logo {
+  height: 32px;
+  width: auto;
+  flex-shrink: 0;
 }
 
 .pv-header__left {
@@ -56,6 +62,24 @@
 .pv-meta-sep {
   color: #c8cedd;
   line-height: 1;
+}
+
+.pv-logout {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  border: none;
+  border-radius: 50%;
+  background: #f3f4f6;
+  color: #6b7280;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+
+  &:hover { background: #fee2e2; color: #dc2626; }
 }
 
 .pv-period {
@@ -406,4 +430,241 @@
   background: linear-gradient(90deg, #ebebeb 25%, #f5f5f5 50%, #ebebeb 75%);
   background-size: 600px 100%;
   animation: pv-shimmer 1.4s infinite linear;
+}
+
+/* ── Bottom nav ─────────────────────────────────────────────────────── */
+
+.pv-bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 64px;
+  background: #fff;
+  border-top: 1px solid #e9ecf2;
+  display: flex;
+  align-items: stretch;
+  z-index: 100;
+  box-shadow: 0 -2px 12px rgba(0,0,0,.06);
+}
+
+.pv-nav-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  border: none;
+  background: none;
+  color: #9ca3af;
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  transition: color 0.15s;
+
+  .pi { font-size: 1.2rem; }
+
+  &--active {
+    color: #6366f1;
+  }
+}
+
+/* ── Mes clients page ────────────────────────────────────────────────── */
+
+.pv-clients-page {
+  padding: 0;
+}
+
+.pvc-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.pvc-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: #fff;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.pvc-avatar {
+  width: 38px;
+  height: 38px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #6366f1, #818cf8);
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pvc-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.pvc-name {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #1a1f36;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pvc-total {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #6366f1;
+  white-space: nowrap;
+}
+
+/* ── Menu page ───────────────────────────────────────────────────────── */
+
+.pv-menu-page {
+  padding: 20px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.pvm-user-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: #fff;
+  border-radius: 16px;
+  padding: 16px;
+  box-shadow: 0 1px 4px rgba(0,0,0,.06);
+}
+
+.pvm-avatar {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #6366f1, #818cf8);
+  color: #fff;
+  font-weight: 700;
+  font-size: 1.3rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.pvm-user-info {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.pvm-user-name {
+  font-weight: 700;
+  font-size: 1rem;
+  color: #1a1f36;
+}
+
+.pvm-user-role {
+  font-size: 0.75rem;
+  color: #6b7280;
+}
+
+.pvm-section {
+  background: #fff;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 1px 4px rgba(0,0,0,.06);
+}
+
+.pvm-item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px;
+  border: none;
+  background: none;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: left;
+  color: #374151;
+  transition: background 0.15s;
+
+  &:hover { background: #f9fafb; }
+
+  .pi:first-child { font-size: 1.1rem; width: 20px; text-align: center; }
+
+  span { flex: 1; }
+
+  &--danger { color: #dc2626; }
+  &--danger .pi { color: #dc2626; }
+}
+
+.pvm-arrow {
+  font-size: 0.7rem !important;
+  color: #d1d5db !important;
+}
+
+/* ── Nom RC (nom_sodichn) inline edit ───────────────────────────────── */
+
+.pv-rc-row {
+  margin-top: 4px;
+}
+
+.pv-rc-value {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.72rem;
+  color: #6b7280;
+  cursor: pointer;
+  padding: 2px 6px 2px 4px;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  transition: border-color 0.15s, background 0.15s;
+
+  &:hover {
+    border-color: #d1d5db;
+    background: #f9fafb;
+    color: #374151;
+  }
+
+  &--empty {
+    color: #9ca3af;
+    font-style: italic;
+  }
+}
+
+.pv-rc-icon {
+  font-size: 0.62rem;
+  opacity: 0.4;
+}
+
+.pv-rc-saving {
+  font-size: 0.65rem;
+  color: #6366f1;
+}
+
+.pv-rc-input {
+  width: 100%;
+  max-width: 260px;
+  font-size: 0.75rem;
+  padding: 3px 8px;
+  border: 1.5px solid #6366f1;
+  border-radius: 6px;
+  outline: none;
+  background: #fff;
+  color: #1a1f36;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.12);
 }

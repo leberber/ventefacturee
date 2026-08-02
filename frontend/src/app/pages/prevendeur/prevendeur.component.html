@@ -1,10 +1,11 @@
 <div class="pv-page">
 
-  <!-- Header -->
+  <!-- ── Sticky header ──────────────────────────────────────────────── -->
   <div class="pv-header">
+    <img src="assets/logo.png" alt="Logo" class="pv-header__logo" />
     <div class="pv-header__left">
       <div class="pv-header__name">{{ userName }}</div>
-      @if (data && !loading) {
+      @if (data && !loading && activeTab === 'tournees') {
         <div class="pv-header__meta">
           <span>{{ data.routes.length }} routes</span>
           <span class="pv-meta-sep">·</span>
@@ -12,139 +13,279 @@
         </div>
       }
     </div>
-    <div class="pv-period">
-      <button class="pv-period__btn" (click)="prevPeriod()" [disabled]="!canGoPrev">
-        <i class="pi pi-chevron-left"></i>
-      </button>
-      <span class="pv-period__label">{{ formatPeriod(selectedMois) }}</span>
-      <button class="pv-period__btn" (click)="nextPeriod()" [disabled]="!canGoNext">
-        <i class="pi pi-chevron-right"></i>
-      </button>
-    </div>
+
+    @if (activeTab === 'tournees') {
+      <div class="pv-period">
+        <button class="pv-period__btn" (click)="prevPeriod()" [disabled]="!canGoPrev">
+          <i class="pi pi-chevron-left"></i>
+        </button>
+        <span class="pv-period__label">{{ formatPeriod(selectedMois) }}</span>
+        <button class="pv-period__btn" (click)="nextPeriod()" [disabled]="!canGoNext">
+          <i class="pi pi-chevron-right"></i>
+        </button>
+      </div>
+    }
   </div>
 
-  <!-- Summary strip -->
-  @if (data && !loading) {
-    <div class="pv-summary">
-      <div class="pv-kpi">
-        <span class="pv-kpi__val">{{ data.total_clients }}</span>
-        <span class="pv-kpi__label">Clients</span>
+  <!-- ══════════════════════════════════════════════════════════════════
+       TAB: MES TOURNÉES
+  ══════════════════════════════════════════════════════════════════════ -->
+  @if (activeTab === 'tournees') {
+
+    <!-- Summary strip -->
+    @if (data && !loading) {
+      <div class="pv-summary">
+        <div class="pv-kpi">
+          <span class="pv-kpi__val">{{ data.total_clients }}</span>
+          <span class="pv-kpi__label">Clients</span>
+        </div>
+        <div class="pv-kpi-sep"></div>
+        <div class="pv-kpi pv-kpi--sucre">
+          <span class="pv-kpi__val">{{ totalSucre }}</span>
+          <span class="pv-kpi__label">Sucre</span>
+        </div>
+        <div class="pv-kpi-sep"></div>
+        <div class="pv-kpi pv-kpi--huile">
+          <span class="pv-kpi__val">{{ totalHuile }}</span>
+          <span class="pv-kpi__label">Huile</span>
+        </div>
       </div>
-      <div class="pv-kpi-sep"></div>
-      <div class="pv-kpi pv-kpi--sucre">
-        <span class="pv-kpi__val">{{ totalSucre }}</span>
-        <span class="pv-kpi__label">Sucre</span>
+    }
+
+    <!-- Skeleton -->
+    @if (loading) {
+      <div class="pv-summary pv-summary--sk">
+        <div class="pv-sk-kpi"></div>
+        <div class="pv-sk-kpi"></div>
+        <div class="pv-sk-kpi"></div>
       </div>
-      <div class="pv-kpi-sep"></div>
-      <div class="pv-kpi pv-kpi--huile">
-        <span class="pv-kpi__val">{{ totalHuile }}</span>
-        <span class="pv-kpi__label">Huile</span>
+      <div class="pv-routes">
+        @for (_ of skeletonRows; track $index; let i = $index) {
+          <div class="pv-sk-card" [style.animation-delay]="i * 60 + 'ms'"></div>
+        }
       </div>
-    </div>
+    }
+
+    <!-- Routes -->
+    @if (data && !loading) {
+      @if (data.routes.length === 0) {
+        <div class="pv-empty">
+          <i class="pi pi-inbox"></i>
+          <p>Aucune donnée pour cette période</p>
+        </div>
+      } @else {
+        <div class="pv-routes">
+          @for (route of data.routes; track route.route; let ri = $index) {
+            <div class="pv-route">
+
+              <div class="pv-route__header">
+                <span class="pv-route__idx">{{ ri + 1 }}</span>
+                <i class="pi pi-map-marker"></i>
+                <span>{{ route.route }}</span>
+                <span class="pv-route__count">{{ route.clients.length }}</span>
+              </div>
+
+              @for (client of route.clients; track client.nom_client; let ci = $index) {
+                <div class="pv-client-card"
+                     [class.pv-client-card--open]="isExpanded(route.route + client.nom_client)"
+                     (click)="toggleClient(route.route + client.nom_client)">
+
+                  <div class="pv-client-head">
+                    <div class="pv-stop-num">{{ ci + 1 }}</div>
+                    <div class="pv-avatar">{{ client.nom_client.charAt(0) }}</div>
+                    <div class="pv-client-info">
+                      <span class="pv-client-name">{{ client.nom_client }}</span>
+                      <div class="pv-client-tags">
+                        @for (f of clientFamilies(client); track f) {
+                          <span class="pv-fam-tag pv-fam-tag--{{ f }}">{{ f }}</span>
+                        }
+                        @if (client.derniere_visite) {
+                          <span class="pv-client-last">{{ client.derniere_visite }}</span>
+                        }
+                      </div>
+                      <!-- nom_sodichn inline edit -->
+                      <div class="pv-rc-row" (click)="$event.stopPropagation()">
+                        @if (editingKey === clientKey(route.route, client)) {
+                          <input class="pv-rc-input"
+                                 [(ngModel)]="editingValue"
+                                 placeholder="Nom registre commerce…"
+                                 (keydown.enter)="saveEdit(client, $event)"
+                                 (keydown.escape)="cancelEdit($event)"
+                                 (blur)="saveEdit(client, $event)" />
+                        } @else {
+                          <span class="pv-rc-value"
+                                [class.pv-rc-value--empty]="!client.nom_sodichn"
+                                (click)="startEdit(route.route, client, $event)">
+                            @if (savingKey === clientKey(route.route, client)) {
+                              <i class="pi pi-spin pi-spinner pv-rc-saving"></i>
+                            } @else {
+                              <i class="pi pi-pencil pv-rc-icon"></i>
+                            }
+                            {{ client.nom_sodichn || 'Nom RC…' }}
+                          </span>
+                        }
+                      </div>
+                    </div>
+                    <span class="pv-client-total">{{ clientTotal(client) }}</span>
+                    <i class="pi pv-chevron"
+                       [class.pi-chevron-down]="!isExpanded(route.route + client.nom_client)"
+                       [class.pi-chevron-up]="isExpanded(route.route + client.nom_client)"></i>
+                  </div>
+
+                  @if (isExpanded(route.route + client.nom_client)) {
+                    <div class="pv-client-detail" (click)="$event.stopPropagation()">
+                      <div class="pv-table-wrap">
+                        <table class="pv-table">
+                          <thead>
+                            <tr>
+                              <th class="pv-th-date">Date</th>
+                              @for (p of data!.products; track p) {
+                                <th [class]="familleClass(p)">{{ p }}</th>
+                              }
+                            </tr>
+                          </thead>
+                          <tbody>
+                            @for (week of client.weeks; track week) {
+                              <tr>
+                                <td class="pv-td-date">{{ week }}</td>
+                                @for (p of data!.products; track p) {
+                                  <td [class.pv-td--val]="val(client.semaines[week]?.[p] ?? null, p) !== ''">
+                                    {{ val(client.semaines[week]?.[p] ?? null, p) }}
+                                  </td>
+                                }
+                              </tr>
+                            }
+                            <tr class="pv-tr-total">
+                              <td class="pv-td-date">Total</td>
+                              @for (p of data!.products; track p) {
+                                <td [class.pv-td--val]="val(client.totaux[p] ?? null, p) !== ''">
+                                  <strong>{{ val(client.totaux[p] ?? null, p) }}</strong>
+                                </td>
+                              }
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  }
+
+                </div>
+              }
+
+            </div>
+          }
+        </div>
+      }
+    }
   }
 
-  <!-- Skeleton -->
-  @if (loading) {
-    <div class="pv-summary pv-summary--sk">
-      <div class="pv-sk-kpi"></div>
-      <div class="pv-sk-kpi"></div>
-      <div class="pv-sk-kpi"></div>
-    </div>
-    <div class="pv-routes">
-      @for (_ of skeletonRows; track $index; let i = $index) {
-        <div class="pv-sk-card" [style.animation-delay]="i * 60 + 'ms'"></div>
+  <!-- ══════════════════════════════════════════════════════════════════
+       TAB: MES CLIENTS
+  ══════════════════════════════════════════════════════════════════════ -->
+  @if (activeTab === 'clients') {
+    <div class="pv-clients-page">
+      @if (!data || loading) {
+        <div class="pv-empty">
+          <i class="pi pi-spin pi-spinner"></i>
+          <p>Chargement…</p>
+        </div>
+      } @else if (allClients.length === 0) {
+        <div class="pv-empty">
+          <i class="pi pi-users"></i>
+          <p>Aucun client pour cette période</p>
+        </div>
+      } @else {
+        <div class="pvc-list">
+          @for (client of allClients; track client.nom_client; let i = $index) {
+            <div class="pvc-item">
+              <div class="pvc-avatar">{{ client.nom_client.charAt(0) }}</div>
+              <div class="pvc-info">
+                <span class="pvc-name">{{ client.nom_client }}</span>
+                <div class="pv-rc-row" (click)="$event.stopPropagation()">
+                  @if (editingKey === clientKey('clients', client)) {
+                    <input class="pv-rc-input"
+                           [(ngModel)]="editingValue"
+                           placeholder="Nom registre commerce…"
+                           (keydown.enter)="saveEdit(client, $event)"
+                           (keydown.escape)="cancelEdit($event)"
+                           (blur)="saveEdit(client, $event)" />
+                  } @else {
+                    <span class="pv-rc-value"
+                          [class.pv-rc-value--empty]="!client.nom_sodichn"
+                          (click)="startEdit('clients', client, $event)">
+                      @if (savingKey === clientKey('clients', client)) {
+                        <i class="pi pi-spin pi-spinner pv-rc-saving"></i>
+                      } @else {
+                        <i class="pi pi-pencil pv-rc-icon"></i>
+                      }
+                      {{ client.nom_sodichn || 'Nom RC…' }}
+                    </span>
+                  }
+                </div>
+              </div>
+              <span class="pvc-total">{{ clientTotal(client) }}</span>
+            </div>
+          }
+        </div>
       }
     </div>
   }
 
-  <!-- Routes -->
-  @if (data && !loading) {
-    @if (data.routes.length === 0) {
+  <!-- ══════════════════════════════════════════════════════════════════
+       TAB: MES OBJECTIFS
+  ══════════════════════════════════════════════════════════════════════ -->
+  @if (activeTab === 'objectifs') {
+    <div class="pv-objectifs-page">
       <div class="pv-empty">
-        <i class="pi pi-inbox"></i>
-        <p>Aucune donnée pour cette période</p>
+        <i class="pi pi-chart-bar"></i>
+        <p>Aucun objectif défini</p>
       </div>
-    } @else {
-      <div class="pv-routes">
-        @for (route of data.routes; track route.route; let ri = $index) {
-          <div class="pv-route">
-
-            <div class="pv-route__header">
-              <span class="pv-route__idx">{{ ri + 1 }}</span>
-              <i class="pi pi-map-marker"></i>
-              <span>{{ route.route }}</span>
-              <span class="pv-route__count">{{ route.clients.length }}</span>
-            </div>
-
-            @for (client of route.clients; track client.nom_client; let ci = $index) {
-              <div class="pv-client-card"
-                   [class.pv-client-card--open]="isExpanded(route.route + client.nom_client)"
-                   (click)="toggleClient(route.route + client.nom_client)">
-
-                <div class="pv-client-head">
-                  <div class="pv-stop-num">{{ ci + 1 }}</div>
-                  <div class="pv-avatar">{{ client.nom_client.charAt(0) }}</div>
-                  <div class="pv-client-info">
-                    <span class="pv-client-name">{{ client.nom_client }}</span>
-                    <div class="pv-client-tags">
-                      @for (f of clientFamilies(client); track f) {
-                        <span class="pv-fam-tag pv-fam-tag--{{ f }}">{{ f }}</span>
-                      }
-                      @if (client.derniere_visite) {
-                        <span class="pv-client-last">{{ client.derniere_visite }}</span>
-                      }
-                    </div>
-                  </div>
-                  <span class="pv-client-total">{{ clientTotal(client) }}</span>
-                  <i class="pi pv-chevron"
-                     [class.pi-chevron-down]="!isExpanded(route.route + client.nom_client)"
-                     [class.pi-chevron-up]="isExpanded(route.route + client.nom_client)"></i>
-                </div>
-
-                @if (isExpanded(route.route + client.nom_client)) {
-                  <div class="pv-client-detail" (click)="$event.stopPropagation()">
-                    <div class="pv-table-wrap">
-                      <table class="pv-table">
-                        <thead>
-                          <tr>
-                            <th class="pv-th-date">Date</th>
-                            @for (p of data!.products; track p) {
-                              <th [class]="familleClass(p)">{{ p }}</th>
-                            }
-                          </tr>
-                        </thead>
-                        <tbody>
-                          @for (week of client.weeks; track week) {
-                            <tr>
-                              <td class="pv-td-date">{{ week }}</td>
-                              @for (p of data!.products; track p) {
-                                <td [class.pv-td--val]="val(client.semaines[week]?.[p] ?? null, p) !== ''">
-                                  {{ val(client.semaines[week]?.[p] ?? null, p) }}
-                                </td>
-                              }
-                            </tr>
-                          }
-                          <tr class="pv-tr-total">
-                            <td class="pv-td-date">Total</td>
-                            @for (p of data!.products; track p) {
-                              <td [class.pv-td--val]="val(client.totaux[p] ?? null, p) !== ''">
-                                <strong>{{ val(client.totaux[p] ?? null, p) }}</strong>
-                              </td>
-                            }
-                          </tr>
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
-                }
-
-              </div>
-            }
-
-          </div>
-        }
-      </div>
-    }
+    </div>
   }
+
+  <!-- ══════════════════════════════════════════════════════════════════
+       TAB: MENU
+  ══════════════════════════════════════════════════════════════════════ -->
+  @if (activeTab === 'menu') {
+    <div class="pv-menu-page">
+
+      <div class="pvm-user-card">
+        <div class="pvm-avatar">{{ userName.charAt(0) }}</div>
+        <div class="pvm-user-info">
+          <span class="pvm-user-name">{{ userName }}</span>
+          <span class="pvm-user-role">Prévendeur</span>
+        </div>
+      </div>
+
+      <div class="pvm-section">
+        <button class="pvm-item pvm-item--danger" (click)="auth.logout()">
+          <i class="pi pi-sign-out"></i>
+          <span>Se déconnecter</span>
+          <i class="pi pi-chevron-right pvm-arrow"></i>
+        </button>
+      </div>
+
+    </div>
+  }
+
+  <!-- ── Bottom nav ──────────────────────────────────────────────────── -->
+  <nav class="pv-bottom-nav">
+    <button class="pv-nav-item" [class.pv-nav-item--active]="activeTab === 'tournees'" (click)="activeTab = 'tournees'">
+      <i class="pi pi-calendar"></i>
+      <span>Tournées</span>
+    </button>
+    <button class="pv-nav-item" [class.pv-nav-item--active]="activeTab === 'clients'" (click)="activeTab = 'clients'">
+      <i class="pi pi-users"></i>
+      <span>Clients</span>
+    </button>
+    <button class="pv-nav-item" [class.pv-nav-item--active]="activeTab === 'objectifs'" (click)="activeTab = 'objectifs'">
+      <i class="pi pi-chart-bar"></i>
+      <span>Objectifs</span>
+    </button>
+    <button class="pv-nav-item" [class.pv-nav-item--active]="activeTab === 'menu'" (click)="activeTab = 'menu'">
+      <i class="pi pi-bars"></i>
+      <span>Menu</span>
+    </button>
+  </nav>
 
 </div>

@@ -62,23 +62,20 @@
   </aside>
 
   <!-- Mobile top bar -->
-  <header class="mob-topbar">
-    <img src="assets/logo.png" alt="Logo" class="mob-topbar__logo" />
-  </header>
+  @if (!isPrevender) {
+    <header class="mob-topbar">
+      <img src="assets/logo.png" alt="Logo" class="mob-topbar__logo" />
+    </header>
+  }
 
   <!-- Main content -->
-  <main class="admin-content">
+  <main class="admin-content" [class.admin-content--prevendeur]="isPrevender">
     <router-outlet />
   </main>
 
-  <!-- Mobile bottom nav -->
-  <nav class="mob-nav">
-    @if (isPrevender) {
-      <a class="mob-nav__item" routerLink="/prevendeur" routerLinkActive="mob-nav__item--active">
-        <i class="pi pi-map-marker"></i>
-        <span>Mes tournées</span>
-      </a>
-    } @else {
+  <!-- Mobile bottom nav (hidden for prevendeur who has their own bottom nav) -->
+  @if (!isPrevender) {
+    <nav class="mob-nav">
       <a class="mob-nav__item" routerLink="/dashboard" routerLinkActive="mob-nav__item--active" [routerLinkActiveOptions]="{exact:true}">
         <i class="pi pi-home"></i>
         <span>Accueil</span>
@@ -93,8 +90,8 @@
         <i class="pi pi-bars"></i>
         <span>Menu</span>
       </button>
-    }
-  </nav>
+    </nav>
+  }
 
   <!-- Mobile drawer -->
   @if (drawerOpen()) {
