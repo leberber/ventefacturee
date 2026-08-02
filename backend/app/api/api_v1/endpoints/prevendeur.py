@@ -188,6 +188,26 @@ def prevendeur_admin_stats(
             .where(Vente.code_fdv == pv.employe_code)
         ).one()
 
+        # Build client list with nom_sodichn for drilldown
+        clients_detail = []
+        if client_codes:
+            clients_db = session.exec(
+                select(Client).where(Client.customer_no.in_(client_codes)).order_by(Client.name)
+            ).all()
+            sodichn_map = {c.customer_no: c.nom_sodichn for c in clients_db}
+            # Get nom_client from ventes for display
+            vente_names = session.exec(
+                select(Vente.code_client, Vente.nom_client).distinct()
+                .where(Vente.code_fdv == pv.employe_code)
+                .where(Vente.code_client != None)
+            ).all()
+            for code, nom in sorted(vente_names, key=lambda x: x[1] or ''):
+                clients_detail.append({
+                    "code_client": code,
+                    "nom_client": nom,
+                    "nom_sodichn": sodichn_map.get(code),
+                })
+
         result.append({
             "id": pv.id,
             "full_name": pv.full_name,
@@ -196,6 +216,7 @@ def prevendeur_admin_stats(
             "clients_with_sodichn": matched,
             "completion_pct": round(matched / total_clients * 100) if total_clients > 0 else 0,
             "last_activity": last_sale.strftime('%Y-%m-%d') if last_sale else None,
+            "clients": clients_detail,
         })
 
     return result

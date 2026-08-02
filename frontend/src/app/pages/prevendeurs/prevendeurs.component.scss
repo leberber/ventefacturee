@@ -35,3 +35,64 @@
   color: var(--text-secondary, #6b7280);
   font-size: 0.85rem;
 }
+
+.pv-row {
+  cursor: pointer;
+  &:hover { background: var(--surface-hover, rgba(0,0,0,0.02)); }
+  &--open { background: var(--surface-50, #fafafa); }
+}
+
+.pv-detail-row > td {
+  padding: 0;
+  background: var(--surface-ground);
+  border-bottom: 2px solid var(--border-color-light);
+}
+
+.pv-clients-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.82rem;
+
+  thead tr { background: var(--surface-100, #f3f4f6); }
+
+  th {
+    text-align: left;
+    padding: 0.4rem 1rem;
+    font-weight: 600;
+    color: var(--text-color-secondary);
+    border-bottom: 1px solid var(--border-color-light);
+  }
+
+  td {
+    padding: 0.35rem 1rem;
+    border-bottom: 1px solid var(--border-color-light);
+  }
+
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr:hover { background: rgba(0,0,0,0.015); }
+}
+
+.pv-edit-value {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  border-radius: 4px;
+  padding: 2px 6px;
+  &:hover { background: var(--surface-200); }
+  &--empty { color: var(--text-color-secondary); opacity: 0.6; }
+}
+
+.pv-edit-icon { font-size: 0.7rem; opacity: 0.4; }
+
+.pv-edit-input {
+  width: 100%;
+  border: 1px solid var(--primary-color);
+  border-radius: 4px;
+  padding: 3px 8px;
+  font-size: 0.82rem;
+  outline: none;
+  background: var(--surface-card);
+  color: var(--text-color);
+  box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.1);
+}

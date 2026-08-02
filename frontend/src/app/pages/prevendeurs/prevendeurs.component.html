@@ -24,6 +24,7 @@
         <table class="table">
           <thead>
             <tr>
+              <th style="width:2rem"></th>
               <th>Prévendeur</th>
               <th>Code</th>
               <th>Clients visités</th>
@@ -34,7 +35,10 @@
           </thead>
           <tbody>
             @for (s of stats; track s.id) {
-              <tr>
+              <tr class="pv-row" [class.pv-row--open]="expandedId === s.id" (click)="toggle(s.id)">
+                <td>
+                  <i class="pi" [class.pi-chevron-right]="expandedId !== s.id" [class.pi-chevron-down]="expandedId === s.id"></i>
+                </td>
                 <td><strong>{{ s.full_name }}</strong></td>
                 <td><span class="badge badge--info">{{ s.employe_code }}</span></td>
                 <td>{{ s.total_clients }}</td>
@@ -52,6 +56,50 @@
                 </td>
                 <td class="td-muted">{{ s.last_activity ?? '—' }}</td>
               </tr>
+              @if (expandedId === s.id) {
+                <tr class="pv-detail-row">
+                  <td colspan="7">
+                    <table class="pv-clients-table">
+                      <thead>
+                        <tr>
+                          <th>Code client</th>
+                          <th>Nom client</th>
+                          <th>Nom RC (Sodichn)</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        @for (c of s.clients; track c.code_client) {
+                          <tr>
+                            <td class="td-muted">{{ c.code_client }}</td>
+                            <td>{{ c.nom_client }}</td>
+                            <td (click)="$event.stopPropagation()">
+                              @if (editingKey === c.code_client) {
+                                <input class="pv-edit-input"
+                                       [(ngModel)]="editingValue"
+                                       placeholder="Nom RC…"
+                                       (keydown.enter)="saveEdit(c, $event)"
+                                       (keydown.escape)="cancelEdit($event)"
+                                       (blur)="saveEdit(c, $event)" />
+                              } @else {
+                                <span class="pv-edit-value"
+                                      [class.pv-edit-value--empty]="!c.nom_sodichn"
+                                      (click)="startEdit(c, $event)">
+                                  @if (savingKey === c.code_client) {
+                                    <i class="pi pi-spin pi-spinner"></i>
+                                  } @else {
+                                    <i class="pi pi-pencil pv-edit-icon"></i>
+                                  }
+                                  {{ c.nom_sodichn || '—' }}
+                                </span>
+                              }
+                            </td>
+                          </tr>
+                        }
+                      </tbody>
+                    </table>
+                  </td>
+                </tr>
+              }
             }
           </tbody>
         </table>

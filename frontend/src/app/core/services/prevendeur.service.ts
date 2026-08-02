@@ -31,6 +31,12 @@ export interface PrevFacturation {
   routes: PrevRoute[];
 }
 
+export interface PrevAdminClientRow {
+  code_client: string;
+  nom_client: string;
+  nom_sodichn: string | null;
+}
+
 export interface PrevAdminStat {
   id: number;
   full_name: string;
@@ -39,6 +45,7 @@ export interface PrevAdminStat {
   clients_with_sodichn: number;
   completion_pct: number;
   last_activity: string | null;
+  clients: PrevAdminClientRow[];
 }
 
 @Injectable({ providedIn: 'root' })
