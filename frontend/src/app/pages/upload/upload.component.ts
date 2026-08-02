@@ -1,5 +1,6 @@
 import { Component, inject, signal } from '@angular/core';
 import { CommonModule, DecimalPipe } from '@angular/common';
+import { Router } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
 
 interface UploadResult { success: boolean; message: string; }
@@ -15,7 +16,8 @@ interface MissingFdv { code: string; nom: string; }
   styleUrl: './upload.component.scss',
 })
 export class UploadComponent {
-  private auth = inject(AuthService);
+  private auth   = inject(AuthService);
+  private router = inject(Router);
 
   dragOver        = signal(false);
   loading         = signal(false);
@@ -118,4 +120,10 @@ export class UploadComponent {
   skip()    { if (this.pendingFile) this.startUpload(this.pendingFile, 'skip'); }
   replace() { if (this.pendingFile) this.startUpload(this.pendingFile, 'replace'); }
   cancel()  { this.overlap.set(null); this.pendingFile = null; }
+
+  createUser(fdv: MissingFdv) {
+    this.router.navigate(['/utilisateurs/nouveau'], {
+      state: { prefill: { full_name: fdv.nom, employe_code: fdv.code, role: 'prevender' } },
+    });
+  }
 }

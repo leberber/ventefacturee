@@ -89,6 +89,14 @@ export class UtilisateurFormComponent implements OnInit {
     } else {
       this.form.get('password')!.setValidators(Validators.required);
       this.form.get('password')!.updateValueAndValidity();
+      const prefill = (history.state as any)?.prefill;
+      if (prefill) {
+        this.form.patchValue({
+          full_name:    prefill.full_name    ?? '',
+          employe_code: prefill.employe_code ?? null,
+          role:         prefill.role         ?? 'employe',
+        });
+      }
     }
   }
 

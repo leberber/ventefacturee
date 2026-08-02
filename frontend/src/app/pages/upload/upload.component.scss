@@ -442,6 +442,24 @@
     }
   }
 
+  &__btn {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.25rem 0.65rem;
+    border-radius: 6px;
+    border: 1px solid #f59e0b;
+    background: transparent;
+    color: #b45309;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+
+    &:hover { background: color-mix(in srgb, #f59e0b 12%, transparent); }
+  }
+
   &__hint {
     margin: 0;
     color: #92400e;

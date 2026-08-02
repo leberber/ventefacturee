@@ -131,7 +131,13 @@
         <p class="missing-fdv-box__sub">Ces codes FDV apparaissent dans le fichier mais n'ont pas de compte utilisateur :</p>
         <ul class="missing-fdv-box__list">
           @for (fdv of missingFdvs(); track fdv.code) {
-            <li><span class="badge badge--warning">{{ fdv.code }}</span> {{ fdv.nom }}</li>
+            <li>
+              <span class="badge badge--warning">{{ fdv.code }}</span>
+              <span>{{ fdv.nom }}</span>
+              <button class="missing-fdv-box__btn" (click)="createUser(fdv)">
+                <i class="pi pi-user-plus"></i> Créer un compte
+              </button>
+            </li>
           }
         </ul>
         <p class="missing-fdv-box__hint">Créez leurs comptes dans <strong>Fonctionnaires</strong> avec le rôle Prévendeur.</p>
