@@ -39,6 +39,18 @@ def _safe_str(val: Any, max_len: int) -> Optional[str]:
     return s[:max_len] if s else None
 
 
+def _normalize_code(val: Any, max_len: int) -> Optional[str]:
+    """Like _safe_str but strips the .0 suffix that pandas adds when a numeric
+    column contains empty cells (int → float coercion)."""
+    s = _safe_str(val, max_len)
+    if s and s.endswith('.0'):
+        try:
+            s = str(int(float(s)))
+        except (ValueError, OverflowError):
+            pass
+    return s
+
+
 def _safe_float(val: Any) -> Optional[float]:
     if val is None:
         return None
@@ -76,7 +88,7 @@ def _row_to_vente(row: pd.Series, annee_mois: str, uploaded_by_id: int) -> Vente
         num_commande=_safe_str(row.get('N° Commande'), 60),
         type_commande=_safe_str(row.get('Type'), 30),
         source=_safe_str(row.get('Source'), 30),
-        code_client=_safe_str(row.get('Code Client'), 50),
+        code_client=_normalize_code(row.get('Code Client'), 50),
         nom_client=_safe_str(row.get('Nom client'), 150),
         categorie_client=_safe_str(row.get('Categories Client'), 20),
         adresse_client=_safe_str(row.get('Adresse Client'), 200),
@@ -92,18 +104,18 @@ def _row_to_vente(row: pd.Series, annee_mois: str, uploaded_by_id: int) -> Vente
         type_fdv=_safe_str(row.get('Type-FDV'), 30),
         code_sup=_safe_str(row.get('Code-Sup'), 30),
         nom_sup=_safe_str(row.get('Nom-Sup'), 100),
-        buid=_safe_str(row.get('BUID'), 30),
-        code_distributeur=_safe_str(row.get('Code Distributeur'), 30),
+        buid=_normalize_code(row.get('BUID'), 30),
+        code_distributeur=_normalize_code(row.get('Code Distributeur'), 30),
         nom_distributeur=_safe_str(row.get('Nom Distributeur'), 100),
         depot_livraison=_safe_str(row.get('Dépôt Livraison'), 50),
         statut_commande=_safe_str(row.get('Statut Commande'), 30),
         date_creation=_safe_date(row.get('Date Création')),
         date_confirmation=_safe_date(row.get('Date Confirmation')),
         date_facturation=_safe_date(row.get('Date Facturation')),
-        code_livreur=_safe_str(row.get('Code Livreur'), 30),
+        code_livreur=_normalize_code(row.get('Code Livreur'), 30),
         nom_livreur=_safe_str(row.get('Nom Livreur'), 100),
         matricule_van=_safe_str(row.get('Matricule VAN'), 30),
-        code_produit=_safe_str(row.get('Code Produit'), 30),
+        code_produit=_normalize_code(row.get('Code Produit'), 30),
         description_produit=_safe_str(row.get('Description Produit'), 200),
         famille=_safe_str(row.get('Famille'), 50),
         sous_famille=_safe_str(row.get('Sous Famille'), 80),
