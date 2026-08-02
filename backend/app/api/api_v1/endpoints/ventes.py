@@ -360,12 +360,25 @@ async def upload_ventes(
         dominant_month = df['Date'].dt.strftime('%Y-%m').value_counts().idxmax()
         msg = f"{total:,} lignes importées avec succès"
         log_line = f"Upload terminé : {total:,} lignes importées ({dominant_month}) par {current_user.full_name}"
+
+        # Check for FDV codes in the file that have no user account
+        fdv_in_file = df[['Code-FDV', 'Nom-FDV']].dropna(subset=['Code-FDV']).drop_duplicates('Code-FDV')
+        existing_codes = set(session.exec(
+            select(User.employe_code).where(User.employe_code != None)
+        ).all())
+        missing_fdvs = [
+            {"code": _safe_str(row['Code-FDV'], 30), "nom": _safe_str(row['Nom-FDV'], 100)}
+            for _, row in fdv_in_file.iterrows()
+            if _safe_str(row['Code-FDV'], 30) not in existing_codes
+        ]
+
         del df
         logger.info(log_line)
         yield event({
             "progress": 100,
             "done": True,
             "message": msg,
+            "missing_fdvs": missing_fdvs,
         })
 
     return StreamingResponse(

@@ -122,5 +122,21 @@
       </div>
     }
 
+    @if (missingFdvs().length) {
+      <div class="missing-fdv-box">
+        <div class="missing-fdv-box__header">
+          <i class="pi pi-exclamation-triangle"></i>
+          <strong>{{ missingFdvs().length }} prévendeur(s) sans compte</strong>
+        </div>
+        <p class="missing-fdv-box__sub">Ces codes FDV apparaissent dans le fichier mais n'ont pas de compte utilisateur :</p>
+        <ul class="missing-fdv-box__list">
+          @for (fdv of missingFdvs(); track fdv.code) {
+            <li><span class="badge badge--warning">{{ fdv.code }}</span> {{ fdv.nom }}</li>
+          }
+        </ul>
+        <p class="missing-fdv-box__hint">Créez leurs comptes dans <strong>Fonctionnaires</strong> avec le rôle Prévendeur.</p>
+      </div>
+    }
+
   </div>
 </div>
