@@ -70,6 +70,9 @@ export class ProduitsComponent implements OnInit {
   readonly familles     = signal<string[]>([]);
   readonly loading      = signal(false);
   readonly syncing      = signal(false);
+  showSyncConfirm = false;
+  syncPreviewLoading = false;
+  syncPreviewItems: { code_produit: string; description_produit: string | null; famille: string | null }[] = [];
 
   readonly searchText     = signal('');
   readonly familleFilter  = signal<string | null>(null);
@@ -117,6 +120,17 @@ export class ProduitsComponent implements OnInit {
   }
 
   sync(): void {
+    this.syncPreviewLoading = true;
+    this.syncPreviewItems = [];
+    this.showSyncConfirm = true;
+    this.svc.syncPreview().subscribe({
+      next: items => { this.syncPreviewItems = items; this.syncPreviewLoading = false; },
+      error: ()    => { this.syncPreviewLoading = false; },
+    });
+  }
+
+  confirmSync(): void {
+    this.showSyncConfirm = false;
     this.syncing.set(true);
     this.svc.sync().subscribe({
       next: () => { this.syncing.set(false); this.load(); this.svc.getFamilles().subscribe(d => this.familles.set(d)); },

@@ -50,6 +50,71 @@ export class ObjectifsAdminComponent implements OnInit {
   routesVH = 0;
   routesFallbackMois: string | null = null;
 
+  // Import state
+  importFile: File | null = null;
+  showImportDialog = false;
+  importCanal: 'VD' | 'VH' = 'VD';
+  importMois = 1;
+  importAnnee = new Date().getFullYear();
+  isImporting = false;
+  importResult: { imported: number; notFound: string[] } | null = null;
+  showNotFoundDetail = false;
+
+  sortCol = '';
+  sortDir: 1 | -1 = 1;
+
+  readonly FLAT_SORT_COLS = new Set(['tonne', 'tonne_route', 'packs', 'packs_route']);
+
+  get isFlatSort(): boolean {
+    return this.FLAT_SORT_COLS.has(this.sortCol);
+  }
+
+  setSort(col: string) {
+    if (this.sortCol === col) this.sortDir = this.sortDir === 1 ? -1 : 1;
+    else { this.sortCol = col; this.sortDir = 1; }
+  }
+
+  resetSort() {
+    this.sortCol = '';
+    this.sortDir = 1;
+  }
+
+  sortIcon(col: string): string {
+    if (this.sortCol !== col) return 'pi-sort-alt';
+    return this.sortDir === 1 ? 'pi-sort-amount-up-alt' : 'pi-sort-amount-down-alt';
+  }
+
+  get sortedRows(): ObjectifRow[] {
+    if (!this.sortCol) return this.rows;
+    const dir = this.sortDir;
+    const col = this.sortCol;
+    return [...this.rows].sort((a, b) => {
+      let va: any, vb: any;
+      const tonne = (r: ObjectifRow) => this.editMode ? r._tonne
+        : (this.canal === 'VD' ? r.objectif_tonne_vd : r.objectif_tonne_vh);
+      const packs = (r: ObjectifRow) => this.editMode ? r._packs
+        : (this.canal === 'VD' ? r.objectif_packs_vd : r.objectif_packs_vh);
+      switch (col) {
+        case 'famille':      va = a.famille;       vb = b.famille;       break;
+        case 'code':         va = a.code_produit;  vb = b.code_produit;  break;
+        case 'produit':      va = a.nom_produit;   vb = b.nom_produit;   break;
+        case 'tonne':        va = tonne(a);        vb = tonne(b);        break;
+        case 'tonne_route':  va = this.routeCount ? (tonne(a) ?? 0) / this.routeCount : 0;
+                             vb = this.routeCount ? (tonne(b) ?? 0) / this.routeCount : 0; break;
+        case 'packs':        va = packs(a);        vb = packs(b);        break;
+        case 'packs_route':  va = this.routeCount ? (packs(a) ?? 0) / this.routeCount : 0;
+                             vb = this.routeCount ? (packs(b) ?? 0) / this.routeCount : 0; break;
+        case 'updated_by':   va = a.updated_by;   vb = b.updated_by;    break;
+        case 'updated_at':   va = a.updated_at;   vb = b.updated_at;    break;
+        default: return 0;
+      }
+      if (va == null && vb == null) return 0;
+      if (va == null) return -1;  // nulls always first
+      if (vb == null) return 1;
+      return (typeof va === 'string' ? va.localeCompare(vb) : va - vb) * dir;
+    });
+  }
+
   private snapshot = new Map<string, { tonne: number | null; packs: number | null }>();
   collapsedFamilies = new Set<string>();
 
@@ -135,6 +200,96 @@ export class ObjectifsAdminComponent implements OnInit {
     this.load();
   }
 
+  // ── Excel import ───────────────────────────────────────────────────────────
+
+  onFileSelected(event: Event) {
+    const input = event.target as HTMLInputElement;
+    if (!input.files?.length) return;
+    this.importFile = input.files[0];
+    this.importCanal = this.canal;
+    this.importMois = this.mois;
+    this.importAnnee = this.annee;
+    this.showImportDialog = true;
+    input.value = '';
+  }
+
+  get importPeriodLabel(): string {
+    const m = this.MONTHS.find(x => x.v === this.importMois);
+    return `${m?.l ?? ''} ${this.importAnnee}`;
+  }
+
+  cancelImport() {
+    this.showImportDialog = false;
+    this.importFile = null;
+  }
+
+  confirmImport() {
+    if (!this.importFile) return;
+    this.isImporting = true;
+    const fd = new FormData();
+    fd.append('file', this.importFile);
+
+    const applyImport = (data: { code_produit: string | null; nom_produit?: string; tonne: number | null; packs: number | null }[]) => {
+      if (this.importCanal !== this.canal) {
+        this.canal = this.importCanal;
+        for (const r of this.rows) {
+          r._tonne = this.canal === 'VD' ? r.objectif_tonne_vd : r.objectif_tonne_vh;
+          r._packs = this.canal === 'VD' ? r.objectif_packs_vd : r.objectif_packs_vh;
+        }
+      }
+      let imported = 0;
+      const notFound: string[] = [];
+      for (const item of data) {
+        const row = item.code_produit
+          ? this.rows.find(r => r.code_produit === item.code_produit)
+          : this.rows.find(r => r.nom_produit.trim().toLowerCase() === (item.nom_produit ?? '').trim().toLowerCase());
+        if (row) {
+          row._tonne = item.tonne != null ? Math.round(item.tonne * 100) / 100 : null;
+          row._packs = item.packs != null ? Math.round(item.packs) : null;
+          imported++;
+        } else {
+          notFound.push(item.code_produit ?? item.nom_produit ?? '?');
+        }
+      }
+      this.showImportDialog = false;
+      this.isImporting = false;
+      this.importFile = null;
+      this.importResult = { imported, notFound };
+      this.showNotFoundDetail = false;
+    };
+
+    // If month changed, reload edit rows for the new period first
+    const monthChanged = this.importMois !== this.mois || this.importAnnee !== this.annee;
+
+    this.http.post<{ code_produit: string | null; nom_produit?: string; tonne: number | null; packs: number | null }[]>(
+      '/api/v1/objectifs/parse-excel', fd
+    ).subscribe({
+      next: data => {
+        if (monthChanged) {
+          this.mois = this.importMois;
+          this.annee = this.importAnnee;
+          this.http.get<any[]>(`/api/v1/objectifs?mois=${this.mois}&annee=${this.annee}&edit=true`).subscribe({
+            next: rows => {
+              this.rows = rows.map(d => ({ ...d, _tonne: null, _packs: null }));
+              this.snapshot.clear();
+              for (const r of this.rows) {
+                const t = this.importCanal === 'VD' ? r.objectif_tonne_vd : r.objectif_tonne_vh;
+                const p = this.importCanal === 'VD' ? r.objectif_packs_vd : r.objectif_packs_vh;
+                this.snapshot.set(r.code_produit, { tonne: t, packs: p });
+                r._tonne = t; r._packs = p;
+              }
+              applyImport(data);
+            },
+            error: () => { this.isImporting = false; },
+          });
+        } else {
+          applyImport(data);
+        }
+      },
+      error: () => { this.isImporting = false; },
+    });
+  }
+
   // ── Copy from previous month ───────────────────────────────────────────────
 
   copyFromPrevious() {
@@ -198,7 +353,7 @@ export class ObjectifsAdminComponent implements OnInit {
 
   get grouped(): FamGroupe[] {
     const famMap = new Map<string, Map<string, ObjectifRow[]>>();
-    for (const row of this.rows) {
+    for (const row of this.sortedRows) {
       const f = row.famille || '(Sans famille)';
       const sf = row.sous_famille || '(Sans sous-famille)';
       if (!famMap.has(f)) famMap.set(f, new Map());
@@ -221,6 +376,32 @@ export class ObjectifsAdminComponent implements OnInit {
   perRoute(val: number | null): string {
     if (val == null || this.routeCount === 0) return '—';
     return (val / this.routeCount).toLocaleString('fr-FR', { maximumFractionDigits: 2 });
+  }
+
+  // ── Group totals ───────────────────────────────────────────────────────────
+
+  private rowTonne(row: ObjectifRow): number | null {
+    return this.editMode ? row._tonne
+      : (this.canal === 'VD' ? row.objectif_tonne_vd : row.objectif_tonne_vh);
+  }
+
+  private rowPacks(row: ObjectifRow): number | null {
+    return this.editMode ? row._packs
+      : (this.canal === 'VD' ? row.objectif_packs_vd : row.objectif_packs_vh);
+  }
+
+  sumTonne(rows: ObjectifRow[]): number | null {
+    const vals = rows.map(r => this.rowTonne(r)).filter(v => v != null) as number[];
+    return vals.length ? vals.reduce((a, b) => a + b, 0) : null;
+  }
+
+  sumPacks(rows: ObjectifRow[]): number | null {
+    const vals = rows.map(r => this.rowPacks(r)).filter(v => v != null) as number[];
+    return vals.length ? vals.reduce((a, b) => a + b, 0) : null;
+  }
+
+  famRows(fam: FamGroupe): ObjectifRow[] {
+    return fam.sfs.flatMap(sf => sf.rows);
   }
 
   // ── Family colors ──────────────────────────────────────────────────────────

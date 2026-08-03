@@ -44,6 +44,10 @@ export class ProduitsService {
     return this.http.patch<ProduitRead>(`/api/v1/produits/${encodeURIComponent(code)}`, body);
   }
 
+  syncPreview() {
+    return this.http.get<{ code_produit: string; description_produit: string | null; famille: string | null; sous_famille: string | null }[]>('/api/v1/produits/sync-preview');
+  }
+
   sync() {
     return this.http.post<{ inserted: number; message: string }>('/api/v1/produits/sync', {});
   }

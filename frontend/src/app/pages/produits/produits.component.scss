@@ -339,3 +339,125 @@
     color: #dc2626;
   }
 }
+
+// ── Sync confirmation dialog ───────────────────────────────────────────────────
+.sync-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sync-dialog {
+  background: var(--surface-card);
+  border: 1px solid var(--surface-border);
+  border-radius: var(--radius-2xl);
+  padding: 1.75rem 2rem;
+  min-width: 22rem;
+  max-width: 30rem;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.2);
+
+  &__title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1rem;
+    font-weight: var(--font-weight-bold);
+    color: var(--text-color);
+    margin: 0 0 0.75rem;
+    i { font-size: 0.9rem; color: var(--primary-color); }
+  }
+
+  &__body {
+    font-size: var(--font-size-sm);
+    color: var(--text-color-secondary);
+    margin: 0 0 1.5rem;
+    line-height: 1.6;
+  }
+
+  &__actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.65rem;
+  }
+}
+
+.sync-btn-cancel {
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--surface-border);
+  background: transparent;
+  color: var(--text-color-secondary);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  font-family: inherit;
+  cursor: pointer;
+  &:hover { background: var(--surface-ground); }
+}
+
+.sync-preview-list {
+  margin: 0 0 1.25rem;
+  padding: 0;
+  list-style: none;
+  max-height: 14rem;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  border: 1px solid var(--surface-border);
+  border-radius: var(--radius-lg);
+
+  li {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.4rem 0.75rem;
+    font-size: var(--font-size-xs);
+    border-bottom: 1px solid var(--surface-border);
+    &:last-child { border-bottom: none; }
+    &:nth-child(odd) { background: var(--surface-ground); }
+  }
+}
+
+.sync-preview-code {
+  flex-shrink: 0;
+  font-family: 'Menlo', 'Monaco', monospace;
+  font-size: 0.7rem;
+  color: var(--primary-color);
+  background: rgba(var(--primary-rgb), 0.06);
+  padding: 0.1rem 0.35rem;
+  border-radius: var(--radius-sm);
+}
+
+.sync-preview-name {
+  flex: 1;
+  color: var(--text-color);
+  font-weight: var(--font-weight-medium);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sync-preview-famille {
+  flex-shrink: 0;
+  font-size: 0.65rem;
+  color: var(--text-color-muted);
+  font-style: italic;
+}
+
+.sync-btn-confirm {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius-lg);
+  border: none;
+  background: var(--primary-color);
+  color: #fff;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  font-family: inherit;
+  cursor: pointer;
+  &:hover { filter: brightness(1.08); }
+}

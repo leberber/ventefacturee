@@ -1,4 +1,5 @@
 from typing import Any, List, Optional
+from datetime import datetime, timezone
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import func
@@ -68,7 +69,6 @@ def update_produit(
     data = body.model_dump(exclude_unset=True)
     for k, v in data.items():
         setattr(produit, k, v)
-    from datetime import datetime, timezone
     produit.updated_at = datetime.now(timezone.utc)
     session.add(produit)
     session.commit()
@@ -76,11 +76,8 @@ def update_produit(
     return ProduitRead.model_validate(produit)
 
 
-@router.post("/sync", response_model=dict)
-def sync_produits(
-    session: Session = Depends(get_session),
-    current_user: Any = Depends(get_current_user),
-) -> Any:
+def _missing_produits(session: Session) -> list:
+    """Return deduplicated ventes rows whose code_produit is not in produits."""
     rows = session.exec(
         select(
             Vente.code_produit,
@@ -96,18 +93,42 @@ def sync_produits(
 
     existing_codes = set(session.exec(select(Produit.code_produit)).all())
 
-    inserted = 0
+    seen: set = set()
+    result = []
     for row in rows:
-        if row.code_produit not in existing_codes:
-            session.add(Produit(
-                code_produit=row.code_produit,
-                description_produit=row.description_produit,
-                famille=row.famille,
-                sous_famille=row.sous_famille,
-                uom_vente=row.uom_vente,
-                uom_principale=row.uom_principale,
-            ))
-            inserted += 1
+        if row.code_produit not in existing_codes and row.code_produit not in seen:
+            seen.add(row.code_produit)
+            result.append(row)
+    return result
 
+
+@router.get("/sync-preview", response_model=list)
+def sync_preview(
+    session: Session = Depends(get_session),
+    current_user: Any = Depends(get_current_user),
+) -> Any:
+    rows = _missing_produits(session)
+    return sorted([
+        {"code_produit": r.code_produit, "description_produit": r.description_produit,
+         "famille": r.famille, "sous_famille": r.sous_famille}
+        for r in rows
+    ], key=lambda x: x["code_produit"])
+
+
+@router.post("/sync", response_model=dict)
+def sync_produits(
+    session: Session = Depends(get_session),
+    current_user: Any = Depends(get_current_user),
+) -> Any:
+    rows = _missing_produits(session)
+    for row in rows:
+        session.add(Produit(
+            code_produit=row.code_produit,
+            description_produit=row.description_produit,
+            famille=row.famille,
+            sous_famille=row.sous_famille,
+            uom_vente=row.uom_vente,
+            uom_principale=row.uom_principale,
+        ))
     session.commit()
-    return {"inserted": inserted, "message": f"{inserted} nouveaux produits ajoutés"}
+    return {"inserted": len(rows), "message": f"{len(rows)} nouveaux produits ajoutés"}

@@ -1,7 +1,8 @@
 from typing import Any, Optional
 from datetime import datetime, timezone, date
+import io
 
-from fastapi import APIRouter, Body, Depends, Query
+from fastapi import APIRouter, Body, Depends, File, Query, UploadFile
 from sqlalchemy import func, distinct
 from sqlmodel import Session, select
 
@@ -102,21 +103,27 @@ def batch_upsert(
         code = item.get("code_produit")
         if not code:
             continue
+        tonne_vd = _f(item, "objectif_tonne_vd")
+        packs_vd = _f(item, "objectif_packs_vd")
+        tonne_vh = _f(item, "objectif_tonne_vh")
+        packs_vh = _f(item, "objectif_packs_vh")
+
         obj = obj_map.get(code)
         if obj:
-            obj.objectif_tonne_vd = _f(item, "objectif_tonne_vd")
-            obj.objectif_packs_vd = _f(item, "objectif_packs_vd")
-            obj.objectif_tonne_vh = _f(item, "objectif_tonne_vh")
-            obj.objectif_packs_vh = _f(item, "objectif_packs_vh")
+            obj.objectif_tonne_vd = tonne_vd
+            obj.objectif_packs_vd = packs_vd
+            obj.objectif_tonne_vh = tonne_vh
+            obj.objectif_packs_vh = packs_vh
             obj.updated_by_id = current_user.id
             obj.updated_at = now
-        else:
+        elif any(v is not None for v in (tonne_vd, packs_vd, tonne_vh, packs_vh)):
+            # Skip creating a new row when all values are null
             session.add(Objectif(
                 code_produit=code, mois=mois, annee=annee,
-                objectif_tonne_vd=_f(item, "objectif_tonne_vd"),
-                objectif_packs_vd=_f(item, "objectif_packs_vd"),
-                objectif_tonne_vh=_f(item, "objectif_tonne_vh"),
-                objectif_packs_vh=_f(item, "objectif_packs_vh"),
+                objectif_tonne_vd=tonne_vd,
+                objectif_packs_vd=packs_vd,
+                objectif_tonne_vh=tonne_vh,
+                objectif_packs_vh=packs_vh,
                 created_by_id=current_user.id,
                 updated_by_id=current_user.id,
                 created_at=now, updated_at=now,
@@ -137,7 +144,7 @@ def list_objectifs(
     # Single join: produits LEFT/INNER joined with objectifs for this period
     base = (
         select(Produit, Objectif)
-        .order_by(Produit.famille, Produit.sous_famille, Produit.nom_produit)
+        .order_by(Produit.famille, Produit.sous_famille, Produit.description_produit)
     )
     if edit:
         stmt = base.outerjoin(
@@ -171,7 +178,7 @@ def list_objectifs(
     return [
         {
             "code_produit": p.code_produit,
-            "nom_produit": p.nom_produit or p.description_produit or p.code_produit,
+            "nom_produit": p.description_produit or p.nom_produit or p.code_produit,
             "famille": (p.famille or "").strip(),
             "sous_famille": (p.sous_famille or "").strip(),
             "objectif_tonne_vd": obj.objectif_tonne_vd if obj else None,
@@ -183,3 +190,38 @@ def list_objectifs(
         }
         for p, obj in rows
     ]
+
+
+@router.post("/parse-excel")
+async def parse_excel(
+    file: UploadFile = File(...),
+    current_user: User = Depends(get_current_user),
+) -> Any:
+    import openpyxl
+    content = await file.read()
+    wb = openpyxl.load_workbook(io.BytesIO(content), data_only=True)
+    ws = wb.active
+    result = []
+    header = None
+    for row in ws.iter_rows(values_only=True):
+        if header is None:
+            header = [str(c).strip().lower() if c else "" for c in row]
+            has_code = header[0] == "code"
+            continue
+        if not row:
+            continue
+        if has_code:
+            code = row[0]
+            if not code or str(code).startswith("⚠"):
+                continue
+            tonne = float(row[2]) if len(row) > 2 and row[2] is not None else None
+            packs  = float(row[3]) if len(row) > 3 and row[3] is not None else None
+            result.append({"code_produit": str(code).strip(), "tonne": tonne, "packs": packs})
+        else:
+            nom = row[0]
+            if not nom:
+                continue
+            tonne = float(row[1]) if len(row) > 1 and row[1] is not None else None
+            packs  = float(row[2]) if len(row) > 2 and row[2] is not None else None
+            result.append({"code_produit": None, "nom_produit": str(nom).strip(), "tonne": tonne, "packs": packs})
+    return result

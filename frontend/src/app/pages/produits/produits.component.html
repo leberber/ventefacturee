@@ -24,7 +24,7 @@
         </div>
       </div>
       <div class="table-actions">
-        <button class="table-action-btn" pTooltip="Synchroniser depuis ventes" (click)="sync()">
+        <button class="table-action-btn" pTooltip="Synchroniser depuis ventes" (click)="sync()" [disabled]="syncing()">
           <i class="pi pi-sync" [class.pi-spin]="syncing()"></i>
         </button>
         <button class="table-action-btn" pTooltip="Colonnes visibles" (click)="colMenu.toggle($event)">
@@ -330,3 +330,43 @@
   </div>
 
 </div>
+
+@if (showSyncConfirm) {
+  <div class="sync-backdrop" (click)="showSyncConfirm = false">
+    <div class="sync-dialog" (click)="$event.stopPropagation()">
+      <h3 class="sync-dialog__title"><i class="pi pi-sync"></i> Synchroniser les produits</h3>
+
+      @if (syncPreviewLoading) {
+        <p class="sync-dialog__body"><i class="pi pi-spin pi-spinner"></i> Recherche des produits manquants…</p>
+      } @else if (syncPreviewItems.length === 0) {
+        <p class="sync-dialog__body">
+          <i class="pi pi-check-circle" style="color:var(--color-success,#22c55e)"></i>
+          Aucun produit manquant — le catalogue est déjà à jour.
+        </p>
+      } @else {
+        <p class="sync-dialog__body">
+          <strong>{{ syncPreviewItems.length }}</strong> produit(s) seront ajoutés au catalogue (identifiés par leur code) :
+        </p>
+        <ul class="sync-preview-list">
+          @for (p of syncPreviewItems; track p.code_produit) {
+            <li>
+              <code class="sync-preview-code">{{ p.code_produit }}</code>
+              <span class="sync-preview-name">{{ p.description_produit ?? '—' }}</span>
+              @if (p.famille) {
+                <span class="sync-preview-famille">{{ p.famille }}</span>
+              }
+            </li>
+          }
+        </ul>
+      }
+
+      <div class="sync-dialog__actions">
+        <button class="sync-btn-cancel" (click)="showSyncConfirm = false">Annuler</button>
+        <button class="sync-btn-confirm" (click)="confirmSync()"
+          [disabled]="syncPreviewLoading || syncPreviewItems.length === 0">
+          <i class="pi pi-check"></i> Confirmer
+        </button>
+      </div>
+    </div>
+  </div>
+}
