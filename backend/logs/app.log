@@ -608,3 +608,9 @@
 2026-08-03 09:48:12 | INFO     | app | GET /api/v1/prevendeur/admin/drilldown → 200 (0.276s)
 2026-08-03 09:48:14 | INFO     | app | GET /api/v1/prevendeur/admin/drilldown → 200 (0.369s)
 2026-08-03 09:48:18 | INFO     | app | GET /api/v1/prevendeur/admin/drilldown → 200 (0.236s)
+2026-08-03 10:12:26 | INFO     | app | Application démarrée
+2026-08-03 10:12:57 | INFO     | app | GET /api/v1/prevendeur/admin/drilldown → 200 (0.073s)
+2026-08-03 10:13:01 | INFO     | app | GET /api/v1/prevendeur/admin/drilldown → 200 (3.177s)
+2026-08-03 10:13:09 | INFO     | app | GET /api/v1/prevendeur/admin/drilldown → 200 (0.067s)
+2026-08-03 10:13:12 | INFO     | app | GET /api/v1/prevendeur/admin/drilldown → 200 (3.125s)
+2026-08-03 10:13:49 | INFO     | app | GET /api/v1/prevendeur/admin/drilldown → 200 (0.379s)

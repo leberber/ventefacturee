@@ -132,8 +132,13 @@
     background: var(--primary-color);
     border-color: var(--primary-color);
 
-    .db-filter-pill__name  { color: rgba(255,255,255,0.8); }
-    .db-filter-pill__total { color: #fff; }
+    .db-filter-pill__name      { color: rgba(255,255,255,0.8); }
+    .db-filter-pill__total     { color: #fff; }
+    .db-filter-pill__bar-track { background: rgba(255,255,255,0.2); }
+    .db-filter-pill__bar-fill  { background: rgba(255,255,255,0.6); }
+    .db-filter-pill__pct       { color: rgba(255,255,255,0.8); }
+    .db-filter-pill__vs        { color: rgba(255,255,255,0.55); }
+    .db-filter-pill__obj-val   { color: rgba(255,255,255,0.75); }
   }
 
   &__name {
@@ -150,6 +155,51 @@
     color: var(--text-color);
     line-height: 1.1;
   }
+
+  &__progress {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    width: 100%;
+    margin-top: 0.35rem;
+  }
+
+  &__bar-track {
+    flex: 1;
+    height: 4px;
+    border-radius: 999px;
+    background: var(--surface-200);
+    overflow: hidden;
+  }
+
+  &__bar-fill {
+    height: 100%;
+    width: 0%;
+    border-radius: 999px;
+    background: var(--surface-400);
+    transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  &__pct {
+    font-size: 0.62rem;
+    font-weight: 700;
+    color: var(--text-color-secondary);
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  &__vs {
+    font-size: 0.6rem;
+    color: var(--text-color-muted);
+    margin-top: 0.2rem;
+    white-space: nowrap;
+  }
+
+  &__obj-val {
+    font-weight: 600;
+    color: var(--text-color-secondary);
+  }
+
 }
 
 // ── KPI family grid ───────────────────────────────────────────────────────────

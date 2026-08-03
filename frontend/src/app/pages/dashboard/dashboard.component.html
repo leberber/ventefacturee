@@ -40,6 +40,13 @@
           <button class="db-filter-pill" [class.db-filter-pill--active]="selectedFdv === pv.code" (click)="selectFdv(pv.code)">
             <span class="db-filter-pill__name">{{ pv.nom }}</span>
             <span class="db-filter-pill__total">{{ formatNum(pv.total) }}</span>
+            <div class="db-filter-pill__progress">
+              <div class="db-filter-pill__bar-track">
+                <div class="db-filter-pill__bar-fill"></div>
+              </div>
+              <span class="db-filter-pill__pct">—%</span>
+            </div>
+            <span class="db-filter-pill__vs">vs obj. <span class="db-filter-pill__obj-val">—</span></span>
           </button>
         }
       </div>

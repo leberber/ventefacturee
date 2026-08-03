@@ -259,13 +259,11 @@ def prevendeur_admin_drilldown(
         for p in prevendeurs_db if p.employe_code
     ]
 
-    # Previous period
+    # Previous period — use the previous available period in the data (not necessarily month-1)
     try:
-        year, month = int(annee_mois[:4]), int(annee_mois[5:])
-        prev_month = month - 1 if month > 1 else 12
-        prev_year = year if month > 1 else year - 1
-        prev_periode = f"{prev_year}-{prev_month:02d}"
-    except Exception:
+        cur_idx = all_periods_list.index(annee_mois)
+        prev_periode = all_periods_list[cur_idx + 1] if cur_idx + 1 < len(all_periods_list) else None
+    except ValueError:
         prev_periode = None
 
     def fetch_rows(periode: str) -> list:
