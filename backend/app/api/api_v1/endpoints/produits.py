@@ -94,10 +94,11 @@ def sync_produits(
         .distinct()
     ).all()
 
+    existing_codes = set(session.exec(select(Produit.code_produit)).all())
+
     inserted = 0
     for row in rows:
-        existing = session.get(Produit, row.code_produit)
-        if not existing:
+        if row.code_produit not in existing_codes:
             session.add(Produit(
                 code_produit=row.code_produit,
                 description_produit=row.description_produit,

@@ -3,7 +3,7 @@ from collections import defaultdict
 from datetime import datetime, timezone
 
 from fastapi import APIRouter, Body, Depends, Query
-from sqlalchemy import or_, func
+from sqlalchemy import or_, func, distinct
 from sqlmodel import Session, select
 
 from app.api.deps import get_current_user
@@ -73,17 +73,18 @@ def prevendeur_facturation(
 
     products = sorted({display_label(r) for r in rows if r.description_produit})
 
-    def meta_for_label(label: str) -> dict:
-        for r in rows:
-            if display_label(r) == label:
-                famille = (r.famille or '').lower()
-                if r.code_produit and r.code_produit in code_to_produit:
-                    p = code_to_produit[r.code_produit]
-                    return {"uom_vente": p.uom_vente, "colisage": p.colisage, "famille": famille}
-                return {"uom_vente": None, "colisage": None, "famille": famille}
-        return {"uom_vente": None, "colisage": None, "famille": None}
-
-    products_meta = {p: meta_for_label(p) for p in products}
+    # Build meta map in one pass — O(rows) instead of O(rows × products)
+    label_meta: dict = {}
+    for r in rows:
+        label = display_label(r)
+        if label not in label_meta:
+            famille = (r.famille or '').lower()
+            if r.code_produit and r.code_produit in code_to_produit:
+                p = code_to_produit[r.code_produit]
+                label_meta[label] = {"uom_vente": p.uom_vente, "colisage": p.colisage, "famille": famille}
+            else:
+                label_meta[label] = {"uom_vente": None, "colisage": None, "famille": famille}
+    products_meta = {p: label_meta.get(p, {"uom_vente": None, "colisage": None, "famille": None}) for p in products}
 
     # Aggregate: client -> date_label -> product -> qty
     agg: dict = defaultdict(lambda: defaultdict(lambda: defaultdict(float)))
@@ -162,52 +163,55 @@ def prevendeur_admin_stats(
         .order_by(User.full_name)
     ).all()
 
+    fdv_codes = [pv.employe_code for pv in prevendeurs if pv.employe_code]
+    if not fdv_codes:
+        return []
+
+    # 1 query: all distinct (code_fdv, code_client, nom_client) across all prevendeurs
+    vente_rows = session.exec(
+        select(Vente.code_fdv, Vente.code_client, Vente.nom_client)
+        .distinct()
+        .where(Vente.code_fdv.in_(fdv_codes), Vente.code_client.isnot(None))
+    ).all()
+
+    fdv_clients: dict = defaultdict(list)   # code_fdv -> [(code_client, nom_client)]
+    all_client_codes: set = set()
+    for code_fdv, code_client, nom_client in vente_rows:
+        fdv_clients[code_fdv].append((code_client, nom_client))
+        all_client_codes.add(code_client)
+
+    # 1 query: last sale date per prevendeur
+    last_sale_rows = session.exec(
+        select(Vente.code_fdv, func.max(Vente.date_commande))
+        .where(Vente.code_fdv.in_(fdv_codes))
+        .group_by(Vente.code_fdv)
+    ).all()
+    last_sale_map = {code_fdv: last_sale for code_fdv, last_sale in last_sale_rows}
+
+    # 1 query: all client records (for nom_sodichn)
+    sodichn_map: dict = {}
+    if all_client_codes:
+        clients_db = session.exec(
+            select(Client).where(Client.customer_no.in_(all_client_codes))
+        ).all()
+        sodichn_map = {c.customer_no: c.nom_sodichn for c in clients_db}
+
     result = []
     for pv in prevendeurs:
         if not pv.employe_code:
             continue
-
-        client_codes = session.exec(
-            select(Vente.code_client).distinct()
-            .where(Vente.code_fdv == pv.employe_code)
-            .where(Vente.code_client != None)
-        ).all()
-        total_clients = len(client_codes)
-
-        matched = 0
-        if client_codes:
-            matched = session.exec(
-                select(func.count(Client.id))
-                .where(Client.customer_no.in_(client_codes))
-                .where(Client.nom_sodichn != None)
-                .where(Client.nom_sodichn != '')
-            ).one()
-
-        last_sale = session.exec(
-            select(func.max(Vente.date_commande))
-            .where(Vente.code_fdv == pv.employe_code)
-        ).one()
-
-        # Build client list with nom_sodichn for drilldown
-        clients_detail = []
-        if client_codes:
-            clients_db = session.exec(
-                select(Client).where(Client.customer_no.in_(client_codes)).order_by(Client.name)
-            ).all()
-            sodichn_map = {c.customer_no: c.nom_sodichn for c in clients_db}
-            # Get nom_client from ventes for display
-            vente_names = session.exec(
-                select(Vente.code_client, Vente.nom_client).distinct()
-                .where(Vente.code_fdv == pv.employe_code)
-                .where(Vente.code_client != None)
-            ).all()
-            for code, nom in sorted(vente_names, key=lambda x: x[1] or ''):
-                clients_detail.append({
-                    "code_client": code,
-                    "nom_client": nom,
-                    "nom_sodichn": sodichn_map.get(code),
-                })
-
+        clients = fdv_clients.get(pv.employe_code, [])
+        total_clients = len(clients)
+        matched = sum(1 for code, _ in clients if sodichn_map.get(code))
+        last_sale = last_sale_map.get(pv.employe_code)
+        clients_detail = [
+            {
+                "code_client": code,
+                "nom_client": nom,
+                "nom_sodichn": sodichn_map.get(code),
+            }
+            for code, nom in sorted(clients, key=lambda x: x[1] or '')
+        ]
         result.append({
             "id": pv.id,
             "full_name": pv.full_name,
@@ -267,9 +271,10 @@ def prevendeur_admin_drilldown(
     # Previous period — use the previous available period in the data (not necessarily month-1)
     try:
         cur_idx = all_periods_list.index(annee_mois)
-        prev_periode = all_periods_list[cur_idx + 1] if cur_idx + 1 < len(all_periods_list) else None
     except ValueError:
-        prev_periode = None
+        cur_idx = 0
+    prev_periode = all_periods_list[cur_idx + 1] if cur_idx + 1 < len(all_periods_list) else None
+    trend_periods = list(reversed(all_periods_list[cur_idx: cur_idx + 6]))  # chronological
 
     def fetch_rows(periode: str) -> list:
         q = select(
@@ -292,13 +297,6 @@ def prevendeur_admin_drilldown(
 
     rows = fetch_rows(annee_mois)
     prev_rows = fetch_rows(prev_periode) if prev_periode else []
-
-    # 6-month trend via SQL aggregation (always unfiltered by code_fdv for global view)
-    try:
-        cur_idx = all_periods_list.index(annee_mois)
-    except ValueError:
-        cur_idx = 0
-    trend_periods = list(reversed(all_periods_list[cur_idx: cur_idx + 6]))  # chronological
 
     period_totals: dict = defaultdict(float)
     if trend_periods:

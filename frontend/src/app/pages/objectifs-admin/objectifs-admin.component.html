@@ -1,0 +1,200 @@
+<!-- Page header -->
+<div class="page-header">
+  <div class="page-header__left">
+    <div class="page-icon"><i class="pi pi-bullseye"></i></div>
+    <div>
+      <h1 class="page-header__title">Objectifs</h1>
+      @if (!editMode) {
+        <p class="page-header__sub">{{ filledProducts }} / {{ totalProducts }} produits renseignés</p>
+      } @else {
+        <p class="page-header__sub">
+          <span class="obj-edit-badge"><i class="pi pi-pencil"></i> Mode édition — {{ periodLabel }} — {{ canalLabel }}</span>
+        </p>
+      }
+    </div>
+  </div>
+</div>
+
+<!-- Table container -->
+<div class="table-container" [class.table-container--editing]="editMode">
+
+  <!-- Toolbar -->
+  <div class="obj-toolbar">
+
+    <div class="obj-toolbar__left">
+      @if (!editMode) {
+        <div class="dash-filter">
+          <button class="dash-filter__btn" [class.dash-filter__btn--active]="canal === 'VD'" (click)="canal = 'VD'">Direct (VD)</button>
+          <button class="dash-filter__btn" [class.dash-filter__btn--active]="canal === 'VH'" (click)="canal = 'VH'">Horeca (VH)</button>
+        </div>
+        <div class="obj-period">
+          <select class="obj-period-sel" [(ngModel)]="mois" (change)="load()">
+            @for (m of MONTHS; track m.v) {
+              <option [value]="m.v">{{ m.l }}</option>
+            }
+          </select>
+          <input class="obj-period-year" type="number" [(ngModel)]="annee" (change)="load()" min="2020" max="2035">
+        </div>
+
+        <!-- Route counts (editable — used as divisor for T/Tournée and P/Tournée) -->
+        <div class="obj-routes">
+          <label class="obj-route-pill obj-route-pill--vd">
+            <i class="pi pi-car"></i>
+            <input type="number" min="1" [(ngModel)]="routesVD" class="obj-route-input"> tournées VD
+          </label>
+          <label class="obj-route-pill obj-route-pill--vh">
+            <i class="pi pi-car"></i>
+            <input type="number" min="1" [(ngModel)]="routesVH" class="obj-route-input"> tournées VH
+          </label>
+          @if (routesFallbackMois) {
+            <span class="obj-route-fallback" title="Aucune donnée pour ce mois — tournées basées sur {{ routesFallbackMois }}">
+              <i class="pi pi-info-circle"></i> basé sur {{ routesFallbackMois }}
+            </span>
+          }
+        </div>
+      }
+    </div>
+
+    <div class="obj-toolbar__right">
+      @if (!editMode) {
+        @if (!loading) {
+          @if (hasGoals) {
+            <button class="btn-secondary" (click)="enterEditMode()">
+              <i class="pi pi-pencil"></i> Modifier
+            </button>
+          } @else {
+            <button class="btn-add" (click)="enterEditMode()">
+              <i class="pi pi-plus"></i> Définir les objectifs
+            </button>
+          }
+          @if (nextMissingLabel && !isNextMissingPeriod) {
+            <button class="btn-add" (click)="goToNextMissing()">
+              <i class="pi pi-arrow-right"></i> {{ nextMissingLabel }}
+            </button>
+          }
+        }
+      } @else {
+        <button class="btn-secondary" (click)="copyFromPrevious()" [disabled]="isSaving">
+          <i class="pi pi-copy"></i> Copier depuis {{ prevMonthLabel }}
+        </button>
+        <button class="btn-danger" (click)="cancelEdit()" [disabled]="isSaving">
+          <i class="pi pi-times"></i> Annuler
+        </button>
+        <button class="btn-save" (click)="requestSave()" [disabled]="isSaving">
+          @if (isSaving) {
+            <i class="pi pi-spin pi-spinner"></i> Enregistrement…
+          } @else {
+            <i class="pi pi-check"></i> Sauvegarder
+            @if (dirtyCount > 0) { <span class="obj-badge">{{ dirtyCount }}</span> }
+          }
+        </button>
+      }
+    </div>
+
+  </div>
+
+  <!-- Table -->
+  <div class="table-wrapper">
+    <table class="table">
+      <thead>
+        <tr>
+          <th style="width:8rem">Famille</th>
+          <th style="width:8rem">Code</th>
+          <th>Produit</th>
+          <th class="th-num" [class.th-vd]="canal === 'VD'" [class.th-vh]="canal === 'VH'">Tonnes</th>
+          <th class="th-num th-per-route" [class.th-vd]="canal === 'VD'" [class.th-vh]="canal === 'VH'">T / Tournée</th>
+          <th class="th-num" [class.th-vd]="canal === 'VD'" [class.th-vh]="canal === 'VH'">Packs</th>
+          <th class="th-num th-per-route" [class.th-vd]="canal === 'VD'" [class.th-vh]="canal === 'VH'">P / Tournée</th>
+          <th style="width:9rem">Modifié par</th>
+          <th style="width:7rem">Le</th>
+        </tr>
+      </thead>
+      <tbody>
+        @if (loading) {
+          @for (_ of [1,2,3,4,5,6,7,8]; track $index) {
+            <tr class="sk-row">
+              <td colspan="9"><div class="sk-bar"></div></td>
+            </tr>
+          }
+        } @else {
+          @for (fam of grouped; track fam.nom) {
+
+            <tr class="obj-fam-row" (click)="toggleFamily(fam.nom)" title="Cliquer pour réduire / développer">
+              <td colspan="9" class="obj-fam-cell"
+                [style.background]="famBg(fam.nom)"
+                [style.color]="famColor(fam.nom)"
+                [style.border-top-color]="famColor(fam.nom) + '33'"
+                [style.border-bottom-color]="famColor(fam.nom) + '33'">
+                <div class="obj-fam-inner">
+                  <i class="pi obj-fam-chevron"
+                    [class.pi-chevron-down]="!isFamilyCollapsed(fam.nom)"
+                    [class.pi-chevron-right]="isFamilyCollapsed(fam.nom)"></i>
+                  {{ fam.nom | uppercase }}
+                  <span class="obj-fam-count">{{ fam.sfs.length }} sous-famille(s)</span>
+                </div>
+              </td>
+            </tr>
+
+            @if (!isFamilyCollapsed(fam.nom)) {
+              @for (sf of fam.sfs; track sf.nom) {
+
+                <tr class="obj-sf-row">
+                  <td colspan="9">{{ sf.nom }}</td>
+                </tr>
+
+                @for (row of sf.rows; track row.code_produit) {
+                <tr [class.obj-row--dirty]="editMode && isDirtyRow(row)">
+                  <td>
+                    <span class="famille-pill-badge"
+                      [style.background]="famBg(row.famille)"
+                      [style.color]="famColor(row.famille)">{{ row.famille }}</span>
+                  </td>
+                  <td><span class="code-chip">{{ row.code_produit }}</span></td>
+                  <td class="td-nom" [title]="row.nom_produit">{{ row.nom_produit }}</td>
+                  @if (editMode) {
+                    <td class="td-input" [class.td-vd]="canal === 'VD'" [class.td-vh]="canal === 'VH'">
+                      <input type="number" step="0.001" min="0" [(ngModel)]="row._tonne" placeholder="—">
+                    </td>
+                    <td class="td-num td-per-route">{{ perRoute(row._tonne) }}</td>
+                    <td class="td-input" [class.td-vd]="canal === 'VD'" [class.td-vh]="canal === 'VH'">
+                      <input type="number" step="1" min="0" [(ngModel)]="row._packs" placeholder="—">
+                    </td>
+                    <td class="td-num td-per-route">{{ perRoute(row._packs) }}</td>
+                  } @else {
+                    <td class="td-num">{{ formatNum(canal === 'VD' ? row.objectif_tonne_vd : row.objectif_tonne_vh) }}</td>
+                    <td class="td-num td-per-route">{{ perRoute(canal === 'VD' ? row.objectif_tonne_vd : row.objectif_tonne_vh) }}</td>
+                    <td class="td-num">{{ formatNum(canal === 'VD' ? row.objectif_packs_vd : row.objectif_packs_vh) }}</td>
+                    <td class="td-num td-per-route">{{ perRoute(canal === 'VD' ? row.objectif_packs_vd : row.objectif_packs_vh) }}</td>
+                  }
+                  <td class="text-muted td-small">{{ row.updated_by || '—' }}</td>
+                  <td class="text-muted td-small">{{ formatDate(row.updated_at) }}</td>
+                </tr>
+                }
+              }
+            } <!-- end @if !collapsed -->
+          }
+        }
+      </tbody>
+    </table>
+  </div>
+
+</div>
+
+<!-- Confirmation dialog -->
+@if (showConfirm) {
+  <div class="obj-backdrop" (click)="showConfirm = false">
+    <div class="obj-dialog" (click)="$event.stopPropagation()">
+      <h3 class="obj-dialog__title">Confirmer la sauvegarde</h3>
+      <p class="obj-dialog__body">
+        Sauvegarder les objectifs de <strong>{{ periodLabel }}</strong> — <strong>{{ canalLabel }}</strong> ?
+      </p>
+      <p class="obj-dialog__count text-muted">{{ dirtyCount }} produit(s) modifié(s)</p>
+      <div class="obj-dialog__actions">
+        <button class="btn-secondary" (click)="showConfirm = false">Annuler</button>
+        <button class="btn-save" (click)="confirmSave()">
+          <i class="pi pi-check"></i> Confirmer
+        </button>
+      </div>
+    </div>
+  </div>
+}

@@ -10,6 +10,15 @@ engine = create_engine(
 
 
 def create_db_and_tables() -> None:
+    # If objectifs table exists with wrong schema, drop it before create_all
+    with engine.connect() as pre_conn:
+        try:
+            pre_conn.execute(text("SELECT mois, annee, code_produit FROM objectifs LIMIT 1"))
+        except Exception:
+            pre_conn.rollback()
+            pre_conn.execute(text("DROP TABLE IF EXISTS objectifs CASCADE"))
+            pre_conn.commit()
+
     SQLModel.metadata.create_all(engine)
     with engine.connect() as conn:
         # Fix float-coerced client codes (e.g. "3530010000001.0" → "3530010000001")

@@ -1,0 +1,427 @@
+// =============================================================================
+// Objectifs admin — follows the produits page layout pattern
+// =============================================================================
+
+:host {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  height: calc(100vh - 3rem);
+  overflow: visible;
+}
+
+// Override global page-header margin so gap drives the spacing
+.page-header { margin-bottom: 0; }
+
+// ── Table container ────────────────────────────────────────────────────────────
+.table-container {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transition: border-color 0.2s, box-shadow 0.2s;
+
+  &--editing {
+    border-color: rgba(37, 99, 235, 0.3);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.06);
+  }
+
+  .table-wrapper {
+    flex: 1;
+    min-height: 0;
+    height: unset !important;
+    overflow: auto;
+    overscroll-behavior: contain;
+  }
+}
+
+// ── Toolbar ────────────────────────────────────────────────────────────────────
+.obj-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 1.5rem 0.75rem;
+  flex-shrink: 0;
+  flex-wrap: wrap;
+
+  &__left,
+  &__right {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+}
+
+// ── Canal filter — override global dash-filter for larger size ─────────────────
+.dash-filter__btn {
+  padding: 0.5rem 1.1rem;
+  font-size: var(--font-size-sm);
+}
+
+// ── Period selectors ───────────────────────────────────────────────────────────
+.obj-period {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.obj-period-sel,
+.obj-period-year {
+  padding: 0.55rem 1rem;
+  border: 1px solid var(--surface-border);
+  border-radius: var(--radius-lg);
+  background: var(--surface-card);
+  color: var(--text-color);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  font-family: inherit;
+  outline: none;
+  cursor: pointer;
+
+  &:focus { border-color: var(--primary-color); }
+}
+
+.obj-period-year { width: 6.5rem; }
+
+// ── Route count pills ──────────────────────────────────────────────────────────
+.obj-routes {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.obj-route-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.25rem 0.65rem;
+  border-radius: 999px;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  white-space: nowrap;
+  cursor: text;
+
+  i { font-size: 0.7rem; flex-shrink: 0; }
+
+  &--vd {
+    background: rgba(var(--primary-rgb), 0.08);
+    color: var(--primary-color);
+    border: 1px solid rgba(var(--primary-rgb), 0.2);
+    &:focus-within { border-color: var(--primary-color); }
+  }
+
+  &--vh {
+    background: rgba(22, 163, 74, 0.08);
+    color: var(--color-success-dark, #16a34a);
+    border: 1px solid rgba(22, 163, 74, 0.2);
+    &:focus-within { border-color: var(--color-success-dark, #16a34a); }
+  }
+}
+
+.obj-route-input {
+  width: 2.5rem;
+  border: none;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-weight: var(--font-weight-semibold);
+  text-align: center;
+  outline: none;
+  padding: 0;
+
+  &::-webkit-inner-spin-button,
+  &::-webkit-outer-spin-button { -webkit-appearance: none; }
+  -moz-appearance: textfield;
+}
+
+.obj-route-fallback {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.68rem;
+  color: var(--text-color-muted);
+  font-style: italic;
+  i { font-size: 0.65rem; }
+}
+
+// ── Edit mode badge ────────────────────────────────────────────────────────────
+.obj-edit-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  color: var(--primary-color);
+  background: rgba(37, 99, 235, 0.08);
+  border: 1px solid rgba(37, 99, 235, 0.2);
+  border-radius: 999px;
+  padding: 0.2rem 0.75rem;
+  white-space: nowrap;
+}
+
+// ── Extra buttons (save / danger — not in global _buttons.scss) ────────────────
+.btn-save {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius-lg);
+  border: none;
+  background: var(--color-success-dark, #16a34a);
+  color: #fff;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  font-family: inherit;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: filter 0.15s;
+
+  i { font-size: 0.8rem; }
+  &:hover:not(:disabled) { filter: brightness(1.08); }
+  &:disabled { opacity: 0.55; cursor: not-allowed; }
+}
+
+.btn-danger {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-error, #ef4444);
+  background: transparent;
+  color: var(--color-error, #ef4444);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  font-family: inherit;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s;
+
+  i { font-size: 0.8rem; }
+  &:hover:not(:disabled) { background: rgba(239, 68, 68, 0.06); }
+  &:disabled { opacity: 0.55; cursor: not-allowed; }
+}
+
+// Dirty-count badge inside save button
+.obj-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.2rem;
+  height: 1.2rem;
+  padding: 0 0.25rem;
+  background: rgba(255, 255, 255, 0.25);
+  border-radius: 999px;
+  font-size: 0.68rem;
+  font-weight: 700;
+}
+
+// ── Table header alignment ─────────────────────────────────────────────────────
+.th-num { text-align: right !important; }
+.th-vd  { color: var(--primary-color) !important; border-top: 2px solid var(--primary-color) !important; }
+.th-vh  { color: var(--color-success-dark, #16a34a) !important; border-top: 2px solid var(--color-success-dark, #16a34a) !important; }
+
+.th-per-route {
+  opacity: 0.6;
+  font-style: italic;
+}
+
+.td-per-route {
+  opacity: 0.65;
+  font-style: italic;
+  font-size: 0.75rem;
+}
+
+// ── Table group rows ───────────────────────────────────────────────────────────
+.obj-fam-row {
+  cursor: pointer;
+  user-select: none;
+
+  td {
+    padding: 0.65rem 1.25rem;
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    border-top: 1px solid transparent;
+    border-bottom: 1px solid transparent;
+  }
+
+  &:hover td { filter: brightness(0.95); }
+}
+
+.obj-fam-cell {
+  // no display:flex — keeps display:table-cell so background spans full width
+}
+
+.obj-fam-inner {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.obj-fam-chevron {
+  font-size: 0.7rem;
+  transition: transform 0.18s ease;
+  flex-shrink: 0;
+}
+
+.obj-fam-count {
+  margin-left: auto;
+  font-size: 0.68rem;
+  font-weight: 500;
+  opacity: 0.65;
+  letter-spacing: 0;
+}
+
+.obj-sf-row td {
+  padding: 0.45rem 1.25rem 0.45rem 2rem;
+  background: var(--surface-50);
+  font-size: 0.74rem;
+  font-weight: 600;
+  color: var(--text-color-secondary);
+  border-bottom: 1px solid var(--surface-border);
+  font-style: italic;
+}
+
+// ── Product row cells ──────────────────────────────────────────────────────────
+.obj-row--dirty { background: rgba(37, 99, 235, 0.04) !important; }
+
+.td-nom {
+  max-width: 20rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: var(--font-weight-medium);
+  font-size: 0.82rem;
+}
+
+.td-num {
+  text-align: right;
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-color);
+  white-space: nowrap;
+  font-size: 0.82rem;
+}
+
+.td-small { font-size: 0.72rem; white-space: nowrap; }
+
+// ── Edit mode input cells ──────────────────────────────────────────────────────
+.td-input {
+  padding: 0.15rem 0.4rem;
+
+  input {
+    width: 100%;
+    min-width: 5.5rem;
+    padding: 0.25rem 0.45rem;
+    border: 1px solid transparent;
+    border-radius: var(--radius-md);
+    background: transparent;
+    color: var(--text-color);
+    font-family: inherit;
+    font-size: 0.82rem;
+    font-weight: var(--font-weight-semibold);
+    text-align: right;
+    outline: none;
+    transition: border-color 0.15s, background 0.15s, box-shadow 0.15s;
+
+    &::placeholder { color: var(--text-color-muted); font-weight: 400; }
+    &:hover { border-color: var(--surface-border); background: var(--surface-ground); }
+    &:focus { background: var(--surface-card); }
+
+    &::-webkit-inner-spin-button,
+    &::-webkit-outer-spin-button { -webkit-appearance: none; }
+    -moz-appearance: textfield;
+  }
+}
+
+.td-vd input:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+.td-vh input:focus {
+  border-color: var(--color-success-dark, #16a34a);
+  box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.12);
+}
+
+// ── Code chip + famille pill (mirrors produits component) ──────────────────────
+.code-chip {
+  display: inline-block;
+  padding: 0.15rem 0.5rem;
+  border-radius: var(--radius-md);
+  background: var(--surface-ground);
+  color: var(--text-color-secondary);
+  font-size: 0.72rem;
+  font-family: 'Menlo', 'Monaco', monospace;
+  letter-spacing: 0.02em;
+}
+
+.famille-pill-badge {
+  display: inline-block;
+  padding: 0.2rem 0.6rem;
+  border-radius: 9999px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  white-space: nowrap;
+  // background and color set via [style] bindings from FAMILY_COLORS
+}
+
+// ── Skeleton ───────────────────────────────────────────────────────────────────
+.sk-row td { padding: 0.6rem 1rem; }
+
+.sk-bar {
+  height: 1rem;
+  border-radius: var(--radius-sm);
+  background: var(--surface-200);
+  animation: skeleton 1.2s infinite alternate;
+}
+
+// ── Confirmation dialog ────────────────────────────────────────────────────────
+.obj-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.obj-dialog {
+  background: var(--surface-card);
+  border: 1px solid var(--surface-border);
+  border-radius: var(--radius-2xl);
+  padding: 1.75rem 2rem;
+  min-width: 22rem;
+  max-width: 30rem;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.2);
+
+  &__title {
+    font-size: 1rem;
+    font-weight: var(--font-weight-bold);
+    color: var(--text-color);
+    margin: 0 0 0.6rem;
+  }
+
+  &__body {
+    font-size: var(--font-size-xs);
+    color: var(--text-color);
+    margin: 0 0 0.35rem;
+    line-height: 1.6;
+  }
+
+  &__count {
+    font-size: var(--font-size-xs);
+    margin: 0 0 1.4rem;
+    display: block;
+  }
+
+  &__actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.65rem;
+  }
+}

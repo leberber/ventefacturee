@@ -27,6 +27,7 @@ export const routes: Routes = [
       { path: 'utilisateurs/:id/modifier', canActivate: [adminGuard],          loadComponent: () => import('./pages/utilisateurs/utilisateur-form/utilisateur-form.component').then(m => m.UtilisateurFormComponent) },
 
       { path: 'prevendeurs', canActivate: [adminOrEmployeGuard], loadComponent: () => import('./pages/prevendeurs/prevendeurs.component').then(m => m.PrevendeursComponent) },
+      { path: 'objectifs',  canActivate: [adminOrEmployeGuard], loadComponent: () => import('./pages/objectifs-admin/objectifs-admin.component').then(m => m.ObjectifsAdminComponent) },
       { path: 'parametres', canActivate: [adminOrEmployeGuard], loadComponent: () => import('./pages/settings/settings.component').then(m => m.SettingsComponent) },
       { path: 'logs',       canActivate: [adminGuard],          loadComponent: () => import('./pages/logs/logs.component').then(m => m.LogsComponent) },
 

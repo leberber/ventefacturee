@@ -120,17 +120,18 @@ def get_rapport_facturation(
     # Distinct products (columns), sorted
     products = sorted({display_label(r) for r in rows if r.description_produit})
 
-    def meta_for_label(label: str) -> dict:
-        for r in rows:
-            if display_label(r) == label:
-                famille = (r.famille or '').lower()
-                if r.code_produit and r.code_produit in code_to_produit:
-                    p = code_to_produit[r.code_produit]
-                    return {"uom_vente": p.uom_vente, "colisage": p.colisage, "famille": famille}
-                return {"uom_vente": None, "colisage": None, "famille": famille}
-        return {"uom_vente": None, "colisage": None, "famille": None}
-
-    products_meta = {p: meta_for_label(p) for p in products}
+    # Build meta in one O(rows) pass instead of O(rows × products)
+    label_meta: dict = {}
+    for r in rows:
+        label = display_label(r)
+        if label not in label_meta:
+            famille = (r.famille or '').lower()
+            if r.code_produit and r.code_produit in code_to_produit:
+                p = code_to_produit[r.code_produit]
+                label_meta[label] = {"uom_vente": p.uom_vente, "colisage": p.colisage, "famille": famille}
+            else:
+                label_meta[label] = {"uom_vente": None, "colisage": None, "famille": famille}
+    products_meta = {p: label_meta.get(p, {"uom_vente": None, "colisage": None, "famille": None}) for p in products}
 
     # Distinct clients (rows), sorted
     client_names = sorted({r.nom_client for r in rows if r.nom_client})
