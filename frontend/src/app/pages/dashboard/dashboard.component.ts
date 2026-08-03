@@ -7,17 +7,8 @@ import {
   DrilldownSousFamille,
   TopFdv,
 } from '../../core/services/prevendeur.service';
+import { getFamilyColor, getFamilyBg, CHART_COLORS } from '../../core/constants/colors';
 
-const FAMILY_PALETTE: Record<string, { main: string; bg: string }> = {
-  sucre:  { main: '#f59e0b', bg: 'rgba(245,158,11,0.10)' },
-  huile:  { main: '#22c55e', bg: 'rgba(34,197,94,0.10)'  },
-};
-
-const CHART_COLORS = [
-  '#3b82f6', '#8b5cf6', '#f59e0b', '#22c55e',
-  '#ef4444', '#06b6d4', '#ec4899', '#84cc16',
-  '#f97316', '#a855f7',
-];
 
 @Component({
   selector: 'app-dashboard',
@@ -244,8 +235,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   // ── Family colour helpers ─────────────────────────────────────────────────
-  familyColor(nom: string): string { return FAMILY_PALETTE[nom]?.main ?? '#94a3b8'; }
-  familyBg(nom: string):    string { return FAMILY_PALETTE[nom]?.bg   ?? 'rgba(148,163,184,0.1)'; }
+  familyColor(nom: string): string { return getFamilyColor(nom); }
+  familyBg(nom: string):    string { return getFamilyBg(nom); }
 
   // ── Prevendeur total (for "Tous" pill) ───────────────────────────────────
   get totalAll(): number {

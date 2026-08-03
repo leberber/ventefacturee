@@ -2,6 +2,7 @@ import { Component, OnInit, inject } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { DatePipe, NgClass } from '@angular/common';
+import { getFamilyColor } from '../../core/constants/colors';
 import { TooltipModule } from 'primeng/tooltip';
 import { Select } from 'primeng/select';
 import { Popover } from 'primeng/popover';
@@ -228,10 +229,8 @@ export class RapportFacturationComponent implements OnInit {
     return this.grandTotals.reduce((sum, g) => sum + g.total, 0);
   }
 
-  familleClass(product: string): string {
+  familleColor(product: string): string {
     const f = this.rapport?.products_meta[product]?.famille ?? '';
-    if (f === 'huile') return 'col-product--huile';
-    if (f === 'sucre') return 'col-product--sucre';
-    return '';
+    return getFamilyColor(f);
   }
 }

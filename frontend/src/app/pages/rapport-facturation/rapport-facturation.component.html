@@ -284,7 +284,7 @@
                   <tr>
                     <th class="col-semaine">Semaine</th>
                     @for (p of rapport.products; track p) {
-                      <th class="col-product" [ngClass]="familleClass(p)"><span class="col-product-text">{{ p }}</span></th>
+                      <th class="col-product" [style.border-top-color]="familleColor(p)"><span class="col-product-text">{{ p }}</span></th>
                     }
                   </tr>
                 </thead>
