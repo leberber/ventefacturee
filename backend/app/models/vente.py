@@ -1,3 +1,4 @@
+from sqlalchemy import Index
 from sqlmodel import SQLModel, Field
 from typing import Optional, List
 from datetime import date, datetime, timezone
@@ -5,6 +6,10 @@ from datetime import date, datetime, timezone
 
 class Vente(SQLModel, table=True):
     __tablename__ = "ventes"
+    __table_args__ = (
+        Index("ix_ventes_annee_mois_code_fdv", "annee_mois", "code_fdv"),
+        Index("ix_ventes_annee_mois_canal", "annee_mois", "canal"),
+    )
 
     id: Optional[int] = Field(default=None, primary_key=True)
     annee_mois: str = Field(max_length=7, index=True)  # "YYYY-MM"
@@ -30,6 +35,7 @@ class Vente(SQLModel, table=True):
 
     # FDV (Prévendeur)
     code_fdv: Optional[str] = Field(default=None, max_length=30)
+    canal: Optional[str] = Field(default=None, max_length=2)    # "VD" or "VH"
     nom_fdv: Optional[str] = Field(default=None, max_length=100)
     type_fdv: Optional[str] = Field(default=None, max_length=30)
     code_sup: Optional[str] = Field(default=None, max_length=30)

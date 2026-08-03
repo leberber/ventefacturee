@@ -27,6 +27,17 @@ def _normalize_date(d: str) -> str:
     return d
 
 
+def _extract_canal(code_fdv: Optional[str]) -> Optional[str]:
+    if not code_fdv:
+        return None
+    upper = code_fdv.upper()
+    if 'VH' in upper:
+        return 'VH'
+    if 'VD' in upper:
+        return 'VD'
+    return None
+
+
 def _safe_str(val: Any, max_len: int) -> Optional[str]:
     if val is None:
         return None
@@ -100,6 +111,7 @@ def _row_to_vente(row: pd.Series, annee_mois: str, uploaded_by_id: int) -> Vente
         tel_client=_safe_str(row.get('Tél'), 30),
         type_client=_safe_str(row.get('Type Client'), 20),
         code_fdv=_safe_str(row.get('Code-FDV'), 30),
+        canal=_extract_canal(_safe_str(row.get('Code-FDV'), 30)),
         nom_fdv=_safe_str(row.get('Nom-FDV'), 100),
         type_fdv=_safe_str(row.get('Type-FDV'), 30),
         code_sup=_safe_str(row.get('Code-Sup'), 30),

@@ -254,7 +254,7 @@ def prevendeur_admin_drilldown(
         .group_by(Vente.code_fdv)
     )
     if canal:
-        fdv_totals_q = fdv_totals_q.where(Vente.code_fdv.ilike(f"%{canal}%"))
+        fdv_totals_q = fdv_totals_q.where(Vente.canal == canal)
     fdv_totals = {row[0]: round(row[1] or 0) for row in session.exec(fdv_totals_q).all()}
 
     canal_upper = canal.upper() if canal else None
@@ -272,11 +272,21 @@ def prevendeur_admin_drilldown(
         prev_periode = None
 
     def fetch_rows(periode: str) -> list:
-        q = select(Vente).where(Vente.annee_mois == periode)
+        q = select(
+            Vente.date_commande,
+            Vente.famille,
+            Vente.sous_famille,
+            Vente.code_produit,
+            Vente.description_produit,
+            Vente.qte_facturee,
+            Vente.code_fdv,
+            Vente.nom_fdv,
+            Vente.source,
+        ).where(Vente.annee_mois == periode)
         if code_fdv:
             q = q.where(Vente.code_fdv == code_fdv)
         if canal:
-            q = q.where(Vente.code_fdv.ilike(f"%{canal}%"))
+            q = q.where(Vente.canal == canal)
         rs = session.exec(q).all()
         return [r for r in rs if r.source != "BackOffice"]
 
@@ -300,7 +310,7 @@ def prevendeur_admin_drilldown(
         if code_fdv:
             q6 = q6.where(Vente.code_fdv == code_fdv)
         if canal:
-            q6 = q6.where(Vente.code_fdv.ilike(f"%{canal}%"))
+            q6 = q6.where(Vente.canal == canal)
         q6 = q6.group_by(Vente.annee_mois)
         for periode, total in session.exec(q6).all():
             period_totals[periode] = total or 0
