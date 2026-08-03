@@ -9,13 +9,7 @@
         </button>
         @if (selectedFamille) {
           <i class="pi pi-chevron-right db-crumb-sep"></i>
-          <button class="db-crumb" [class.db-crumb--dim]="selectedSf" (click)="drillToFamille()">
-            {{ capitalize(selectedFamille.nom) }}
-          </button>
-        }
-        @if (selectedSf) {
-          <i class="pi pi-chevron-right db-crumb-sep"></i>
-          <span class="db-crumb db-crumb--leaf">{{ selectedSf.nom }}</span>
+          <span class="db-crumb db-crumb--leaf">{{ capitalize(selectedFamille.nom) }}</span>
         }
       </div>
       <div class="db-period">
@@ -54,7 +48,7 @@
   </div>
 
   <!-- ── KPI family grid ──────────────────────────────────────────────────── -->
-  <div class="db-kpi-grid">
+  <div class="db-kpi-grid" [class.db-kpi-grid--selection]="selectedFamille">
     @if (loading) {
       @for (_ of skeletonRows; track $index) { <div class="db-kpi-sk"></div> }
     }
@@ -115,116 +109,81 @@
     }
   </div>
 
-  <!-- ── Middle: donut (left) + leaderboard/products (right) ─────────────── -->
+  <!-- ── Bottom: sf/product bars (left) + FDV performance (right) ─────────── -->
   <div class="db-middle">
 
-    <!-- Left: subfamily donut -->
+    <!-- Left: tree view — sf headers (collapsible) + products -->
     <div class="db-panel">
       @if (!selectedFamille) {
         <div class="db-panel-empty">
-          <i class="pi pi-chart-pie"></i>
+          <i class="pi pi-chart-bar"></i>
           <p>Sélectionnez une famille</p>
         </div>
       } @else {
         <div class="db-panel-head">
-          <span class="db-panel-title">{{ capitalize(selectedFamille.nom) }} — Sous-familles</span>
+          <span class="db-panel-title">{{ capitalize(selectedFamille.nom) }} — Détail</span>
           <span class="db-panel-total">{{ formatNum(selectedFamille.total) }}</span>
         </div>
-        <div class="db-donut-wrap">
-          <svg class="db-donut" [class.db-donut--animating]="donutAnimating" viewBox="0 0 200 200">
-            <circle cx="100" cy="100" r="70" fill="none" stroke="var(--surface-100)" stroke-width="22"/>
-            @for (seg of donutSegments; track seg.nom; let i = $index) {
-              <circle cx="100" cy="100" r="70"
-                      fill="none"
-                      [attr.stroke]="seg.color"
-                      stroke-width="22"
-                      stroke-linecap="butt"
-                      [style.stroke-dasharray]="donutReady ? donutDasharray(seg.pct) : ('0 ' + DONUT_CIRC)"
-                      [attr.stroke-dashoffset]="donutDashoffset(seg.offset)"
-                      transform="rotate(-90 100 100)"
-                      class="db-donut-seg"
-                      [class.db-donut-seg--active]="selectedSf?.nom === selectedFamille.sous_familles[i].nom"
-                      (click)="selectSf(selectedFamille.sous_familles[i])"
-                      (mouseenter)="onSegHover(i, $event)"
-                      (mouseleave)="onSegLeave()"/>
+        <div class="db-tree" [style.--fc]="familyColor(selectedFamille.nom)" [style.--fbg]="familyBg(selectedFamille.nom)">
+          @for (sf of selectedFamille.sous_familles; track sf.nom) {
+            <button class="db-tree-sf" (click)="toggleSfCollapse(sf.nom)">
+              <i class="pi db-tree-sf-chevron"
+                 [class.pi-chevron-down]="!collapsedSfs.has(sf.nom)"
+                 [class.pi-chevron-right]="collapsedSfs.has(sf.nom)"></i>
+              <span class="db-tree-sf-name">{{ sf.nom }}</span>
+              <span class="db-tree-sf-total">{{ formatNum(sf.total) }}</span>
+            </button>
+            @if (!collapsedSfs.has(sf.nom)) {
+              @for (p of sf.produits; track p.nom; let i = $index) {
+                <div class="db-tree-prod"
+                     [class.db-tree-prod--active]="selectedProduct === p"
+                     (click)="selectProduct(p)">
+                  <span class="db-tree-prod-name" [title]="p.nom">{{ p.nom }}</span>
+                  <div class="db-bar-track">
+                    <div class="db-bar-fill"
+                         [style.width.%]="barsReady ? prodPct(p, sf) : 0"
+                         [style.background]="prodColor(i)"
+                         [style.transition-delay.ms]="i * 40"></div>
+                  </div>
+                  <span class="db-bar-num">{{ formatNum(p.total) }}</span>
+                </div>
+              }
             }
-            <text x="100" y="96" text-anchor="middle" class="db-donut-val">{{ formatNum(selectedFamille.total) }}</text>
-            <text x="100" y="112" text-anchor="middle" class="db-donut-sub">caisses</text>
-          </svg>
-
-          @if (hoveredSeg !== null && donutSegments[hoveredSeg]) {
-            <div class="db-seg-tooltip" [style.left.px]="tooltipX" [style.top.px]="tooltipY">
-              <span class="db-seg-tooltip__name">{{ donutSegments[hoveredSeg].nom }}</span>
-              <span class="db-seg-tooltip__val">{{ formatNum(donutSegments[hoveredSeg].total) }}</span>
-              <span class="db-seg-tooltip__pct">{{ (donutSegments[hoveredSeg].pct * 100).toFixed(0) }}%</span>
-            </div>
           }
-
-          <div class="db-legend">
-            @for (seg of donutSegments; track seg.nom; let i = $index) {
-              <button class="db-legend-row"
-                      [class.db-legend-row--active]="selectedSf?.nom === selectedFamille.sous_familles[i].nom"
-                      (click)="selectSf(selectedFamille.sous_familles[i])">
-                <span class="db-legend-dot" [style.background]="seg.color"></span>
-                <span class="db-legend-name">{{ seg.nom }}</span>
-                <span class="db-legend-val">{{ formatNum(seg.total) }}</span>
-                <span class="db-legend-pct">{{ (seg.pct * 100).toFixed(0) }}%</span>
-              </button>
-            }
-          </div>
         </div>
       }
     </div>
 
-    <!-- Right: leaderboard or product breakdown -->
+    <!-- Right: FDV performance scorecard (always visible) -->
     <div class="db-panel">
-      @if (selectedSf) {
-        <div class="db-panel-head">
-          <span class="db-panel-title">{{ selectedSf.nom }} — Produits</span>
-          <span class="db-panel-total">{{ formatNum(selectedSf.total) }}</span>
+      <div class="db-panel-head">
+        <span class="db-panel-title">{{ fdvPerfTitle }}</span>
+        <span class="db-panel-total">{{ fdvPerfItems.length }} prévendeurs</span>
+      </div>
+      @if (fdvPerfItems.length === 0) {
+        <div class="db-panel-empty">
+          <i class="pi pi-users"></i>
+          <p>Aucune donnée</p>
         </div>
-        <div class="db-bars">
-          @for (b of barItems; track b.nom; let i = $index) {
-            <div class="db-bar-row">
-              <span class="db-bar-name" [title]="b.nom">{{ b.nom }}</span>
-              <div class="db-bar-track">
-                <div class="db-bar-fill"
-                     [style.width.%]="barsReady ? b.pct : 0"
-                     [style.background]="b.color"
-                     [style.transition-delay.ms]="i * 55"></div>
+      } @else {
+        <div class="db-fdv-perf">
+          @for (item of fdvPerfItems; track item.code; let i = $index) {
+            <div class="db-fdv-row"
+                 [class.db-fdv-row--active]="selectedFdv === item.code"
+                 (click)="selectFdv(item.code)">
+              <span class="db-fdv-rank"
+                    [class.db-fdv-rank--gold]="i === 0"
+                    [class.db-fdv-rank--silver]="i === 1"
+                    [class.db-fdv-rank--bronze]="i === 2">{{ i + 1 }}</span>
+              <span class="db-fdv-name">{{ item.nom }}</span>
+              <div class="db-fdv-bar-track">
+                <div class="db-fdv-bar-fill" [style.width.%]="(item.total / fdvPerfMax) * 100"></div>
               </div>
-              <span class="db-bar-num">{{ formatNum(b.total) }}</span>
+              <span class="db-fdv-val">{{ formatNum(item.total) }}</span>
+              <span class="db-fdv-share">{{ fdvSharePct(item) }}</span>
             </div>
           }
         </div>
-      } @else {
-        <!-- Leaderboard -->
-        <div class="db-panel-head">
-          <span class="db-panel-title">{{ leaderboardTitle }}</span>
-          <span class="db-panel-total">{{ leaderboardItems.length }} vendeurs</span>
-        </div>
-        @if (leaderboardItems.length === 0) {
-          <div class="db-panel-empty">
-            <i class="pi pi-users"></i>
-            <p>Aucune donnée</p>
-          </div>
-        } @else {
-          <div class="db-leaderboard">
-            @for (item of leaderboardItems; track item.code; let i = $index) {
-              <div class="db-lb-row">
-                <span class="db-lb-rank"
-                      [class.db-lb-rank--gold]="i === 0"
-                      [class.db-lb-rank--silver]="i === 1"
-                      [class.db-lb-rank--bronze]="i === 2">{{ i + 1 }}</span>
-                <span class="db-lb-name">{{ item.nom }}</span>
-                <div class="db-lb-bar">
-                  <div class="db-lb-bar-fill" [style.width.%]="(item.total / leaderboardMax) * 100"></div>
-                </div>
-                <span class="db-lb-val">{{ formatNum(item.total) }}</span>
-              </div>
-            }
-          </div>
-        }
       }
     </div>
 

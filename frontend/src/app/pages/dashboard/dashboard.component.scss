@@ -17,6 +17,8 @@
   gap: 0.5rem;
   min-width: 0;
   overflow: hidden;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--surface-border);
 }
 
 .db-header-main {
@@ -215,9 +217,19 @@
   &::-webkit-scrollbar { display: none; }
 }
 
+.db-kpi-grid--selection {
+  .db-kpi-card:not(.db-kpi-card--active) {
+    opacity: 0.4;
+    transform: scale(0.98);
+    transition: opacity 0.2s, transform 0.2s, border-color 0.2s, box-shadow 0.18s;
+    &:hover { opacity: 0.75; transform: scale(0.98) translateY(-2px); }
+  }
+}
+
 .db-kpi-card {
   background: var(--surface-card);
-  border: 2px solid var(--surface-border);
+  border: 1.5px solid var(--surface-border);
+  border-top: 3px solid var(--fc);
   border-radius: 1.1rem;
   padding: 1rem 1.25rem 0;
   cursor: pointer;
@@ -225,19 +237,19 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  transition: border-color 0.2s, transform 0.15s, box-shadow 0.18s;
+  transition: border-color 0.2s, border-top-color 0.2s, transform 0.15s, box-shadow 0.18s;
   font-family: inherit;
 
   &:hover {
     border-color: var(--fc);
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(0,0,0,0.07);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.09);
   }
 
   &--active {
     border-color: var(--fc) !important;
     background: var(--fbg);
-    box-shadow: 0 3px 14px rgba(0,0,0,0.05);
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
   }
 
   &__top {
@@ -381,7 +393,6 @@
   min-height: 0;
   min-width: 0;
   overflow: hidden;
-
 }
 
 // ── Shared panel shell ────────────────────────────────────────────────────────
@@ -431,134 +442,176 @@
   p { font-size: 0.78rem; margin: 0; }
 }
 
-// ── Donut ─────────────────────────────────────────────────────────────────────
-.db-donut-wrap {
+// ── FDV performance panel ─────────────────────────────────────────────────────
+.db-fdv-perf {
   flex: 1;
   display: flex;
-  align-items: center;
-  gap: 1.25rem;
-  padding: 1rem 1.25rem;
-  min-height: 0;
-  overflow: hidden;
-  position: relative;
-}
-
-.db-donut {
-  width: 160px;
-  height: 160px;
-  flex-shrink: 0;
-}
-
-.db-donut-seg {
-  cursor: pointer;
-  transition: stroke-width 0.15s;
-  &:hover { stroke-width: 28; }
-  &--active { stroke-width: 30; }
-}
-
-.db-donut--animating .db-donut-seg {
-  transition: stroke-dasharray 0.7s cubic-bezier(0.4, 0, 0.2, 1),
-              stroke-width 0.15s;
-}
-
-.db-donut-val {
-  font-size: 18px;
-  font-weight: 800;
-  fill: var(--text-color);
-  font-family: inherit;
-}
-
-.db-donut-sub {
-  font-size: 8px;
-  fill: var(--text-color-secondary);
-  font-family: inherit;
-}
-
-// ── Segment tooltip ───────────────────────────────────────────────────────────
-.db-seg-tooltip {
-  position: absolute;
-  background: var(--surface-900, #0f172a);
-  color: #fff;
-  padding: 0.4rem 0.65rem;
-  border-radius: 0.5rem;
-  font-size: 0.72rem;
-  pointer-events: none;
-  z-index: 10;
-  transform: translate(-50%, calc(-100% - 8px));
-  display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 0.1rem;
-  white-space: nowrap;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.25);
-
-  &__name { font-weight: 600; }
-  &__val  { font-size: 0.85rem; font-weight: 800; }
-  &__pct  { font-size: 0.62rem; opacity: 0.75; }
-}
-
-.db-legend {
-  flex: 1;
-  align-self: stretch;
-  display: flex;
-  flex-direction: column;
-  gap: 0.15rem;
   overflow-y: auto;
   min-height: 0;
-  scrollbar-width: none;
-  &::-webkit-scrollbar { display: none; }
+  scrollbar-width: thin;
+  padding: 0.5rem 0.75rem;
+  gap: 0.2rem;
 }
 
-.db-legend-row {
+.db-fdv-row {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  background: none;
-  border: none;
-  padding: 0.35rem 0.5rem;
-  border-radius: 0.5rem;
+  gap: 0.55rem;
+  padding: 0.4rem 0.5rem;
+  border-radius: 0.6rem;
   cursor: pointer;
-  text-align: left;
-  width: 100%;
   transition: background 0.12s;
   font-family: inherit;
 
   &:hover { background: var(--surface-hover); }
 
   &--active {
-    background: var(--surface-100);
-    .db-legend-name { font-weight: 600; color: var(--text-color); }
+    background: rgba(var(--primary-rgb), 0.08);
+    .db-fdv-name { font-weight: 600; color: var(--primary-color); }
+    .db-fdv-bar-fill { background: var(--primary-color); }
   }
 }
 
-.db-legend-dot {
-  width: 8px;
-  height: 8px;
+.db-fdv-rank {
+  width: 1.4rem;
+  height: 1.4rem;
   border-radius: 50%;
+  background: var(--surface-200);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.6rem;
+  font-weight: 700;
+  color: var(--text-color-secondary);
   flex-shrink: 0;
+  &--gold   { background: #f59e0b; color: #fff; }
+  &--silver { background: #94a3b8; color: #fff; }
+  &--bronze { background: #b87333; color: #fff; }
 }
 
-.db-legend-name {
+.db-fdv-name {
   flex: 1;
-  font-size: 0.74rem;
+  font-size: 0.75rem;
   color: var(--text-color);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  text-align: left;
 }
 
-.db-legend-val {
+.db-fdv-bar-track {
+  width: 5rem;
+  height: 5px;
+  border-radius: 999px;
+  background: var(--surface-200);
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.db-fdv-bar-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: var(--primary-color);
+  transition: width 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.db-fdv-val {
   font-size: 0.78rem;
   font-weight: 700;
   color: var(--text-color);
+  width: 2.75rem;
+  text-align: right;
+  flex-shrink: 0;
 }
 
-.db-legend-pct {
-  font-size: 0.68rem;
+.db-fdv-share {
+  font-size: 0.65rem;
   color: var(--text-color-secondary);
-  width: 2.5rem;
+  width: 2rem;
   text-align: right;
+  flex-shrink: 0;
+}
+
+// ── Tree view (left panel) ─────────────────────────────────────────────────
+.db-tree {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+  scrollbar-width: thin;
+  padding: 0.5rem 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.db-tree-sf {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  background: var(--fbg, var(--surface-100));
+  border: none;
+  border-left: 3px solid var(--fc, var(--primary-color));
+  border-radius: 0 0.5rem 0.5rem 0;
+  cursor: pointer;
+  font-family: inherit;
+  text-align: left;
+  transition: background 0.12s, filter 0.12s;
+  margin-top: 0.5rem;
+
+  &:first-child { margin-top: 0; }
+  &:hover { filter: brightness(0.96); }
+}
+
+.db-tree-sf-chevron {
+  font-size: 0.55rem;
+  color: var(--fc, var(--primary-color));
+  width: 0.75rem;
+  flex-shrink: 0;
+}
+
+.db-tree-sf-name {
+  flex: 1;
+  font-size: 0.67rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--fc, var(--text-color));
+}
+
+.db-tree-sf-total {
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: var(--fc, var(--primary-color));
+}
+
+.db-tree-prod {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.3rem 0.5rem 0.3rem 2rem;
+  border-radius: 0.45rem;
+  cursor: pointer;
+  transition: background 0.12s;
+
+  &:hover { background: var(--surface-hover); }
+
+  &--active {
+    background: rgba(var(--primary-rgb), 0.08);
+    .db-tree-prod-name { font-weight: 600; color: var(--primary-color); }
+    .db-bar-num { color: var(--primary-color); }
+  }
+}
+
+.db-tree-prod-name {
+  font-size: 0.72rem;
+  color: var(--text-color);
+  width: 120px;
+  flex-shrink: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 // ── Bar chart ─────────────────────────────────────────────────────────────────
@@ -612,79 +665,19 @@
   flex-shrink: 0;
 }
 
-// ── Leaderboard ───────────────────────────────────────────────────────────────
-.db-leaderboard {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 0.3rem;
-  padding: 0.75rem 1rem;
-  overflow-y: auto;
-  min-height: 0;
-  scrollbar-width: thin;
-}
-
-.db-lb-row {
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
-  padding: 0.5rem 0.65rem;
-  border-radius: 0.7rem;
-  background: var(--surface-ground);
-  transition: background 0.12s;
-  &:hover { background: var(--surface-hover); }
-}
-
-.db-lb-rank {
-  width: 1.6rem;
-  height: 1.6rem;
-  border-radius: 50%;
-  background: var(--surface-200);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.66rem;
-  font-weight: 700;
+.db-bar-share {
+  font-size: 0.65rem;
   color: var(--text-color-secondary);
-  flex-shrink: 0;
-  &--gold   { background: #f59e0b; color: #fff; }
-  &--silver { background: #94a3b8; color: #fff; }
-  &--bronze { background: #b87333; color: #fff; }
-}
-
-.db-lb-name {
-  flex: 1;
-  font-size: 0.78rem;
-  color: var(--text-color);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.db-lb-bar {
-  width: 4rem;
-  height: 4px;
-  border-radius: 999px;
-  background: var(--surface-200);
-  overflow: hidden;
-  flex-shrink: 0;
-}
-
-.db-lb-bar-fill {
-  height: 100%;
-  border-radius: 999px;
-  background: var(--primary-color);
-  transition: width 0.4s ease;
-}
-
-.db-lb-val {
-  font-size: 0.8rem;
-  font-weight: 700;
-  color: var(--text-color);
-  flex-shrink: 0;
-  width: 3rem;
+  width: 2rem;
   text-align: right;
+  flex-shrink: 0;
 }
+
+.db-bar-row {
+  &--clickable { cursor: pointer; border-radius: 0.5rem; transition: background 0.12s; padding: 0.2rem 0.4rem; margin: 0 -0.4rem; &:hover { background: var(--surface-hover); } }
+  &--active .db-bar-name { font-weight: 600; }
+}
+
 
 // ── Sparkline animation (plays on first mount) ────────────────────────────────
 @keyframes spark-in {

@@ -35,6 +35,7 @@ export interface DrilldownProduit {
   nom: string;
   total: number;
   weeks: number[];
+  top_fdv: TopFdv[];
 }
 
 export interface DrilldownSousFamille {

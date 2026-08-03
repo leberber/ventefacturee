@@ -5,7 +5,7 @@ import {
   DrilldownData,
   DrilldownFamille,
   DrilldownSousFamille,
-  TopFdv,
+  DrilldownProduit,
 } from '../../core/services/prevendeur.service';
 import { getFamilyColor, getFamilyBg, CHART_COLORS } from '../../core/constants/colors';
 
@@ -24,28 +24,18 @@ export class DashboardComponent implements OnInit, OnDestroy {
   data: DrilldownData | null = null;
   selectedPeriode = '';
   selectedFamille: DrilldownFamille | null = null;
-  selectedSf: DrilldownSousFamille | null = null;
+  selectedProduct: DrilldownProduit | null = null;
+  collapsedSfs = new Set<string>();
   selectedFdv: string | null = null;
 
   // Animated counter values
   displayValues: Record<string, number> = {};
   private _animInterval: ReturnType<typeof setInterval> | null = null;
 
-  // Donut animation
-  donutReady = false;
-  donutAnimating = false;
-
-  // Bar animation
+  // Bar animation (sf bars + product bars)
   barsReady = false;
 
-  // Donut tooltip
-  hoveredSeg: number | null = null;
-  tooltipX = 0;
-  tooltipY = 0;
-
   readonly WEEK_LABELS = ['S1', 'S2', 'S3', 'S4'];
-  readonly DONUT_R = 70;
-  readonly DONUT_CIRC = 2 * Math.PI * 70;
 
   ngOnInit() {
     this.loadInitial();
@@ -84,12 +74,11 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   load(keepSelection = false) {
     const prevFamille = keepSelection ? this.selectedFamille?.nom ?? null : null;
-    const prevSf      = keepSelection ? this.selectedSf?.nom ?? null      : null;
 
     if (!keepSelection) {
       this.selectedFamille = null;
-      this.selectedSf = null;
     }
+    this.selectedProduct = null;
 
     this.svc.getDrilldown(this.selectedPeriode, this.selectedFdv).subscribe({
       next: d => {
@@ -97,15 +86,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
         if (prevFamille) {
           this.selectedFamille = d.familles.find(f => f.nom === prevFamille) ?? null;
-          if (this.selectedFamille && prevSf) {
-            this.selectedSf = this.selectedFamille.sous_familles.find(sf => sf.nom === prevSf) ?? null;
-          }
           if (this.selectedFamille) {
-            this.triggerDonutAnimation();
-          }
-          if (this.selectedSf) {
-            // In-place update: CSS transition moves bars to new widths
-            this.barsReady = true;
+            this.barsReady = false;
+            requestAnimationFrame(() => { this.barsReady = true; });
           }
         }
       },
@@ -169,47 +152,34 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   selectFamille(f: DrilldownFamille) {
     this.selectedFamille = this.selectedFamille?.nom === f.nom ? null : f;
-    this.selectedSf = null;
+    this.selectedProduct = null;
+    this.collapsedSfs = new Set();
     this.barsReady = false;
     if (this.selectedFamille) {
-      this.triggerDonutAnimation();
-    }
-  }
-
-  private triggerDonutAnimation() {
-    this.donutReady = false;
-    this.donutAnimating = false;
-    requestAnimationFrame(() => {
-      this.donutAnimating = true;
-      requestAnimationFrame(() => { this.donutReady = true; });
-    });
-  }
-
-  selectSf(sf: DrilldownSousFamille) {
-    const wasNull = !this.selectedSf;
-    this.selectedSf = this.selectedSf?.nom === sf.nom ? null : sf;
-    if (this.selectedSf && wasNull) {
-      // Bars newly appearing — animate from 0
-      this.barsReady = false;
       requestAnimationFrame(() => { this.barsReady = true; });
     }
   }
 
-  drillToRoot() { this.selectedFamille = null; this.selectedSf = null; }
-  drillToFamille() { this.selectedSf = null; }
+  selectProduct(p: DrilldownProduit) {
+    this.selectedProduct = this.selectedProduct === p ? null : p;
+  }
 
-  // ── Donut tooltip ─────────────────────────────────────────────────────────
-  onSegHover(i: number, event: MouseEvent) {
-    this.hoveredSeg = i;
-    const wrap = (event.target as Element).closest('.db-donut-wrap');
-    if (wrap) {
-      const rect = wrap.getBoundingClientRect();
-      this.tooltipX = event.clientX - rect.left;
-      this.tooltipY = event.clientY - rect.top;
+  toggleSfCollapse(nom: string) {
+    if (this.collapsedSfs.has(nom)) {
+      this.collapsedSfs.delete(nom);
+      this.barsReady = false;
+      requestAnimationFrame(() => { this.barsReady = true; });
+    } else {
+      this.collapsedSfs.add(nom);
     }
   }
 
-  onSegLeave() { this.hoveredSeg = null; }
+  drillToRoot() {
+    this.selectedFamille = null;
+    this.selectedProduct = null;
+    this.collapsedSfs = new Set();
+    this.barsReady = false;
+  }
 
   // ── Formatters ────────────────────────────────────────────────────────────
   formatPeriod(p: string): string {
@@ -243,19 +213,41 @@ export class DashboardComponent implements OnInit, OnDestroy {
     return this.data?.prevendeurs.reduce((s, p) => s + p.total, 0) ?? 0;
   }
 
-  // ── Leaderboard ───────────────────────────────────────────────────────────
-  get leaderboardTitle(): string {
-    return this.selectedFamille
-      ? `${this.capitalize(this.selectedFamille.nom)} — Top vendeurs`
-      : 'Top vendeurs';
+  // ── FDV performance panel ─────────────────────────────────────────────────
+  get fdvPerfTitle(): string {
+    if (this.selectedProduct) return `${this.selectedProduct.nom} — Prévendeurs`;
+    if (this.selectedFamille) return `${this.capitalize(this.selectedFamille.nom)} — Prévendeurs`;
+    return 'Performance prévendeurs';
   }
 
-  get leaderboardItems(): TopFdv[] {
-    return this.selectedFamille?.top_fdv ?? this.data?.top_fdv ?? [];
+  get fdvPerfItems(): { code: string; nom: string; total: number }[] {
+    if (this.selectedProduct) return this.selectedProduct.top_fdv;
+    if (this.selectedFamille) return this.selectedFamille.top_fdv;
+    const all = this.data?.prevendeurs ?? [];
+    return [...all].sort((a, b) => b.total - a.total);
   }
 
-  get leaderboardMax(): number {
-    return this.leaderboardItems.reduce((m, x) => Math.max(m, x.total), 1);
+  get fdvPerfMax(): number {
+    return this.fdvPerfItems.reduce((m, x) => Math.max(m, x.total), 1);
+  }
+
+  get fdvPerfTotal(): number {
+    return this.fdvPerfItems.reduce((s, x) => s + x.total, 0);
+  }
+
+  fdvSharePct(item: { total: number }): string {
+    if (!this.fdvPerfTotal) return '0%';
+    return `${Math.round((item.total / this.fdvPerfTotal) * 100)}%`;
+  }
+
+  // ── Tree helpers (left panel) ─────────────────────────────────────────────
+  prodPct(p: DrilldownProduit, sf: DrilldownSousFamille): number {
+    const max = sf.produits.reduce((m, x) => Math.max(m, x.total), 1);
+    return (p.total / max) * 100;
+  }
+
+  prodColor(i: number): string {
+    return CHART_COLORS[i % CHART_COLORS.length];
   }
 
   // ── SVG helpers ───────────────────────────────────────────────────────────
@@ -290,39 +282,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
       d += ` C${cpx},${pts[i - 1].y} ${cpx},${pts[i].y} ${pts[i].x},${pts[i].y}`;
     }
     return d;
-  }
-
-  // ── Donut chart ───────────────────────────────────────────────────────────
-  get donutSegments(): { nom: string; total: number; pct: number; offset: number; color: string }[] {
-    const items = this.selectedFamille?.sous_familles ?? [];
-    const total = items.reduce((s, sf) => s + sf.total, 0);
-    let offset = 0;
-    return items.map((sf, i) => {
-      const pct = total > 0 ? sf.total / total : 0;
-      const seg = { nom: sf.nom, total: sf.total, pct, offset, color: CHART_COLORS[i % CHART_COLORS.length] };
-      offset += pct;
-      return seg;
-    });
-  }
-
-  donutDasharray(pct: number): string {
-    return `${pct * this.DONUT_CIRC} ${this.DONUT_CIRC}`;
-  }
-
-  donutDashoffset(offset: number): string {
-    return `${-(offset * this.DONUT_CIRC)}`;
-  }
-
-  // ── Bar chart (products) ──────────────────────────────────────────────────
-  get barItems(): { nom: string; total: number; pct: number; color: string }[] {
-    const items = this.selectedSf?.produits ?? [];
-    const max = items.reduce((m, p) => Math.max(m, p.total), 1);
-    return items.map((p, i) => ({
-      nom: p.nom,
-      total: p.total,
-      pct: max > 0 ? (p.total / max) * 100 : 0,
-      color: CHART_COLORS[i % CHART_COLORS.length],
-    }));
   }
 
   readonly skeletonRows = Array(3).fill(0);

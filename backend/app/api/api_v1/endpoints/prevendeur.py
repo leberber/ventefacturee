@@ -325,6 +325,8 @@ def prevendeur_admin_drilldown(
     fdv_by_famille: dict = defaultdict(lambda: defaultdict(float))
     fdv_global: dict = defaultdict(float)
     prev_famille_total: dict = defaultdict(float)
+    # famille -> sf -> produit -> code_fdv -> total (for per-product FDV panel)
+    fdv_by_sf_prod: dict = defaultdict(lambda: defaultdict(lambda: defaultdict(lambda: defaultdict(float))))
 
     for r in rows:
         if not r.date_commande or not r.qte_facturee:
@@ -337,6 +339,7 @@ def prevendeur_admin_drilldown(
         if r.code_fdv:
             fdv_by_famille[famille][r.code_fdv] += r.qte_facturee
             fdv_global[r.code_fdv] += r.qte_facturee
+            fdv_by_sf_prod[famille][sf][prod][r.code_fdv] += r.qte_facturee
         # Supplement fdv name map from row data
         if r.code_fdv and r.nom_fdv and r.code_fdv not in fdv_name_map:
             fdv_name_map[r.code_fdv] = r.nom_fdv
@@ -363,7 +366,12 @@ def prevendeur_admin_drilldown(
             for prod, wks in prod_map.items():
                 for i in range(4):
                     sf_weeks[i] += wks[i]
-                prods_out.append({"nom": prod, "total": round(sum(wks)), "weeks": [round(v) for v in wks]})
+                prod_top_fdv = sorted(
+                    [{"code": c, "nom": fdv_name_map.get(c, c), "total": round(t)}
+                     for c, t in fdv_by_sf_prod[famille][sf][prod].items()],
+                    key=lambda x: -x["total"]
+                )
+                prods_out.append({"nom": prod, "total": round(sum(wks)), "weeks": [round(v) for v in wks], "top_fdv": prod_top_fdv})
             for i in range(4):
                 f_weeks[i] += sf_weeks[i]
             sfs_out.append({
@@ -380,7 +388,7 @@ def prevendeur_admin_drilldown(
         top_fdv = sorted(
             [{"code": c, "nom": fdv_name_map.get(c, c), "total": round(t)} for c, t in fdv_by_famille[famille].items()],
             key=lambda x: -x["total"]
-        )[:5]
+        )
 
         familles_out.append({
             "nom": famille,
