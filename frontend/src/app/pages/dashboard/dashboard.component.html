@@ -12,14 +12,21 @@
           <span class="db-crumb db-crumb--leaf">{{ capitalize(selectedFamille.nom) }}</span>
         }
       </div>
-      <div class="db-period">
-        <button class="db-period-btn" (click)="prevPeriod()" [disabled]="!canGoPrev">
-          <i class="pi pi-chevron-left"></i>
-        </button>
-        <span class="db-period-label">{{ formatPeriod(selectedPeriode) }}</span>
-        <button class="db-period-btn" (click)="nextPeriod()" [disabled]="!canGoNext">
-          <i class="pi pi-chevron-right"></i>
-        </button>
+      <div class="db-header-right">
+        <div class="db-canal-seg">
+          <button class="db-canal-btn" [class.db-canal-btn--active]="selectedCanal === 'ALL'" (click)="setCanal('ALL')">Tous</button>
+          <button class="db-canal-btn" [class.db-canal-btn--active]="selectedCanal === 'VD'" (click)="setCanal('VD')">Direct</button>
+          <button class="db-canal-btn" [class.db-canal-btn--active]="selectedCanal === 'VH'" (click)="setCanal('VH')">Horeca</button>
+        </div>
+        <div class="db-period">
+          <button class="db-period-btn" (click)="prevPeriod()" [disabled]="!canGoPrev">
+            <i class="pi pi-chevron-left"></i>
+          </button>
+          <span class="db-period-label">{{ formatPeriod(selectedPeriode) }}</span>
+          <button class="db-period-btn" (click)="nextPeriod()" [disabled]="!canGoNext">
+            <i class="pi pi-chevron-right"></i>
+          </button>
+        </div>
       </div>
     </div>
 

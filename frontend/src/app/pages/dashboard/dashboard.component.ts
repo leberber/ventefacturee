@@ -27,6 +27,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   selectedProduct: DrilldownProduit | null = null;
   collapsedSfs = new Set<string>();
   selectedFdv: string | null = null;
+  selectedCanal: 'ALL' | 'VD' | 'VH' = 'ALL';
 
   // Animated counter values
   displayValues: Record<string, number> = {};
@@ -50,7 +51,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     const now = new Date();
     const guess = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
     this.selectedPeriode = guess;
-    this.svc.getDrilldown(guess, this.selectedFdv).subscribe({
+    this.svc.getDrilldown(guess, this.selectedFdv, this.canal).subscribe({
       next: d => {
         if (d.periodes.length && !d.periodes.includes(guess)) {
           this.selectedPeriode = d.periodes[0];
@@ -80,7 +81,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     }
     this.selectedProduct = null;
 
-    this.svc.getDrilldown(this.selectedPeriode, this.selectedFdv).subscribe({
+    this.svc.getDrilldown(this.selectedPeriode, this.selectedFdv, this.canal).subscribe({
       next: d => {
         this.applyData(d);
 
@@ -147,7 +148,18 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   selectFdv(code: string | null) {
     this.selectedFdv = this.selectedFdv === code ? null : code;
-    this.load(true); // preserve famille/sf selection
+    this.load(true);
+  }
+
+  get canal(): string | null {
+    return this.selectedCanal === 'ALL' ? null : this.selectedCanal;
+  }
+
+  setCanal(c: 'ALL' | 'VD' | 'VH') {
+    if (this.selectedCanal === c) return;
+    this.selectedCanal = c;
+    this.selectedFdv = null;
+    this.load(true); // preserve famille selection
   }
 
   selectFamille(f: DrilldownFamille) {

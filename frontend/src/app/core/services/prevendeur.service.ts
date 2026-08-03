@@ -115,9 +115,10 @@ export class PrevendeurService {
     return this.http.get<PrevAdminStat[]>('/api/v1/prevendeur/admin/stats');
   }
 
-  getDrilldown(annee_mois: string, code_fdv?: string | null) {
+  getDrilldown(annee_mois: string, code_fdv?: string | null, canal?: string | null) {
     let p = new HttpParams().set('annee_mois', annee_mois);
     if (code_fdv) p = p.set('code_fdv', code_fdv);
+    if (canal) p = p.set('canal', canal);
     return this.http.get<DrilldownData>('/api/v1/prevendeur/admin/drilldown', { params: p });
   }
 }

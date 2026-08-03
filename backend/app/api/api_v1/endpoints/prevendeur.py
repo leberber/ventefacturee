@@ -226,6 +226,7 @@ def prevendeur_admin_stats(
 def prevendeur_admin_drilldown(
     annee_mois: str = Query(...),
     code_fdv: Optional[str] = Query(None),
+    canal: Optional[str] = Query(None),   # "VD" or "VH"
     current_user: User = Depends(get_current_user),
     session: Session = Depends(get_session),
 ) -> Any:
@@ -252,11 +253,15 @@ def prevendeur_admin_drilldown(
         .where(or_(Vente.source != "BackOffice", Vente.source == None))
         .group_by(Vente.code_fdv)
     )
+    if canal:
+        fdv_totals_q = fdv_totals_q.where(Vente.code_fdv.ilike(f"%{canal}%"))
     fdv_totals = {row[0]: round(row[1] or 0) for row in session.exec(fdv_totals_q).all()}
 
+    canal_upper = canal.upper() if canal else None
     prevendeurs_out = [
         {"code": p.employe_code, "nom": p.full_name, "total": fdv_totals.get(p.employe_code, 0)}
-        for p in prevendeurs_db if p.employe_code
+        for p in prevendeurs_db
+        if p.employe_code and (not canal_upper or canal_upper in (p.employe_code or "").upper())
     ]
 
     # Previous period — use the previous available period in the data (not necessarily month-1)
@@ -270,6 +275,8 @@ def prevendeur_admin_drilldown(
         q = select(Vente).where(Vente.annee_mois == periode)
         if code_fdv:
             q = q.where(Vente.code_fdv == code_fdv)
+        if canal:
+            q = q.where(Vente.code_fdv.ilike(f"%{canal}%"))
         rs = session.exec(q).all()
         return [r for r in rs if r.source != "BackOffice"]
 
@@ -292,6 +299,8 @@ def prevendeur_admin_drilldown(
         )
         if code_fdv:
             q6 = q6.where(Vente.code_fdv == code_fdv)
+        if canal:
+            q6 = q6.where(Vente.code_fdv.ilike(f"%{canal}%"))
         q6 = q6.group_by(Vente.annee_mois)
         for periode, total in session.exec(q6).all():
             period_totals[periode] = total or 0
