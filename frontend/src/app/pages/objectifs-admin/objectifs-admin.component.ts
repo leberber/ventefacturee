@@ -2,7 +2,7 @@ import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
-import { getFamilyColor, getFamilyBg } from '../../core/constants/colors';
+import { getFamilyColor, getFamilyBg, getFamilyBgLight } from '../../core/constants/colors';
 
 interface ObjectifRow {
   code_produit: string;
@@ -406,8 +406,9 @@ export class ObjectifsAdminComponent implements OnInit {
 
   // ── Family colors ──────────────────────────────────────────────────────────
 
-  famColor(nom: string): string { return getFamilyColor(nom); }
-  famBg(nom: string): string    { return getFamilyBg(nom); }
+  famColor(nom: string): string    { return getFamilyColor(nom); }
+  famBg(nom: string): string       { return getFamilyBg(nom); }
+  famBgLight(nom: string): string  { return getFamilyBgLight(nom); }
 
   // ── Helpers ────────────────────────────────────────────────────────────────
 

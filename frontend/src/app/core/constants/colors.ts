@@ -51,6 +51,13 @@ export function getFamilyBg(nom: string): string {
   return hexToRgba(main, 0.10);
 }
 
+export function getFamilyBgLight(nom: string): string {
+  const key = nom.trim().toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  const main = FAMILY_COLORS[key]?.main ?? FALLBACK_MAINS[stableIndex(key)];
+  return hexToRgba(main, 0.05);
+}
+
 // Deterministic index so unknown families always get the same color
 function stableIndex(s: string): number {
   let h = 0;

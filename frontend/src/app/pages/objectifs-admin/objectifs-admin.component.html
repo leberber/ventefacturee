@@ -213,6 +213,7 @@
             @let fColor = famColor(fam.nom);
             @let fBorder = fColor + '33';
             @let fRows = famRows(fam);
+            @let sfBg = famBgLight(fam.nom);
             <tr class="obj-fam-row" (click)="toggleFamily(fam.nom)" title="Cliquer pour réduire / développer">
               <td colspan="3" class="obj-fam-cell"
                 [style.background]="fBg" [style.color]="fColor"
@@ -236,12 +237,12 @@
               @for (sf of fam.sfs; track sf.nom) {
 
                 <tr class="obj-sf-row">
-                  <td colspan="3">{{ sf.nom }}</td>
-                  <td class="td-num obj-sf-total">{{ formatNum(sumTonne(sf.rows)) }}</td>
-                  <td class="td-num td-per-route obj-sf-total">{{ perRoute(sumTonne(sf.rows)) }}</td>
-                  <td class="td-num obj-sf-total">{{ sumPacks(sf.rows) != null ? (sumPacks(sf.rows) | number:'1.0-0') : '—' }}</td>
-                  <td class="td-num td-per-route obj-sf-total">{{ perRoute(sumPacks(sf.rows)) }}</td>
-                  <td colspan="2"></td>
+                  <td colspan="3" [style.background]="sfBg">{{ sf.nom }}</td>
+                  <td class="td-num obj-sf-total" [style.background]="sfBg">{{ formatNum(sumTonne(sf.rows)) }}</td>
+                  <td class="td-num td-per-route obj-sf-total" [style.background]="sfBg">{{ perRoute(sumTonne(sf.rows)) }}</td>
+                  <td class="td-num obj-sf-total" [style.background]="sfBg">{{ sumPacks(sf.rows) != null ? (sumPacks(sf.rows) | number:'1.0-0') : '—' }}</td>
+                  <td class="td-num td-per-route obj-sf-total" [style.background]="sfBg">{{ perRoute(sumPacks(sf.rows)) }}</td>
+                  <td colspan="2" [style.background]="sfBg"></td>
                 </tr>
 
                 @for (row of sf.rows; track row.code_produit) {
