@@ -31,6 +31,51 @@ export interface PrevFacturation {
   routes: PrevRoute[];
 }
 
+export interface DrilldownProduit {
+  nom: string;
+  total: number;
+  weeks: number[];
+}
+
+export interface DrilldownSousFamille {
+  nom: string;
+  total: number;
+  weeks: number[];
+  produits: DrilldownProduit[];
+}
+
+export interface TopFdv {
+  code: string;
+  nom: string;
+  total: number;
+}
+
+export interface FdvItem {
+  code: string;
+  nom: string;
+  total: number;
+}
+
+export interface DrilldownFamille {
+  nom: string;
+  total: number;
+  total_prev: number;
+  delta_pct: number | null;
+  weeks: number[];
+  sous_familles: DrilldownSousFamille[];
+  top_fdv: TopFdv[];
+}
+
+export interface DrilldownData {
+  periode: string;
+  periodes: string[];
+  prevendeurs: FdvItem[];
+  trend_6m: number[];
+  trend_6m_labels: string[];
+  top_fdv: TopFdv[];
+  familles: DrilldownFamille[];
+}
+
 export interface PrevAdminClientRow {
   code_client: string;
   nom_client: string;
@@ -67,5 +112,11 @@ export class PrevendeurService {
 
   getAdminStats() {
     return this.http.get<PrevAdminStat[]>('/api/v1/prevendeur/admin/stats');
+  }
+
+  getDrilldown(annee_mois: string, code_fdv?: string | null) {
+    let p = new HttpParams().set('annee_mois', annee_mois);
+    if (code_fdv) p = p.set('code_fdv', code_fdv);
+    return this.http.get<DrilldownData>('/api/v1/prevendeur/admin/drilldown', { params: p });
   }
 }

@@ -1,4 +1,4 @@
-from typing import Any, List
+from typing import Any, List, Optional
 from collections import defaultdict
 from datetime import datetime, timezone
 
@@ -220,6 +220,189 @@ def prevendeur_admin_stats(
         })
 
     return result
+
+
+@router.get("/admin/drilldown")
+def prevendeur_admin_drilldown(
+    annee_mois: str = Query(...),
+    code_fdv: Optional[str] = Query(None),
+    current_user: User = Depends(get_current_user),
+    session: Session = Depends(get_session),
+) -> Any:
+    from collections import defaultdict
+
+    all_periods = session.exec(
+        select(Vente.annee_mois).distinct().order_by(Vente.annee_mois.desc())
+    ).all()
+    all_periods_list = list(all_periods)
+
+    # Prevendeurs list with their totals for the current period (always unfiltered)
+    prevendeurs_db = session.exec(
+        select(User)
+        .where(User.role == UserRole.PREVENDER)
+        .where(User.is_active == True)
+        .order_by(User.full_name)
+    ).all()
+    fdv_name_map = {p.employe_code: p.full_name for p in prevendeurs_db if p.employe_code}
+
+    fdv_totals_q = (
+        select(Vente.code_fdv, func.sum(Vente.qte_facturee))
+        .where(Vente.annee_mois == annee_mois)
+        .where(Vente.code_fdv != None)
+        .where(or_(Vente.source != "BackOffice", Vente.source == None))
+        .group_by(Vente.code_fdv)
+    )
+    fdv_totals = {row[0]: round(row[1] or 0) for row in session.exec(fdv_totals_q).all()}
+
+    prevendeurs_out = [
+        {"code": p.employe_code, "nom": p.full_name, "total": fdv_totals.get(p.employe_code, 0)}
+        for p in prevendeurs_db if p.employe_code
+    ]
+
+    # Previous period
+    try:
+        year, month = int(annee_mois[:4]), int(annee_mois[5:])
+        prev_month = month - 1 if month > 1 else 12
+        prev_year = year if month > 1 else year - 1
+        prev_periode = f"{prev_year}-{prev_month:02d}"
+    except Exception:
+        prev_periode = None
+
+    def fetch_rows(periode: str) -> list:
+        q = select(Vente).where(Vente.annee_mois == periode)
+        if code_fdv:
+            q = q.where(Vente.code_fdv == code_fdv)
+        rs = session.exec(q).all()
+        return [r for r in rs if r.source != "BackOffice"]
+
+    rows = fetch_rows(annee_mois)
+    prev_rows = fetch_rows(prev_periode) if prev_periode else []
+
+    # 6-month trend via SQL aggregation (always unfiltered by code_fdv for global view)
+    try:
+        cur_idx = all_periods_list.index(annee_mois)
+    except ValueError:
+        cur_idx = 0
+    trend_periods = list(reversed(all_periods_list[cur_idx: cur_idx + 6]))  # chronological
+
+    period_totals: dict = defaultdict(float)
+    if trend_periods:
+        q6 = (
+            select(Vente.annee_mois, func.sum(Vente.qte_facturee))
+            .where(Vente.annee_mois.in_(trend_periods))
+            .where(or_(Vente.source != "BackOffice", Vente.source == None))
+        )
+        if code_fdv:
+            q6 = q6.where(Vente.code_fdv == code_fdv)
+        q6 = q6.group_by(Vente.annee_mois)
+        for periode, total in session.exec(q6).all():
+            period_totals[periode] = total or 0
+
+    trend_6m = [round(period_totals.get(p, 0)) for p in trend_periods]
+    trend_6m_labels = trend_periods
+
+    # Product label resolution
+    codes = {r.code_produit for r in rows if r.code_produit}
+    produits_db = session.exec(select(Produit).where(Produit.code_produit.in_(codes))).all() if codes else []
+    code_to_produit = {p.code_produit: p for p in produits_db}
+
+    def week_idx(d) -> int:
+        if d is None:
+            return 0
+        day = d.day
+        if day <= 7: return 0
+        if day <= 14: return 1
+        if day <= 21: return 2
+        return 3
+
+    def product_label(r: Vente) -> str:
+        if r.code_produit and r.code_produit in code_to_produit:
+            p = code_to_produit[r.code_produit]
+            return p.nom_produit or r.description_produit or "Autre"
+        return r.description_produit or "Autre"
+
+    # famille -> sous_famille -> produit -> [w0,w1,w2,w3]
+    hier: dict = defaultdict(lambda: defaultdict(lambda: defaultdict(lambda: [0.0] * 4)))
+    # famille -> code_fdv -> total
+    fdv_by_famille: dict = defaultdict(lambda: defaultdict(float))
+    fdv_global: dict = defaultdict(float)
+    prev_famille_total: dict = defaultdict(float)
+
+    for r in rows:
+        if not r.date_commande or not r.qte_facturee:
+            continue
+        famille = (r.famille or "").strip().lower()
+        sf = (r.sous_famille or "Autres").strip()
+        prod = product_label(r)
+        w = week_idx(r.date_commande)
+        hier[famille][sf][prod][w] += r.qte_facturee
+        if r.code_fdv:
+            fdv_by_famille[famille][r.code_fdv] += r.qte_facturee
+            fdv_global[r.code_fdv] += r.qte_facturee
+        # Supplement fdv name map from row data
+        if r.code_fdv and r.nom_fdv and r.code_fdv not in fdv_name_map:
+            fdv_name_map[r.code_fdv] = r.nom_fdv
+
+    for r in prev_rows:
+        if not r.qte_facturee:
+            continue
+        famille = (r.famille or "").strip().lower()
+        prev_famille_total[famille] += r.qte_facturee
+
+    # Global top FDV
+    global_top_fdv = sorted(
+        [{"code": c, "nom": fdv_name_map.get(c, c), "total": round(t)} for c, t in fdv_global.items()],
+        key=lambda x: -x["total"]
+    )[:5]
+
+    familles_out = []
+    for famille, sf_map in sorted(hier.items()):
+        f_weeks = [0.0] * 4
+        sfs_out = []
+        for sf, prod_map in sf_map.items():
+            sf_weeks = [0.0] * 4
+            prods_out = []
+            for prod, wks in prod_map.items():
+                for i in range(4):
+                    sf_weeks[i] += wks[i]
+                prods_out.append({"nom": prod, "total": round(sum(wks)), "weeks": [round(v) for v in wks]})
+            for i in range(4):
+                f_weeks[i] += sf_weeks[i]
+            sfs_out.append({
+                "nom": sf,
+                "total": round(sum(sf_weeks)),
+                "weeks": [round(v) for v in sf_weeks],
+                "produits": sorted(prods_out, key=lambda x: -x["total"]),
+            })
+
+        f_total = round(sum(f_weeks))
+        prev_total = round(prev_famille_total.get(famille, 0))
+        delta_pct = round((f_total - prev_total) / prev_total * 100) if prev_total > 0 else None
+
+        top_fdv = sorted(
+            [{"code": c, "nom": fdv_name_map.get(c, c), "total": round(t)} for c, t in fdv_by_famille[famille].items()],
+            key=lambda x: -x["total"]
+        )[:5]
+
+        familles_out.append({
+            "nom": famille,
+            "total": f_total,
+            "total_prev": prev_total,
+            "delta_pct": delta_pct,
+            "weeks": [round(v) for v in f_weeks],
+            "sous_familles": sorted(sfs_out, key=lambda x: -x["total"]),
+            "top_fdv": top_fdv,
+        })
+
+    return {
+        "periode": annee_mois,
+        "periodes": list(all_periods),
+        "prevendeurs": prevendeurs_out,
+        "trend_6m": trend_6m,
+        "trend_6m_labels": trend_6m_labels,
+        "top_fdv": global_top_fdv,
+        "familles": sorted(familles_out, key=lambda x: -x["total"]),
+    }
 
 
 @router.patch("/clients/{code_client}")
