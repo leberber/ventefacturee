@@ -4,8 +4,8 @@
 
 .db-root {
   display: grid;
-  grid-template-rows: auto auto 1fr;
-  gap: 1rem;
+  grid-template-rows: auto auto auto 1fr;
+  gap: 0.5rem;
   height: calc(100vh - 3rem);
   overflow: hidden;
 }
@@ -75,6 +75,35 @@
   border: 1px solid var(--surface-border);
   border-radius: 999px;
   padding: 0.3rem 0.75rem;
+}
+
+.db-collapse-handle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  padding: 0.25rem 0;
+  transition: opacity 0.15s;
+
+  &:hover {
+    .db-collapse-handle__line { background: var(--primary-color); }
+    .db-collapse-handle__icon { color: var(--primary-color); }
+  }
+
+  &__line {
+    flex: 1;
+    height: 2px;
+    border-radius: 999px;
+    background: var(--surface-border);
+    transition: background 0.15s;
+  }
+
+  &__icon {
+    font-size: 0.7rem;
+    color: var(--text-color-secondary);
+    flex-shrink: 0;
+    transition: color 0.15s;
+  }
 }
 
 .db-period-btn {
@@ -274,6 +303,29 @@
   scrollbar-width: none;
   padding: 4px 0;
   &::-webkit-scrollbar { display: none; }
+}
+
+.db-kpi-grid--compact {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: thin;
+  grid-template-columns: unset;
+  grid-auto-rows: unset;
+  gap: 0.6rem;
+
+  .db-kpi-card {
+    flex: 0 0 10rem;
+    padding: 0.6rem 0.85rem;
+
+    &__prev,
+    &__weeks,
+    &__spark { display: none; }
+
+    .db-kpi-obj { margin-top: 0.3rem; }
+  }
 }
 
 .db-kpi-grid--selection {

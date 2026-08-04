@@ -57,7 +57,7 @@
   </div>
 
   <!-- ── KPI family grid ──────────────────────────────────────────────────── -->
-  <div class="db-kpi-grid" [class.db-kpi-grid--selection]="selectedFamille">
+  <div class="db-kpi-grid" [class.db-kpi-grid--selection]="selectedFamille" [class.db-kpi-grid--compact]="compactCards">
     @if (loading) {
       @for (_ of skeletonRows; track $index) { <div class="db-kpi-sk"></div> }
     }
@@ -129,6 +129,15 @@
         </button>
       }
     }
+  </div>
+
+  <!-- ── Collapse handle ──────────────────────────────────────────────────── -->
+  <div class="db-collapse-handle" (click)="compactCards = !compactCards" [title]="compactCards ? 'Agrandir les cartes' : 'Réduire les cartes'">
+    <div class="db-collapse-handle__line"></div>
+    <i class="pi db-collapse-handle__icon"
+       [class.pi-chevron-up]="!compactCards"
+       [class.pi-chevron-down]="compactCards"></i>
+    <div class="db-collapse-handle__line"></div>
   </div>
 
   <!-- ── Bottom: sf/product bars (left) + FDV performance (right) ─────────── -->

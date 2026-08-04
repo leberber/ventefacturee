@@ -36,6 +36,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   // Bar animation (sf bars + product bars)
   barsReady = false;
+  compactCards = false;
 
   readonly WEEK_LABELS = ['S1', 'S2', 'S3', 'S4'];
   readonly Math = Math;
