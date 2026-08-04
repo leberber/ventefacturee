@@ -235,7 +235,7 @@ export class ObjectifsAdminComponent implements OnInit {
     const fd = new FormData();
     fd.append('file', this.importFile);
 
-    const applyImport = (data: { code_produit: string | null; nom_produit?: string; packs: number | null; packs_tournee: number | null }[]) => {
+    const applyImport = (data: { code_produit: string | null; nom_produit?: string; tonne: number | null; packs: number | null; packs_tournee: number | null }[]) => {
       if (this.importCanal !== this.canal) {
         this.canal = this.importCanal;
         for (const r of this.rows) {
@@ -251,8 +251,11 @@ export class ObjectifsAdminComponent implements OnInit {
           ? this.rows.find(r => r.code_produit === item.code_produit)
           : this.rows.find(r => r.nom_produit.trim().toLowerCase() === (item.nom_produit ?? '').trim().toLowerCase());
         if (row) {
-          row._packs         = item.packs         != null ? Math.round(item.packs)         : null;
-          row._packs_tournee = item.packs_tournee != null ? Math.round(item.packs_tournee) : null;
+          row._tonne         = item.tonne ?? null;
+          row._packs         = item.packs != null ? Math.round(item.packs) : null;
+          row._packs_tournee = item.packs_tournee != null
+            ? Math.round(item.packs_tournee)
+            : (item.packs != null && this.routeCount > 0 ? Math.round(item.packs / this.routeCount) : null);
           imported++;
         } else {
           notFound.push(item.code_produit ?? item.nom_produit ?? '?');
@@ -268,7 +271,7 @@ export class ObjectifsAdminComponent implements OnInit {
     // If month changed, reload edit rows for the new period first
     const monthChanged = this.importMois !== this.mois || this.importAnnee !== this.annee;
 
-    this.http.post<{ code_produit: string | null; nom_produit?: string; packs: number | null; packs_tournee: number | null }[]>(
+    this.http.post<{ code_produit: string | null; nom_produit?: string; tonne: number | null; packs: number | null; packs_tournee: number | null }[]>(
       '/api/v1/objectifs/parse-excel', fd
     ).subscribe({
       next: data => {

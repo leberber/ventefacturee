@@ -221,9 +221,10 @@ async def parse_excel(
             code = row[0]
             if not code or str(code).startswith("⚠"):
                 continue
-            packs   = float(row[2]) if len(row) > 2 and row[2] is not None else None
-            packs_t = float(row[3]) if len(row) > 3 and row[3] is not None else None
-            result.append({"code_produit": str(code).strip(), "packs": packs, "packs_tournee": packs_t})
+            tonne   = float(row[2]) if len(row) > 2 and row[2] is not None else None
+            packs   = float(row[3]) if len(row) > 3 and row[3] is not None else None
+            packs_t = float(row[4]) if len(row) > 4 and row[4] is not None else None
+            result.append({"code_produit": str(code).strip(), "tonne": tonne, "packs": packs, "packs_tournee": packs_t})
         else:
             nom = row[0]
             if not nom:
