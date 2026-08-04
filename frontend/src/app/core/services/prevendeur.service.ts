@@ -59,6 +59,7 @@ export interface FdvItem {
   code: string;
   nom: string;
   total: number;
+  achievement_pct: number | null;
 }
 
 export interface DrilldownFamille {

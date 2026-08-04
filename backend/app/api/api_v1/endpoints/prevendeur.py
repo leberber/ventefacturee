@@ -262,11 +262,6 @@ def prevendeur_admin_drilldown(
     fdv_totals = {row[0]: round(row[1] or 0) for row in session.exec(fdv_totals_q).all()}
 
     canal_upper = canal.upper() if canal else None
-    prevendeurs_out = [
-        {"code": p.employe_code, "nom": p.full_name, "total": fdv_totals.get(p.employe_code, 0)}
-        for p in prevendeurs_db
-        if p.employe_code and (not canal_upper or canal_upper in (p.employe_code or "").upper())
-    ]
 
     # Previous period — use the previous available period in the data (not necessarily month-1)
     try:
@@ -429,6 +424,39 @@ def prevendeur_admin_drilldown(
     else:
         obj_by_prod        = {r.code_produit: (r.objectif_packs_vd_tournee or 0) + (r.objectif_packs_vh_tournee or 0) for r in obj_prod_rows}
         obj_by_prod_total  = {r.code_produit: (r.objectif_packs_vd or 0) + (r.objectif_packs_vh or 0) for r in obj_prod_rows}
+
+    # Per-fdv per-product sales (flattened from fdv_by_sf_prod)
+    fdv_prod_totals: dict = defaultdict(lambda: defaultdict(float))
+    for _fam_map in fdv_by_sf_prod.values():
+        for _prod_map in _fam_map.values():
+            for _prod_label, _fdv_map in _prod_map.items():
+                for _code_fdv, _tot in _fdv_map.items():
+                    fdv_prod_totals[_code_fdv][_prod_label] += _tot
+
+    def compute_achievement_pct(code_fdv: str):
+        """Simple average of per-product achievement rates for this prevendeur."""
+        rates = []
+        prod_sales = fdv_prod_totals.get(code_fdv, {})
+        for label, code in prod_label_to_code.items():
+            obj = obj_by_prod.get(code)
+            if not obj:
+                continue
+            sales = prod_sales.get(label, 0.0)
+            rates.append(min(sales / obj * 100, 100.0))
+        if not rates:
+            return None
+        return round(sum(rates) / len(rates))
+
+    prevendeurs_out = [
+        {
+            "code": p.employe_code,
+            "nom": p.full_name,
+            "total": fdv_totals.get(p.employe_code, 0),
+            "achievement_pct": compute_achievement_pct(p.employe_code),
+        }
+        for p in prevendeurs_db
+        if p.employe_code and (not canal_upper or canal_upper in (p.employe_code or "").upper())
+    ]
 
     familles_out = []
     for famille, sf_map in sorted(hier.items()):

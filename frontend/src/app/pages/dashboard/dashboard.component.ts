@@ -258,9 +258,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   pvObjPct(pv: FdvItem): number {
-    const perRoute = this.data?.objectif_packs_per_route;
-    if (!perRoute) return 0;
-    return Math.min(Math.round((pv.total / perRoute) * 100), 100);
+    return pv.achievement_pct ?? 0;
   }
 
   pvObjClass(pv: FdvItem): string {
