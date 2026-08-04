@@ -172,7 +172,12 @@
                        [style.background]="prodColor(i)"
                        [style.transition-delay.ms]="i * 40"></div>
                 </div>
-                <span class="db-bar-num">{{ formatNum(p.total) }}</span>
+                <span class="db-bar-num">
+                  {{ formatNum(p.total) }}
+                  @if (p.objectif_packs) {
+                    <span class="db-bar-num__obj">/ {{ formatNum(p.objectif_packs) }}</span>
+                  }
+                </span>
                 @if (p.objectif_packs) {
                   <span class="db-prod-obj-pct" [style.color]="prodObjColor(p)">{{ prodObjPct(p) }}%</span>
                 }

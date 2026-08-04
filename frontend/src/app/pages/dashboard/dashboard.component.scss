@@ -833,9 +833,14 @@
   font-size: 0.72rem;
   font-weight: 600;
   color: var(--text-color);
-  width: 2.75rem;
+  width: 4.5rem;
   text-align: right;
   flex-shrink: 0;
+
+  &__obj {
+    font-weight: 400;
+    color: var(--text-color-muted);
+  }
 }
 
 .db-prod-obj-pct {
