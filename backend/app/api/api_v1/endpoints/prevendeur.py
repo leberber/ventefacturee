@@ -377,18 +377,29 @@ def prevendeur_admin_drilldown(
             Produit.famille,
             func.sum(Objectif.objectif_packs_vd).label('packs_vd'),
             func.sum(Objectif.objectif_packs_vh).label('packs_vh'),
+            func.sum(Objectif.objectif_packs_vd_tournee).label('packs_vd_t'),
+            func.sum(Objectif.objectif_packs_vh_tournee).label('packs_vh_t'),
         )
         .join(Produit, Objectif.code_produit == Produit.code_produit)
         .where(Objectif.mois == mois_int, Objectif.annee == annee_int)
         .group_by(Produit.famille)
     ).all()
 
-    if canal == 'VD':
-        obj_by_famille = {(r.famille or '').strip().lower(): round(r.packs_vd or 0) for r in obj_rows}
-    elif canal == 'VH':
-        obj_by_famille = {(r.famille or '').strip().lower(): round(r.packs_vh or 0) for r in obj_rows}
+    # When filtering by a single FDV, compare against per-route targets; otherwise total targets
+    if code_fdv:
+        if canal == 'VD':
+            obj_by_famille = {(r.famille or '').strip().lower(): round(r.packs_vd_t or 0) for r in obj_rows}
+        elif canal == 'VH':
+            obj_by_famille = {(r.famille or '').strip().lower(): round(r.packs_vh_t or 0) for r in obj_rows}
+        else:
+            obj_by_famille = {(r.famille or '').strip().lower(): round((r.packs_vd_t or 0) + (r.packs_vh_t or 0)) for r in obj_rows}
     else:
-        obj_by_famille = {(r.famille or '').strip().lower(): round((r.packs_vd or 0) + (r.packs_vh or 0)) for r in obj_rows}
+        if canal == 'VD':
+            obj_by_famille = {(r.famille or '').strip().lower(): round(r.packs_vd or 0) for r in obj_rows}
+        elif canal == 'VH':
+            obj_by_famille = {(r.famille or '').strip().lower(): round(r.packs_vh or 0) for r in obj_rows}
+        else:
+            obj_by_famille = {(r.famille or '').strip().lower(): round((r.packs_vd or 0) + (r.packs_vh or 0)) for r in obj_rows}
     objectif_total = sum(obj_by_famille.values())
 
     # Per-route objective: sum of per-tournée targets across all products
@@ -416,14 +427,18 @@ def prevendeur_admin_drilldown(
         .where(Objectif.mois == mois_int, Objectif.annee == annee_int)
     ).all()
     if canal == 'VD':
-        obj_by_prod        = {r.code_produit: r.objectif_packs_vd_tournee for r in obj_prod_rows}
-        obj_by_prod_total  = {r.code_produit: r.objectif_packs_vd for r in obj_prod_rows}
+        obj_by_prod       = {r.code_produit: r.objectif_packs_vd_tournee for r in obj_prod_rows}
+        obj_by_prod_total = {r.code_produit: r.objectif_packs_vd for r in obj_prod_rows}
     elif canal == 'VH':
-        obj_by_prod        = {r.code_produit: r.objectif_packs_vh_tournee for r in obj_prod_rows}
-        obj_by_prod_total  = {r.code_produit: r.objectif_packs_vh for r in obj_prod_rows}
+        obj_by_prod       = {r.code_produit: r.objectif_packs_vh_tournee for r in obj_prod_rows}
+        obj_by_prod_total = {r.code_produit: r.objectif_packs_vh for r in obj_prod_rows}
     else:
-        obj_by_prod        = {r.code_produit: (r.objectif_packs_vd_tournee or 0) + (r.objectif_packs_vh_tournee or 0) for r in obj_prod_rows}
-        obj_by_prod_total  = {r.code_produit: (r.objectif_packs_vd or 0) + (r.objectif_packs_vh or 0) for r in obj_prod_rows}
+        obj_by_prod       = {r.code_produit: (r.objectif_packs_vd_tournee or 0) + (r.objectif_packs_vh_tournee or 0) for r in obj_prod_rows}
+        obj_by_prod_total = {r.code_produit: (r.objectif_packs_vd or 0) + (r.objectif_packs_vh or 0) for r in obj_prod_rows}
+
+    # When a single FDV is selected, display per-route targets instead of global totals
+    if code_fdv:
+        obj_by_prod_total = obj_by_prod
 
     # Per-fdv per-product sales — queried without code_fdv filter so all pills stay accurate
     _fdv_prod_q = (
@@ -514,6 +529,10 @@ def prevendeur_admin_drilldown(
             key=lambda x: -x["total"]
         )
 
+        # Derive family objective from SF objectives so hierarchy is consistent
+        f_obj_vals = [sf["objectif_packs"] for sf in sfs_out if sf["objectif_packs"]]
+        f_obj = round(sum(f_obj_vals)) if f_obj_vals else None
+
         familles_out.append({
             "nom": famille,
             "total": f_total,
@@ -522,7 +541,7 @@ def prevendeur_admin_drilldown(
             "weeks": [round(v) for v in f_weeks],
             "sous_familles": sorted(sfs_out, key=lambda x: -x["total"]),
             "top_fdv": top_fdv,
-            "objectif_packs": obj_by_famille.get(famille) or None,
+            "objectif_packs": f_obj,
         })
 
     return {
