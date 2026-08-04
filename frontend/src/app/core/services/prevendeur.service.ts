@@ -79,9 +79,7 @@ export interface DrilldownData {
   prevendeurs: FdvItem[];
   trend_6m: number[];
   trend_6m_labels: string[];
-  top_fdv: TopFdv[];
   familles: DrilldownFamille[];
-  objectif_packs_total: number | null;
   objectif_packs_per_route: number | null;
 }
 
@@ -133,7 +131,10 @@ export class PrevendeurService {
     if (code_fdv) p = p.set('code_fdv', code_fdv);
     if (canal) p = p.set('canal', canal);
     return this.http.get<DrilldownData>('/api/v1/prevendeur/admin/drilldown', { params: p }).pipe(
-      tap(data => this.drilldownCache.set(key, data))
+      tap(data => {
+        if (this.drilldownCache.size >= 50) this.drilldownCache.clear();
+        this.drilldownCache.set(key, data);
+      })
     );
   }
 

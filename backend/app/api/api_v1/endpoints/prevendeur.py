@@ -3,7 +3,7 @@ from collections import defaultdict
 from datetime import datetime, timezone
 
 from fastapi import APIRouter, Body, Depends, Query
-from sqlalchemy import func, distinct
+from sqlalchemy import func
 from sqlmodel import Session, select
 
 from app.api.deps import get_current_user
@@ -235,8 +235,6 @@ def prevendeur_admin_drilldown(
     current_user: User = Depends(get_current_user),
     session: Session = Depends(get_session),
 ) -> Any:
-    from collections import defaultdict
-
     all_periods = session.exec(
         select(Vente.annee_mois).distinct().order_by(Vente.annee_mois.desc())
     ).all()
@@ -333,7 +331,6 @@ def prevendeur_admin_drilldown(
     hier: dict = defaultdict(lambda: defaultdict(lambda: defaultdict(lambda: [0.0] * 4)))
     # famille -> code_fdv -> total
     fdv_by_famille: dict = defaultdict(lambda: defaultdict(float))
-    fdv_global: dict = defaultdict(float)
     prev_famille_total: dict = defaultdict(float)
     # famille -> sf -> produit -> code_fdv -> total (for per-product FDV panel)
     fdv_by_sf_prod: dict = defaultdict(lambda: defaultdict(lambda: defaultdict(lambda: defaultdict(float))))
@@ -352,7 +349,6 @@ def prevendeur_admin_drilldown(
             prod_label_to_code[prod] = r.code_produit
         if r.code_fdv:
             fdv_by_famille[famille][r.code_fdv] += r.qte_livree
-            fdv_global[r.code_fdv] += r.qte_livree
             fdv_by_sf_prod[famille][sf][prod][r.code_fdv] += r.qte_livree
         # Supplement fdv name map from row data
         if r.code_fdv and r.nom_fdv and r.code_fdv not in fdv_name_map:
@@ -364,58 +360,8 @@ def prevendeur_admin_drilldown(
         famille = (r.famille or "").strip().lower()
         prev_famille_total[famille] += r.qte_livree
 
-    # Global top FDV
-    global_top_fdv = sorted(
-        [{"code": c, "nom": fdv_name_map.get(c, c), "total": round(t)} for c, t in fdv_global.items()],
-        key=lambda x: -x["total"]
-    )[:5]
-
-    # Objective aggregation by famille for this period
+    # Objective aggregation for this period
     annee_int, mois_int = int(annee_mois.split('-')[0]), int(annee_mois.split('-')[1])
-    obj_rows = session.exec(
-        select(
-            Produit.famille,
-            func.sum(Objectif.objectif_packs_vd).label('packs_vd'),
-            func.sum(Objectif.objectif_packs_vh).label('packs_vh'),
-            func.sum(Objectif.objectif_packs_vd_tournee).label('packs_vd_t'),
-            func.sum(Objectif.objectif_packs_vh_tournee).label('packs_vh_t'),
-        )
-        .join(Produit, Objectif.code_produit == Produit.code_produit)
-        .where(Objectif.mois == mois_int, Objectif.annee == annee_int)
-        .group_by(Produit.famille)
-    ).all()
-
-    # When filtering by a single FDV, compare against per-route targets; otherwise total targets
-    if code_fdv:
-        if canal == 'VD':
-            obj_by_famille = {(r.famille or '').strip().lower(): round(r.packs_vd_t or 0) for r in obj_rows}
-        elif canal == 'VH':
-            obj_by_famille = {(r.famille or '').strip().lower(): round(r.packs_vh_t or 0) for r in obj_rows}
-        else:
-            obj_by_famille = {(r.famille or '').strip().lower(): round((r.packs_vd_t or 0) + (r.packs_vh_t or 0)) for r in obj_rows}
-    else:
-        if canal == 'VD':
-            obj_by_famille = {(r.famille or '').strip().lower(): round(r.packs_vd or 0) for r in obj_rows}
-        elif canal == 'VH':
-            obj_by_famille = {(r.famille or '').strip().lower(): round(r.packs_vh or 0) for r in obj_rows}
-        else:
-            obj_by_famille = {(r.famille or '').strip().lower(): round((r.packs_vd or 0) + (r.packs_vh or 0)) for r in obj_rows}
-    objectif_total = sum(obj_by_famille.values())
-
-    # Per-route objective: sum of per-tournée targets across all products
-    obj_pr = session.exec(
-        select(
-            func.sum(Objectif.objectif_packs_vd_tournee).label('pr_vd'),
-            func.sum(Objectif.objectif_packs_vh_tournee).label('pr_vh'),
-        )
-        .where(Objectif.mois == mois_int, Objectif.annee == annee_int)
-    ).first()
-    if canal == 'VD':
-        objectif_per_route = round(obj_pr.pr_vd or 0) if obj_pr else 0
-    elif canal == 'VH':
-        objectif_per_route = round(obj_pr.pr_vh or 0) if obj_pr else 0
-    else:
-        objectif_per_route = round((obj_pr.pr_vd or 0) + (obj_pr.pr_vh or 0)) if obj_pr else 0
 
     # Per-product objectives (total + per-tournée)
     obj_prod_rows = session.exec(
@@ -439,6 +385,9 @@ def prevendeur_admin_drilldown(
     # When a single FDV is selected, display per-route targets instead of global totals
     if code_fdv:
         obj_by_prod_total = obj_by_prod
+
+    # Per-route total: sum of all tournée targets (derived from obj_by_prod, no extra query)
+    objectif_per_route = round(sum(v for v in obj_by_prod.values() if v))
 
     # Per-fdv per-product sales — queried without code_fdv filter so all pills stay accurate
     _fdv_prod_q = (
@@ -550,9 +499,7 @@ def prevendeur_admin_drilldown(
         "prevendeurs": prevendeurs_out,
         "trend_6m": trend_6m,
         "trend_6m_labels": trend_6m_labels,
-        "top_fdv": global_top_fdv,
         "familles": sorted(familles_out, key=lambda x: -x["total"]),
-        "objectif_packs_total": objectif_total or None,
         "objectif_packs_per_route": objectif_per_route or None,
     }
 

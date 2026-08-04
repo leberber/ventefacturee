@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { getFamilyColor, getFamilyBg, getFamilyBgLight } from '../../core/constants/colors';
+import { PrevendeurService } from '../../core/services/prevendeur.service';
 
 interface ObjectifRow {
   code_produit: string;
@@ -34,6 +35,7 @@ interface FamGroupe { nom: string; sfs: SfGroup[]; }
 })
 export class ObjectifsAdminComponent implements OnInit {
   private http = inject(HttpClient);
+  private prevSvc = inject(PrevendeurService);
 
   mois = new Date().getMonth() + 1;
   annee = new Date().getFullYear();
@@ -358,6 +360,7 @@ export class ObjectifsAdminComponent implements OnInit {
       next: () => {
         this.isSaving = false;
         this.editMode = false;
+        this.prevSvc.clearDrilldownCache();
         this.load();
         this.loadNextMissing();
       },

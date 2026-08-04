@@ -31,6 +31,10 @@ export class DashboardComponent implements OnInit, OnDestroy {
   selectedFdv: string | null = null;
   selectedCanal: 'VD' | 'VH' = 'VD';
 
+  // Pre-computed lists (updated in applyData to avoid re-sorting on every CD cycle)
+  overviewFamilles: DrilldownFamille[] = [];
+  fdvPerfSorted: FdvItem[] = [];
+
   // Animated counter values
   displayValues: Record<string, number> = {};
   private _animInterval: ReturnType<typeof setInterval> | null = null;
@@ -75,6 +79,10 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.data = d;
     this.loading = false;
     this.animateCounters(d.familles);
+    this.fdvPerfSorted = [...d.prevendeurs].sort((a, b) => b.total - a.total);
+    this.overviewFamilles = [...d.familles]
+      .sort((a, b) => a.nom.localeCompare(b.nom))
+      .map(f => ({ ...f, sous_familles: [...f.sous_familles].sort((a, b) => a.nom.localeCompare(b.nom)) }));
     if (this.selectedFdv) this.initOverviewCollapse(d.familles);
   }
 
@@ -96,16 +104,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
     }
   }
 
-  get overviewFamilles(): DrilldownFamille[] {
-    return [...(this.data?.familles ?? [])].sort((a, b) => a.nom.localeCompare(b.nom));
-  }
-
   get selectedFdvName(): string {
     return this.data?.prevendeurs.find(p => p.code === this.selectedFdv)?.nom ?? this.selectedFdv ?? '';
-  }
-
-  sortedSfs(sfs: DrilldownSousFamille[]): DrilldownSousFamille[] {
-    return [...sfs].sort((a, b) => a.nom.localeCompare(b.nom));
   }
 
   load(keepSelection = false) {
@@ -316,8 +316,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   get fdvPerfItems(): { code: string; nom: string; total: number }[] {
     if (this.selectedProduct) return this.selectedProduct.top_fdv;
     if (this.selectedFamille) return this.selectedFamille.top_fdv;
-    const all = this.data?.prevendeurs ?? [];
-    return [...all].sort((a, b) => b.total - a.total);
+    return this.fdvPerfSorted;
   }
 
   get fdvPerfMax(): number {
