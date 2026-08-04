@@ -203,6 +203,13 @@
               </div>
               <span class="db-fdv-val">{{ formatNum(item.total) }}</span>
               <span class="db-fdv-share">{{ fdvSharePct(item) }}</span>
+              @if (selectedProduct?.objectif_packs_tournee) {
+                <span class="db-fdv-obj-pct"
+                      [class.db-fdv-obj-pct--ok]="fdvObjPct(item, selectedProduct!.objectif_packs_tournee!) >= 100">
+                  {{ fdvObjPct(item, selectedProduct!.objectif_packs_tournee!) }}%
+                  <span class="db-fdv-obj-pct__sub">/ {{ formatNum(selectedProduct!.objectif_packs_tournee) }}</span>
+                </span>
+              }
             </div>
           }
         </div>

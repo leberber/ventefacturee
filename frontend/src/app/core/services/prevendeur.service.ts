@@ -37,6 +37,7 @@ export interface DrilldownProduit {
   total: number;
   weeks: number[];
   top_fdv: TopFdv[];
+  objectif_packs_tournee: number | null;
 }
 
 export interface DrilldownSousFamille {

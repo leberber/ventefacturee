@@ -3,7 +3,7 @@ from collections import defaultdict
 from datetime import datetime, timezone
 
 from fastapi import APIRouter, Body, Depends, Query
-from sqlalchemy import or_, func, distinct
+from sqlalchemy import func, distinct
 from sqlmodel import Session, select
 
 from app.api.deps import get_current_user
@@ -255,7 +255,6 @@ def prevendeur_admin_drilldown(
         select(Vente.code_fdv, func.sum(Vente.qte_livree))
         .where(Vente.annee_mois == annee_mois)
         .where(Vente.code_fdv != None)
-        .where(or_(Vente.source != "BackOffice", Vente.source == None))
         .group_by(Vente.code_fdv)
     )
     if canal:
@@ -293,8 +292,7 @@ def prevendeur_admin_drilldown(
             q = q.where(Vente.code_fdv == code_fdv)
         if canal:
             q = q.where(Vente.canal == canal)
-        rs = session.exec(q).all()
-        return [r for r in rs if r.source != "BackOffice"]
+        return list(session.exec(q).all())
 
     rows = fetch_rows(annee_mois)
     prev_rows = fetch_rows(prev_periode) if prev_periode else []
@@ -304,7 +302,6 @@ def prevendeur_admin_drilldown(
         q6 = (
             select(Vente.annee_mois, func.sum(Vente.qte_livree))
             .where(Vente.annee_mois.in_(trend_periods))
-            .where(or_(Vente.source != "BackOffice", Vente.source == None))
         )
         if code_fdv:
             q6 = q6.where(Vente.code_fdv == code_fdv)
@@ -345,6 +342,8 @@ def prevendeur_admin_drilldown(
     prev_famille_total: dict = defaultdict(float)
     # famille -> sf -> produit -> code_fdv -> total (for per-product FDV panel)
     fdv_by_sf_prod: dict = defaultdict(lambda: defaultdict(lambda: defaultdict(lambda: defaultdict(float))))
+    # product label -> code_produit (first seen)
+    prod_label_to_code: dict = {}
 
     for r in rows:
         if not r.date_commande or not r.qte_livree:
@@ -354,6 +353,8 @@ def prevendeur_admin_drilldown(
         prod = product_label(r)
         w = week_idx(r.date_commande)
         hier[famille][sf][prod][w] += r.qte_livree
+        if r.code_produit and prod not in prod_label_to_code:
+            prod_label_to_code[prod] = r.code_produit
         if r.code_fdv:
             fdv_by_famille[famille][r.code_fdv] += r.qte_livree
             fdv_global[r.code_fdv] += r.qte_livree
@@ -410,6 +411,18 @@ def prevendeur_admin_drilldown(
     else:
         objectif_per_route = round((obj_pr.pr_vd or 0) + (obj_pr.pr_vh or 0)) if obj_pr else 0
 
+    # Per-product tournée objective (for FDV panel when a product is selected)
+    obj_prod_rows = session.exec(
+        select(Objectif.code_produit, Objectif.objectif_packs_vd_tournee, Objectif.objectif_packs_vh_tournee)
+        .where(Objectif.mois == mois_int, Objectif.annee == annee_int)
+    ).all()
+    if canal == 'VD':
+        obj_by_prod = {r.code_produit: r.objectif_packs_vd_tournee for r in obj_prod_rows}
+    elif canal == 'VH':
+        obj_by_prod = {r.code_produit: r.objectif_packs_vh_tournee for r in obj_prod_rows}
+    else:
+        obj_by_prod = {r.code_produit: (r.objectif_packs_vd_tournee or 0) + (r.objectif_packs_vh_tournee or 0) for r in obj_prod_rows}
+
     familles_out = []
     for famille, sf_map in sorted(hier.items()):
         f_weeks = [0.0] * 4
@@ -425,7 +438,9 @@ def prevendeur_admin_drilldown(
                      for c, t in fdv_by_sf_prod[famille][sf][prod].items()],
                     key=lambda x: -x["total"]
                 )
-                prods_out.append({"nom": prod, "total": round(sum(wks)), "weeks": [round(v) for v in wks], "top_fdv": prod_top_fdv})
+                prod_code = prod_label_to_code.get(prod)
+                prod_obj = obj_by_prod.get(prod_code) if prod_code else None
+                prods_out.append({"nom": prod, "total": round(sum(wks)), "weeks": [round(v) for v in wks], "top_fdv": prod_top_fdv, "objectif_packs_tournee": round(prod_obj) if prod_obj else None})
             for i in range(4):
                 f_weeks[i] += sf_weeks[i]
             sfs_out.append({

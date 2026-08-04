@@ -619,6 +619,22 @@
   flex-shrink: 0;
 }
 
+.db-fdv-obj-pct {
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: var(--color-warning);
+  text-align: right;
+  flex-shrink: 0;
+  white-space: nowrap;
+
+  &--ok { color: var(--color-success); }
+
+  &__sub {
+    font-weight: 400;
+    color: var(--text-color-secondary);
+  }
+}
+
 // ── Tree view (left panel) ─────────────────────────────────────────────────
 .db-tree {
   flex: 1;

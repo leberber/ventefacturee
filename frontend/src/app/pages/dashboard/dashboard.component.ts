@@ -234,6 +234,10 @@ export class DashboardComponent implements OnInit, OnDestroy {
     return Math.min(Math.round((f.total / f.objectif_packs) * 100), 999);
   }
 
+  fdvObjPct(item: { total: number }, obj: number): number {
+    return Math.min(Math.round((item.total / obj) * 100), 999);
+  }
+
   pvObjPct(pv: FdvItem): number {
     const perRoute = this.data?.objectif_packs_per_route;
     if (!perRoute) return 0;
