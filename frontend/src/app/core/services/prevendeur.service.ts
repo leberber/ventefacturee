@@ -78,6 +78,7 @@ export interface DrilldownData {
   top_fdv: TopFdv[];
   familles: DrilldownFamille[];
   objectif_packs_total: number | null;
+  objectif_packs_per_route: number | null;
 }
 
 export interface PrevAdminClientRow {

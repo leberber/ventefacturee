@@ -14,9 +14,8 @@
       </div>
       <div class="db-header-right">
         <div class="db-canal-seg">
-          <button class="db-canal-btn" [class.db-canal-btn--active]="selectedCanal === 'ALL'" (click)="setCanal('ALL')">Tous</button>
-          <button class="db-canal-btn" [class.db-canal-btn--active]="selectedCanal === 'VD'" (click)="setCanal('VD')">Direct</button>
-          <button class="db-canal-btn" [class.db-canal-btn--active]="selectedCanal === 'VH'" (click)="setCanal('VH')">Horeca</button>
+          <button class="db-canal-btn" [class.db-canal-btn--active]="selectedCanal === 'VD'" (click)="setCanal('VD')">Direct (VD)</button>
+          <button class="db-canal-btn" [class.db-canal-btn--active]="selectedCanal === 'VH'" (click)="setCanal('VH')">Horeca (VH)</button>
         </div>
         <div class="db-period">
           <button class="db-period-btn" (click)="prevPeriod()" [disabled]="!canGoPrev">
@@ -42,14 +41,14 @@
             <span class="db-filter-pill__route">{{ routeCode(pv.code) }}</span>
             <span class="db-filter-pill__name">{{ pv.nom }}</span>
             <span class="db-filter-pill__total">{{ formatNum(pv.total) }}</span>
-            @if (data?.objectif_packs_total) {
+            @if (data?.objectif_packs_per_route) {
               <div class="db-filter-pill__progress">
                 <div class="db-filter-pill__bar-track">
                   <div class="db-filter-pill__bar-fill" [style.width.%]="pvObjPct(pv)"></div>
                 </div>
                 <span class="db-filter-pill__pct">{{ pvObjPct(pv) }}%</span>
               </div>
-              <span class="db-filter-pill__vs">/ obj. <span class="db-filter-pill__obj-val">{{ formatNum(data!.objectif_packs_total) }}</span></span>
+              <span class="db-filter-pill__vs">/ obj. <span class="db-filter-pill__obj-val">{{ formatNum(data!.objectif_packs_per_route) }}</span></span>
             }
           </button>
         }

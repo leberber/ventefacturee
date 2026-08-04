@@ -28,7 +28,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   selectedProduct: DrilldownProduit | null = null;
   collapsedSfs = new Set<string>();
   selectedFdv: string | null = null;
-  selectedCanal: 'ALL' | 'VD' | 'VH' = 'ALL';
+  selectedCanal: 'VD' | 'VH' = 'VD';
 
   // Animated counter values
   displayValues: Record<string, number> = {};
@@ -153,11 +153,11 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.load(true);
   }
 
-  get canal(): string | null {
-    return this.selectedCanal === 'ALL' ? null : this.selectedCanal;
+  get canal(): string {
+    return this.selectedCanal;
   }
 
-  setCanal(c: 'ALL' | 'VD' | 'VH') {
+  setCanal(c: 'VD' | 'VH') {
     if (this.selectedCanal === c) return;
     this.selectedCanal = c;
     this.selectedFdv = null;
@@ -235,9 +235,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   pvObjPct(pv: FdvItem): number {
-    const total = this.data?.objectif_packs_total;
-    if (!total) return 0;
-    return Math.min(Math.round((pv.total / total) * 100), 100);
+    const perRoute = this.data?.objectif_packs_per_route;
+    if (!perRoute) return 0;
+    return Math.min(Math.round((pv.total / perRoute) * 100), 100);
   }
 
   // ── Prevendeur total (for "Tous" pill) ───────────────────────────────────

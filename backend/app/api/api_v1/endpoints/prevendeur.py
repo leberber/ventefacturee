@@ -395,6 +395,21 @@ def prevendeur_admin_drilldown(
         obj_by_famille = {(r.famille or '').strip().lower(): round((r.packs_vd or 0) + (r.packs_vh or 0)) for r in obj_rows}
     objectif_total = sum(obj_by_famille.values())
 
+    # Per-route objective: sum of per-tournée targets across all products
+    obj_pr = session.exec(
+        select(
+            func.sum(Objectif.objectif_packs_vd_tournee).label('pr_vd'),
+            func.sum(Objectif.objectif_packs_vh_tournee).label('pr_vh'),
+        )
+        .where(Objectif.mois == mois_int, Objectif.annee == annee_int)
+    ).first()
+    if canal == 'VD':
+        objectif_per_route = round(obj_pr.pr_vd or 0) if obj_pr else 0
+    elif canal == 'VH':
+        objectif_per_route = round(obj_pr.pr_vh or 0) if obj_pr else 0
+    else:
+        objectif_per_route = round((obj_pr.pr_vd or 0) + (obj_pr.pr_vh or 0)) if obj_pr else 0
+
     familles_out = []
     for famille, sf_map in sorted(hier.items()):
         f_weeks = [0.0] * 4
@@ -449,6 +464,7 @@ def prevendeur_admin_drilldown(
         "top_fdv": global_top_fdv,
         "familles": sorted(familles_out, key=lambda x: -x["total"]),
         "objectif_packs_total": objectif_total or None,
+        "objectif_packs_per_route": objectif_per_route or None,
     }
 
 
