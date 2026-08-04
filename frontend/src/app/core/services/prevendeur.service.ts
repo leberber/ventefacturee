@@ -66,6 +66,7 @@ export interface DrilldownFamille {
   weeks: number[];
   sous_familles: DrilldownSousFamille[];
   top_fdv: TopFdv[];
+  objectif_packs: number | null;
 }
 
 export interface DrilldownData {
@@ -76,6 +77,7 @@ export interface DrilldownData {
   trend_6m_labels: string[];
   top_fdv: TopFdv[];
   familles: DrilldownFamille[];
+  objectif_packs_total: number | null;
 }
 
 export interface PrevAdminClientRow {

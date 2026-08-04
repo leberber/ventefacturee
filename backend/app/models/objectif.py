@@ -15,8 +15,10 @@ class Objectif(SQLModel, table=True):
 
     objectif_tonne_vd: Optional[float] = Field(default=None)
     objectif_packs_vd: Optional[float] = Field(default=None)
+    objectif_packs_vd_tournee: Optional[float] = Field(default=None)
     objectif_tonne_vh: Optional[float] = Field(default=None)
     objectif_packs_vh: Optional[float] = Field(default=None)
+    objectif_packs_vh_tournee: Optional[float] = Field(default=None)
 
     created_by_id: Optional[int] = Field(default=None, foreign_key="users.id")
     updated_by_id: Optional[int] = Field(default=None, foreign_key="users.id")

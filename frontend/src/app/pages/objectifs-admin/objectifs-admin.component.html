@@ -187,19 +187,21 @@
               <td><span class="code-chip">{{ row.code_produit }}</span></td>
               <td class="td-nom" [title]="row.nom_produit">{{ row.nom_produit }}</td>
               @if (editMode) {
-                <td class="td-input" [class.td-vd]="canal === 'VD'" [class.td-vh]="canal === 'VH'">
-                  <input type="number" step="0.001" min="0" [(ngModel)]="row._tonne" placeholder="—">
+                <td class="td-input td-tonne" [class.td-vd]="canal === 'VD'" [class.td-vh]="canal === 'VH'">
+                  <input type="number" step="0.01" min="0" [(ngModel)]="row._tonne" placeholder="—">
                 </td>
-                <td class="td-num td-per-route">{{ perRoute(row._tonne) }}</td>
-                <td class="td-input" [class.td-vd]="canal === 'VD'" [class.td-vh]="canal === 'VH'">
+                <td class="td-num td-per-route td-tonne" [class.td-vd]="canal === 'VD'" [class.td-vh]="canal === 'VH'">{{ perRouteTonne(row._tonne) }}</td>
+                <td class="td-input td-packs" [class.td-vd]="canal === 'VD'" [class.td-vh]="canal === 'VH'">
                   <input type="number" step="1" min="0" [(ngModel)]="row._packs" placeholder="—">
                 </td>
-                <td class="td-num td-per-route">{{ perRoute(row._packs) }}</td>
+                <td class="td-input td-packs" [class.td-vd]="canal === 'VD'" [class.td-vh]="canal === 'VH'">
+                  <input type="number" step="1" min="0" [(ngModel)]="row._packs_tournee" placeholder="—">
+                </td>
               } @else {
-                <td class="td-num">{{ formatNum(canal === 'VD' ? row.objectif_tonne_vd : row.objectif_tonne_vh) }}</td>
-                <td class="td-num td-per-route">{{ perRoute(canal === 'VD' ? row.objectif_tonne_vd : row.objectif_tonne_vh) }}</td>
-                <td class="td-num">{{ formatNum(canal === 'VD' ? row.objectif_packs_vd : row.objectif_packs_vh) }}</td>
-                <td class="td-num td-per-route">{{ perRoute(canal === 'VD' ? row.objectif_packs_vd : row.objectif_packs_vh) }}</td>
+                <td class="td-num td-tonne">{{ formatNum(canal === 'VD' ? row.objectif_tonne_vd : row.objectif_tonne_vh) }}</td>
+                <td class="td-num td-per-route td-tonne">{{ perRouteTonne(canal === 'VD' ? row.objectif_tonne_vd : row.objectif_tonne_vh) }}</td>
+                <td class="td-num td-packs">{{ formatNum(canal === 'VD' ? row.objectif_packs_vd : row.objectif_packs_vh) }}</td>
+                <td class="td-num td-per-route td-packs">{{ perRoute(canal === 'VD' ? row.objectif_packs_vd_tournee : row.objectif_packs_vh_tournee) }}</td>
               }
               <td class="text-muted td-small">{{ row.updated_by || '—' }}</td>
               <td class="text-muted td-small">{{ formatDate(row.updated_at) }}</td>
@@ -226,10 +228,10 @@
                   <span class="obj-fam-count">{{ fam.sfs.length }} sous-famille(s)</span>
                 </div>
               </td>
-              <td class="td-num obj-fam-total" [style.background]="fBg" [style.color]="fColor" [style.border-top-color]="fBorder" [style.border-bottom-color]="fBorder">{{ formatNum(sumTonne(fRows)) }}</td>
-              <td class="td-num td-per-route obj-fam-total" [style.background]="fBg" [style.color]="fColor" [style.border-top-color]="fBorder" [style.border-bottom-color]="fBorder">{{ perRoute(sumTonne(fRows)) }}</td>
-              <td class="td-num obj-fam-total" [style.background]="fBg" [style.color]="fColor" [style.border-top-color]="fBorder" [style.border-bottom-color]="fBorder">{{ sumPacks(fRows) != null ? (sumPacks(fRows) | number:'1.0-0') : '—' }}</td>
-              <td class="td-num td-per-route obj-fam-total" [style.background]="fBg" [style.color]="fColor" [style.border-top-color]="fBorder" [style.border-bottom-color]="fBorder">{{ perRoute(sumPacks(fRows)) }}</td>
+              <td class="td-num obj-fam-total td-tonne" [style.background]="fBg" [style.color]="fColor" [style.border-top-color]="fBorder" [style.border-bottom-color]="fBorder">{{ sumTonne(fRows) != null ? (sumTonne(fRows) | number:'1.0-2') : '—' }}</td>
+              <td class="td-num td-per-route obj-fam-total td-tonne" [style.background]="fBg" [style.color]="fColor" [style.border-top-color]="fBorder" [style.border-bottom-color]="fBorder">{{ perRouteTonne(sumTonne(fRows)) }}</td>
+              <td class="td-num obj-fam-total td-packs" [style.background]="fBg" [style.color]="fColor" [style.border-top-color]="fBorder" [style.border-bottom-color]="fBorder">{{ sumPacks(fRows) != null ? (sumPacks(fRows) | number:'1.0-0') : '—' }}</td>
+              <td class="td-num td-per-route obj-fam-total td-packs" [style.background]="fBg" [style.color]="fColor" [style.border-top-color]="fBorder" [style.border-bottom-color]="fBorder">{{ sumPacksTournee(fRows) != null ? (sumPacksTournee(fRows) | number:'1.0-0') : '—' }}</td>
               <td colspan="2" [style.background]="fBg" [style.border-top-color]="fBorder" [style.border-bottom-color]="fBorder"></td>
             </tr>
 
@@ -238,10 +240,10 @@
 
                 <tr class="obj-sf-row">
                   <td colspan="3" [style.background]="sfBg">{{ sf.nom }}</td>
-                  <td class="td-num obj-sf-total" [style.background]="sfBg">{{ formatNum(sumTonne(sf.rows)) }}</td>
-                  <td class="td-num td-per-route obj-sf-total" [style.background]="sfBg">{{ perRoute(sumTonne(sf.rows)) }}</td>
-                  <td class="td-num obj-sf-total" [style.background]="sfBg">{{ sumPacks(sf.rows) != null ? (sumPacks(sf.rows) | number:'1.0-0') : '—' }}</td>
-                  <td class="td-num td-per-route obj-sf-total" [style.background]="sfBg">{{ perRoute(sumPacks(sf.rows)) }}</td>
+                  <td class="td-num obj-sf-total td-tonne" [style.background]="sfBg">{{ sumTonne(sf.rows) != null ? (sumTonne(sf.rows) | number:'1.0-2') : '—' }}</td>
+                  <td class="td-num td-per-route obj-sf-total td-tonne" [style.background]="sfBg">{{ perRouteTonne(sumTonne(sf.rows)) }}</td>
+                  <td class="td-num obj-sf-total td-packs" [style.background]="sfBg">{{ sumPacks(sf.rows) != null ? (sumPacks(sf.rows) | number:'1.0-0') : '—' }}</td>
+                  <td class="td-num td-per-route obj-sf-total td-packs" [style.background]="sfBg">{{ sumPacksTournee(sf.rows) != null ? (sumPacksTournee(sf.rows) | number:'1.0-0') : '—' }}</td>
                   <td colspan="2" [style.background]="sfBg"></td>
                 </tr>
 
@@ -255,19 +257,21 @@
                   <td><span class="code-chip">{{ row.code_produit }}</span></td>
                   <td class="td-nom" [title]="row.nom_produit">{{ row.nom_produit }}</td>
                   @if (editMode) {
-                    <td class="td-input" [class.td-vd]="canal === 'VD'" [class.td-vh]="canal === 'VH'">
-                      <input type="number" step="0.001" min="0" [(ngModel)]="row._tonne" placeholder="—">
+                    <td class="td-input td-tonne" [class.td-vd]="canal === 'VD'" [class.td-vh]="canal === 'VH'">
+                      <input type="number" step="0.01" min="0" [(ngModel)]="row._tonne" placeholder="—">
                     </td>
-                    <td class="td-num td-per-route">{{ perRoute(row._tonne) }}</td>
-                    <td class="td-input" [class.td-vd]="canal === 'VD'" [class.td-vh]="canal === 'VH'">
+                    <td class="td-num td-per-route td-tonne" [class.td-vd]="canal === 'VD'" [class.td-vh]="canal === 'VH'">{{ perRouteTonne(row._tonne) }}</td>
+                    <td class="td-input td-packs" [class.td-vd]="canal === 'VD'" [class.td-vh]="canal === 'VH'">
                       <input type="number" step="1" min="0" [(ngModel)]="row._packs" placeholder="—">
                     </td>
-                    <td class="td-num td-per-route">{{ perRoute(row._packs) }}</td>
+                    <td class="td-input td-packs" [class.td-vd]="canal === 'VD'" [class.td-vh]="canal === 'VH'">
+                      <input type="number" step="1" min="0" [(ngModel)]="row._packs_tournee" placeholder="—">
+                    </td>
                   } @else {
-                    <td class="td-num">{{ formatNum(canal === 'VD' ? row.objectif_tonne_vd : row.objectif_tonne_vh) }}</td>
-                    <td class="td-num td-per-route">{{ perRoute(canal === 'VD' ? row.objectif_tonne_vd : row.objectif_tonne_vh) }}</td>
-                    <td class="td-num">{{ formatNum(canal === 'VD' ? row.objectif_packs_vd : row.objectif_packs_vh) }}</td>
-                    <td class="td-num td-per-route">{{ perRoute(canal === 'VD' ? row.objectif_packs_vd : row.objectif_packs_vh) }}</td>
+                    <td class="td-num td-tonne">{{ formatNum(canal === 'VD' ? row.objectif_tonne_vd : row.objectif_tonne_vh) }}</td>
+                    <td class="td-num td-per-route td-tonne">{{ perRouteTonne(canal === 'VD' ? row.objectif_tonne_vd : row.objectif_tonne_vh) }}</td>
+                    <td class="td-num td-packs">{{ formatNum(canal === 'VD' ? row.objectif_packs_vd : row.objectif_packs_vh) }}</td>
+                    <td class="td-num td-per-route td-packs">{{ perRoute(canal === 'VD' ? row.objectif_packs_vd_tournee : row.objectif_packs_vh_tournee) }}</td>
                   }
                   <td class="text-muted td-small">{{ row.updated_by || '—' }}</td>
                   <td class="text-muted td-small">{{ formatDate(row.updated_at) }}</td>

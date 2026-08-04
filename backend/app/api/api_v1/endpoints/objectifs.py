@@ -105,25 +105,30 @@ def batch_upsert(
             continue
         tonne_vd = _f(item, "objectif_tonne_vd")
         packs_vd = _f(item, "objectif_packs_vd")
+        packs_vd_t = _f(item, "objectif_packs_vd_tournee")
         tonne_vh = _f(item, "objectif_tonne_vh")
         packs_vh = _f(item, "objectif_packs_vh")
+        packs_vh_t = _f(item, "objectif_packs_vh_tournee")
 
         obj = obj_map.get(code)
         if obj:
             obj.objectif_tonne_vd = tonne_vd
             obj.objectif_packs_vd = packs_vd
+            obj.objectif_packs_vd_tournee = packs_vd_t
             obj.objectif_tonne_vh = tonne_vh
             obj.objectif_packs_vh = packs_vh
+            obj.objectif_packs_vh_tournee = packs_vh_t
             obj.updated_by_id = current_user.id
             obj.updated_at = now
-        elif any(v is not None for v in (tonne_vd, packs_vd, tonne_vh, packs_vh)):
-            # Skip creating a new row when all values are null
+        elif any(v is not None for v in (tonne_vd, packs_vd, packs_vd_t, tonne_vh, packs_vh, packs_vh_t)):
             session.add(Objectif(
                 code_produit=code, mois=mois, annee=annee,
                 objectif_tonne_vd=tonne_vd,
                 objectif_packs_vd=packs_vd,
+                objectif_packs_vd_tournee=packs_vd_t,
                 objectif_tonne_vh=tonne_vh,
                 objectif_packs_vh=packs_vh,
+                objectif_packs_vh_tournee=packs_vh_t,
                 created_by_id=current_user.id,
                 updated_by_id=current_user.id,
                 created_at=now, updated_at=now,
@@ -183,8 +188,10 @@ def list_objectifs(
             "sous_famille": (p.sous_famille or "").strip(),
             "objectif_tonne_vd": obj.objectif_tonne_vd if obj else None,
             "objectif_packs_vd": obj.objectif_packs_vd if obj else None,
+            "objectif_packs_vd_tournee": obj.objectif_packs_vd_tournee if obj else None,
             "objectif_tonne_vh": obj.objectif_tonne_vh if obj else None,
             "objectif_packs_vh": obj.objectif_packs_vh if obj else None,
+            "objectif_packs_vh_tournee": obj.objectif_packs_vh_tournee if obj else None,
             "updated_at": obj.updated_at.isoformat() if obj else None,
             "updated_by": users_map.get(obj.updated_by_id) if obj else None,
         }
@@ -214,14 +221,14 @@ async def parse_excel(
             code = row[0]
             if not code or str(code).startswith("⚠"):
                 continue
-            tonne = float(row[2]) if len(row) > 2 and row[2] is not None else None
-            packs  = float(row[3]) if len(row) > 3 and row[3] is not None else None
-            result.append({"code_produit": str(code).strip(), "tonne": tonne, "packs": packs})
+            packs   = float(row[2]) if len(row) > 2 and row[2] is not None else None
+            packs_t = float(row[3]) if len(row) > 3 and row[3] is not None else None
+            result.append({"code_produit": str(code).strip(), "packs": packs, "packs_tournee": packs_t})
         else:
             nom = row[0]
             if not nom:
                 continue
-            tonne = float(row[1]) if len(row) > 1 and row[1] is not None else None
-            packs  = float(row[2]) if len(row) > 2 and row[2] is not None else None
-            result.append({"code_produit": None, "nom_produit": str(nom).strip(), "tonne": tonne, "packs": packs})
+            packs   = float(row[1]) if len(row) > 1 and row[1] is not None else None
+            packs_t = float(row[2]) if len(row) > 2 and row[2] is not None else None
+            result.append({"code_produit": None, "nom_produit": str(nom).strip(), "packs": packs, "packs_tournee": packs_t})
     return result

@@ -11,6 +11,7 @@ from app.database import get_session
 from app.models.client import Client
 from app.models.user import User, UserRole
 from app.models.vente import Vente
+from app.models.objectif import Objectif
 from app.models.produit import Produit
 
 router = APIRouter()
@@ -251,7 +252,7 @@ def prevendeur_admin_drilldown(
     fdv_name_map = {p.employe_code: p.full_name for p in prevendeurs_db if p.employe_code}
 
     fdv_totals_q = (
-        select(Vente.code_fdv, func.sum(Vente.qte_facturee))
+        select(Vente.code_fdv, func.sum(Vente.qte_livree))
         .where(Vente.annee_mois == annee_mois)
         .where(Vente.code_fdv != None)
         .where(or_(Vente.source != "BackOffice", Vente.source == None))
@@ -283,7 +284,7 @@ def prevendeur_admin_drilldown(
             Vente.sous_famille,
             Vente.code_produit,
             Vente.description_produit,
-            Vente.qte_facturee,
+            Vente.qte_livree,
             Vente.code_fdv,
             Vente.nom_fdv,
             Vente.source,
@@ -301,7 +302,7 @@ def prevendeur_admin_drilldown(
     period_totals: dict = defaultdict(float)
     if trend_periods:
         q6 = (
-            select(Vente.annee_mois, func.sum(Vente.qte_facturee))
+            select(Vente.annee_mois, func.sum(Vente.qte_livree))
             .where(Vente.annee_mois.in_(trend_periods))
             .where(or_(Vente.source != "BackOffice", Vente.source == None))
         )
@@ -346,32 +347,53 @@ def prevendeur_admin_drilldown(
     fdv_by_sf_prod: dict = defaultdict(lambda: defaultdict(lambda: defaultdict(lambda: defaultdict(float))))
 
     for r in rows:
-        if not r.date_commande or not r.qte_facturee:
+        if not r.date_commande or not r.qte_livree:
             continue
         famille = (r.famille or "").strip().lower()
         sf = (r.sous_famille or "Autres").strip()
         prod = product_label(r)
         w = week_idx(r.date_commande)
-        hier[famille][sf][prod][w] += r.qte_facturee
+        hier[famille][sf][prod][w] += r.qte_livree
         if r.code_fdv:
-            fdv_by_famille[famille][r.code_fdv] += r.qte_facturee
-            fdv_global[r.code_fdv] += r.qte_facturee
-            fdv_by_sf_prod[famille][sf][prod][r.code_fdv] += r.qte_facturee
+            fdv_by_famille[famille][r.code_fdv] += r.qte_livree
+            fdv_global[r.code_fdv] += r.qte_livree
+            fdv_by_sf_prod[famille][sf][prod][r.code_fdv] += r.qte_livree
         # Supplement fdv name map from row data
         if r.code_fdv and r.nom_fdv and r.code_fdv not in fdv_name_map:
             fdv_name_map[r.code_fdv] = r.nom_fdv
 
     for r in prev_rows:
-        if not r.qte_facturee:
+        if not r.qte_livree:
             continue
         famille = (r.famille or "").strip().lower()
-        prev_famille_total[famille] += r.qte_facturee
+        prev_famille_total[famille] += r.qte_livree
 
     # Global top FDV
     global_top_fdv = sorted(
         [{"code": c, "nom": fdv_name_map.get(c, c), "total": round(t)} for c, t in fdv_global.items()],
         key=lambda x: -x["total"]
     )[:5]
+
+    # Objective aggregation by famille for this period
+    annee_int, mois_int = int(annee_mois.split('-')[0]), int(annee_mois.split('-')[1])
+    obj_rows = session.exec(
+        select(
+            Produit.famille,
+            func.sum(Objectif.objectif_packs_vd).label('packs_vd'),
+            func.sum(Objectif.objectif_packs_vh).label('packs_vh'),
+        )
+        .join(Produit, Objectif.code_produit == Produit.code_produit)
+        .where(Objectif.mois == mois_int, Objectif.annee == annee_int)
+        .group_by(Produit.famille)
+    ).all()
+
+    if canal == 'VD':
+        obj_by_famille = {(r.famille or '').strip().lower(): round(r.packs_vd or 0) for r in obj_rows}
+    elif canal == 'VH':
+        obj_by_famille = {(r.famille or '').strip().lower(): round(r.packs_vh or 0) for r in obj_rows}
+    else:
+        obj_by_famille = {(r.famille or '').strip().lower(): round((r.packs_vd or 0) + (r.packs_vh or 0)) for r in obj_rows}
+    objectif_total = sum(obj_by_famille.values())
 
     familles_out = []
     for famille, sf_map in sorted(hier.items()):
@@ -415,6 +437,7 @@ def prevendeur_admin_drilldown(
             "weeks": [round(v) for v in f_weeks],
             "sous_familles": sorted(sfs_out, key=lambda x: -x["total"]),
             "top_fdv": top_fdv,
+            "objectif_packs": obj_by_famille.get(famille) or None,
         })
 
     return {
@@ -425,6 +448,7 @@ def prevendeur_admin_drilldown(
         "trend_6m_labels": trend_6m_labels,
         "top_fdv": global_top_fdv,
         "familles": sorted(familles_out, key=lambda x: -x["total"]),
+        "objectif_packs_total": objectif_total or None,
     }
 
 

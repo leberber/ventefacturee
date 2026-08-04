@@ -1,7 +1,7 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { DatePipe, NgClass } from '@angular/common';
+import { DatePipe } from '@angular/common';
 import { getFamilyColor } from '../../core/constants/colors';
 import { TooltipModule } from 'primeng/tooltip';
 import { Select } from 'primeng/select';
@@ -15,7 +15,7 @@ import { DateRangePickerComponent, DateRange } from '../../shared/components/dat
 @Component({
   selector: 'app-rapport-facturation',
   standalone: true,
-  imports: [FormsModule, DatePipe, NgClass, TooltipModule, Select, Popover, ToggleSwitch, DateRangePickerComponent],
+  imports: [FormsModule, DatePipe, TooltipModule, Select, Popover, ToggleSwitch, DateRangePickerComponent],
   templateUrl: './rapport-facturation.component.html',
   styleUrl: './rapport-facturation.component.scss',
 })

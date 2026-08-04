@@ -6,6 +6,7 @@ import {
   DrilldownFamille,
   DrilldownSousFamille,
   DrilldownProduit,
+  FdvItem,
 } from '../../core/services/prevendeur.service';
 import { getFamilyColor, getFamilyBg, CHART_COLORS } from '../../core/constants/colors';
 
@@ -37,6 +38,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   barsReady = false;
 
   readonly WEEK_LABELS = ['S1', 'S2', 'S3', 'S4'];
+  readonly Math = Math;
 
   ngOnInit() {
     this.loadInitial();
@@ -216,9 +218,27 @@ export class DashboardComponent implements OnInit, OnDestroy {
     return s ? s.charAt(0).toUpperCase() + s.slice(1) : '';
   }
 
+  // ── Route code (strip agency prefix e.g. "1501-VD201" → "VD201") ─────────
+  routeCode(code: string): string {
+    const parts = code.split('-');
+    return parts.length > 1 ? parts.slice(1).join('-') : code;
+  }
+
   // ── Family colour helpers ─────────────────────────────────────────────────
   familyColor(nom: string): string { return getFamilyColor(nom); }
   familyBg(nom: string):    string { return getFamilyBg(nom); }
+
+  // ── Objective helpers ─────────────────────────────────────────────────────
+  objPct(f: DrilldownFamille): number {
+    if (!f.objectif_packs) return 0;
+    return Math.min(Math.round((f.total / f.objectif_packs) * 100), 999);
+  }
+
+  pvObjPct(pv: FdvItem): number {
+    const total = this.data?.objectif_packs_total;
+    if (!total) return 0;
+    return Math.min(Math.round((pv.total / total) * 100), 100);
+  }
 
   // ── Prevendeur total (for "Tous" pill) ───────────────────────────────────
   get totalAll(): number {
