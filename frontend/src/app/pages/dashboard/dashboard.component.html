@@ -146,6 +146,7 @@
     <!-- Reusable tree template: subfamilies + products -->
     <ng-template #familyTree let-f="f" let-inline="inline">
       <div class="db-tree" [class.db-tree--overview]="inline"
+           [class.db-tree--selection]="selectedProduct"
            [style.--fc]="familyColor(f.nom)" [style.--fbg]="familyBg(f.nom)">
         @for (sf of f.sous_familles; track sf.nom) {
           <button class="db-tree-sf" (click)="toggleSfCollapse(sf.nom)">

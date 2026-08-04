@@ -766,7 +766,7 @@
   padding: 0.3rem 0.5rem 0.3rem 2rem;
   border-radius: 0.45rem;
   cursor: pointer;
-  transition: background 0.12s;
+  transition: background 0.12s, opacity 0.2s;
 
   &:hover { background: var(--surface-hover); }
 
@@ -774,6 +774,13 @@
     background: rgba(var(--primary-rgb), 0.08);
     .db-tree-prod-name { font-weight: 600; color: var(--primary-color); }
     .db-bar-num { color: var(--primary-color); }
+  }
+}
+
+.db-tree--selection {
+  .db-tree-prod:not(.db-tree-prod--active) {
+    opacity: 0.35;
+    &:hover { opacity: 0.65; }
   }
 }
 
