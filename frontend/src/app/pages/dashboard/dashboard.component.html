@@ -42,7 +42,7 @@
             <span class="db-filter-pill__name">{{ pv.nom }}</span>
             <span class="db-filter-pill__total">{{ formatNum(pv.total) }}</span>
             @if (data?.objectif_packs_per_route) {
-              <div class="db-filter-pill__progress">
+              <div class="db-filter-pill__progress" [ngClass]="pvObjClass(pv)">
                 <div class="db-filter-pill__bar-track">
                   <div class="db-filter-pill__bar-fill" [style.width.%]="pvObjPct(pv)"></div>
                 </div>
@@ -153,6 +153,12 @@
                  [class.pi-chevron-down]="!collapsedSfs.has(sf.nom)"
                  [class.pi-chevron-right]="collapsedSfs.has(sf.nom)"></i>
               <span class="db-tree-sf-name">{{ sf.nom }}</span>
+              @if (sf.objectif_packs) {
+                <span class="db-tree-sf-obj"
+                      [class.db-tree-sf-obj--ok]="sfObjPct(sf) >= 100">
+                  {{ sfObjPct(sf) }}%
+                </span>
+              }
               <span class="db-tree-sf-total">{{ formatNum(sf.total) }}</span>
             </button>
             @if (!collapsedSfs.has(sf.nom)) {
@@ -168,6 +174,9 @@
                          [style.transition-delay.ms]="i * 40"></div>
                   </div>
                   <span class="db-bar-num">{{ formatNum(p.total) }}</span>
+                  @if (p.objectif_packs) {
+                    <span class="db-prod-obj-pct" [style.color]="prodObjColor(p)">{{ prodObjPct(p) }}%</span>
+                  }
                 </div>
               }
             }

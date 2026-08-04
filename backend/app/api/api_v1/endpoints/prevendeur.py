@@ -411,17 +411,24 @@ def prevendeur_admin_drilldown(
     else:
         objectif_per_route = round((obj_pr.pr_vd or 0) + (obj_pr.pr_vh or 0)) if obj_pr else 0
 
-    # Per-product tournée objective (for FDV panel when a product is selected)
+    # Per-product objectives (total + per-tournée)
     obj_prod_rows = session.exec(
-        select(Objectif.code_produit, Objectif.objectif_packs_vd_tournee, Objectif.objectif_packs_vh_tournee)
+        select(
+            Objectif.code_produit,
+            Objectif.objectif_packs_vd, Objectif.objectif_packs_vh,
+            Objectif.objectif_packs_vd_tournee, Objectif.objectif_packs_vh_tournee,
+        )
         .where(Objectif.mois == mois_int, Objectif.annee == annee_int)
     ).all()
     if canal == 'VD':
-        obj_by_prod = {r.code_produit: r.objectif_packs_vd_tournee for r in obj_prod_rows}
+        obj_by_prod        = {r.code_produit: r.objectif_packs_vd_tournee for r in obj_prod_rows}
+        obj_by_prod_total  = {r.code_produit: r.objectif_packs_vd for r in obj_prod_rows}
     elif canal == 'VH':
-        obj_by_prod = {r.code_produit: r.objectif_packs_vh_tournee for r in obj_prod_rows}
+        obj_by_prod        = {r.code_produit: r.objectif_packs_vh_tournee for r in obj_prod_rows}
+        obj_by_prod_total  = {r.code_produit: r.objectif_packs_vh for r in obj_prod_rows}
     else:
-        obj_by_prod = {r.code_produit: (r.objectif_packs_vd_tournee or 0) + (r.objectif_packs_vh_tournee or 0) for r in obj_prod_rows}
+        obj_by_prod        = {r.code_produit: (r.objectif_packs_vd_tournee or 0) + (r.objectif_packs_vh_tournee or 0) for r in obj_prod_rows}
+        obj_by_prod_total  = {r.code_produit: (r.objectif_packs_vd or 0) + (r.objectif_packs_vh or 0) for r in obj_prod_rows}
 
     familles_out = []
     for famille, sf_map in sorted(hier.items()):
@@ -439,15 +446,31 @@ def prevendeur_admin_drilldown(
                     key=lambda x: -x["total"]
                 )
                 prod_code = prod_label_to_code.get(prod)
-                prod_obj = obj_by_prod.get(prod_code) if prod_code else None
-                prods_out.append({"nom": prod, "total": round(sum(wks)), "weeks": [round(v) for v in wks], "top_fdv": prod_top_fdv, "objectif_packs_tournee": round(prod_obj) if prod_obj else None})
+                prod_obj_t = obj_by_prod.get(prod_code) if prod_code else None
+                prod_obj   = obj_by_prod_total.get(prod_code) if prod_code else None
+                prods_out.append({
+                    "nom": prod,
+                    "total": round(sum(wks)),
+                    "weeks": [round(v) for v in wks],
+                    "top_fdv": prod_top_fdv,
+                    "objectif_packs": round(prod_obj) if prod_obj else None,
+                    "objectif_packs_tournee": round(prod_obj_t) if prod_obj_t else None,
+                })
             for i in range(4):
                 f_weeks[i] += sf_weeks[i]
+            sf_obj_vals = [
+                obj_by_prod_total[prod_label_to_code[p["nom"]]]
+                for p in prods_out
+                if p["nom"] in prod_label_to_code and prod_label_to_code[p["nom"]] in obj_by_prod_total
+                and obj_by_prod_total[prod_label_to_code[p["nom"]]]
+            ]
+            sf_obj = round(sum(sf_obj_vals)) if sf_obj_vals else None
             sfs_out.append({
                 "nom": sf,
                 "total": round(sum(sf_weeks)),
                 "weeks": [round(v) for v in sf_weeks],
                 "produits": sorted(prods_out, key=lambda x: -x["total"]),
+                "objectif_packs": sf_obj,
             })
 
         f_total = round(sum(f_weeks))

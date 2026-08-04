@@ -1,5 +1,5 @@
 import { Component, OnInit, OnDestroy, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, NgClass } from '@angular/common';
 import {
   PrevendeurService,
   DrilldownData,
@@ -14,7 +14,7 @@ import { getFamilyColor, getFamilyBg, CHART_COLORS } from '../../core/constants/
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, NgClass],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss',
 })
@@ -234,6 +234,24 @@ export class DashboardComponent implements OnInit, OnDestroy {
     return Math.min(Math.round((f.total / f.objectif_packs) * 100), 999);
   }
 
+  sfObjPct(sf: { total: number; objectif_packs: number | null }): number {
+    if (!sf.objectif_packs) return 0;
+    return Math.min(Math.round((sf.total / sf.objectif_packs) * 100), 999);
+  }
+
+  prodObjPct(p: { total: number; objectif_packs: number | null }): number {
+    if (!p.objectif_packs) return 0;
+    return Math.min(Math.round((p.total / p.objectif_packs) * 100), 999);
+  }
+
+  prodObjColor(p: { total: number; objectif_packs: number | null }): string {
+    const pct = this.prodObjPct(p);
+    if (pct >= 90) return 'var(--color-success)';
+    if (pct >= 70) return 'var(--color-warning)';
+    if (pct >= 50) return '#f97316';
+    return 'var(--color-error)';
+  }
+
   fdvObjPct(item: { total: number }, obj: number): number {
     return Math.min(Math.round((item.total / obj) * 100), 999);
   }
@@ -242,6 +260,14 @@ export class DashboardComponent implements OnInit, OnDestroy {
     const perRoute = this.data?.objectif_packs_per_route;
     if (!perRoute) return 0;
     return Math.min(Math.round((pv.total / perRoute) * 100), 100);
+  }
+
+  pvObjClass(pv: FdvItem): string {
+    const pct = this.pvObjPct(pv);
+    if (pct >= 90) return 'pv-obj--green';
+    if (pct >= 70) return 'pv-obj--amber';
+    if (pct >= 50) return 'pv-obj--orange';
+    return 'pv-obj--red';
   }
 
   // ── Prevendeur total (for "Tous" pill) ───────────────────────────────────

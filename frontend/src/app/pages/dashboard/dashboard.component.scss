@@ -243,6 +243,12 @@
     flex-shrink: 0;
   }
 
+  // Progress colour tiers (applied to __progress wrapper)
+  .pv-obj--green  { .db-filter-pill__bar-fill { background: var(--color-success); } .db-filter-pill__pct { color: var(--color-success); } }
+  .pv-obj--amber  { .db-filter-pill__bar-fill { background: var(--color-warning); } .db-filter-pill__pct { color: var(--color-warning); } }
+  .pv-obj--orange { .db-filter-pill__bar-fill { background: #f97316; } .db-filter-pill__pct { color: #f97316; } }
+  .pv-obj--red    { .db-filter-pill__bar-fill { background: var(--color-error);   } .db-filter-pill__pct { color: var(--color-error);   } }
+
   &__vs {
     font-size: 0.6rem;
     color: var(--text-color-muted);
@@ -689,6 +695,16 @@
   color: var(--fc, var(--primary-color));
 }
 
+.db-tree-sf-obj {
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: var(--color-warning);
+  margin-left: auto;
+  margin-right: 0.4rem;
+
+  &--ok { color: var(--color-success); }
+}
+
 .db-tree-prod {
   display: flex;
   align-items: center;
@@ -764,6 +780,14 @@
   font-weight: 600;
   color: var(--text-color);
   width: 2.75rem;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.db-prod-obj-pct {
+  font-size: 0.62rem;
+  font-weight: 700;
+  width: 2.5rem;
   text-align: right;
   flex-shrink: 0;
 }
