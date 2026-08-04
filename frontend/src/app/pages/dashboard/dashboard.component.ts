@@ -27,6 +27,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   selectedFamille: DrilldownFamille | null = null;
   selectedProduct: DrilldownProduit | null = null;
   collapsedSfs = new Set<string>();
+  collapsedOverviewFamilles = new Set<string>();
   selectedFdv: string | null = null;
   selectedCanal: 'VD' | 'VH' = 'VD';
 
@@ -74,6 +75,37 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.data = d;
     this.loading = false;
     this.animateCounters(d.familles);
+    if (this.selectedFdv) this.initOverviewCollapse(d.familles);
+  }
+
+  private initOverviewCollapse(familles: DrilldownFamille[]) {
+    const sorted = [...familles].sort((a, b) => a.nom.localeCompare(b.nom));
+    this.collapsedOverviewFamilles = new Set(sorted.slice(1).map(f => f.nom));
+    this.collapsedSfs = new Set();
+    this.barsReady = false;
+    requestAnimationFrame(() => { this.barsReady = true; });
+  }
+
+  toggleOverviewFamille(nom: string) {
+    if (this.collapsedOverviewFamilles.has(nom)) {
+      this.collapsedOverviewFamilles.delete(nom);
+      this.barsReady = false;
+      requestAnimationFrame(() => { this.barsReady = true; });
+    } else {
+      this.collapsedOverviewFamilles.add(nom);
+    }
+  }
+
+  get overviewFamilles(): DrilldownFamille[] {
+    return [...(this.data?.familles ?? [])].sort((a, b) => a.nom.localeCompare(b.nom));
+  }
+
+  get selectedFdvName(): string {
+    return this.data?.prevendeurs.find(p => p.code === this.selectedFdv)?.nom ?? this.selectedFdv ?? '';
+  }
+
+  sortedSfs(sfs: DrilldownSousFamille[]): DrilldownSousFamille[] {
+    return [...sfs].sort((a, b) => a.nom.localeCompare(b.nom));
   }
 
   load(keepSelection = false) {

@@ -143,53 +143,86 @@
   <!-- ── Bottom: sf/product bars (left) + FDV performance (right) ─────────── -->
   <div class="db-middle">
 
+    <!-- Reusable tree template: subfamilies + products -->
+    <ng-template #familyTree let-f="f" let-inline="inline">
+      <div class="db-tree" [class.db-tree--overview]="inline"
+           [style.--fc]="familyColor(f.nom)" [style.--fbg]="familyBg(f.nom)">
+        @for (sf of f.sous_familles; track sf.nom) {
+          <button class="db-tree-sf" (click)="toggleSfCollapse(sf.nom)">
+            <i class="pi db-tree-sf-chevron"
+               [class.pi-chevron-down]="!collapsedSfs.has(sf.nom)"
+               [class.pi-chevron-right]="collapsedSfs.has(sf.nom)"></i>
+            <span class="db-tree-sf-name">{{ sf.nom }}</span>
+            @if (sf.objectif_packs) {
+              <span class="db-tree-sf-obj" [class.db-tree-sf-obj--ok]="sfObjPct(sf) >= 100">
+                {{ sfObjPct(sf) }}%
+              </span>
+            }
+            <span class="db-tree-sf-total">{{ formatNum(sf.total) }}</span>
+          </button>
+          @if (!collapsedSfs.has(sf.nom)) {
+            @for (p of sf.produits; track p.nom; let i = $index) {
+              <div class="db-tree-prod"
+                   [class.db-tree-prod--active]="selectedProduct === p"
+                   (click)="selectProduct(p)">
+                <span class="db-tree-prod-name" [title]="p.nom">{{ p.nom }}</span>
+                <div class="db-bar-track">
+                  <div class="db-bar-fill"
+                       [style.width.%]="barsReady ? prodPct(p, sf) : 0"
+                       [style.background]="prodColor(i)"
+                       [style.transition-delay.ms]="i * 40"></div>
+                </div>
+                <span class="db-bar-num">{{ formatNum(p.total) }}</span>
+                @if (p.objectif_packs) {
+                  <span class="db-prod-obj-pct" [style.color]="prodObjColor(p)">{{ prodObjPct(p) }}%</span>
+                }
+              </div>
+            }
+          }
+        }
+      </div>
+    </ng-template>
+
     <!-- Left: tree view — sf headers (collapsible) + products -->
     <div class="db-panel">
-      @if (!selectedFamille) {
-        <div class="db-panel-empty">
-          <i class="pi pi-chart-bar"></i>
-          <p>Sélectionnez une famille</p>
-        </div>
-      } @else {
+      @if (selectedFamille) {
         <div class="db-panel-head">
           <span class="db-panel-title">{{ capitalize(selectedFamille.nom) }} — Détail</span>
           <span class="db-panel-total">{{ formatNum(selectedFamille.total) }}</span>
         </div>
-        <div class="db-tree" [style.--fc]="familyColor(selectedFamille.nom)" [style.--fbg]="familyBg(selectedFamille.nom)">
-          @for (sf of selectedFamille.sous_familles; track sf.nom) {
-            <button class="db-tree-sf" (click)="toggleSfCollapse(sf.nom)">
-              <i class="pi db-tree-sf-chevron"
-                 [class.pi-chevron-down]="!collapsedSfs.has(sf.nom)"
-                 [class.pi-chevron-right]="collapsedSfs.has(sf.nom)"></i>
-              <span class="db-tree-sf-name">{{ sf.nom }}</span>
-              @if (sf.objectif_packs) {
-                <span class="db-tree-sf-obj"
-                      [class.db-tree-sf-obj--ok]="sfObjPct(sf) >= 100">
-                  {{ sfObjPct(sf) }}%
-                </span>
+        <ng-container [ngTemplateOutlet]="familyTree"
+                      [ngTemplateOutletContext]="{ f: selectedFamille, inline: false }">
+        </ng-container>
+      } @else if (selectedFdv) {
+        <div class="db-panel-head">
+          <span class="db-panel-title">{{ selectedFdvName }}</span>
+          <span class="db-panel-total">{{ overviewFamilles.length }} familles</span>
+        </div>
+        <div class="db-overview">
+          @for (f of overviewFamilles; track f.nom) {
+            <button class="db-ov-fam-head"
+                    [style.--fc]="familyColor(f.nom)"
+                    (click)="toggleOverviewFamille(f.nom)">
+              <i class="pi db-ov-fam-chevron"
+                 [class.pi-chevron-down]="!collapsedOverviewFamilles.has(f.nom)"
+                 [class.pi-chevron-right]="collapsedOverviewFamilles.has(f.nom)"></i>
+              <span class="db-ov-fam-name">{{ capitalize(f.nom) }}</span>
+              @if (f.objectif_packs) {
+                <span class="db-ov-fam-obj" [class.db-ov-fam-obj--ok]="objPct(f) >= 100">{{ objPct(f) }}%</span>
               }
-              <span class="db-tree-sf-total">{{ formatNum(sf.total) }}</span>
+              <span class="db-ov-fam-total">{{ formatNum(f.total) }}</span>
             </button>
-            @if (!collapsedSfs.has(sf.nom)) {
-              @for (p of sf.produits; track p.nom; let i = $index) {
-                <div class="db-tree-prod"
-                     [class.db-tree-prod--active]="selectedProduct === p"
-                     (click)="selectProduct(p)">
-                  <span class="db-tree-prod-name" [title]="p.nom">{{ p.nom }}</span>
-                  <div class="db-bar-track">
-                    <div class="db-bar-fill"
-                         [style.width.%]="barsReady ? prodPct(p, sf) : 0"
-                         [style.background]="prodColor(i)"
-                         [style.transition-delay.ms]="i * 40"></div>
-                  </div>
-                  <span class="db-bar-num">{{ formatNum(p.total) }}</span>
-                  @if (p.objectif_packs) {
-                    <span class="db-prod-obj-pct" [style.color]="prodObjColor(p)">{{ prodObjPct(p) }}%</span>
-                  }
-                </div>
-              }
+            @if (!collapsedOverviewFamilles.has(f.nom)) {
+              <ng-container [ngTemplateOutlet]="familyTree"
+                            [ngTemplateOutletContext]="{ f: f, inline: true }">
+              </ng-container>
             }
           }
+        </div>
+      } @else {
+        <div class="db-panel-empty">
+          <i class="pi pi-chart-bar"></i>
+          <p>Sélectionnez une famille</p>
         </div>
       }
     </div>

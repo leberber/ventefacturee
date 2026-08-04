@@ -210,6 +210,8 @@
     .db-filter-pill__pct       { color: rgba(255,255,255,0.8); }
     .db-filter-pill__vs        { color: rgba(255,255,255,0.55); }
     .db-filter-pill__obj-val   { color: rgba(255,255,255,0.75); }
+
+    &:hover { background: #1d4ed8; border-color: #1d4ed8; }
   }
 
   &__route {
@@ -857,6 +859,73 @@
   &--active .db-bar-name { font-weight: 600; }
 }
 
+
+// ── Prevendeur overview (left panel when FDV selected, no famille) ────────────
+.db-overview {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+  scrollbar-width: thin;
+  display: flex;
+  flex-direction: column;
+}
+
+.db-ov-fam-head {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.6rem 1.1rem;
+  background: none;
+  border: none;
+  border-top: 1px solid var(--surface-border);
+  cursor: pointer;
+  font-family: inherit;
+  text-align: left;
+  transition: background 0.12s;
+
+  &:first-of-type { border-top: none; }
+  &:hover { background: var(--surface-hover); }
+}
+
+.db-ov-fam-chevron {
+  font-size: 0.55rem;
+  color: var(--fc, var(--primary-color));
+  width: 0.75rem;
+  flex-shrink: 0;
+}
+
+.db-ov-fam-name {
+  flex: 1;
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--fc, var(--text-color));
+}
+
+.db-ov-fam-obj {
+  font-size: 0.62rem;
+  font-weight: 700;
+  color: var(--color-warning);
+  flex-shrink: 0;
+  margin-right: 0.25rem;
+  &--ok { color: var(--color-success); }
+}
+
+.db-ov-fam-total {
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: var(--fc, var(--primary-color));
+}
+
+// Make db-tree render inline (not scrollable) inside the overview
+.db-tree--overview {
+  flex: none;
+  overflow: visible;
+  padding-top: 0;
+  padding-bottom: 0.4rem;
+}
 
 // ── Sparkline animation (plays on first mount) ────────────────────────────────
 @keyframes spark-in {
