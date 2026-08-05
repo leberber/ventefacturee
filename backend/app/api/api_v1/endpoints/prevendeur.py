@@ -252,7 +252,7 @@ def prevendeur_admin_drilldown(
     fdv_totals_q = (
         select(Vente.code_fdv, func.sum(Vente.qte_livree))
         .where(Vente.annee_mois == annee_mois)
-        .where(Vente.code_fdv != None)
+        .where(Vente.code_fdv.isnot(None))
         .group_by(Vente.code_fdv)
     )
     if canal:
