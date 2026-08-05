@@ -301,6 +301,12 @@ export class DashboardComponent implements OnInit, OnDestroy {
     return 'pv-obj--red';
   }
 
+  // ── Medal rank (0=gold, 1=silver, 2=bronze, -1=none) ─────────────────────
+  fdvRank(code: string): number {
+    const i = this.fdvPerfSorted.findIndex(p => p.code === code);
+    return i < 3 ? i : -1;
+  }
+
   // ── Prevendeur total (for "Tous" pill) ───────────────────────────────────
   get totalAll(): number {
     return this.data?.prevendeurs.reduce((s, p) => s + p.total, 0) ?? 0;

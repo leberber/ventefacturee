@@ -37,7 +37,14 @@
           <span class="db-filter-pill__total">{{ formatNum(totalAll) }}</span>
         </button>
         @for (pv of data!.prevendeurs; track pv.code) {
+          @let rank = fdvRank(pv.code);
           <button class="db-filter-pill" [class.db-filter-pill--active]="selectedFdv === pv.code" (click)="selectFdv(pv.code)">
+            @if (rank >= 0) {
+              <span class="db-filter-pill__medal"
+                    [class.db-filter-pill__medal--gold]="rank === 0"
+                    [class.db-filter-pill__medal--silver]="rank === 1"
+                    [class.db-filter-pill__medal--bronze]="rank === 2">{{ rank + 1 }}</span>
+            }
             <span class="db-filter-pill__route">{{ routeCode(pv.code) }}</span>
             <span class="db-filter-pill__name">{{ pv.nom }}</span>
             <span class="db-filter-pill__total">{{ formatNum(pv.total) }}</span>
