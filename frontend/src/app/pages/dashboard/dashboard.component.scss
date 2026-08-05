@@ -893,6 +893,13 @@
   font-size: 0.78rem;
   font-weight: 800;
   color: var(--fc, var(--primary-color));
+
+  &__obj {
+    font-size: 0.68rem;
+    font-weight: 400;
+    color: var(--text-color-muted);
+    margin-left: 0.15rem;
+  }
 }
 
 .db-tree-sf-obj {

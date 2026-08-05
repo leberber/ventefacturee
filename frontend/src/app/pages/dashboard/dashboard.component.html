@@ -164,12 +164,17 @@
                [class.pi-chevron-down]="!collapsedSfs.has(sf.nom)"
                [class.pi-chevron-right]="collapsedSfs.has(sf.nom)"></i>
             <span class="db-tree-sf-name">{{ sf.nom }}</span>
+            <span class="db-tree-sf-total">
+              {{ formatNum(sf.total) }}
+              @if (sf.objectif_packs) {
+                <span class="db-tree-sf-total__obj">/ {{ formatNum(sf.objectif_packs) }} obj.</span>
+              }
+            </span>
             @if (sf.objectif_packs) {
               <span class="db-tree-sf-obj" [class.db-tree-sf-obj--ok]="sfObjPct(sf) >= 100">
                 {{ sfObjPct(sf) }}%
               </span>
             }
-            <span class="db-tree-sf-total">{{ formatNum(sf.total) }}</span>
           </button>
           @if (!collapsedSfs.has(sf.nom)) {
             @for (p of sf.produits; track p.nom; let i = $index) {
