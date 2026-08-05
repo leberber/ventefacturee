@@ -415,16 +415,19 @@ def prevendeur_admin_drilldown(
             return None
         return round(sum(rates) / len(rates))
 
-    prevendeurs_out = [
-        {
-            "code": p.employe_code,
-            "nom": p.full_name,
-            "total": fdv_totals.get(p.employe_code, 0),
-            "achievement_pct": compute_achievement_pct(p.employe_code),
-        }
-        for p in prevendeurs_db
-        if p.employe_code and (not canal_upper or canal_upper in (p.employe_code or "").upper())
-    ]
+    prevendeurs_out = sorted(
+        [
+            {
+                "code": code,
+                "nom": fdv_name_map.get(code, code),
+                "total": total,
+                "achievement_pct": compute_achievement_pct(code),
+            }
+            for code, total in fdv_totals.items()
+            if not canal_upper or canal_upper in code.upper()
+        ],
+        key=lambda x: x["nom"],
+    )
 
     familles_out = []
     for famille, sf_map in sorted(hier.items()):
