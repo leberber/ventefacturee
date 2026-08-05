@@ -38,7 +38,8 @@
         </button>
         @for (pv of data!.prevendeurs; track pv.code) {
           @let rank = fdvRank(pv.code);
-          <button class="db-filter-pill" [class.db-filter-pill--active]="selectedFdv === pv.code" (click)="selectFdv(pv.code)">
+          <button class="db-filter-pill" [class.db-filter-pill--active]="selectedFdv === pv.code"
+                  (click)="selectFdv(pv.code)">
             @if (rank >= 0) {
               <span class="db-filter-pill__medal"
                     [class.db-filter-pill__medal--gold]="rank === 0"
@@ -48,8 +49,10 @@
             <span class="db-filter-pill__route">{{ routeCode(pv.code) }}</span>
             <span class="db-filter-pill__name">{{ pv.nom }}</span>
             <span class="db-filter-pill__total">{{ formatNum(pv.total) }}</span>
-            @if (data?.objectif_packs_per_route) {
-              <div class="db-filter-pill__progress" [ngClass]="pvObjClass(pv)">
+            @if (data!.objectif_packs_per_route) {
+              <div class="db-filter-pill__progress" [ngClass]="pvObjClass(pv)"
+                   (mouseenter)="onPillEnter($event, pv.code)"
+                   (mouseleave)="onPillLeave()">
                 <div class="db-filter-pill__bar-track">
                   <div class="db-filter-pill__bar-fill" [style.width.%]="pvObjPct(pv)"></div>
                 </div>
@@ -283,3 +286,36 @@
   </div>
 
 </div>
+
+@if (hoveredFdv) {
+  <div class="db-tt"
+       [style.top.px]="tooltipTop"
+       (mouseenter)="onTooltipEnter()"
+       (mouseleave)="onTooltipLeave()">
+
+    <div class="db-tt__header">
+      <span class="db-tt__fdv-name">{{ hoveredFdvName }}</span>
+      <span class="db-tt__total-count">{{ hoveredFdvRates.length }} produits</span>
+      <span class="db-tt__total-pct" [style.color]="rateColor(hoveredFdvTotalPct)">moy. {{ hoveredFdvTotalPct }}%</span>
+    </div>
+
+    <div class="db-tt__grid">
+      @for (r of hoveredFdvRates; track r.nom) {
+        <div class="db-tt__prod" [style.--rc]="rateColor(r.pct)">
+          <div class="db-tt__prod-top">
+            <span class="db-tt__prod-sf">{{ r.sf }}</span>
+            <span class="db-tt__prod-pct">{{ r.pct }}%</span>
+          </div>
+          <div class="db-tt__prod-name" [title]="r.nom">{{ r.nom }}</div>
+          <div class="db-tt__prod-bar-track">
+            <div class="db-tt__prod-bar-fill" [style.width.%]="r.pct"></div>
+          </div>
+          <div class="db-tt__prod-nums">
+            {{ formatNum(r.sold) }}<span class="db-tt__prod-obj"> / {{ formatNum(r.obj) }}</span>
+          </div>
+        </div>
+      }
+    </div>
+
+  </div>
+}

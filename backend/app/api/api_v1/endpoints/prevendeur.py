@@ -386,6 +386,25 @@ def prevendeur_admin_drilldown(
     if code_fdv:
         obj_by_prod_total = obj_by_prod
 
+    # Supplement code_to_produit with objective products that had zero sales this period
+    missing_obj_codes = {c for c in obj_by_prod if c and c not in code_to_produit}
+    if missing_obj_codes:
+        extra = session.exec(select(Produit).where(Produit.code_produit.in_(missing_obj_codes))).all()
+        for p in extra:
+            code_to_produit[p.code_produit] = p
+
+    # Add zero-sale objective products into hier so they appear in the tree with total=0
+    for code_prod, obj in obj_by_prod.items():
+        if not obj or not code_prod or code_prod not in code_to_produit:
+            continue
+        produit = code_to_produit[code_prod]
+        prod_name = produit.nom_produit or produit.description_produit or code_prod
+        famille = (produit.famille or "").strip().lower()
+        sf = (produit.sous_famille or "Autres").strip()
+        if prod_name not in hier[famille][sf]:
+            hier[famille][sf][prod_name]  # creates [0.0, 0.0, 0.0, 0.0] via defaultdict
+            prod_label_to_code[prod_name] = code_prod
+
     # Per-route total: sum of all tournée targets (derived from obj_by_prod, no extra query)
     objectif_per_route = round(sum(v for v in obj_by_prod.values() if v))
 

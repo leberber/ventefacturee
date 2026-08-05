@@ -43,6 +43,12 @@ export class DashboardComponent implements OnInit, OnDestroy {
   barsReady = false;
   compactCards = false;
 
+  // Pill hover tooltip
+  hoveredFdv: string | null = null;
+  hoveredFdvRates: { nom: string; sf: string; sold: number; obj: number; pct: number }[] = [];
+  tooltipTop = 0;
+  private _tooltipTimer: ReturnType<typeof setTimeout> | null = null;
+
   readonly WEEK_LABELS = ['S1', 'S2', 'S3', 'S4'];
   readonly Math = Math;
 
@@ -52,6 +58,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     if (this._animInterval) clearInterval(this._animInterval);
+    if (this._tooltipTimer) clearTimeout(this._tooltipTimer);
   }
 
   private loadInitial() {
@@ -306,6 +313,62 @@ export class DashboardComponent implements OnInit, OnDestroy {
     const i = this.fdvPerfSorted.findIndex(p => p.code === code);
     return i < 3 ? i : -1;
   }
+
+  // ── Pill hover tooltip ────────────────────────────────────────────────────
+  onPillEnter(ev: MouseEvent, code: string) {
+    if (this._tooltipTimer) clearTimeout(this._tooltipTimer);
+    const rect = (ev.currentTarget as HTMLElement).getBoundingClientRect();
+    const maxH = window.innerHeight * 0.72;
+    this.tooltipTop = rect.bottom + 8 + maxH > window.innerHeight
+      ? Math.max(rect.top - maxH - 8, 8)
+      : rect.bottom + 8;
+    this.hoveredFdv = code;
+    this.hoveredFdvRates = this.buildFdvRates(code);
+  }
+
+  onPillLeave() {
+    this._tooltipTimer = setTimeout(() => { this.hoveredFdv = null; }, 120);
+  }
+
+  onTooltipEnter() {
+    if (this._tooltipTimer) clearTimeout(this._tooltipTimer);
+  }
+
+  onTooltipLeave() {
+    this.hoveredFdv = null;
+  }
+
+  private buildFdvRates(code: string): { nom: string; sf: string; sold: number; obj: number; pct: number }[] {
+    const result: { nom: string; sf: string; sold: number; obj: number; pct: number }[] = [];
+    for (const f of this.data?.familles ?? []) {
+      for (const sf of f.sous_familles) {
+        for (const p of sf.produits) {
+          if (!p.objectif_packs_tournee) continue;
+          const sold = p.top_fdv.find(x => x.code === code)?.total ?? 0;
+          const pct = Math.min(Math.round(sold / p.objectif_packs_tournee * 100), 100);
+          result.push({ nom: p.nom, sf: sf.nom, sold, obj: p.objectif_packs_tournee, pct });
+        }
+      }
+    }
+    return result.sort((a, b) => a.pct - b.pct);
+  }
+
+  get hoveredFdvName(): string {
+    return this.data?.prevendeurs.find(p => p.code === this.hoveredFdv)?.nom ?? this.hoveredFdv ?? '';
+  }
+
+  get hoveredFdvTotalPct(): number {
+    if (!this.hoveredFdvRates.length) return 0;
+    return Math.round(this.hoveredFdvRates.reduce((s, r) => s + r.pct, 0) / this.hoveredFdvRates.length);
+  }
+
+  rateColor(pct: number): string {
+    if (pct >= 90) return 'var(--color-success)';
+    if (pct >= 70) return 'var(--color-warning)';
+    if (pct >= 50) return '#f97316';
+    return 'var(--color-error)';
+  }
+
 
   // ── Prevendeur total (for "Tous" pill) ───────────────────────────────────
   get totalAll(): number {
