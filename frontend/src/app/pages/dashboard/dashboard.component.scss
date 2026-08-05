@@ -817,17 +817,21 @@
   flex-shrink: 0;
 }
 
-.db-fdv-share {
-  font-size: 0.65rem;
-  color: var(--text-color-secondary);
-  width: 2rem;
-  text-align: right;
+.db-fdv-nums {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--text-color);
+  white-space: nowrap;
   flex-shrink: 0;
+  &__obj {
+    font-weight: 400;
+    color: var(--text-color-secondary);
+  }
 }
 
 .db-fdv-obj-pct {
-  font-size: 0.65rem;
-  font-weight: 600;
+  font-size: 0.78rem;
+  font-weight: 700;
   color: var(--color-warning);
   text-align: right;
   flex-shrink: 0;
