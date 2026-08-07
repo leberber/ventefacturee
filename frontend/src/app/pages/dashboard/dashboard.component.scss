@@ -657,11 +657,74 @@
   &--flat { background: var(--surface-100); color: var(--text-color-secondary); }
 }
 
+// KPI card skeleton — mirrors real card layout
 .db-kpi-sk {
-  height: 160px;
   border-radius: 1.1rem;
-  background: var(--surface-200);
-  animation: db-sk 1.2s infinite alternate;
+  border: 1.5px solid var(--surface-border);
+  background: var(--surface-card);
+  padding: 1rem 1.25rem 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+
+  &__label  { height: 10px; width: 55%; border-radius: 4px; @extend %db-sk-base; }
+  &__value  { height: 36px; width: 65%; border-radius: 6px; @extend %db-sk-base; margin-top: 0.55rem; }
+  &__prev   { height: 8px;  width: 80%; border-radius: 4px; @extend %db-sk-base; margin-top: 0.4rem; }
+  &__bar    { height: 4px;  border-radius: 999px; @extend %db-sk-base; margin-top: 0.55rem; }
+
+  &__weeks {
+    display: flex;
+    gap: 0;
+    border-top: 1px solid var(--surface-border);
+    margin: 0.55rem -1.25rem 0;
+    padding: 0.5rem 1.25rem;
+  }
+  &__week   { flex: 1; height: 28px; border-radius: 5px; @extend %db-sk-base; margin: 0 3px; }
+
+  &__spark  { height: 26px; width: calc(100% + 2.5rem); margin-left: -1.25rem; @extend %db-sk-base; margin-top: auto; }
+}
+
+// Panel skeletons
+.db-panel-sk {
+  flex: 1;
+  padding: 0.75rem 1.1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  overflow: hidden;
+
+  // Left panel — SF header
+  &__sf {
+    height: 32px;
+    border-radius: 7px;
+    @extend %db-sk-base;
+    margin-bottom: 0.1rem;
+  }
+
+  // Left panel — product row
+  &__prod {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding-left: 1rem;
+    margin-bottom: 0.15rem;
+  }
+  &__prod-name { height: 10px; flex: 0 0 30%; border-radius: 4px; @extend %db-sk-base; }
+  &__prod-bar  { height: 6px;  flex: 1;       border-radius: 999px; @extend %db-sk-base; }
+  &__prod-num  { height: 10px; flex: 0 0 12%; border-radius: 4px; @extend %db-sk-base; }
+
+  // Right panel — FDV row
+  &__fdv {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.45rem 0;
+    border-bottom: 1px solid var(--surface-border);
+  }
+  &__fdv-rank { flex: 0 0 22px; height: 22px; border-radius: 50%; @extend %db-sk-base; }
+  &__fdv-name { flex: 0 0 28%;  height: 11px; border-radius: 4px; @extend %db-sk-base; }
+  &__fdv-bar  { flex: 1;        height: 6px;  border-radius: 999px; @extend %db-sk-base; }
+  &__fdv-val  { flex: 0 0 14%;  height: 11px; border-radius: 4px; @extend %db-sk-base; }
 }
 
 .db-no-data {
@@ -1107,7 +1170,13 @@
 }
 
 // ── Skeleton ──────────────────────────────────────────────────────────────────
-@keyframes db-sk {
-  from { opacity: 0.55; }
-  to   { opacity: 1;    }
+@keyframes db-sk-shimmer {
+  0%   { background-position: -600px 0; }
+  100% { background-position: 600px 0; }
+}
+
+%db-sk-base {
+  background: linear-gradient(90deg, var(--surface-200) 25%, var(--surface-100) 50%, var(--surface-200) 75%);
+  background-size: 1200px 100%;
+  animation: db-sk-shimmer 1.4s infinite linear;
 }

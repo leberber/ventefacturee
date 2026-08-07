@@ -69,7 +69,21 @@
   <!-- ── KPI family grid ──────────────────────────────────────────────────── -->
   <div class="db-kpi-grid" [class.db-kpi-grid--selection]="selectedFamille" [class.db-kpi-grid--compact]="compactCards">
     @if (loading) {
-      @for (_ of skeletonRows; track $index) { <div class="db-kpi-sk"></div> }
+      @for (_ of skeletonRows; track $index; let i = $index) {
+        <div class="db-kpi-sk" [style.animation-delay]="i * 80 + 'ms'">
+          <div class="db-kpi-sk__label"></div>
+          <div class="db-kpi-sk__value"></div>
+          <div class="db-kpi-sk__prev"></div>
+          <div class="db-kpi-sk__bar"></div>
+          <div class="db-kpi-sk__weeks">
+            <div class="db-kpi-sk__week"></div>
+            <div class="db-kpi-sk__week"></div>
+            <div class="db-kpi-sk__week"></div>
+            <div class="db-kpi-sk__week"></div>
+          </div>
+          <div class="db-kpi-sk__spark"></div>
+        </div>
+      }
     }
     @if (!loading && data && data.familles.length === 0) {
       <div class="db-no-data"><i class="pi pi-inbox"></i><span>Aucune donnée pour cette période</span></div>
@@ -142,16 +156,18 @@
   </div>
 
   <!-- ── Collapse handle ──────────────────────────────────────────────────── -->
-  <div class="db-collapse-handle" (click)="compactCards = !compactCards" [title]="compactCards ? 'Agrandir les cartes' : 'Réduire les cartes'">
-    <div class="db-collapse-handle__line"></div>
-    <i class="pi db-collapse-handle__icon"
-       [class.pi-chevron-up]="!compactCards"
-       [class.pi-chevron-down]="compactCards"></i>
-    <div class="db-collapse-handle__line"></div>
-  </div>
+  @if (!loading) {
+    <div class="db-collapse-handle" (click)="compactCards = !compactCards" [title]="compactCards ? 'Agrandir les cartes' : 'Réduire les cartes'">
+      <div class="db-collapse-handle__line"></div>
+      <i class="pi db-collapse-handle__icon"
+         [class.pi-chevron-up]="!compactCards"
+         [class.pi-chevron-down]="compactCards"></i>
+      <div class="db-collapse-handle__line"></div>
+    </div>
+  }
 
   <!-- ── Bottom: sf/product bars (left) + FDV performance (right) ─────────── -->
-  <div class="db-middle">
+  <div class="db-middle" [class.db-middle--loading]="loading">
 
     <!-- Reusable tree template: subfamilies + products -->
     <ng-template #familyTree let-f="f" let-inline="inline">
@@ -206,7 +222,23 @@
 
     <!-- Left: tree view — sf headers (collapsible) + products -->
     <div class="db-panel">
-      @if (selectedFamille) {
+      @if (loading) {
+        <div class="db-panel-sk">
+          @for (_ of skeletonRows; track $index; let i = $index) {
+            <div class="db-panel-sk__sf" [style.animation-delay]="i * 80 + 'ms'"></div>
+            <div class="db-panel-sk__prod" [style.animation-delay]="i * 80 + 20 + 'ms'">
+              <div class="db-panel-sk__prod-name"></div>
+              <div class="db-panel-sk__prod-bar"></div>
+              <div class="db-panel-sk__prod-num"></div>
+            </div>
+            <div class="db-panel-sk__prod" [style.animation-delay]="i * 80 + 40 + 'ms'">
+              <div class="db-panel-sk__prod-name"></div>
+              <div class="db-panel-sk__prod-bar"></div>
+              <div class="db-panel-sk__prod-num"></div>
+            </div>
+          }
+        </div>
+      } @else if (selectedFamille) {
         <div class="db-panel-head">
           <span class="db-panel-title">{{ capitalize(selectedFamille.nom) }} — Détail</span>
           <span class="db-panel-total">{{ formatNum(selectedFamille.total) }}</span>
@@ -250,6 +282,18 @@
 
     <!-- Right: FDV performance scorecard (always visible) -->
     <div class="db-panel">
+      @if (loading) {
+        <div class="db-panel-sk">
+          @for (_ of skeletonRows; track $index; let i = $index) {
+            <div class="db-panel-sk__fdv" [style.animation-delay]="i * 80 + 'ms'">
+              <div class="db-panel-sk__fdv-rank"></div>
+              <div class="db-panel-sk__fdv-name"></div>
+              <div class="db-panel-sk__fdv-bar"></div>
+              <div class="db-panel-sk__fdv-val"></div>
+            </div>
+          }
+        </div>
+      } @else {
       <div class="db-panel-head">
         <span class="db-panel-title">{{ fdvPerfTitle }}</span>
         <span class="db-panel-total">{{ fdvPerfItems.length }} prévendeurs</span>
@@ -288,6 +332,7 @@
           }
         </div>
       }
+      } <!-- end @else loading -->
     </div>
 
   </div>

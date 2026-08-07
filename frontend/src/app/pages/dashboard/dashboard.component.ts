@@ -445,5 +445,5 @@ export class DashboardComponent implements OnInit, OnDestroy {
     return d;
   }
 
-  readonly skeletonRows = Array(3).fill(0);
+  readonly skeletonRows = Array(5).fill(0);
 }
