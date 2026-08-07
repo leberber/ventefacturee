@@ -12,7 +12,7 @@ import { AuthService } from '../../core/services/auth.service';
   styleUrl: './prevendeur.component.scss',
 })
 export class PrevendeurComponent implements OnInit {
-  private svc  = inject(PrevendeurService);
+  private svc = inject(PrevendeurService);
   auth = inject(AuthService);
 
   periodes: string[] = [];
@@ -21,7 +21,6 @@ export class PrevendeurComponent implements OnInit {
   data: PrevFacturation | null = null;
   activeTab: 'tournees' | 'clients' | 'objectifs' | 'menu' = 'tournees';
   expandedClients = new Set<string>();
-  showUnites = false;
   editingKey: string | null = null;
   editingValue = '';
   savingKey: string | null = null;
@@ -73,35 +72,34 @@ export class PrevendeurComponent implements OnInit {
     return new Date(+y, +m - 1).toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
   }
 
-  clientTotal(client: PrevClient): number {
+  get totalMontant(): number {
     if (!this.data) return 0;
-    return Object.entries(client.totaux).reduce<number>((s, [prod, v]) => {
-      if (!v) return s;
-      if (!this.showUnites) return s + v;
-      const colisage = this.data!.products_meta[prod]?.colisage;
-      return s + (colisage ? Math.round(v * colisage) : v);
+    return this.data.routes.flatMap(r => r.clients).reduce((s, c) => {
+      return s + Object.entries(c.totaux).reduce((cs, [prod, qty]) => {
+        if (!qty) return cs;
+        const prix = this.data!.products_meta[prod]?.prix ?? 0;
+        return cs + qty * prix;
+      }, 0);
     }, 0);
   }
 
-  get totalSucre(): number {
+  clientMontant(client: PrevClient): number {
     if (!this.data) return 0;
-    const sucreProducts = this.data.products.filter(p => this.data!.products_meta[p]?.famille === 'sucre');
-    return this.data.routes.flatMap(r => r.clients)
-      .reduce((s, c) => s + sucreProducts.reduce((ps, p) => ps + (c.totaux[p] ?? 0), 0), 0);
+    return Object.entries(client.totaux).reduce<number>((s, [prod, qty]) => {
+      if (!qty) return s;
+      const prix = this.data!.products_meta[prod]?.prix ?? 0;
+      return s + qty * prix;
+    }, 0);
   }
 
-  get totalHuile(): number {
-    if (!this.data) return 0;
-    const huileProducts = this.data.products.filter(p => this.data!.products_meta[p]?.famille === 'huile');
-    return this.data.routes.flatMap(r => r.clients)
-      .reduce((s, c) => s + huileProducts.reduce((ps, p) => ps + (c.totaux[p] ?? 0), 0), 0);
+  formatMontant(n: number): string {
+    if (n >= 1_000_000) return (n / 1_000_000).toFixed(1) + ' M';
+    if (n >= 1_000) return (n / 1_000).toFixed(0) + ' k';
+    return n.toFixed(0);
   }
 
-  val(v: number | null, product: string): string {
-    if (!v) return '';
-    if (!this.showUnites) return String(v);
-    const colisage = this.data?.products_meta[product]?.colisage;
-    return colisage ? String(Math.round(v * colisage)) : String(v);
+  val(v: number | null): string {
+    return v ? String(v) : '';
   }
 
   familleClass(p: string): string {

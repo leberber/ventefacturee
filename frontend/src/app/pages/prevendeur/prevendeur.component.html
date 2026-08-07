@@ -16,11 +16,7 @@
 
     @if (activeTab === 'tournees') {
       <div class="pv-header__right">
-        <div class="pv-unit-toggle">
-          <button class="pv-unit-toggle__btn" [class.pv-unit-toggle__btn--active]="!showUnites" (click)="showUnites = false">Brut</button>
-          <button class="pv-unit-toggle__btn" [class.pv-unit-toggle__btn--active]="showUnites" (click)="showUnites = true">Unités</button>
-        </div>
-        <div class="pv-period">
+<div class="pv-period">
           <button class="pv-period__btn" (click)="prevPeriod()" [disabled]="!canGoPrev">
             <i class="pi pi-chevron-left"></i>
           </button>
@@ -46,14 +42,9 @@
           <span class="pv-kpi__label">Clients</span>
         </div>
         <div class="pv-kpi-sep"></div>
-        <div class="pv-kpi pv-kpi--sucre">
-          <span class="pv-kpi__val">{{ totalSucre }}</span>
-          <span class="pv-kpi__label">Sucre</span>
-        </div>
-        <div class="pv-kpi-sep"></div>
-        <div class="pv-kpi pv-kpi--huile">
-          <span class="pv-kpi__val">{{ totalHuile }}</span>
-          <span class="pv-kpi__label">Huile</span>
+        <div class="pv-kpi">
+          <span class="pv-kpi__val">{{ formatMontant(totalMontant) }}</span>
+          <span class="pv-kpi__label">Montant DA</span>
         </div>
       </div>
     }
@@ -98,9 +89,11 @@
 
                   <div class="pv-client-head">
                     <div class="pv-stop-num">{{ ci + 1 }}</div>
-                    <div class="pv-avatar">{{ client.nom_client.charAt(0) }}</div>
-                    <div class="pv-client-info">
-                      <span class="pv-client-name">{{ client.nom_client }}</span>
+<div class="pv-client-info">
+                      <div class="pv-client-name-row">
+                        <span class="pv-client-name">{{ client.nom_client }}</span>
+                        <span class="pv-client-total">{{ clientMontant(client) | number:'1.0-0' }} DA</span>
+                      </div>
                       <div class="pv-client-tags">
                         @for (f of clientFamilies(client); track f) {
                           <span class="pv-fam-tag pv-fam-tag--{{ f }}">{{ f }}</span>
@@ -132,7 +125,6 @@
                         }
                       </div>
                     </div>
-                    <span class="pv-client-total">{{ clientTotal(client) }}</span>
                     <i class="pi pv-chevron"
                        [class.pi-chevron-down]="!isExpanded(route.route + client.nom_client)"
                        [class.pi-chevron-up]="isExpanded(route.route + client.nom_client)"></i>
@@ -155,8 +147,8 @@
                               <tr>
                                 <td class="pv-td-date">{{ week }}</td>
                                 @for (p of data!.products; track p) {
-                                  <td [class.pv-td--val]="val(client.semaines[week]?.[p] ?? null, p) !== ''">
-                                    {{ val(client.semaines[week]?.[p] ?? null, p) }}
+                                  <td [class.pv-td--val]="val(client.semaines[week]?.[p] ?? null) !== ''">
+                                    {{ val(client.semaines[week]?.[p] ?? null) }}
                                   </td>
                                 }
                               </tr>
@@ -164,8 +156,8 @@
                             <tr class="pv-tr-total">
                               <td class="pv-td-date">Total</td>
                               @for (p of data!.products; track p) {
-                                <td [class.pv-td--val]="val(client.totaux[p] ?? null, p) !== ''">
-                                  <strong>{{ val(client.totaux[p] ?? null, p) }}</strong>
+                                <td [class.pv-td--val]="val(client.totaux[p] ?? null) !== ''">
+                                  <strong>{{ val(client.totaux[p] ?? null) }}</strong>
                                 </td>
                               }
                             </tr>
@@ -229,7 +221,7 @@
                   }
                 </div>
               </div>
-              <span class="pvc-total">{{ clientTotal(client) }}</span>
+              <span class="pvc-total">{{ clientMontant(client) | number:'1.0-0' }} DA</span>
             </div>
           }
         </div>

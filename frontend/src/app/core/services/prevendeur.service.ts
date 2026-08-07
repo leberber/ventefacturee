@@ -21,6 +21,7 @@ export interface PrevProductMeta {
   uom_vente: string | null;
   colisage: number | null;
   famille: string | null;
+  prix: number | null;
 }
 
 export interface PrevFacturation {

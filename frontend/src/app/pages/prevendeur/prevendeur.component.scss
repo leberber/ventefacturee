@@ -41,32 +41,6 @@
   flex-shrink: 0;
 }
 
-.pv-unit-toggle {
-  display: flex;
-  background: #e9ecf2;
-  border-radius: 8px;
-  padding: 2px;
-  gap: 2px;
-
-  &__btn {
-    padding: 3px 10px;
-    border-radius: 6px;
-    border: none;
-    background: transparent;
-    font-size: 0.72rem;
-    font-weight: 600;
-    color: #8b95b0;
-    cursor: pointer;
-    transition: all 0.15s;
-
-    &--active {
-      background: #fff;
-      color: #1a1f36;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-    }
-  }
-}
-
 .pv-header__left {
   display: flex;
   flex-direction: column;
@@ -96,24 +70,6 @@
 .pv-meta-sep {
   color: #c8cedd;
   line-height: 1;
-}
-
-.pv-logout {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 36px;
-  height: 36px;
-  flex-shrink: 0;
-  border: none;
-  border-radius: 50%;
-  background: #f3f4f6;
-  color: #6b7280;
-  font-size: 0.9rem;
-  cursor: pointer;
-  transition: background 0.15s, color 0.15s;
-
-  &:hover { background: #fee2e2; color: #dc2626; }
 }
 
 .pv-period {
@@ -184,9 +140,6 @@
   text-transform: uppercase;
   letter-spacing: 0.04em;
 }
-
-.pv-kpi--sucre .pv-kpi__val { color: #2563eb; }
-.pv-kpi--huile .pv-kpi__val { color: #f59e0b; }
 
 .pv-kpi-sep {
   width: 1px;
@@ -283,26 +236,20 @@
   padding: 12px 14px;
 }
 
-.pv-avatar {
-  width: 36px;
-  height: 36px;
-  border-radius: 10px;
-  background: linear-gradient(135deg, #6366f1, #818cf8);
-  color: #fff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 700;
-  font-size: 0.95rem;
-  flex-shrink: 0;
-}
-
 .pv-client-info {
   flex: 1;
   min-width: 0;
   display: flex;
   flex-direction: column;
   gap: 2px;
+}
+
+.pv-client-name-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  min-width: 0;
 }
 
 .pv-client-name {
@@ -312,6 +259,8 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  flex: 1;
+  min-width: 0;
 }
 
 .pv-client-tags {
@@ -349,9 +298,10 @@
 }
 
 .pv-client-total {
-  font-size: 0.9rem;
-  font-weight: 700;
-  color: #1a1f36;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #8b95b0;
+  white-space: nowrap;
   flex-shrink: 0;
 }
 

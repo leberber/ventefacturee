@@ -82,10 +82,10 @@ def prevendeur_facturation(
             famille = (r.famille or '').lower()
             if r.code_produit and r.code_produit in code_to_produit:
                 p = code_to_produit[r.code_produit]
-                label_meta[label] = {"uom_vente": p.uom_vente, "colisage": p.colisage, "famille": famille}
+                label_meta[label] = {"uom_vente": p.uom_vente, "colisage": p.colisage, "famille": famille, "prix": p.prix}
             else:
-                label_meta[label] = {"uom_vente": None, "colisage": None, "famille": famille}
-    products_meta = {p: label_meta.get(p, {"uom_vente": None, "colisage": None, "famille": None}) for p in products}
+                label_meta[label] = {"uom_vente": None, "colisage": None, "famille": famille, "prix": None}
+    products_meta = {p: label_meta.get(p, {"uom_vente": None, "colisage": None, "famille": None, "prix": None}) for p in products}
 
     # Aggregate: client -> date_label -> product -> qty
     agg: dict = defaultdict(lambda: defaultdict(lambda: defaultdict(float)))
