@@ -79,6 +79,16 @@ export class ObjectifsAdminComponent implements OnInit {
     else { this.sortCol = col; this.sortDir = 1; }
   }
 
+  stepMonth(dir: 1 | -1) {
+    let m = this.mois + dir;
+    let a = this.annee;
+    if (m > 12) { m = 1;  a++; }
+    if (m < 1)  { m = 12; a--; }
+    this.mois = m;
+    this.annee = a;
+    this.load();
+  }
+
   resetSort() {
     this.sortCol = '';
     this.sortDir = 1;

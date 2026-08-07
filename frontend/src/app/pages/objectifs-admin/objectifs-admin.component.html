@@ -27,13 +27,10 @@
           <button class="dash-filter__btn" [class.dash-filter__btn--active]="canal === 'VD'" (click)="canal = 'VD'">Direct (VD)</button>
           <button class="dash-filter__btn" [class.dash-filter__btn--active]="canal === 'VH'" (click)="canal = 'VH'">Horeca (VH)</button>
         </div>
-        <div class="obj-period">
-          <select class="obj-period-sel" [(ngModel)]="mois" (change)="load()">
-            @for (m of MONTHS; track m.v) {
-              <option [value]="m.v">{{ m.l }}</option>
-            }
-          </select>
-          <input class="obj-period-year" type="number" [(ngModel)]="annee" (change)="load()" min="2020" max="2035">
+        <div class="obj-period-stepper">
+          <button class="obj-stepper-btn" (click)="stepMonth(-1)"><i class="pi pi-chevron-left"></i></button>
+          <span class="obj-stepper-label">{{ periodLabel }}</span>
+          <button class="obj-stepper-btn" (click)="stepMonth(1)"><i class="pi pi-chevron-right"></i></button>
         </div>
 
         <!-- Route counts (editable — used as divisor for T/Tournée and P/Tournée) -->

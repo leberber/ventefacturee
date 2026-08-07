@@ -61,30 +61,49 @@
   font-size: var(--font-size-sm);
 }
 
-// ── Period selectors ───────────────────────────────────────────────────────────
-.obj-period {
+// ── Period stepper ─────────────────────────────────────────────────────────────
+.obj-period-stepper {
   display: flex;
   align-items: center;
-  gap: 0.35rem;
-}
-
-.obj-period-sel,
-.obj-period-year {
-  padding: 0.55rem 1rem;
   border: 1px solid var(--surface-border);
   border-radius: var(--radius-lg);
   background: var(--surface-card);
-  color: var(--text-color);
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-semibold);
-  font-family: inherit;
-  outline: none;
-  cursor: pointer;
-
-  &:focus { border-color: var(--primary-color); }
+  overflow: hidden;
 }
 
-.obj-period-year { width: 6.5rem; }
+.obj-stepper-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.2rem;
+  height: 2.2rem;
+  border: none;
+  background: transparent;
+  color: var(--text-color-secondary);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  flex-shrink: 0;
+
+  i { font-size: 0.7rem; }
+
+  &:hover {
+    background: var(--surface-ground);
+    color: var(--text-color);
+  }
+}
+
+.obj-stepper-label {
+  padding: 0 0.9rem;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-color);
+  white-space: nowrap;
+  min-width: 8rem;
+  text-align: center;
+  border-left: 1px solid var(--surface-border);
+  border-right: 1px solid var(--surface-border);
+  line-height: 2.2rem;
+}
 
 // ── Route count pills ──────────────────────────────────────────────────────────
 .obj-routes {

@@ -87,6 +87,16 @@ export class ObjectifsInComponent implements OnInit {
     });
   }
 
+  stepMonth(dir: 1 | -1) {
+    let m = this.mois + dir;
+    let a = this.annee;
+    if (m > 12) { m = 1;  a++; }
+    if (m < 1)  { m = 12; a--; }
+    this.mois = m;
+    this.annee = a;
+    this.load();
+  }
+
   goToNextMissing() {
     if (this.nextMois == null || this.nextAnnee == null) return;
     this.mois = this.nextMois;
