@@ -526,6 +526,76 @@ def prevendeur_admin_drilldown(
     }
 
 
+@router.get("/objectifs")
+def prevendeur_objectifs(
+    annee_mois: str = Query(...),
+    current_user: User = Depends(get_current_user),
+    session: Session = Depends(get_session),
+) -> Any:
+    if not current_user.employe_code:
+        return []
+
+    code_fdv = current_user.employe_code
+    annee_int, mois_int = int(annee_mois.split('-')[0]), int(annee_mois.split('-')[1])
+
+    code_upper = code_fdv.upper()
+    use_vd = 'VH' not in code_upper  # default to VD unless explicitly VH
+
+    # Actual sales per product — with name fallback from Vente
+    sales_rows = session.exec(
+        select(Vente.code_produit, Vente.description_produit, func.sum(Vente.qte_facturee))
+        .where(Vente.code_fdv == code_fdv)
+        .where(Vente.annee_mois == annee_mois)
+        .where(Vente.source != 'BackOffice')
+        .group_by(Vente.code_produit, Vente.description_produit)
+    ).all()
+
+    sales_by_code: dict = {}
+    desc_by_code: dict = {}
+    for code, desc, qty in sales_rows:
+        if not code:
+            continue
+        sales_by_code[code] = sales_by_code.get(code, 0) + (qty or 0)
+        if desc and code not in desc_by_code:
+            desc_by_code[code] = desc
+
+    # Objectives for this period
+    obj_rows = session.exec(
+        select(Objectif)
+        .where(Objectif.mois == mois_int, Objectif.annee == annee_int)
+    ).all()
+
+    obj_by_code: dict = {}
+    for obj in obj_rows:
+        if not obj.code_produit:
+            continue
+        objectif = obj.objectif_packs_vd_tournee if use_vd else obj.objectif_packs_vh_tournee
+        obj_by_code[obj.code_produit] = objectif or 0
+
+    all_codes = set(sales_by_code.keys()) | set(obj_by_code.keys())
+    produits_db = session.exec(select(Produit).where(Produit.code_produit.in_(all_codes))).all() if all_codes else []
+    code_to_produit = {p.code_produit: p for p in produits_db}
+
+    result = []
+    for code in all_codes:
+        actual = sales_by_code.get(code, 0)
+        objectif = obj_by_code.get(code, 0)
+        produit = code_to_produit.get(code)
+        nom = (produit.nom_produit or produit.description_produit if produit else None) or desc_by_code.get(code) or code
+        famille = (produit.famille or '').lower() if produit else ''
+        pct = round(min(actual / objectif * 100, 100)) if objectif else 0
+        result.append({
+            "code_produit": code,
+            "nom_produit": nom,
+            "famille": famille,
+            "actual": round(actual),
+            "objectif": round(objectif),
+            "pct": pct,
+        })
+
+    return sorted(result, key=lambda x: (x['pct'], x['nom_produit']))
+
+
 @router.patch("/clients/{code_client}")
 def update_nom_sodichn(
     code_client: str,

@@ -234,10 +234,56 @@
   ══════════════════════════════════════════════════════════════════════ -->
   @if (activeTab === 'objectifs') {
     <div class="pv-objectifs-page">
-      <div class="pv-empty">
-        <i class="pi pi-chart-bar"></i>
-        <p>Aucun objectif défini</p>
-      </div>
+      @if (loadingObjectifs) {
+        <div class="pv-empty"><i class="pi pi-spin pi-spinner"></i><p>Chargement…</p></div>
+      } @else if (objectifs.length === 0) {
+        <div class="pv-empty"><i class="pi pi-chart-bar"></i><p>Aucun objectif pour cette période</p></div>
+      } @else {
+        <div class="pvo-list">
+          @for (group of objectifsByFamille; track group.famille) {
+            <div class="pvo-groupe">
+              <div class="pvo-famille-header" (click)="toggleFamille(group.famille)">
+                <span class="pvo-famille-dot pvo-famille-dot--{{ group.famille }}"></span>
+                <span class="pvo-famille-name">{{ group.famille || 'Autre' }}</span>
+                <span class="pvo-famille-count">{{ group.items.length }}</span>
+                <span class="pvo-famille-pct"
+                      [class.pvo-pct--red]="group.pct < 60"
+                      [class.pvo-pct--orange]="group.pct >= 60 && group.pct < 85"
+                      [class.pvo-pct--green]="group.pct >= 85">{{ group.pct }}%</span>
+                <i class="pi pvo-famille-chevron"
+                   [class.pi-chevron-down]="collapsedFamilles.has(group.famille)"
+                   [class.pi-chevron-up]="!collapsedFamilles.has(group.famille)"></i>
+              </div>
+              @if (!collapsedFamilles.has(group.famille)) {
+                <div class="pvo-items-wrap">
+                @for (obj of group.items; track obj.code_produit) {
+                  <div class="pvo-item">
+                    <div class="pvo-top">
+                      <span class="pvo-name">{{ obj.nom_produit }}</span>
+                      <span class="pvo-pct"
+                            [class.pvo-pct--red]="obj.pct < 60"
+                            [class.pvo-pct--orange]="obj.pct >= 60 && obj.pct < 85"
+                            [class.pvo-pct--green]="obj.pct >= 85">{{ obj.pct }}%</span>
+                    </div>
+                    <div class="pvo-bar-track">
+                      <div class="pvo-bar-fill"
+                           [class.pvo-bar-fill--red]="obj.pct < 60"
+                           [class.pvo-bar-fill--orange]="obj.pct >= 60 && obj.pct < 85"
+                           [class.pvo-bar-fill--green]="obj.pct >= 85"
+                           [style.width.%]="obj.pct"></div>
+                    </div>
+                    <div class="pvo-numbers">
+                      <span><strong>{{ obj.actual | number:'1.0-0' }}</strong> <span class="pvo-unit">réalisé</span></span>
+                      <span><strong>{{ obj.objectif | number:'1.0-0' }}</strong> <span class="pvo-unit">objectif</span></span>
+                    </div>
+                  </div>
+                }
+                </div>
+              }
+            </div>
+          }
+        </div>
+      }
     </div>
   }
 

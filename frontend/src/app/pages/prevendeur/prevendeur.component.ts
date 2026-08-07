@@ -1,7 +1,7 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { PrevendeurService, PrevFacturation, PrevClient } from '../../core/services/prevendeur.service';
+import { PrevendeurService, PrevFacturation, PrevClient, PrevObjectifItem } from '../../core/services/prevendeur.service';
 import { AuthService } from '../../core/services/auth.service';
 
 @Component({
@@ -21,6 +21,9 @@ export class PrevendeurComponent implements OnInit {
   data: PrevFacturation | null = null;
   activeTab: 'tournees' | 'clients' | 'objectifs' | 'menu' = 'tournees';
   expandedClients = new Set<string>();
+  objectifs: PrevObjectifItem[] = [];
+  loadingObjectifs = false;
+  collapsedFamilles = new Set<string>();
   editingKey: string | null = null;
   editingValue = '';
   savingKey: string | null = null;
@@ -43,8 +46,22 @@ export class PrevendeurComponent implements OnInit {
     this.data = null;
     this.expandedClients.clear();
     this.svc.getFacturation(this.selectedMois).subscribe({
-      next: d  => { this.data = d; this.loading = false; },
+      next: d => { this.data = d; this.loading = false; },
       error: () => { this.loading = false; },
+    });
+    this.loadObjectifs();
+  }
+
+  loadObjectifs() {
+    if (!this.selectedMois) return;
+    this.loadingObjectifs = true;
+    this.svc.getObjectifs(this.selectedMois).subscribe({
+      next: d => {
+        this.objectifs = d;
+        this.collapsedFamilles = new Set(d.map(o => o.famille || 'autre'));
+        this.loadingObjectifs = false;
+      },
+      error: () => { this.loadingObjectifs = false; },
     });
   }
 
@@ -160,6 +177,25 @@ export class PrevendeurComponent implements OnInit {
   cancelEdit(event: Event) {
     event.stopPropagation();
     this.editingKey = null;
+  }
+
+  get objectifsByFamille(): { famille: string; items: PrevObjectifItem[]; pct: number }[] {
+    const map = new Map<string, PrevObjectifItem[]>();
+    for (const obj of this.objectifs) {
+      const key = obj.famille || 'autre';
+      if (!map.has(key)) map.set(key, []);
+      map.get(key)!.push(obj);
+    }
+    return Array.from(map.entries()).map(([famille, items]) => {
+      const totalActual = items.reduce((s, o) => s + o.actual, 0);
+      const totalObj    = items.reduce((s, o) => s + o.objectif, 0);
+      const pct = totalObj > 0 ? Math.round(Math.min(totalActual / totalObj * 100, 100)) : 0;
+      return { famille, items, pct };
+    }).sort((a, b) => a.pct - b.pct);
+  }
+
+  toggleFamille(famille: string) {
+    this.collapsedFamilles.has(famille) ? this.collapsedFamilles.delete(famille) : this.collapsedFamilles.add(famille);
   }
 
   readonly skeletonRows = Array(6).fill(0);

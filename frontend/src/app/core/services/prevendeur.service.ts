@@ -84,6 +84,15 @@ export interface DrilldownData {
   objectif_packs_per_route: number | null;
 }
 
+export interface PrevObjectifItem {
+  code_produit: string;
+  nom_produit: string;
+  famille: string;
+  actual: number;
+  objectif: number;
+  pct: number;
+}
+
 export interface PrevAdminClientRow {
   code_client: string;
   nom_client: string;
@@ -117,6 +126,11 @@ export class PrevendeurService {
 
   updateNomSodichn(code_client: string, nom_sodichn: string, nom_client: string) {
     return this.http.patch(`/api/v1/prevendeur/clients/${encodeURIComponent(code_client)}`, { nom_sodichn, nom_client });
+  }
+
+  getObjectifs(annee_mois: string) {
+    const p = new HttpParams().set('annee_mois', annee_mois);
+    return this.http.get<PrevObjectifItem[]>('/api/v1/prevendeur/objectifs', { params: p });
   }
 
   getAdminStats() {
