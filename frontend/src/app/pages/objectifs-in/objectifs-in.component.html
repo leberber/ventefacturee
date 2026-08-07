@@ -1,0 +1,245 @@
+<!-- Page header -->
+<div class="page-header">
+  <div class="page-header__left">
+    <div class="page-icon"><i class="pi pi-chart-line"></i></div>
+    <div>
+      <h1 class="page-header__title">Objectifs IN</h1>
+      @if (!editMode) {
+        <p class="page-header__sub">{{ filledProducts }} / {{ totalProducts }} produits renseignés</p>
+      } @else {
+        <p class="page-header__sub">
+          <span class="obj-edit-badge"><i class="pi pi-pencil"></i> Mode édition — {{ periodLabel }}</span>
+        </p>
+      }
+    </div>
+  </div>
+</div>
+
+<!-- Table container -->
+<div class="table-container" [class.table-container--editing]="editMode">
+
+  <!-- Toolbar -->
+  <div class="obj-toolbar">
+
+    <div class="obj-toolbar__left">
+      @if (!editMode) {
+        <div class="obj-period">
+          <select class="obj-period-sel" [(ngModel)]="mois" (change)="load()">
+            @for (m of MONTHS; track m.v) {
+              <option [value]="m.v">{{ m.l }}</option>
+            }
+          </select>
+          <input class="obj-period-year" type="number" [(ngModel)]="annee" (change)="load()" min="2020" max="2035">
+        </div>
+      }
+    </div>
+
+    <div class="obj-toolbar__right">
+      @if (!editMode) {
+        @if (!loading) {
+          @if (hasGoals) {
+            <button class="btn-secondary" (click)="enterEditMode()">
+              <i class="pi pi-pencil"></i> Modifier
+            </button>
+          } @else {
+            <button class="btn-add" (click)="enterEditMode()">
+              <i class="pi pi-plus"></i> Définir les objectifs
+            </button>
+          }
+          @if (nextMissingLabel && !isNextMissingPeriod) {
+            <button class="btn-add" (click)="goToNextMissing()">
+              <i class="pi pi-arrow-right"></i> {{ nextMissingLabel }}
+            </button>
+          }
+        }
+      } @else {
+        <input #fileInput type="file" accept=".xlsx,.xls" style="display:none"
+          (change)="onFileSelected($event)">
+
+        <button class="btn-import" (click)="fileInput.click()" [disabled]="isSaving || isImporting">
+          <i class="pi pi-file-excel"></i> Importer Excel
+        </button>
+        <button class="btn-secondary" (click)="copyFromPrevious()" [disabled]="isSaving">
+          <i class="pi pi-copy"></i> Copier depuis {{ prevMonthLabel }}
+        </button>
+        <button class="btn-danger" (click)="cancelEdit()" [disabled]="isSaving">
+          <i class="pi pi-times"></i> Annuler
+        </button>
+        <button class="btn-save" (click)="requestSave()" [disabled]="isSaving">
+          @if (isSaving) {
+            <i class="pi pi-spin pi-spinner"></i> Enregistrement…
+          } @else {
+            <i class="pi pi-check"></i> Sauvegarder
+            @if (dirtyCount > 0) { <span class="obj-badge">{{ dirtyCount }}</span> }
+          }
+        </button>
+      }
+    </div>
+
+  </div>
+
+  <!-- Import result banner -->
+  @if (importResult) {
+    <div class="obj-import-banner" [class.obj-import-banner--warn]="importResult.notFound.length > 0">
+      <div class="obj-import-banner__top">
+        <i class="pi pi-check-circle"></i>
+        <span class="obj-import-banner__msg">
+          <strong>{{ importResult.imported }}</strong> produit(s) importé(s)
+          @if (importResult.notFound.length > 0) {
+            &nbsp;—&nbsp;<strong>{{ importResult.notFound.length }}</strong> non trouvé(s)
+            <button class="obj-import-detail-toggle" (click)="showNotFoundDetail = !showNotFoundDetail">
+              {{ showNotFoundDetail ? 'masquer' : 'voir détail' }}
+              <i class="pi" [class.pi-chevron-down]="!showNotFoundDetail" [class.pi-chevron-up]="showNotFoundDetail"></i>
+            </button>
+          }
+        </span>
+        <button class="obj-import-close" (click)="importResult = null; showNotFoundDetail = false">
+          <i class="pi pi-times"></i>
+        </button>
+      </div>
+      @if (showNotFoundDetail && importResult.notFound.length > 0) {
+        <ul class="obj-import-not-found-list">
+          @for (name of importResult.notFound; track name) { <li>{{ name }}</li> }
+        </ul>
+      }
+    </div>
+  }
+
+  <!-- Table -->
+  <div class="table-wrapper">
+    <table class="table">
+      <thead>
+        <tr>
+          <th class="th-sort" style="width:8rem" (click)="setSort('famille')">
+            Famille <i class="pi" [class]="sortIcon('famille')"></i>
+          </th>
+          <th style="width:8rem">Code</th>
+          <th class="th-sort" (click)="setSort('produit')">
+            Produit <i class="pi" [class]="sortIcon('produit')"></i>
+          </th>
+          <th class="th-num th-sort th-tonne" (click)="setSort('tonne')">
+            Objectif (T) <i class="pi" [class]="sortIcon('tonne')"></i>
+          </th>
+          <th style="width:9rem">Modifié par</th>
+          <th style="width:7rem">Le</th>
+        </tr>
+      </thead>
+      <tbody>
+        @if (loading) {
+          @for (_ of [1,2,3,4,5,6,7,8]; track $index) {
+            <tr class="sk-row"><td colspan="6"><div class="sk-bar"></div></td></tr>
+          }
+        } @else {
+          @for (fam of grouped; track fam.nom) {
+            @let fBg = famBg(fam.nom);
+            @let fColor = famColor(fam.nom);
+            @let fBorder = fColor + '33';
+            @let fRows = famRows(fam);
+            @let sfBg = famBgLight(fam.nom);
+
+            <tr class="obj-fam-row" (click)="toggleFamily(fam.nom)">
+              <td colspan="3" class="obj-fam-cell"
+                [style.background]="fBg" [style.color]="fColor"
+                [style.border-top-color]="fBorder" [style.border-bottom-color]="fBorder">
+                <div class="obj-fam-inner">
+                  <i class="pi obj-fam-chevron"
+                    [class.pi-chevron-down]="!collapsedFamilies.has(fam.nom)"
+                    [class.pi-chevron-right]="collapsedFamilies.has(fam.nom)"></i>
+                  {{ fam.nom | uppercase }}
+                  <span class="obj-fam-count">{{ fam.sfs.length }} sous-famille(s)</span>
+                </div>
+              </td>
+              <td class="td-num obj-fam-total td-tonne"
+                [style.background]="fBg" [style.color]="fColor"
+                [style.border-top-color]="fBorder" [style.border-bottom-color]="fBorder">
+                {{ sumTonne(fRows) != null ? (sumTonne(fRows) | number:'1.0-4') : '—' }}
+              </td>
+              <td colspan="2" [style.background]="fBg"
+                [style.border-top-color]="fBorder" [style.border-bottom-color]="fBorder"></td>
+            </tr>
+
+            @if (!collapsedFamilies.has(fam.nom)) {
+              @for (sf of fam.sfs; track sf.nom) {
+                <tr class="obj-sf-row">
+                  <td colspan="3" [style.background]="sfBg">{{ sf.nom }}</td>
+                  <td class="td-num obj-sf-total td-tonne" [style.background]="sfBg">
+                    {{ sumTonne(sf.rows) != null ? (sumTonne(sf.rows) | number:'1.0-4') : '—' }}
+                  </td>
+                  <td colspan="2" [style.background]="sfBg"></td>
+                </tr>
+
+                @for (row of sf.rows; track row.code_produit) {
+                  <tr [class.obj-row--dirty]="editMode && isDirtyRow(row)">
+                    <td>
+                      <span class="famille-pill-badge"
+                        [style.background]="famBg(row.famille)"
+                        [style.color]="famColor(row.famille)">{{ row.famille }}</span>
+                    </td>
+                    <td><span class="code-chip">{{ row.code_produit }}</span></td>
+                    <td class="td-nom" [title]="row.nom_produit">{{ row.nom_produit }}</td>
+                    @if (editMode) {
+                      <td class="td-input td-tonne">
+                        <input type="number" step="0.0001" min="0" [(ngModel)]="row._tonne" placeholder="—">
+                      </td>
+                    } @else {
+                      <td class="td-num td-tonne">{{ formatNum(row.objectif_tonne) }}</td>
+                    }
+                    <td class="text-muted td-small">{{ row.updated_by || '—' }}</td>
+                    <td class="text-muted td-small">{{ formatDate(row.updated_at) }}</td>
+                  </tr>
+                }
+              }
+            }
+          }
+        }
+      </tbody>
+    </table>
+  </div>
+
+</div>
+
+<!-- Import dialog -->
+@if (showImportDialog) {
+  <div class="obj-backdrop" (click)="cancelImport()">
+    <div class="obj-dialog" (click)="$event.stopPropagation()">
+      <h3 class="obj-dialog__title"><i class="pi pi-upload"></i> Importer depuis Excel</h3>
+      <div class="obj-import-period-banner">
+        <i class="pi pi-calendar"></i>
+        <span>Période&nbsp;:</span>
+        <select class="obj-period-sel obj-import-period-sel" [(ngModel)]="importMois">
+          @for (m of MONTHS; track m.v) { <option [value]="m.v">{{ m.l }}</option> }
+        </select>
+        <input class="obj-period-year obj-import-period-year" type="number"
+          [(ngModel)]="importAnnee" min="2020" max="2035">
+      </div>
+      <p class="obj-dialog__body">Fichier&nbsp;: <strong>{{ importFile?.name }}</strong></p>
+      <div class="obj-dialog__actions">
+        <button class="btn-secondary" (click)="cancelImport()" [disabled]="isImporting">Annuler</button>
+        <button class="btn-save" (click)="confirmImport()" [disabled]="isImporting">
+          @if (isImporting) {
+            <i class="pi pi-spin pi-spinner"></i> Import en cours…
+          } @else {
+            <i class="pi pi-check"></i> Importer
+          }
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- Confirmation dialog -->
+@if (showConfirm) {
+  <div class="obj-backdrop" (click)="showConfirm = false">
+    <div class="obj-dialog" (click)="$event.stopPropagation()">
+      <h3 class="obj-dialog__title">Confirmer la sauvegarde</h3>
+      <p class="obj-dialog__body">
+        Sauvegarder les objectifs IN de <strong>{{ periodLabel }}</strong> ?
+      </p>
+      <p class="obj-dialog__count text-muted">{{ dirtyCount }} produit(s) modifié(s)</p>
+      <div class="obj-dialog__actions">
+        <button class="btn-secondary" (click)="showConfirm = false">Annuler</button>
+        <button class="btn-save" (click)="confirmSave()"><i class="pi pi-check"></i> Confirmer</button>
+      </div>
+    </div>
+  </div>
+}
