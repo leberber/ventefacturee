@@ -6,8 +6,8 @@ import { ProduitsService, ProduitRead } from '../../core/services/produits.servi
 
 const LS_KEY = 'ventefacturee_produits_columns';
 
-type SortCol = 'code_produit' | 'description_produit' | 'famille' | 'sous_famille' | 'uom_vente' | 'colisage';
-type EditField = 'nom_produit' | 'colisage' | 'unite' | 'volume' | 'poids' | 'prix';
+type SortCol = 'code_produit' | 'description_produit' | 'famille' | 'sous_famille' | 'uom_vente' | 'colisage' | 'imported';
+type EditField = 'nom_produit' | 'colisage' | 'colisage_palette' | 'unite' | 'volume' | 'poids_unite_vente' | 'prix';
 
 interface ColDef {
   field: string;
@@ -34,11 +34,13 @@ export class ProduitsComponent implements OnInit {
     { field: 'uom_vente',           header: 'UOM Vente',         visible: true  },
     { field: 'uom_principale',      header: 'UOM P.',            visible: true  },
     { field: 'colisage',            header: 'Colisage',          visible: true  },
+    { field: 'colisage_palette',    header: 'Col./palette',      visible: true  },
     { field: 'unite',               header: 'Unité',             visible: true  },
     { field: 'volume',              header: 'Volume',            visible: false },
-    { field: 'poids',               header: 'Poids',             visible: false },
+    { field: 'poids_unite_vente',   header: 'Poids UV (T)',      visible: false },
     { field: 'prix',                header: 'Prix',              visible: true  },
     { field: 'facturable',          header: 'Facturable',        visible: true  },
+    { field: 'imported',            header: 'Importé',           visible: true  },
   ];
 
   isColVisible(field: string): boolean {
@@ -200,6 +202,11 @@ export class ProduitsComponent implements OnInit {
     this.svc.update(p.code_produit, { facturable: newVal }).subscribe({
       next: updated => this.allProduits.update(list => list.map(x => x.code_produit === updated.code_produit ? updated : x)),
     });
+  }
+
+  formatPoids(v: number | null): string {
+    if (v == null) return '—';
+    return parseFloat(v.toPrecision(6)).toString();
   }
 
   getFamilleStyle(famille: string | null): { background: string; color: string } {

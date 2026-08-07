@@ -117,11 +117,19 @@
                 Colisage <i class="pi pi-sort-alt"></i>
               </th>
             }
+            @if (isColVisible('colisage_palette')) { <th class="col-center">Col./palette</th> }
             @if (isColVisible('unite'))      { <th class="col-center">Unité</th> }
             @if (isColVisible('volume'))     { <th class="col-center">Volume</th> }
-            @if (isColVisible('poids'))      { <th class="col-center">Poids</th> }
+            @if (isColVisible('poids_unite_vente')) { <th class="col-center">Poids UV (T)</th> }
             @if (isColVisible('prix'))       { <th class="col-center">Prix</th> }
             @if (isColVisible('facturable')) { <th class="col-center">Facturable</th> }
+            @if (isColVisible('imported')) {
+              <th class="th-sort col-center" (click)="sort('imported')"
+                [class.th-sort--asc]="sortCol()==='imported'&&sortDir()===1"
+                [class.th-sort--desc]="sortCol()==='imported'&&sortDir()===-1">
+                Importé <i class="pi pi-sort-alt"></i>
+              </th>
+            }
           </tr>
         </thead>
         <tbody>
@@ -211,6 +219,32 @@
                   </td>
                 }
 
+                @if (isColVisible('colisage_palette')) {
+                  <td class="col-center cell-editable"
+                    (click)="startEdit(p, 'colisage_palette', $event)"
+                    [class.cell-editing]="isEditing(p.code_produit, 'colisage_palette')">
+                    @if (isEditing(p.code_produit, 'colisage_palette')) {
+                      <input type="number" class="cell-input" autofocus min="0" step="1"
+                        [value]="editingValue()"
+                        (input)="editingValue.set(+$any($event.target).value || null)"
+                        (blur)="saveEdit(p)"
+                        (keydown.enter)="saveEdit(p)"
+                        (keydown.escape)="cancelEdit()" />
+                    } @else {
+                      <div class="cell-display cell-display--center">
+                        @if (savingCell()?.code === p.code_produit && savingCell()?.field === 'colisage_palette') {
+                          <i class="pi pi-spin pi-spinner cell-spinner"></i>
+                        } @else {
+                          <span [class.colisage-value]="p.colisage_palette != null" [class.text-muted]="p.colisage_palette == null">
+                            {{ p.colisage_palette != null ? p.colisage_palette : '—' }}
+                          </span>
+                        }
+                        <i class="pi pi-pencil cell-pencil"></i>
+                      </div>
+                    }
+                  </td>
+                }
+
                 @if (isColVisible('unite')) {
                   <td class="col-center cell-editable"
                     (click)="startEdit(p, 'unite', $event)"
@@ -261,12 +295,12 @@
                   </td>
                 }
 
-                @if (isColVisible('poids')) {
+                @if (isColVisible('poids_unite_vente')) {
                   <td class="col-center cell-editable"
-                    (click)="startEdit(p, 'poids', $event)"
-                    [class.cell-editing]="isEditing(p.code_produit, 'poids')">
-                    @if (isEditing(p.code_produit, 'poids')) {
-                      <input type="number" class="cell-input" autofocus min="0" step="0.01"
+                    (click)="startEdit(p, 'poids_unite_vente', $event)"
+                    [class.cell-editing]="isEditing(p.code_produit, 'poids_unite_vente')">
+                    @if (isEditing(p.code_produit, 'poids_unite_vente')) {
+                      <input type="number" class="cell-input" autofocus min="0" step="0.0001"
                         [value]="editingValue()"
                         (input)="editingValue.set(+$any($event.target).value || null)"
                         (blur)="saveEdit(p)"
@@ -274,10 +308,10 @@
                         (keydown.escape)="cancelEdit()" />
                     } @else {
                       <div class="cell-display cell-display--center">
-                        @if (savingCell()?.code === p.code_produit && savingCell()?.field === 'poids') {
+                        @if (savingCell()?.code === p.code_produit && savingCell()?.field === 'poids_unite_vente') {
                           <i class="pi pi-spin pi-spinner cell-spinner"></i>
                         } @else {
-                          <span [class.text-muted]="p.poids == null">{{ p.poids != null ? p.poids : '—' }}</span>
+                          <span [class.text-muted]="p.poids_unite_vente == null">{{ formatPoids(p.poids_unite_vente) }}</span>
                         }
                         <i class="pi pi-pencil cell-pencil"></i>
                       </div>
@@ -318,6 +352,16 @@
                       [title]="p.facturable ? 'Oui — cliquer pour exclure' : 'Non — cliquer pour inclure'">
                       {{ p.facturable ? 'Oui' : 'Non' }}
                     </button>
+                  </td>
+                }
+
+                @if (isColVisible('imported')) {
+                  <td class="col-center">
+                    @if (p.imported) {
+                      <span class="imported-badge">Importé</span>
+                    } @else {
+                      <span class="text-muted">—</span>
+                    }
                   </td>
                 }
 

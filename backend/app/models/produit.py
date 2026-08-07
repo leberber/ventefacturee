@@ -16,11 +16,13 @@ class Produit(SQLModel, table=True):
     # Enrichment
     nom_produit: Optional[str] = Field(default=None, max_length=200)
     colisage: Optional[float] = Field(default=None)
+    colisage_palette: Optional[int] = Field(default=None)
     unite: Optional[str] = Field(default=None, max_length=10)
     volume: Optional[float] = Field(default=None)
-    poids: Optional[float] = Field(default=None)
+    poids_unite_vente: Optional[float] = Field(default=None)
     prix: Optional[float] = Field(default=None)
     facturable: bool = Field(default=True)
+    imported: bool = Field(default=False)
 
     updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
@@ -36,22 +38,26 @@ class ProduitRead(SQLModel):
     uom_principale: Optional[str] = None
     nom_produit: Optional[str] = None
     colisage: Optional[float] = None
+    colisage_palette: Optional[int] = None
     unite: Optional[str] = None
     volume: Optional[float] = None
-    poids: Optional[float] = None
+    poids_unite_vente: Optional[float] = None
     prix: Optional[float] = None
     facturable: bool = True
+    imported: bool = False
     updated_at: datetime
 
 
 class ProduitUpdate(SQLModel):
     nom_produit: Optional[str] = None
     colisage: Optional[float] = None
+    colisage_palette: Optional[int] = None
     unite: Optional[str] = None
     volume: Optional[float] = None
-    poids: Optional[float] = None
+    poids_unite_vente: Optional[float] = None
     prix: Optional[float] = None
     facturable: Optional[bool] = None
+    imported: Optional[bool] = None
 
 
 class ProduitPage(SQLModel):
