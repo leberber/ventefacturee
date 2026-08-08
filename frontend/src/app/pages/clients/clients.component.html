@@ -186,33 +186,26 @@
                 }
                 <div class="mob-client-card__meta">
                   <span [class]="categoryBadge[c.category]">{{ categoryLabel[c.category] }}</span>
-                  @if (c.code) {
-                    <code class="font-mono text-muted" style="font-size:var(--font-size-xs)">{{ c.code }}</code>
+                  @if (c.commune) {
+                    <span class="mob-client-card__location"><i class="pi pi-map-marker"></i>{{ c.commune }}</span>
                   }
                 </div>
+                @if (c.phone) {
+                  <span class="mob-client-card__phone"><i class="pi pi-phone"></i>{{ c.phone }}</span>
+                }
               </div>
-              <div class="mob-client-card__palettes">
-                <button class="palette-pill" (click)="openPop($event, c, 'plastique')">
-                  <img src="assets/plastiquepallette.png" class="palette-pill__img" alt="">
-                  <span class="palette-pill__count palette-pill__count--plastic">{{ c.plastic_out ?? 0 }}</span>
+              <div class="mob-client-card__actions">
+                <button class="table-action-btn" title="Modifier" (click)="openEdit(c)">
+                  <i class="pi pi-pencil"></i>
                 </button>
-                <button class="palette-pill" (click)="openPop($event, c, 'bois')">
-                  <img src="assets/woodpallette.png" class="palette-pill__img" alt="">
-                  <span class="palette-pill__count palette-pill__count--wood">{{ c.wood_out ?? 0 }}</span>
+                <button class="table-action-btn" title="BLs"
+                  [routerLink]="['/historique']" [queryParams]="{clientId: c.id}">
+                  <i class="pi pi-list"></i>
+                </button>
+                <button class="table-action-btn table-action-btn--danger" title="Supprimer" (click)="confirmDelete(c)">
+                  <i class="pi pi-trash"></i>
                 </button>
               </div>
-            </div>
-            <div class="mob-client-card__actions">
-              <button class="table-action-btn" title="Modifier" (click)="openEdit(c)">
-                <i class="pi pi-pencil"></i>
-              </button>
-              <button class="table-action-btn" title="BLs"
-                [routerLink]="['/historique']" [queryParams]="{clientId: c.id}">
-                <i class="pi pi-list"></i>
-              </button>
-              <button class="table-action-btn table-action-btn--danger" title="Supprimer" (click)="confirmDelete(c)">
-                <i class="pi pi-trash"></i>
-              </button>
             </div>
           </div>
         }
