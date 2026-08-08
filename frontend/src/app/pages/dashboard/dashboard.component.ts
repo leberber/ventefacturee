@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, inject } from '@angular/core';
+import { Component, OnInit, OnDestroy, HostListener, inject } from '@angular/core';
 import { CommonModule, NgClass } from '@angular/common';
 import {
   PrevendeurService,
@@ -47,7 +47,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
   hoveredFdv: string | null = null;
   hoveredFdvRates: { nom: string; sf: string; sold: number; obj: number; pct: number }[] = [];
   tooltipTop = 0;
-  private _tooltipTimer: ReturnType<typeof setTimeout> | null = null;
 
   readonly WEEK_LABELS = ['S1', 'S2', 'S3', 'S4'];
   readonly Math = Math;
@@ -58,7 +57,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     if (this._animInterval) clearInterval(this._animInterval);
-    if (this._tooltipTimer) clearTimeout(this._tooltipTimer);
   }
 
   private loadInitial() {
@@ -300,8 +298,14 @@ export class DashboardComponent implements OnInit, OnDestroy {
     return pv.achievement_pct ?? 0;
   }
 
+  pvSimplePct(pv: FdvItem): number {
+    const obj = this.data?.objectif_packs_per_route;
+    if (!obj) return 0;
+    return Math.min(Math.round((pv.total / obj) * 100), 999);
+  }
+
   pvObjClass(pv: FdvItem): string {
-    const pct = this.pvObjPct(pv);
+    const pct = this.pvSimplePct(pv);
     if (pct >= 90) return 'pv-obj--green';
     if (pct >= 70) return 'pv-obj--amber';
     if (pct >= 50) return 'pv-obj--orange';
@@ -314,9 +318,10 @@ export class DashboardComponent implements OnInit, OnDestroy {
     return i < 3 ? i : -1;
   }
 
-  // ── Pill hover tooltip ────────────────────────────────────────────────────
-  onPillEnter(ev: MouseEvent, code: string) {
-    if (this._tooltipTimer) clearTimeout(this._tooltipTimer);
+  // ── Pill click tooltip ────────────────────────────────────────────────────
+  togglePillTooltip(ev: MouseEvent, code: string) {
+    ev.stopPropagation();
+    if (this.hoveredFdv === code) { this.hoveredFdv = null; return; }
     const rect = (ev.currentTarget as HTMLElement).getBoundingClientRect();
     const maxH = window.innerHeight * 0.72;
     this.tooltipTop = rect.bottom + 8 + maxH > window.innerHeight
@@ -326,17 +331,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.hoveredFdvRates = this.buildFdvRates(code);
   }
 
-  onPillLeave() {
-    this._tooltipTimer = setTimeout(() => { this.hoveredFdv = null; }, 120);
-  }
-
-  onTooltipEnter() {
-    if (this._tooltipTimer) clearTimeout(this._tooltipTimer);
-  }
-
-  onTooltipLeave() {
-    this.hoveredFdv = null;
-  }
+  @HostListener('document:click')
+  closePillTooltip() { this.hoveredFdv = null; }
 
   private buildFdvRates(code: string): { nom: string; sf: string; sold: number; obj: number; pct: number }[] {
     const result: { nom: string; sf: string; sold: number; obj: number; pct: number }[] = [];

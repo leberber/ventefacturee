@@ -249,7 +249,15 @@
     gap: 0.4rem;
     width: 100%;
     margin-top: 0.35rem;
-    cursor: help;
+  }
+
+  &__info {
+    font-size: 0.75rem;
+    opacity: 0.6;
+    cursor: pointer;
+    margin-left: auto;
+    transition: opacity 0.15s;
+    &:hover { opacity: 1; }
   }
 
   &__bar-track {
@@ -283,6 +291,9 @@
   .pv-obj--red    { .db-filter-pill__bar-fill { background: var(--color-error);   } .db-filter-pill__pct { color: var(--color-error);   } }
 
   &__vs {
+    display: flex;
+    align-items: center;
+    width: 100%;
     font-size: 0.6rem;
     color: var(--text-color-muted);
     margin-top: 0.2rem;

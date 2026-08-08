@@ -50,15 +50,17 @@
             <span class="db-filter-pill__name">{{ pv.nom }}</span>
             <span class="db-filter-pill__total">{{ formatNum(pv.total) }}</span>
             @if (data!.objectif_packs_per_route) {
-              <div class="db-filter-pill__progress" [ngClass]="pvObjClass(pv)"
-                   (mouseenter)="onPillEnter($event, pv.code)"
-                   (mouseleave)="onPillLeave()">
+              <div class="db-filter-pill__progress" [ngClass]="pvObjClass(pv)">
                 <div class="db-filter-pill__bar-track">
-                  <div class="db-filter-pill__bar-fill" [style.width.%]="pvObjPct(pv)"></div>
+                  <div class="db-filter-pill__bar-fill" [style.width.%]="pvSimplePct(pv)"></div>
                 </div>
-                <span class="db-filter-pill__pct">{{ pvObjPct(pv) }}%</span>
+                <span class="db-filter-pill__pct">{{ pvSimplePct(pv) }}%</span>
               </div>
-              <span class="db-filter-pill__vs">/ obj. <span class="db-filter-pill__obj-val">{{ formatNum(data!.objectif_packs_per_route) }}</span></span>
+              <span class="db-filter-pill__vs">
+                / obj. <span class="db-filter-pill__obj-val">{{ formatNum(data!.objectif_packs_per_route) }}</span>
+                <i class="pi pi-info-circle db-filter-pill__info"
+                   (click)="togglePillTooltip($event, pv.code)"></i>
+              </span>
             }
           </button>
         }
@@ -342,8 +344,7 @@
 @if (hoveredFdv) {
   <div class="db-tt"
        [style.top.px]="tooltipTop"
-       (mouseenter)="onTooltipEnter()"
-       (mouseleave)="onTooltipLeave()">
+       (click)="$event.stopPropagation()">
 
     <div class="db-tt__header">
       <span class="db-tt__fdv-name">{{ hoveredFdvName }}</span>
