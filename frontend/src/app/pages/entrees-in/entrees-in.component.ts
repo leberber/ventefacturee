@@ -356,7 +356,7 @@ export class EntreesInComponent implements OnInit {
   pctClass(actual: number | null, obj: number | null): string {
     const p = this.pctNum(actual, obj);
     if (p == null) return '';
-    if (p >= 85) return 'pct-ok';
+    if (p >= 100) return 'pct-ok';
     if (p >= 60) return 'pct-mid';
     return 'pct-low';
   }

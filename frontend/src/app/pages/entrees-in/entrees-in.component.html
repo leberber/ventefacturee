@@ -23,6 +23,11 @@
       <app-period-stepper [mois]="mois" [annee]="annee" (periodChange)="onPeriodChange($event)"></app-period-stepper>
     </div>
     <div class="obj-toolbar__right">
+      <button class="btn-heatmap" (click)="toggleDays()"
+        [class.btn-heatmap--active]="daysExpanded" [disabled]="!data || data.rows.length === 0">
+        <i class="pi" [class.pi-expand]="!daysExpanded" [class.pi-compress]="daysExpanded"></i>
+        Jours
+      </button>
       <button class="btn-heatmap" (click)="toggleAllFamilies()"
         [class.btn-heatmap--active]="allFamiliesCollapsed" [disabled]="!data || data.rows.length === 0">
         <i class="pi" [class.pi-chevron-right]="!allFamiliesCollapsed" [class.pi-chevron-down]="allFamiliesCollapsed"></i>
@@ -83,19 +88,18 @@
         </button>
       </div>
     } @else {
-      <table class="table ein-table">
+      <table class="table ein-table" [class.ein-days-expanded]="daysExpanded">
         <thead>
           <tr>
             <!-- Sticky left -->
-            <th class="th-fam ein-sl ein-sl0">Famille</th>
+            @if (!daysExpanded) {
+              <th class="th-fam ein-sl ein-sl0">Famille</th>
+            }
             <th class="th-code ein-sl ein-sl1">Code</th>
             <th class="th-nom ein-sl ein-sl2">Produit</th>
 
             <!-- Day columns or cumulative -->
             @if (daysExpanded) {
-              <th class="th-days-ctrl" (click)="toggleDays()" title="Réduire">
-                <i class="pi pi-compress"></i>
-              </th>
               @for (day of data.days; track day) {
                 <th class="th-day">
                   <div class="th-day-inner">
@@ -109,19 +113,19 @@
                 </th>
               }
             } @else {
-              <th class="th-cumul" (click)="toggleDays()"
-                [title]="'Voir les ' + data.days.length + ' jour(s) — cliquer pour développer'">
+              <th class="th-cumul">
                 <div class="th-cumul-inner">
                   <span>Cumul. <em>pal.</em></span>
-                  <i class="pi pi-table"></i>
                 </div>
                 <small class="th-cumul-hint">{{ data.days.length }} j</small>
               </th>
             }
 
             <!-- Sticky right -->
-            <th class="th-metric th-ecart ein-sr ein-sr4">Écart pal.</th>
-            <th class="th-metric th-moyj ein-sr ein-sr3">Moy./j pal.</th>
+            @if (!daysExpanded) {
+              <th class="th-metric th-ecart ein-sr ein-sr4">Écart pal.</th>
+              <th class="th-metric th-moyj ein-sr ein-sr3">Moy./j pal.</th>
+            }
             <th class="th-metric th-tonne ein-sr ein-sr2">Total T</th>
             <th class="th-metric th-obj ein-sr ein-sr1">Obj. T</th>
             <th class="th-metric ein-sr ein-sr0">%</th>
@@ -137,7 +141,7 @@
 
             <!-- Famille row -->
             <tr class="obj-fam-row" (click)="toggleFamily(fam.nom)">
-              <td colspan="3" class="obj-fam-cell ein-sl ein-sl0 ein-sl-span"
+              <td [attr.colspan]="daysExpanded ? 2 : 3" class="obj-fam-cell ein-sl ein-sl0 ein-sl-span"
                 [style.background]="fBgSolid" [style.color]="fColor"
                 [style.border-top-color]="fBorder" [style.border-bottom-color]="fBorder">
                 <div class="obj-fam-inner">
@@ -149,7 +153,6 @@
                 </div>
               </td>
               @if (daysExpanded) {
-                <td class="td-day-ctrl" [style.background]="fBg"></td>
                 @for (day of data.days; track day) {
                   @let pv = sumPalDay(fam.rows, day);
                   <td class="td-day td-fam-num" [style.background]="fBg" [style.color]="fColor">
@@ -161,14 +164,16 @@
                   {{ sumPalettes(fam.rows) != null ? formatNum(sumPalettes(fam.rows), 1) : '—' }}
                 </td>
               }
-              <td class="td-metric td-fam-num ein-sr ein-sr4" [style.background]="fBgSolid" [style.color]="fColor">
-                <span [class]="ecartClass(sumEcartPal(fam.rows))">
-                  {{ sumEcartPal(fam.rows) != null ? formatNum(sumEcartPal(fam.rows), 1) : '—' }}
-                </span>
-              </td>
-              <td class="td-metric td-fam-num ein-sr ein-sr3" [style.background]="fBgSolid" [style.color]="fColor">
-                {{ sumMoyJPal(fam.rows) != null ? formatNum(sumMoyJPal(fam.rows), 1) : '—' }}
-              </td>
+              @if (!daysExpanded) {
+                <td class="td-metric td-fam-num ein-sr ein-sr4" [style.background]="fBgSolid" [style.color]="fColor">
+                  <span [class]="ecartClass(sumEcartPal(fam.rows))">
+                    {{ sumEcartPal(fam.rows) != null ? formatNum(sumEcartPal(fam.rows), 1) : '—' }}
+                  </span>
+                </td>
+                <td class="td-metric td-fam-num ein-sr ein-sr3" [style.background]="fBgSolid" [style.color]="fColor">
+                  {{ sumMoyJPal(fam.rows) != null ? formatNum(sumMoyJPal(fam.rows), 1) : '—' }}
+                </td>
+              }
               <td class="td-metric td-fam-num td-tonne ein-sr ein-sr2" [style.background]="fBgSolid" [style.color]="fColor">
                 {{ sumTonne(fam.rows) != null ? formatNum(sumTonne(fam.rows), 2) : '—' }}
               </td>
@@ -187,9 +192,8 @@
                 <!-- Sous-famille row -->
                 @if (showSousFamilles) {
                 <tr class="obj-sf-row">
-                  <td colspan="3" class="ein-sl ein-sl0 ein-sl-span">{{ sf.nom }}</td>
+                  <td [attr.colspan]="daysExpanded ? 2 : 3" class="ein-sl ein-sl0 ein-sl-span">{{ sf.nom }}</td>
                   @if (daysExpanded) {
-                    <td class="td-day-ctrl"></td>
                     @for (day of data.days; track day) {
                       @let spv = sumPalDay(sf.rows, day);
                       <td class="td-day td-sf-num">
@@ -201,14 +205,16 @@
                       {{ sumPalettes(sf.rows) != null ? formatNum(sumPalettes(sf.rows), 1) : '—' }}
                     </td>
                   }
-                  <td class="td-metric td-sf-num ein-sr ein-sr4">
-                    <span [class]="ecartClass(sumEcartPal(sf.rows))">
-                      {{ sumEcartPal(sf.rows) != null ? formatNum(sumEcartPal(sf.rows), 1) : '—' }}
-                    </span>
-                  </td>
-                  <td class="td-metric td-sf-num ein-sr ein-sr3">
-                    {{ sumMoyJPal(sf.rows) != null ? formatNum(sumMoyJPal(sf.rows), 1) : '—' }}
-                  </td>
+                  @if (!daysExpanded) {
+                    <td class="td-metric td-sf-num ein-sr ein-sr4">
+                      <span [class]="ecartClass(sumEcartPal(sf.rows))">
+                        {{ sumEcartPal(sf.rows) != null ? formatNum(sumEcartPal(sf.rows), 1) : '—' }}
+                      </span>
+                    </td>
+                    <td class="td-metric td-sf-num ein-sr ein-sr3">
+                      {{ sumMoyJPal(sf.rows) != null ? formatNum(sumMoyJPal(sf.rows), 1) : '—' }}
+                    </td>
+                  }
                   <td class="td-metric td-sf-num td-tonne ein-sr ein-sr2">
                     {{ sumTonne(sf.rows) != null ? formatNum(sumTonne(sf.rows), 2) : '—' }}
                   </td>
@@ -227,15 +233,16 @@
                 @for (row of sf.rows; track row.code_produit) {
                   @let maxPal = rowMaxPalDay(row);
                   <tr>
-                    <td class="ein-sl ein-sl0">
-                      <span class="famille-pill-badge"
-                        [style.background]="famBg(row.famille)"
-                        [style.color]="famColor(row.famille)">{{ row.famille }}</span>
-                    </td>
+                    @if (!daysExpanded) {
+                      <td class="ein-sl ein-sl0">
+                        <span class="famille-pill-badge"
+                          [style.background]="famBg(row.famille)"
+                          [style.color]="famColor(row.famille)">{{ row.famille }}</span>
+                      </td>
+                    }
                     <td class="ein-sl ein-sl1"><span class="code-chip">{{ row.code_produit }}</span></td>
                     <td class="td-nom ein-sl ein-sl2">{{ row.nom_produit }}</td>
                     @if (daysExpanded) {
-                      <td class="td-day-ctrl"></td>
                       @for (day of data.days; track day) {
                         @let pv = dayPalVal(row, day);
                         <td class="td-day" [class.td-day--nonzero]="pv > 0"
@@ -248,14 +255,16 @@
                         {{ row.total_palettes != null ? formatNum(row.total_palettes, 1) : '—' }}
                       </td>
                     }
-                    <td class="td-metric ein-sr ein-sr4">
-                      <span [class]="ecartClass(ecartPal(row))">
-                        {{ ecartPal(row) != null ? formatNum(ecartPal(row), 1) : '—' }}
-                      </span>
-                    </td>
-                    <td class="td-metric ein-sr ein-sr3">
-                      {{ moyJPal(row) != null ? formatNum(moyJPal(row) ?? 0, 1) : '—' }}
-                    </td>
+                    @if (!daysExpanded) {
+                      <td class="td-metric ein-sr ein-sr4">
+                        <span [class]="ecartClass(ecartPal(row))">
+                          {{ ecartPal(row) != null ? formatNum(ecartPal(row), 1) : '—' }}
+                        </span>
+                      </td>
+                      <td class="td-metric ein-sr ein-sr3">
+                        {{ moyJPal(row) != null ? formatNum(moyJPal(row) ?? 0, 1) : '—' }}
+                      </td>
+                    }
                     <td class="td-metric td-tonne ein-sr ein-sr2">
                       {{ row.total_tonne != null ? formatNum(row.total_tonne, 3) : '—' }}
                     </td>
@@ -276,9 +285,8 @@
         </tbody>
         <tfoot>
           <tr class="ein-total-row">
-            <td colspan="3" class="ein-total-label ein-sl ein-sl0 ein-sl-span"><strong>TOTAL</strong></td>
+            <td [attr.colspan]="daysExpanded ? 2 : 3" class="ein-total-label ein-sl ein-sl0 ein-sl-span"><strong>TOTAL</strong></td>
             @if (daysExpanded) {
-              <td class="td-day-ctrl"></td>
               @for (day of data.days; track day) {
                 @let tpv = sumPalDay(data.rows, day);
                 <td class="td-day td-total-num">
@@ -290,14 +298,16 @@
                 <strong>{{ sumPalettes(data.rows) != null ? formatNum(sumPalettes(data.rows), 1) : '—' }}</strong>
               </td>
             }
-            <td class="td-metric td-total-num ein-sr ein-sr4">
-              <span [class]="ecartClass(sumEcartPal(data.rows))">
-                <strong>{{ sumEcartPal(data.rows) != null ? formatNum(sumEcartPal(data.rows), 1) : '—' }}</strong>
-              </span>
-            </td>
-            <td class="td-metric td-total-num ein-sr ein-sr3">
-              <strong>{{ sumMoyJPal(data.rows) != null ? formatNum(sumMoyJPal(data.rows), 1) : '—' }}</strong>
-            </td>
+            @if (!daysExpanded) {
+              <td class="td-metric td-total-num ein-sr ein-sr4">
+                <span [class]="ecartClass(sumEcartPal(data.rows))">
+                  <strong>{{ sumEcartPal(data.rows) != null ? formatNum(sumEcartPal(data.rows), 1) : '—' }}</strong>
+                </span>
+              </td>
+              <td class="td-metric td-total-num ein-sr ein-sr3">
+                <strong>{{ sumMoyJPal(data.rows) != null ? formatNum(sumMoyJPal(data.rows), 1) : '—' }}</strong>
+              </td>
+            }
             <td class="td-metric td-total-num td-tonne ein-sr ein-sr2">
               <strong>{{ sumTonne(data.rows) != null ? formatNum(sumTonne(data.rows), 2) : '—' }}</strong>
             </td>

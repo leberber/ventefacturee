@@ -44,6 +44,13 @@ thead .ein-sr { z-index: 3; }
   box-shadow: -4px 0 6px -3px rgba(0,0,0,0.10);
 }
 
+// When days are expanded: Famille column hidden → shift Code/Produit left; Écart/Moy.j hidden → shadow moves to sr2
+.ein-days-expanded {
+  .ein-sl1 { left: 0; }
+  .ein-sl2 { left: 90px; }
+  .ein-sr2 { box-shadow: -4px 0 6px -3px rgba(0,0,0,0.10); }
+}
+
 // ── Cumulative column (collapsed state) ───────────────────────────────────────
 .th-cumul {
   cursor: pointer;
@@ -83,27 +90,6 @@ thead .ein-sr { z-index: 3; }
   white-space: nowrap;
   padding: 0.3rem 0.6rem;
   min-width: 90px;
-}
-
-// ── Days expand/collapse control column ───────────────────────────────────────
-.th-days-ctrl {
-  cursor: pointer;
-  padding: 0.35rem 0.5rem;
-  color: var(--text-color-secondary);
-  font-size: 0.75rem;
-  text-align: center;
-  min-width: 28px;
-  width: 28px;
-  user-select: none;
-  transition: color 0.15s;
-
-  &:hover { color: var(--primary-color); }
-}
-
-.td-day-ctrl {
-  width: 28px;
-  min-width: 28px;
-  padding: 0;
 }
 
 // Day header
