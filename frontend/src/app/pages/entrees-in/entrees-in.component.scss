@@ -29,16 +29,18 @@ thead .ein-sr { z-index: 3; }
 .ein-sl1 { left: 80px; min-width: 90px; }
 .ein-sl2 { left: 170px; min-width: 180px; }
 
-// Right offsets (% 64 + obj 80 + tonne 80)
-.ein-sr0 { right: 0; min-width: 64px; }
-.ein-sr1 { right: 64px; min-width: 80px; }
+// Right offsets (% 64 + obj 80 + tonne 80 + moyj 72 + ecart 72)
+.ein-sr0 { right: 0;     min-width: 64px; }
+.ein-sr1 { right: 64px;  min-width: 80px; }
 .ein-sr2 { right: 144px; min-width: 80px; }
+.ein-sr3 { right: 224px; min-width: 72px; }
+.ein-sr4 { right: 296px; min-width: 72px; }
 
 // Shadow on last left-sticky and first right-sticky
 .ein-sl2, .ein-sl-span {
   box-shadow: 4px 0 6px -3px rgba(0,0,0,0.10);
 }
-.ein-sr2 {
+.ein-sr4 {
   box-shadow: -4px 0 6px -3px rgba(0,0,0,0.10);
 }
 
@@ -121,6 +123,17 @@ thead .ein-sr { z-index: 3; }
   align-items: center;
   justify-content: flex-end;
   gap: 0.2rem;
+}
+
+.th-day-date {
+  display: block;
+  text-align: right;
+  font-size: 0.58rem;
+  font-weight: 400;
+  color: var(--text-color-secondary);
+  opacity: 0.7;
+  margin-top: 0.05rem;
+  line-height: 1.2;
 }
 
 .th-day-del {
@@ -208,12 +221,22 @@ th.th-day:hover .th-day-del {
 .pct-mid { color: var(--color-warning); font-weight: 600; }
 .pct-low { color: var(--color-error);   font-weight: 600; }
 
-// Grand total row
-.ein-total-row {
+// Grand total row / sticky footer
+.ein-total-row td { padding: 0.5rem 0.6rem; }
+
+.ein-table tfoot td {
+  position: sticky;
+  bottom: 0;
+  z-index: 2;
   background: var(--surface-200, #f1f5f9);
   border-top: 2px solid var(--surface-border);
+}
 
-  td { padding: 0.5rem 0.6rem; }
+// Corner cells: sticky both horizontally and vertically → highest z-index
+.ein-table tfoot .ein-sl,
+.ein-table tfoot .ein-sr {
+  z-index: 4;
+  background: var(--surface-200, #f1f5f9);
 }
 
 .ein-total-label {
@@ -342,7 +365,7 @@ th.th-day:hover .th-day-del {
   vertical-align: middle;
 }
 
-// ── Heatmap toggle button ──────────────────────────────────────────────────────
+// ── Toolbar toggle buttons (familles / sous-familles) ─────────────────────────
 .btn-heatmap {
   display: inline-flex;
   align-items: center;
@@ -370,187 +393,6 @@ th.th-day:hover .th-day-del {
   }
 
   &:disabled { opacity: 0.4; cursor: default; }
-}
-
-// ── Heatmap panel ──────────────────────────────────────────────────────────────
-.ein-heatmap-wrap {
-  flex: 1;
-  min-height: 0;
-  display: flex;
-  flex-direction: column;
-  background: var(--surface-card);
-  overflow: hidden;
-}
-
-.ein-heatmap-scroll {
-  flex: 1;
-  overflow: auto;
-  overscroll-behavior: contain;
-}
-
-.ein-hm-grid {
-  display: grid;
-  min-width: 100%;
-  width: max-content;
-}
-
-.ein-hm-corner {
-  position: sticky;
-  left: 0;
-  top: 0;
-  z-index: 3;
-  background: var(--surface-50, #f8fafc);
-  padding: 0.3rem 0.6rem;
-  font-size: 0.64rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: var(--text-color-secondary);
-  border-bottom: 1px solid var(--surface-border);
-  border-right: 1px solid var(--surface-border);
-}
-
-.ein-hm-dh {
-  position: sticky;
-  top: 0;
-  z-index: 2;
-  background: var(--surface-50, #f8fafc);
-  padding: 0.25rem 0.2rem;
-  text-align: center;
-  color: var(--text-color-secondary);
-  border-bottom: 1px solid var(--surface-border);
-  white-space: nowrap;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.05rem;
-}
-
-.ein-hm-dh__day {
-  font-size: 0.66rem;
-  font-weight: 700;
-  line-height: 1.2;
-}
-
-.ein-hm-dh__date {
-  font-size: 0.58rem;
-  font-weight: 400;
-  color: var(--text-color-secondary);
-  opacity: 0.75;
-  line-height: 1.2;
-}
-
-.ein-hm-code {
-  position: sticky;
-  left: 0;
-  z-index: 1;
-  background: var(--surface-card);
-  padding: 0.2rem 0.6rem;
-  white-space: nowrap;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 0.05rem;
-  height: 40px;
-  border-right: 1px solid var(--surface-border);
-  border-bottom: 1px solid rgba(0,0,0,0.04);
-}
-
-.ein-hm-code__id {
-  font-size: 0.70rem;
-  font-weight: 700;
-  line-height: 1.2;
-}
-
-.ein-hm-code__name {
-  font-size: 0.60rem;
-  color: var(--text-color-secondary);
-  font-weight: 400;
-  line-height: 1.2;
-  max-width: 200px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.ein-hm-total-h {
-  position: sticky;
-  right: 56px;
-  z-index: 2;
-  background: var(--surface-50, #f8fafc);
-  border-left: 2px solid var(--surface-border);
-  color: var(--obj-accent);
-  small { font-size: 0.58rem; font-weight: 400; }
-}
-
-.ein-hm-total-cell {
-  position: sticky;
-  right: 56px;
-  z-index: 1;
-  background: var(--surface-card);
-  border-left: 2px solid var(--surface-border);
-  flex-direction: column;
-  gap: 0.05rem;
-}
-
-.ein-hm-pct-h {
-  position: sticky;
-  right: 0;
-  z-index: 2;
-  background: var(--surface-50, #f8fafc);
-  border-left: 1px solid var(--surface-border);
-  font-weight: 700;
-  color: var(--text-color-secondary);
-}
-
-.ein-hm-pct-cell {
-  position: sticky;
-  right: 0;
-  z-index: 1;
-  background: var(--surface-card);
-  border-left: 1px solid var(--surface-border);
-  font-size: 0.70rem;
-  font-weight: 700;
-
-  .pct-ok  { color: var(--color-success); font-weight: 700; }
-  .pct-mid { color: var(--color-warning); font-weight: 700; }
-  .pct-low { color: var(--color-error);   font-weight: 700; }
-  .ein-hm-no-obj { color: var(--text-color-secondary); font-weight: 400; font-size: 0.65rem; }
-}
-
-.ein-hm-tot-actual {
-  font-size: 0.70rem !important;
-  font-weight: 700 !important;
-  color: var(--obj-accent) !important;
-  line-height: 1.2;
-}
-
-.ein-hm-tot-obj {
-  font-size: 0.62rem !important;
-  font-weight: 500 !important;
-  color: var(--text-color-secondary) !important;
-  line-height: 1.2;
-}
-
-.ein-hm-cell {
-  height: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--surface-50, #f8fafc);
-  border-right: 1px solid rgba(0,0,0,0.05);
-  border-bottom: 1px solid rgba(0,0,0,0.04);
-  transition: filter 0.1s;
-  cursor: default;
-
-  &:hover { filter: brightness(0.88); }
-
-  span {
-    font-size: 0.60rem;
-    font-weight: 600;
-    font-variant-numeric: tabular-nums;
-    color: rgba(0,0,0,0.60);
-    line-height: 1;
-  }
 }
 
 // ── Empty state

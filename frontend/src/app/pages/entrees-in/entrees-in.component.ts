@@ -66,7 +66,7 @@ export class EntreesInComponent implements OnInit {
   uploading = false;   // step 2: saving to DB
   deleting  = false;
   daysExpanded = false;
-  showHeatmap = false;
+  showSousFamilles = false;
   deleteConfirmDate: string | null = null;
   uploadResult: { imported: number; dates: string[] } | null = null;
   uploadError: string | null = null;
@@ -100,7 +100,11 @@ export class EntreesInComponent implements OnInit {
     this.loading = true;
     const am = `${this.annee}-${String(this.mois).padStart(2, '0')}`;
     this.http.get<MonthData>(`/api/v1/entrees-in/month?annee_mois=${am}`).subscribe({
-      next: data => { this.data = data; this.loading = false; },
+      next: data => {
+        this.data = data;
+        this.loading = false;
+        this.collapsedFamilies = new Set(this.grouped.map(f => f.nom));
+      },
       error: ()   => { this.loading = false; },
     });
   }
@@ -226,32 +230,53 @@ export class EntreesInComponent implements OnInit {
     return `rgba(99,102,241,${alpha.toFixed(2)})`;
   }
 
+  ecartPal(row: EntreeRow): number | null {
+    const obj = this.rowObjPal(row);
+    if (obj == null || row.total_palettes == null) return null;
+    return obj - row.total_palettes;
+  }
+
+  /** Remaining calendar days in the viewed month after the last imported day. */
+  private remainingDays(): number {
+    if (!this.data || this.data.days.length === 0) return 0;
+    const totalInMonth = new Date(this.annee, this.mois, 0).getDate();
+    const lastDay = Math.max(...this.data.days);
+    return Math.max(0, totalInMonth - lastDay);
+  }
+
+  /** Palettes/day needed in remaining days to reach objective (null when month complete or objective met). */
+  moyJPal(row: EntreeRow): number | null {
+    const rem = this.remainingDays();
+    if (rem <= 0) return null;
+    const ecart = this.ecartPal(row);
+    if (ecart == null || ecart <= 0) return null;
+    return ecart / rem;
+  }
+
+  sumEcartPal(rows: EntreeRow[]): number | null {
+    let has = false; let total = 0;
+    for (const r of rows) { const e = this.ecartPal(r); if (e != null) { total += e; has = true; } }
+    return has ? total : null;
+  }
+
+  sumMoyJPal(rows: EntreeRow[]): number | null {
+    const rem = this.remainingDays();
+    if (rem <= 0) return null;
+    const ecart = this.sumEcartPal(rows);
+    if (ecart == null || ecart <= 0) return null;
+    return ecart / rem;
+  }
+
+  ecartClass(e: number | null): string {
+    if (e == null) return '';
+    return e <= 0 ? 'pct-ok' : 'pct-low';
+  }
+
   rowObjPal(row: EntreeRow): number | null {
     if (!row.objectif_tonne || !row.colisage_palette || !row.poids_unite_vente) return null;
     const poids_palette = row.colisage_palette * row.poids_unite_vente;
     if (poids_palette === 0) return null;
     return row.objectif_tonne / poids_palette;
-  }
-
-  // ── Heatmap ───────────────────────────────────────────────────────────────
-  get heatmapMaxPal(): number {
-    if (!this.data) return 0;
-    let max = 0;
-    for (const row of this.data.rows) {
-      const mx = this.rowMaxPalDay(row);
-      if (mx > max) max = mx;
-    }
-    return max;
-  }
-
-  heatBgFam(val: number, max: number, fam: string): string {
-    if (max <= 0 || val <= 0) return '';
-    const c = this.famColor(fam);
-    const r = parseInt(c.slice(1, 3), 16);
-    const g = parseInt(c.slice(3, 5), 16);
-    const b = parseInt(c.slice(5, 7), 16);
-    const alpha = 0.07 + (val / max) * 0.75;
-    return `rgba(${r},${g},${b},${alpha.toFixed(2)})`;
   }
 
   // ── Famille collapsing ────────────────────────────────────────────────────
@@ -260,6 +285,18 @@ export class EntreesInComponent implements OnInit {
     else this.collapsedFamilies.add(fam);
   }
   isFamilyCollapsed(fam: string): boolean { return this.collapsedFamilies.has(fam); }
+
+  get allFamiliesCollapsed(): boolean {
+    return this.grouped.length > 0 && this.collapsedFamilies.size === this.grouped.length;
+  }
+
+  toggleAllFamilies(): void {
+    if (this.allFamiliesCollapsed) {
+      this.collapsedFamilies.clear();
+    } else {
+      for (const fam of this.grouped) this.collapsedFamilies.add(fam.nom);
+    }
+  }
 
   // ── Grouping ──────────────────────────────────────────────────────────────
   get grouped(): FamGroup[] {
