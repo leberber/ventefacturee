@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, inject } from '@angular/core';
+import { Component, OnInit, AfterViewInit, OnDestroy, ViewChild, ElementRef, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
@@ -8,12 +8,13 @@ import { Popover } from 'primeng/popover';
 import { TooltipModule } from 'primeng/tooltip';
 import { MessageService, ConfirmationService } from 'primeng/api';
 
-import { ClientsService } from '../../core/services/clients.service';
+import { ClientsService, ClientsPage } from '../../core/services/clients.service';
 import { AuthService } from '../../core/services/auth.service';
 import { Client } from '../../core/models/client.model';
 import { sortItems, toggleSort } from '../../core/utils/sort.util';
 
 const LS_KEY = 'ventefacturee_clients_columns';
+const BATCH = 100;
 
 interface ColDef {
   field: string;
@@ -30,9 +31,10 @@ interface ColDef {
   providers: [MessageService, ConfirmationService],
   templateUrl: './clients.component.html',
 })
-export class ClientsComponent implements OnInit {
-  @ViewChild('pop')    pop!: Popover;
-  @ViewChild('colMenu') colMenu!: Popover;
+export class ClientsComponent implements OnInit, AfterViewInit, OnDestroy {
+  @ViewChild('pop')          pop!: Popover;
+  @ViewChild('colMenu')      colMenu!: Popover;
+  @ViewChild('tableWrapper') tableWrapper!: ElementRef<HTMLElement>;
 
   private clientsService      = inject(ClientsService);
   private auth                = inject(AuthService);
@@ -43,13 +45,21 @@ export class ClientsComponent implements OnInit {
   private router              = inject(Router);
 
   clients: Client[] = [];
+  total = 0;
   loading = false;
+  loadingMore = false;
   exporting = false;
   searchQuery = '';
   sortCol = 'name';
   sortDir: 1 | -1 = 1;
   activeClient: Client | null = null;
   activeType: 'plastique' | 'bois' = 'plastique';
+
+  private currentSkip = 0;
+  private searchTimeout: any;
+  private boundScrollFn = () => this.checkScroll();
+
+  get hasMore(): boolean { return this.clients.length < this.total; }
 
   readonly allColumns: ColDef[] = [
     { field: 'nom_sodichn',      header: 'Nom Sodichn',   width: '180px', visible: true                   },
@@ -140,15 +150,58 @@ export class ClientsComponent implements OnInit {
     this.sortCol = s.col; this.sortDir = s.dir;
   }
 
-  ngOnInit() { this.loadColumnState(); this.load(); }
+  ngOnInit() { this.loadColumnState(); this.reset(); }
 
-  load() {
-    this.loading = true;
-    this.clientsService.list(this.searchQuery || undefined).subscribe({
-      next: data => { this.clients = data; this.loading = false; },
-      error: () => { this.loading = false; this.toast('error', 'Erreur de chargement'); },
+  ngAfterViewInit() { setTimeout(() => this.attachScrollListener(), 0); }
+
+  ngOnDestroy() { this.tableWrapper?.nativeElement.removeEventListener('scroll', this.boundScrollFn); }
+
+  private attachScrollListener() {
+    const el = this.tableWrapper?.nativeElement;
+    if (el) el.addEventListener('scroll', this.boundScrollFn);
+  }
+
+  private checkScroll() {
+    const el = this.tableWrapper?.nativeElement;
+    if (!el) return;
+    const { scrollHeight, scrollTop, clientHeight } = el;
+    if (scrollHeight - scrollTop - clientHeight < 300 && this.hasMore && !this.loadingMore && !this.loading) {
+      this.loadBatch(true);
+    }
+  }
+
+  onSearch() {
+    clearTimeout(this.searchTimeout);
+    this.searchTimeout = setTimeout(() => this.reset(), 400);
+  }
+
+  private reset() {
+    this.clients = [];
+    this.total = 0;
+    this.currentSkip = 0;
+    this.loadBatch(false);
+  }
+
+  private loadBatch(append: boolean) {
+    if (append) this.loadingMore = true;
+    else this.loading = true;
+    this.clientsService.listPaged({ search: this.searchQuery || undefined, skip: this.currentSkip, limit: BATCH }).subscribe({
+      next: res => {
+        this.clients = append ? [...this.clients, ...res.items] : res.items;
+        this.total = res.total;
+        this.currentSkip += res.items.length;
+        this.loading = false;
+        this.loadingMore = false;
+      },
+      error: () => {
+        this.loading = false;
+        this.loadingMore = false;
+        this.toast('error', 'Erreur de chargement');
+      },
     });
   }
+
+  load() { this.reset(); }
 
   openAdd() { this.router.navigate(['/clients/nouveau']); }
   openMap() { this.router.navigate(['/clients/carte']); }

@@ -8,7 +8,8 @@ from openpyxl.utils import get_column_letter
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from fastapi.responses import StreamingResponse
-from sqlmodel import Session, select
+from pydantic import BaseModel
+from sqlmodel import Session, select, func
 
 from app.api.deps import get_current_user
 from app.database import get_session
@@ -16,6 +17,30 @@ from app.models.client import Client, ClientCreate, ClientUpdate, ClientRead
 from app.models.user import User, UserRole
 
 router = APIRouter()
+
+
+class ClientsPage(BaseModel):
+    items: List[ClientRead]
+    total: int
+
+
+@router.get("/paged", response_model=ClientsPage)
+def list_clients_paged(
+    search: Optional[str] = Query(default=None),
+    is_active: Optional[bool] = None,
+    skip: int = 0,
+    limit: int = 100,
+    session: Session = Depends(get_session),
+) -> Any:
+    q = select(Client)
+    if is_active is not None:
+        q = q.where(Client.is_active == is_active)
+    if search:
+        term = f"%{search}%"
+        q = q.where(Client.name.ilike(term) | Client.phone.ilike(term))
+    total = session.exec(select(func.count()).select_from(q.subquery())).one()
+    clients = session.exec(q.order_by(Client.name).offset(skip).limit(limit)).all()
+    return ClientsPage(items=clients, total=total)
 
 
 @router.get("", response_model=List[ClientRead])
