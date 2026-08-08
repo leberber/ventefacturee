@@ -66,6 +66,7 @@ export class EntreesInComponent implements OnInit {
   uploading = false;   // step 2: saving to DB
   deleting  = false;
   daysExpanded = false;
+  showHeatmap = false;
   deleteConfirmDate: string | null = null;
   uploadResult: { imported: number; dates: string[] } | null = null;
   uploadError: string | null = null;
@@ -88,6 +89,10 @@ export class EntreesInComponent implements OnInit {
 
   dateForDay(day: number): string {
     return `${this.annee}-${String(this.mois).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+  }
+
+  shortDate(day: number): string {
+    return `${String(day).padStart(2, '0')}/${String(this.mois).padStart(2, '0')}`;
   }
 
   // ── Data loading ──────────────────────────────────────────────────────────
@@ -221,6 +226,34 @@ export class EntreesInComponent implements OnInit {
     return `rgba(99,102,241,${alpha.toFixed(2)})`;
   }
 
+  rowObjPal(row: EntreeRow): number | null {
+    if (!row.objectif_tonne || !row.colisage_palette || !row.poids_unite_vente) return null;
+    const poids_palette = row.colisage_palette * row.poids_unite_vente;
+    if (poids_palette === 0) return null;
+    return row.objectif_tonne / poids_palette;
+  }
+
+  // ── Heatmap ───────────────────────────────────────────────────────────────
+  get heatmapMaxPal(): number {
+    if (!this.data) return 0;
+    let max = 0;
+    for (const row of this.data.rows) {
+      const mx = this.rowMaxPalDay(row);
+      if (mx > max) max = mx;
+    }
+    return max;
+  }
+
+  heatBgFam(val: number, max: number, fam: string): string {
+    if (max <= 0 || val <= 0) return '';
+    const c = this.famColor(fam);
+    const r = parseInt(c.slice(1, 3), 16);
+    const g = parseInt(c.slice(3, 5), 16);
+    const b = parseInt(c.slice(5, 7), 16);
+    const alpha = 0.07 + (val / max) * 0.75;
+    return `rgba(${r},${g},${b},${alpha.toFixed(2)})`;
+  }
+
   // ── Famille collapsing ────────────────────────────────────────────────────
   toggleFamily(fam: string): void {
     if (this.collapsedFamilies.has(fam)) this.collapsedFamilies.delete(fam);
@@ -286,8 +319,8 @@ export class EntreesInComponent implements OnInit {
   pctClass(actual: number | null, obj: number | null): string {
     const p = this.pctNum(actual, obj);
     if (p == null) return '';
-    if (p >= 100) return 'pct-ok';
-    if (p >= 50)  return 'pct-mid';
+    if (p >= 85) return 'pct-ok';
+    if (p >= 60) return 'pct-mid';
     return 'pct-low';
   }
 

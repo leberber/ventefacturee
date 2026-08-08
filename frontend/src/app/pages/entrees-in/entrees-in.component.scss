@@ -342,6 +342,217 @@ th.th-day:hover .th-day-del {
   vertical-align: middle;
 }
 
+// ── Heatmap toggle button ──────────────────────────────────────────────────────
+.btn-heatmap {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.4rem 0.85rem;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--surface-border);
+  background: var(--surface-card);
+  color: var(--text-color-secondary);
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+
+  &:hover:not(:disabled) {
+    background: var(--surface-100, #f1f5f9);
+    color: var(--text-color);
+  }
+
+  &--active {
+    background: rgba(var(--obj-accent-rgb), 0.08);
+    color: var(--obj-accent);
+    border-color: rgba(var(--obj-accent-rgb), 0.3);
+  }
+
+  &:disabled { opacity: 0.4; cursor: default; }
+}
+
+// ── Heatmap panel ──────────────────────────────────────────────────────────────
+.ein-heatmap-wrap {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--surface-card);
+  overflow: hidden;
+}
+
+.ein-heatmap-scroll {
+  flex: 1;
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+
+.ein-hm-grid {
+  display: grid;
+  min-width: 100%;
+  width: max-content;
+}
+
+.ein-hm-corner {
+  position: sticky;
+  left: 0;
+  top: 0;
+  z-index: 3;
+  background: var(--surface-50, #f8fafc);
+  padding: 0.3rem 0.6rem;
+  font-size: 0.64rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-color-secondary);
+  border-bottom: 1px solid var(--surface-border);
+  border-right: 1px solid var(--surface-border);
+}
+
+.ein-hm-dh {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: var(--surface-50, #f8fafc);
+  padding: 0.25rem 0.2rem;
+  text-align: center;
+  color: var(--text-color-secondary);
+  border-bottom: 1px solid var(--surface-border);
+  white-space: nowrap;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.05rem;
+}
+
+.ein-hm-dh__day {
+  font-size: 0.66rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.ein-hm-dh__date {
+  font-size: 0.58rem;
+  font-weight: 400;
+  color: var(--text-color-secondary);
+  opacity: 0.75;
+  line-height: 1.2;
+}
+
+.ein-hm-code {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  background: var(--surface-card);
+  padding: 0.2rem 0.6rem;
+  white-space: nowrap;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.05rem;
+  height: 40px;
+  border-right: 1px solid var(--surface-border);
+  border-bottom: 1px solid rgba(0,0,0,0.04);
+}
+
+.ein-hm-code__id {
+  font-size: 0.70rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.ein-hm-code__name {
+  font-size: 0.60rem;
+  color: var(--text-color-secondary);
+  font-weight: 400;
+  line-height: 1.2;
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ein-hm-total-h {
+  position: sticky;
+  right: 56px;
+  z-index: 2;
+  background: var(--surface-50, #f8fafc);
+  border-left: 2px solid var(--surface-border);
+  color: var(--obj-accent);
+  small { font-size: 0.58rem; font-weight: 400; }
+}
+
+.ein-hm-total-cell {
+  position: sticky;
+  right: 56px;
+  z-index: 1;
+  background: var(--surface-card);
+  border-left: 2px solid var(--surface-border);
+  flex-direction: column;
+  gap: 0.05rem;
+}
+
+.ein-hm-pct-h {
+  position: sticky;
+  right: 0;
+  z-index: 2;
+  background: var(--surface-50, #f8fafc);
+  border-left: 1px solid var(--surface-border);
+  font-weight: 700;
+  color: var(--text-color-secondary);
+}
+
+.ein-hm-pct-cell {
+  position: sticky;
+  right: 0;
+  z-index: 1;
+  background: var(--surface-card);
+  border-left: 1px solid var(--surface-border);
+  font-size: 0.70rem;
+  font-weight: 700;
+
+  .pct-ok  { color: var(--color-success); font-weight: 700; }
+  .pct-mid { color: var(--color-warning); font-weight: 700; }
+  .pct-low { color: var(--color-error);   font-weight: 700; }
+  .ein-hm-no-obj { color: var(--text-color-secondary); font-weight: 400; font-size: 0.65rem; }
+}
+
+.ein-hm-tot-actual {
+  font-size: 0.70rem !important;
+  font-weight: 700 !important;
+  color: var(--obj-accent) !important;
+  line-height: 1.2;
+}
+
+.ein-hm-tot-obj {
+  font-size: 0.62rem !important;
+  font-weight: 500 !important;
+  color: var(--text-color-secondary) !important;
+  line-height: 1.2;
+}
+
+.ein-hm-cell {
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--surface-50, #f8fafc);
+  border-right: 1px solid rgba(0,0,0,0.05);
+  border-bottom: 1px solid rgba(0,0,0,0.04);
+  transition: filter 0.1s;
+  cursor: default;
+
+  &:hover { filter: brightness(0.88); }
+
+  span {
+    font-size: 0.60rem;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    color: rgba(0,0,0,0.60);
+    line-height: 1;
+  }
+}
+
 // ── Empty state
 .ein-empty {
   display: flex;

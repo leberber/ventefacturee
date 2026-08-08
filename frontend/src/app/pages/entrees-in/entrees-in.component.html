@@ -23,6 +23,10 @@
       <app-period-stepper [mois]="mois" [annee]="annee" (periodChange)="onPeriodChange($event)"></app-period-stepper>
     </div>
     <div class="obj-toolbar__right">
+      <button class="btn-heatmap" (click)="showHeatmap = !showHeatmap"
+        [class.btn-heatmap--active]="showHeatmap" [disabled]="!data || data.rows.length === 0">
+        <i class="pi pi-th-large"></i> Heatmap
+      </button>
       <input #fileInput type="file" accept=".xlsx,.xls" style="display:none" (change)="onFileSelected($event)">
       <button class="btn-import" (click)="fileInput.click()" [disabled]="parsing || uploading || loading">
         @if (parsing) {
@@ -58,7 +62,7 @@
   }
 
   <!-- Table -->
-  <div class="table-wrapper">
+  <div class="table-wrapper" [style.display]="showHeatmap ? 'none' : ''"  >
     @if (loading) {
       @for (_ of [1,2,3,4,5,6]; track $index) {
         <div class="sk-row"><div class="sk-bar"></div></div>
@@ -269,6 +273,61 @@
       </table>
     }
   </div>
+
+  <!-- Heatmap panel -->
+  @if (showHeatmap && data && data.rows.length > 0) {
+    @let hmMax = heatmapMaxPal;
+    @let hmCols = '200px repeat(' + data.days.length + ', minmax(48px, 1fr)) 100px 56px';
+    <div class="ein-heatmap-wrap">
+      <div class="ein-heatmap-scroll">
+        <div class="ein-hm-grid" [style.grid-template-columns]="hmCols">
+          <!-- Corner -->
+          <div class="ein-hm-corner">Code</div>
+          <!-- Day headers -->
+          @for (day of data.days; track day) {
+            <div class="ein-hm-dh">
+              <span class="ein-hm-dh__day">J{{ day }}</span>
+              <span class="ein-hm-dh__date">{{ shortDate(day) }}</span>
+            </div>
+          }
+          <div class="ein-hm-dh ein-hm-total-h">Total<br><small>/ Obj. pal.</small></div>
+          <div class="ein-hm-dh ein-hm-pct-h">%</div>
+          <!-- Product rows -->
+          @for (row of data.rows; track row.code_produit) {
+            <div class="ein-hm-code">
+              <span class="ein-hm-code__id" [style.color]="famColor(row.famille)">{{ row.code_produit }}</span>
+              <span class="ein-hm-code__name">{{ row.nom_produit }}</span>
+            </div>
+            @for (day of data.days; track day) {
+              @let pv = dayPalVal(row, day);
+              <div class="ein-hm-cell" [style.background]="heatBgFam(pv, hmMax, row.famille)"
+                [title]="pv > 0 ? row.code_produit + ' J' + day + ' : ' + formatNum(pv, 1) + ' pal.' : ''">
+                @if (pv > 0) {
+                  <span>{{ formatNum(pv, 1) }}</span>
+                }
+              </div>
+            }
+            @let objPal = rowObjPal(row);
+            <div class="ein-hm-cell ein-hm-total-cell">
+              <span class="ein-hm-tot-actual">{{ formatNum(row.total_palettes, 1) }}</span>
+              @if (objPal != null) {
+                <span class="ein-hm-tot-obj">/ {{ formatNum(objPal, 0) }}</span>
+              }
+            </div>
+            <div class="ein-hm-cell ein-hm-pct-cell">
+              @if (objPal != null) {
+                <span [class]="pctClass(row.total_tonne, row.objectif_tonne)">
+                  {{ pct(row.total_tonne, row.objectif_tonne) }}
+                </span>
+              } @else {
+                <span class="ein-hm-no-obj">—</span>
+              }
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  }
 
 </div>
 
