@@ -1,0 +1,282 @@
+:host {
+  --obj-accent:     #6366f1;
+  --obj-accent-rgb: 99 102 241;
+}
+
+@import '../../../styles/objectifs-shared';
+
+// Skeleton div variant
+.sk-row { padding: 0.6rem 1rem; }
+
+// ── Day-column table ──────────────────────────────────────────────────────────
+.ein-table {
+  min-width: max-content; // allows horizontal scroll when many days
+}
+
+// Day header
+.th-day {
+  min-width: 62px;
+  max-width: 80px;
+  padding: 0.45rem 0.4rem;
+  text-align: right;
+  font-size: 0.73rem;
+  color: var(--text-color-secondary);
+  white-space: nowrap;
+  vertical-align: middle;
+}
+
+.th-day-inner {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.2rem;
+}
+
+.th-day-del {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  padding: 0;
+  border: none;
+  border-radius: 3px;
+  background: transparent;
+  color: var(--color-error);
+  cursor: pointer;
+  font-size: 0.6rem;
+  line-height: 1;
+  opacity: 0.7;
+  transition: opacity 0.15s, background 0.15s;
+
+  &:hover { opacity: 1; background: rgba(239,68,68,0.12); }
+}
+
+th.th-day:hover .th-day-del {
+  display: flex;
+}
+
+// Day data cell
+.td-day {
+  text-align: right;
+  font-size: 0.78rem;
+  color: var(--text-color-secondary);
+  padding: 0.3rem 0.4rem;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+
+  &--nonzero {
+    color: var(--text-color);
+    font-weight: 500;
+  }
+}
+
+.td-fam-num {
+  text-align: right;
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 0.3rem 0.4rem;
+  white-space: nowrap;
+}
+
+.td-sf-num {
+  text-align: right;
+  font-size: 0.76rem;
+  font-weight: 500;
+  padding: 0.25rem 0.4rem;
+  white-space: nowrap;
+  color: var(--text-color-secondary);
+}
+
+// Metric columns (total colis, pal, T, obj, %)
+.th-metric {
+  min-width: 72px;
+  text-align: right;
+  white-space: nowrap;
+  font-size: 0.73rem;
+}
+
+.td-metric {
+  text-align: right;
+  font-size: 0.8rem;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  padding: 0.3rem 0.5rem;
+}
+
+// Tonne column accent
+.th-tonne { color: var(--obj-accent); border-left: 2px solid var(--obj-accent); }
+.td-tonne { color: var(--obj-accent); border-left: 2px solid rgba(var(--obj-accent-rgb) / 0.2); font-weight: 600; }
+
+// Objective column
+.th-obj { color: var(--color-warning); }
+.td-obj { color: var(--text-color-secondary); }
+
+// Percentage badge
+.pct-ok  { color: var(--color-success); font-weight: 600; }
+.pct-mid { color: var(--color-warning); font-weight: 600; }
+.pct-low { color: var(--color-error);   font-weight: 600; }
+
+// Grand total row
+.ein-total-row {
+  background: var(--surface-200, #f1f5f9);
+  border-top: 2px solid var(--surface-border);
+
+  td { padding: 0.5rem 0.6rem; }
+}
+
+.ein-total-label {
+  font-size: 0.8rem;
+  letter-spacing: 0.05em;
+  color: var(--text-color);
+}
+
+.td-total-num {
+  text-align: right;
+  font-size: 0.8rem;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+// Fixed left columns
+.th-fam  { min-width: 80px; }
+.th-code { min-width: 90px; }
+.th-nom  { min-width: 180px; }
+
+// ── Preview dialog ────────────────────────────────────────────────────────────
+.ein-preview-dialog {
+  max-width: 680px;
+  width: 90vw;
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.ein-preview-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 0.25rem;
+}
+
+.ein-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.25rem 0.65rem;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 500;
+
+  &--info    { background: rgba(37,99,235,0.1);   color: #1d4ed8; }
+  &--neutral { background: var(--surface-200);    color: var(--text-color-secondary); }
+  &--warn    { background: rgba(245,158,11,0.12); color: #b45309; }
+}
+
+.ein-overwrite-warn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  background: rgba(245,158,11,0.1);
+  border: 1px solid rgba(245,158,11,0.3);
+  border-radius: var(--radius-lg);
+  font-size: 0.82rem;
+  color: #92400e;
+
+  i { color: var(--color-warning); }
+}
+
+.ein-unknown-codes {
+  padding: 0.6rem 0.75rem;
+  background: rgba(239,68,68,0.06);
+  border: 1px solid rgba(239,68,68,0.2);
+  border-radius: var(--radius-lg);
+}
+
+.ein-unknown-title {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--color-error);
+  margin: 0 0 0.4rem;
+}
+
+.ein-unknown-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-bottom: 0.4rem;
+}
+
+.ein-unknown-note {
+  font-size: 0.75rem;
+  margin: 0;
+}
+
+.ein-preview-table-wrap {
+  flex: 1;
+  overflow-y: auto;
+  border: 1px solid var(--surface-border);
+  border-radius: var(--radius-lg);
+  max-height: 40vh;
+}
+
+.ein-preview-table {
+  font-size: 0.8rem;
+
+  .obj-fam-row td { padding: 0.3rem 0.6rem; }
+  tr td { padding: 0.25rem 0.5rem; }
+}
+
+.ein-preview-unknown {
+  opacity: 0.65;
+}
+
+.code-chip--unknown {
+  border: 1px dashed var(--color-error);
+  color: var(--color-error);
+  background: rgba(239,68,68,0.06);
+}
+
+.ein-unknown-badge {
+  display: inline-block;
+  margin-left: 0.4rem;
+  padding: 0.05rem 0.4rem;
+  border-radius: 999px;
+  background: rgba(239,68,68,0.12);
+  color: var(--color-error);
+  font-size: 0.7rem;
+  font-weight: 600;
+  vertical-align: middle;
+}
+
+// ── Empty state
+.ein-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 4rem 2rem;
+  text-align: center;
+  color: var(--text-color-secondary);
+}
+
+.ein-empty__icon {
+  font-size: 2.5rem;
+  opacity: 0.35;
+}
+
+.ein-empty__title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-color);
+  margin: 0;
+}
+
+.ein-empty__sub {
+  font-size: 0.85rem;
+  color: var(--text-color-secondary);
+  margin: 0 0 0.5rem;
+}

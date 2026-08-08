@@ -29,6 +29,7 @@ export const routes: Routes = [
       { path: 'prevendeurs', canActivate: [adminOrEmployeGuard], loadComponent: () => import('./pages/prevendeurs/prevendeurs.component').then(m => m.PrevendeursComponent) },
       { path: 'objectifs',    canActivate: [adminOrEmployeGuard], loadComponent: () => import('./pages/objectifs-admin/objectifs-admin.component').then(m => m.ObjectifsAdminComponent) },
       { path: 'objectifs-in', canActivate: [adminOrEmployeGuard], loadComponent: () => import('./pages/objectifs-in/objectifs-in.component').then(m => m.ObjectifsInComponent) },
+      { path: 'entrees-in',   canActivate: [adminOrEmployeGuard], loadComponent: () => import('./pages/entrees-in/entrees-in.component').then(m => m.EntreesInComponent) },
       { path: 'parametres', canActivate: [adminOrEmployeGuard], loadComponent: () => import('./pages/settings/settings.component').then(m => m.SettingsComponent) },
       { path: 'logs',       canActivate: [adminGuard],          loadComponent: () => import('./pages/logs/logs.component').then(m => m.LogsComponent) },
 

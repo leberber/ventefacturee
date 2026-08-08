@@ -25,6 +25,11 @@ data/
 *.xls
 *.csv
 
+# Backups
+backups/
+*.dump
+*.sql
+
 # Logs
 *.log
 logs/

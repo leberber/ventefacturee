@@ -1,0 +1,380 @@
+<!-- Page header -->
+<div class="page-header">
+  <div class="page-header__left">
+    <div class="page-icon"><i class="pi pi-inbox"></i></div>
+    <div>
+      <h1 class="page-header__title">Entrées IN</h1>
+      <p class="page-header__sub">
+        @if (data && data.rows.length > 0) {
+          {{ data.rows.length }} produit(s) — {{ data.uploaded_dates.length }} jour(s) importé(s)
+        } @else {
+          Réceptions journalières
+        }
+      </p>
+    </div>
+  </div>
+</div>
+
+<div class="table-container">
+
+  <!-- Toolbar -->
+  <div class="obj-toolbar">
+    <div class="obj-toolbar__left">
+      <app-period-stepper [mois]="mois" [annee]="annee" (periodChange)="onPeriodChange($event)"></app-period-stepper>
+    </div>
+    <div class="obj-toolbar__right">
+      <input #fileInput type="file" accept=".xlsx,.xls" style="display:none" (change)="onFileSelected($event)">
+      <button class="btn-import" (click)="fileInput.click()" [disabled]="parsing || uploading || loading">
+        @if (parsing) {
+          <i class="pi pi-spin pi-spinner"></i> Lecture…
+        } @else {
+          <i class="pi pi-file-excel"></i> Importer un jour
+        }
+      </button>
+    </div>
+  </div>
+
+  <!-- Upload result banner -->
+  @if (uploadResult) {
+    <div class="obj-import-banner">
+      <div class="obj-import-banner__top">
+        <i class="pi pi-check-circle"></i>
+        <span class="obj-import-banner__msg">
+          <strong>{{ uploadResult.imported }}</strong> ligne(s) importée(s)
+          pour le(s)&nbsp;: {{ uploadResult.dates.join(', ') }}
+        </span>
+        <button class="obj-import-close" (click)="uploadResult = null"><i class="pi pi-times"></i></button>
+      </div>
+    </div>
+  }
+  @if (uploadError) {
+    <div class="obj-import-banner obj-import-banner--warn">
+      <div class="obj-import-banner__top">
+        <i class="pi pi-exclamation-triangle"></i>
+        <span class="obj-import-banner__msg">{{ uploadError }}</span>
+        <button class="obj-import-close" (click)="uploadError = null"><i class="pi pi-times"></i></button>
+      </div>
+    </div>
+  }
+
+  <!-- Table -->
+  <div class="table-wrapper">
+    @if (loading) {
+      @for (_ of [1,2,3,4,5,6]; track $index) {
+        <div class="sk-row"><div class="sk-bar"></div></div>
+      }
+    } @else if (!data || data.rows.length === 0) {
+      <div class="ein-empty">
+        <i class="pi pi-inbox ein-empty__icon"></i>
+        <p class="ein-empty__title">Aucune entrée pour {{ periodLabel }}</p>
+        <p class="ein-empty__sub">Importez un fichier Excel pour ajouter les réceptions du jour</p>
+        <input #fileInput2 type="file" accept=".xlsx,.xls" style="display:none" (change)="onFileSelected($event)">
+        <button class="btn-import" (click)="fileInput2.click()" [disabled]="parsing || uploading">
+          <i class="pi pi-file-excel"></i> Importer un jour
+        </button>
+      </div>
+    } @else {
+      <table class="table ein-table">
+        <thead>
+          <tr>
+            <th class="th-fam">Famille</th>
+            <th class="th-code">Code</th>
+            <th class="th-nom">Produit</th>
+            @for (day of data.days; track day) {
+              <th class="th-day">
+                <div class="th-day-inner">
+                  <span>J{{ day }}</span>
+                  <button class="th-day-del" [title]="'Supprimer J' + day"
+                    (click)="$event.stopPropagation(); deleteConfirmDate = dateForDay(day)">
+                    <i class="pi pi-times"></i>
+                  </button>
+                </div>
+              </th>
+            }
+            <th class="th-metric">Colis</th>
+            <th class="th-metric">Pal.</th>
+            <th class="th-metric th-tonne">Total T</th>
+            <th class="th-metric th-obj">Obj. T</th>
+            <th class="th-metric th-pct">%</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (fam of grouped; track fam.nom) {
+            @let fColor = famColor(fam.nom);
+            @let fBg    = famBg(fam.nom);
+            @let fBgL   = famBgLight(fam.nom);
+            @let fBorder = fColor + '33';
+
+            <!-- Famille row -->
+            <tr class="obj-fam-row" (click)="toggleFamily(fam.nom)">
+              <td colspan="3" class="obj-fam-cell"
+                [style.background]="fBg" [style.color]="fColor"
+                [style.border-top-color]="fBorder" [style.border-bottom-color]="fBorder">
+                <div class="obj-fam-inner">
+                  <i class="pi obj-fam-chevron"
+                    [class.pi-chevron-down]="!isFamilyCollapsed(fam.nom)"
+                    [class.pi-chevron-right]="isFamilyCollapsed(fam.nom)"></i>
+                  {{ fam.nom | uppercase }}
+                  <span class="obj-fam-count">{{ fam.sfs.length }} sf</span>
+                </div>
+              </td>
+              @for (day of data.days; track day) {
+                <td class="td-day td-fam-num"
+                  [style.background]="fBg" [style.color]="fColor">
+                  @let cv = sumColisDay(fam.rows, day);
+                  {{ cv > 0 ? formatNum(cv, 0) : '' }}
+                </td>
+              }
+              <td class="td-metric td-fam-num" [style.background]="fBg" [style.color]="fColor">
+                {{ formatNum(sumColis(fam.rows), 0) }}
+              </td>
+              <td class="td-metric td-fam-num" [style.background]="fBg" [style.color]="fColor">
+                {{ sumPalettes(fam.rows) != null ? formatNum(sumPalettes(fam.rows), 1) : '—' }}
+              </td>
+              <td class="td-metric td-fam-num td-tonne" [style.background]="fBg" [style.color]="fColor">
+                {{ sumTonne(fam.rows) != null ? formatNum(sumTonne(fam.rows), 2) : '—' }}
+              </td>
+              <td class="td-metric td-fam-num td-obj" [style.background]="fBg" [style.color]="fColor">
+                {{ sumObjTonne(fam.rows) != null ? formatNum(sumObjTonne(fam.rows), 2) : '—' }}
+              </td>
+              <td class="td-metric td-fam-num" [style.background]="fBg" [style.color]="fColor">
+                <span [class]="pctClass(sumTonne(fam.rows), sumObjTonne(fam.rows))">
+                  {{ pct(sumTonne(fam.rows), sumObjTonne(fam.rows)) }}
+                </span>
+              </td>
+            </tr>
+
+            @if (!isFamilyCollapsed(fam.nom)) {
+              @for (sf of fam.sfs; track sf.nom) {
+                <!-- Sous-famille row -->
+                <tr class="obj-sf-row">
+                  <td colspan="3" [style.background]="fBgL">{{ sf.nom }}</td>
+                  @for (day of data.days; track day) {
+                    <td class="td-day td-sf-num" [style.background]="fBgL">
+                      @let sv = sumColisDay(sf.rows, day);
+                      {{ sv > 0 ? formatNum(sv, 0) : '' }}
+                    </td>
+                  }
+                  <td class="td-metric td-sf-num" [style.background]="fBgL">{{ formatNum(sumColis(sf.rows), 0) }}</td>
+                  <td class="td-metric td-sf-num" [style.background]="fBgL">
+                    {{ sumPalettes(sf.rows) != null ? formatNum(sumPalettes(sf.rows), 1) : '—' }}
+                  </td>
+                  <td class="td-metric td-sf-num td-tonne" [style.background]="fBgL">
+                    {{ sumTonne(sf.rows) != null ? formatNum(sumTonne(sf.rows), 2) : '—' }}
+                  </td>
+                  <td class="td-metric td-sf-num td-obj" [style.background]="fBgL">
+                    {{ sumObjTonne(sf.rows) != null ? formatNum(sumObjTonne(sf.rows), 2) : '—' }}
+                  </td>
+                  <td class="td-metric td-sf-num" [style.background]="fBgL">
+                    <span [class]="pctClass(sumTonne(sf.rows), sumObjTonne(sf.rows))">
+                      {{ pct(sumTonne(sf.rows), sumObjTonne(sf.rows)) }}
+                    </span>
+                  </td>
+                </tr>
+
+                <!-- Product rows -->
+                @for (row of sf.rows; track row.code_produit) {
+                  <tr>
+                    <td>
+                      <span class="famille-pill-badge"
+                        [style.background]="famBg(row.famille)"
+                        [style.color]="famColor(row.famille)">{{ row.famille }}</span>
+                    </td>
+                    <td><span class="code-chip">{{ row.code_produit }}</span></td>
+                    <td class="td-nom" [title]="row.nom_produit">{{ row.nom_produit }}</td>
+                    @for (day of data.days; track day) {
+                      @let dv = dayVal(row, day);
+                      <td class="td-day" [class.td-day--nonzero]="dv > 0">
+                        {{ dv > 0 ? dv : '' }}
+                      </td>
+                    }
+                    <td class="td-metric">{{ formatNum(row.total_colis, 0) }}</td>
+                    <td class="td-metric">
+                      {{ row.total_palettes != null ? formatNum(row.total_palettes, 1) : '—' }}
+                    </td>
+                    <td class="td-metric td-tonne">
+                      {{ row.total_tonne != null ? formatNum(row.total_tonne, 3) : '—' }}
+                    </td>
+                    <td class="td-metric td-obj">
+                      {{ row.objectif_tonne != null ? formatNum(row.objectif_tonne, 2) : '—' }}
+                    </td>
+                    <td class="td-metric">
+                      <span [class]="pctClass(row.total_tonne, row.objectif_tonne)">
+                        {{ pct(row.total_tonne, row.objectif_tonne) }}
+                      </span>
+                    </td>
+                  </tr>
+                }
+              }
+            }
+          }
+
+          <!-- Grand total row -->
+          @if (data.rows.length > 0) {
+            <tr class="ein-total-row">
+              <td colspan="3" class="ein-total-label"><strong>TOTAL</strong></td>
+              @for (day of data.days; track day) {
+                <td class="td-day td-total-num">
+                  @let tv = sumColisDay(data.rows, day);
+                  {{ tv > 0 ? formatNum(tv, 0) : '' }}
+                </td>
+              }
+              <td class="td-metric td-total-num"><strong>{{ formatNum(sumColis(data.rows), 0) }}</strong></td>
+              <td class="td-metric td-total-num">
+                <strong>{{ sumPalettes(data.rows) != null ? formatNum(sumPalettes(data.rows), 1) : '—' }}</strong>
+              </td>
+              <td class="td-metric td-total-num td-tonne">
+                <strong>{{ sumTonne(data.rows) != null ? formatNum(sumTonne(data.rows), 2) : '—' }}</strong>
+              </td>
+              <td class="td-metric td-total-num td-obj">
+                <strong>{{ sumObjTonne(data.rows) != null ? formatNum(sumObjTonne(data.rows), 2) : '—' }}</strong>
+              </td>
+              <td class="td-metric td-total-num">
+                <span [class]="pctClass(sumTonne(data.rows), sumObjTonne(data.rows))">
+                  <strong>{{ pct(sumTonne(data.rows), sumObjTonne(data.rows)) }}</strong>
+                </span>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+  </div>
+
+</div>
+
+<!-- Preview / validation dialog -->
+@if (showPreviewDialog && parseResult) {
+  <div class="obj-backdrop" (click)="cancelPreview()">
+    <div class="obj-dialog ein-preview-dialog" (click)="$event.stopPropagation()">
+
+      <h3 class="obj-dialog__title"><i class="pi pi-eye"></i> Vérification avant import</h3>
+
+      <!-- Summary chips -->
+      <div class="ein-preview-summary">
+        <span class="ein-chip ein-chip--info">
+          <i class="pi pi-calendar"></i>
+          @for (d of parseResult.dates; track d) { {{ d }} }
+        </span>
+        <span class="ein-chip ein-chip--neutral">
+          <i class="pi pi-list"></i> {{ parseResult.total_entries }} ligne(s)
+        </span>
+        @if (parseResult.unknown_codes.length > 0) {
+          <span class="ein-chip ein-chip--warn">
+            <i class="pi pi-exclamation-triangle"></i>
+            {{ parseResult.unknown_codes.length }} code(s) inconnu(s)
+          </span>
+        }
+      </div>
+
+      <!-- Overwrite warnings -->
+      @for (date of parseResult.dates; track date) {
+        @if (parseResult.existing_by_date[date]) {
+          <div class="ein-overwrite-warn">
+            <i class="pi pi-exclamation-triangle"></i>
+            Le <strong>{{ date }}</strong> a déjà
+            <strong>{{ parseResult.existing_by_date[date] }}</strong> entrée(s) — elles seront remplacées.
+          </div>
+        }
+      }
+
+      <!-- Unknown codes -->
+      @if (parseResult.unknown_codes.length > 0) {
+        <div class="ein-unknown-codes">
+          <p class="ein-unknown-title"><i class="pi pi-question-circle"></i> Codes non trouvés dans le catalogue&nbsp;:</p>
+          <div class="ein-unknown-list">
+            @for (c of parseResult.unknown_codes; track c) {
+              <span class="code-chip">{{ c }}</span>
+            }
+          </div>
+          <p class="ein-unknown-note text-muted">Ces produits seront importés mais ne pourront pas être liés aux objectifs.</p>
+        </div>
+      }
+
+      <!-- Preview table grouped by famille -->
+      <div class="ein-preview-table-wrap">
+        <table class="table ein-preview-table">
+          <thead>
+            <tr>
+              <th>Famille</th>
+              <th>Code</th>
+              <th>Produit</th>
+              <th class="th-metric">Nb Colis</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (group of previewGrouped; track group.famille) {
+              <tr class="obj-fam-row">
+                <td colspan="3" class="obj-fam-cell"
+                  [style.background]="famBg(group.famille)"
+                  [style.color]="famColor(group.famille)">
+                  <div class="obj-fam-inner">
+                    {{ group.famille | uppercase }}
+                    <span class="obj-fam-count">{{ group.rows.length }} produit(s)</span>
+                  </div>
+                </td>
+                <td class="td-metric td-fam-num"
+                  [style.background]="famBg(group.famille)"
+                  [style.color]="famColor(group.famille)">
+                  {{ formatNum(group.total_colis, 0) }}
+                </td>
+              </tr>
+              @for (row of group.rows; track row.code_produit) {
+                <tr [class.ein-preview-unknown]="!row.known">
+                  <td>
+                    <span class="famille-pill-badge"
+                      [style.background]="famBg(row.famille)"
+                      [style.color]="famColor(row.famille)">{{ row.famille || '—' }}</span>
+                  </td>
+                  <td>
+                    <span class="code-chip" [class.code-chip--unknown]="!row.known">{{ row.code_produit }}</span>
+                  </td>
+                  <td class="td-nom" [title]="row.nom_produit">
+                    {{ row.nom_produit }}
+                    @if (!row.known) { <span class="ein-unknown-badge">inconnu</span> }
+                  </td>
+                  <td class="td-metric">{{ formatNum(row.quantite_colis, 0) }}</td>
+                </tr>
+              }
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <div class="obj-dialog__actions">
+        <button class="btn-secondary" (click)="cancelPreview()" [disabled]="uploading">Annuler</button>
+        <button class="btn-save" (click)="confirmUpload()" [disabled]="uploading">
+          @if (uploading) {
+            <i class="pi pi-spin pi-spinner"></i> Import en cours…
+          } @else {
+            <i class="pi pi-check"></i> Confirmer l'import
+          }
+        </button>
+      </div>
+
+    </div>
+  </div>
+}
+
+<!-- Delete confirmation dialog -->
+@if (deleteConfirmDate) {
+  <div class="obj-backdrop" (click)="deleteConfirmDate = null">
+    <div class="obj-dialog" (click)="$event.stopPropagation()">
+      <h3 class="obj-dialog__title"><i class="pi pi-trash"></i> Supprimer les entrées</h3>
+      <p class="obj-dialog__body">
+        Supprimer toutes les entrées du <strong>{{ deleteConfirmDate }}</strong> ?<br>
+        <small class="text-muted">Cette action est irréversible.</small>
+      </p>
+      <div class="obj-dialog__actions">
+        <button class="btn-secondary" (click)="deleteConfirmDate = null" [disabled]="deleting">Annuler</button>
+        <button class="btn-danger" (click)="confirmDelete()" [disabled]="deleting">
+          @if (deleting) {
+            <i class="pi pi-spin pi-spinner"></i> Suppression…
+          } @else {
+            <i class="pi pi-trash"></i> Supprimer
+          }
+        </button>
+      </div>
+    </div>
+  </div>
+}
