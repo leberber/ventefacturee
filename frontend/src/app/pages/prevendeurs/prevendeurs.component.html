@@ -11,7 +11,9 @@
   </div>
 
   <div class="table-container">
-    <div class="table-wrapper">
+
+    <!-- Desktop table -->
+    <div class="table-wrapper mob-hide">
       @if (loading) {
         @for (_ of [1,2,3,4]; track $index) {
           <div style="padding:0.65rem 1rem;border-bottom:1px solid var(--border-color-light)">
@@ -105,6 +107,95 @@
         </table>
       }
     </div>
+
+    <!-- Mobile cards -->
+    <div class="pv-card-list desk-hide">
+      @if (loading) {
+        @for (_ of [1,2,3,4]; track $index) {
+          <div class="pv-card pv-card--skeleton">
+            <div class="pv-sk-line"></div>
+            <div class="pv-sk-line pv-sk-line--short"></div>
+          </div>
+        }
+      } @else if (stats.length === 0) {
+        <div class="table-empty">Aucun prévendeur actif</div>
+      } @else {
+        @for (s of stats; track s.id) {
+          <div class="pv-card" [class.pv-card--open]="expandedId === s.id" (click)="toggle(s.id)">
+
+            <div class="pv-card__header">
+              <div class="pv-card__name">
+                <strong>{{ s.full_name }}</strong>
+                <span class="badge badge--info">{{ s.employe_code }}</span>
+              </div>
+              <i class="pi pv-card__chevron"
+                [class.pi-chevron-down]="expandedId === s.id"
+                [class.pi-chevron-right]="expandedId !== s.id"></i>
+            </div>
+
+            <div class="pv-progress pv-card__progress">
+              <div class="pv-progress__track">
+                <div class="pv-progress__fill"
+                     [style.width.%]="s.completion_pct"
+                     [style.background]="progressColor(s.completion_pct)">
+                </div>
+              </div>
+              <span class="pv-progress__label">{{ s.completion_pct }}%</span>
+            </div>
+
+            <div class="pv-card__meta">
+              <span class="pv-card__stat">
+                <i class="pi pi-users"></i> {{ s.total_clients }} clients
+              </span>
+              <span class="pv-card__stat">
+                <i class="pi pi-check-circle"></i> RC: {{ s.clients_with_sodichn }}/{{ s.total_clients }}
+              </span>
+              @if (s.last_activity) {
+                <span class="pv-card__stat pv-card__stat--muted">
+                  <i class="pi pi-clock"></i> {{ s.last_activity }}
+                </span>
+              }
+            </div>
+
+            @if (expandedId === s.id) {
+              <div class="pv-card__clients" (click)="$event.stopPropagation()">
+                @for (c of s.clients; track c.code_client) {
+                  <div class="pv-card-client">
+                    <div class="pv-card-client__info">
+                      <span class="pv-card-client__code">{{ c.code_client }}</span>
+                      <span class="pv-card-client__name">{{ c.nom_client }}</span>
+                    </div>
+                    <div class="pv-card-client__rc">
+                      @if (editingKey === c.code_client) {
+                        <input class="pv-edit-input"
+                               [(ngModel)]="editingValue"
+                               placeholder="Nom RC…"
+                               (keydown.enter)="saveEdit(c, $event)"
+                               (keydown.escape)="cancelEdit($event)"
+                               (blur)="saveEdit(c, $event)" />
+                      } @else {
+                        <span class="pv-edit-value"
+                              [class.pv-edit-value--empty]="!c.nom_sodichn"
+                              (click)="startEdit(c, $event)">
+                          @if (savingKey === c.code_client) {
+                            <i class="pi pi-spin pi-spinner"></i>
+                          } @else {
+                            <i class="pi pi-pencil pv-edit-icon"></i>
+                          }
+                          {{ c.nom_sodichn || '—' }}
+                        </span>
+                      }
+                    </div>
+                  </div>
+                }
+              </div>
+            }
+
+          </div>
+        }
+      }
+    </div>
+
   </div>
 
 </div>
