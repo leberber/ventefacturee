@@ -35,6 +35,8 @@ interface ParsePreviewRow {
   famille:         string;
   date:            string;
   quantite_colis:  number;
+  nb_palettes:     number | null;
+  tonnes:          number | null;
   known:           boolean;
 }
 
@@ -163,7 +165,7 @@ export class EntreesInComponent implements OnInit {
   }
 
   // Grouped preview for the dialog
-  get previewGrouped(): { famille: string; rows: ParsePreviewRow[]; total_colis: number }[] {
+  get previewGrouped(): { famille: string; rows: ParsePreviewRow[]; total_colis: number; total_palettes: number | null; total_tonnes: number | null }[] {
     if (!this.parseResult) return [];
     const map = new Map<string, ParsePreviewRow[]>();
     for (const r of this.parseResult.preview) {
@@ -171,11 +173,17 @@ export class EntreesInComponent implements OnInit {
       if (!map.has(fam)) map.set(fam, []);
       map.get(fam)!.push(r);
     }
-    return [...map.entries()].map(([famille, rows]) => ({
-      famille,
-      rows,
-      total_colis: rows.reduce((s, r) => s + r.quantite_colis, 0),
-    }));
+    return [...map.entries()].map(([famille, rows]) => {
+      const palVals = rows.map(r => r.nb_palettes).filter(v => v != null) as number[];
+      const tVals   = rows.map(r => r.tonnes).filter(v => v != null) as number[];
+      return {
+        famille,
+        rows,
+        total_colis:    rows.reduce((s, r) => s + r.quantite_colis, 0),
+        total_palettes: palVals.length ? palVals.reduce((a, b) => a + b, 0) : null,
+        total_tonnes:   tVals.length   ? tVals.reduce((a, b) => a + b, 0)   : null,
+      };
+    });
   }
 
   // ── Delete date ───────────────────────────────────────────────────────────

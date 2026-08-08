@@ -300,6 +300,8 @@
               <th>Code</th>
               <th>Produit</th>
               <th class="th-metric">Nb Colis</th>
+              <th class="th-metric">Palettes</th>
+              <th class="th-metric th-tonne">Tonnes</th>
             </tr>
           </thead>
           <tbody>
@@ -313,10 +315,14 @@
                     <span class="obj-fam-count">{{ group.rows.length }} produit(s)</span>
                   </div>
                 </td>
-                <td class="td-metric td-fam-num"
-                  [style.background]="famBg(group.famille)"
-                  [style.color]="famColor(group.famille)">
+                <td class="td-metric td-fam-num" [style.background]="famBg(group.famille)" [style.color]="famColor(group.famille)">
                   {{ formatNum(group.total_colis, 0) }}
+                </td>
+                <td class="td-metric td-fam-num" [style.background]="famBg(group.famille)" [style.color]="famColor(group.famille)">
+                  {{ group.total_palettes != null ? formatNum(group.total_palettes, 2) : '—' }}
+                </td>
+                <td class="td-metric td-fam-num td-tonne" [style.background]="famBg(group.famille)" [style.color]="famColor(group.famille)">
+                  {{ group.total_tonnes != null ? formatNum(group.total_tonnes, 3) : '—' }}
                 </td>
               </tr>
               @for (row of group.rows; track row.code_produit) {
@@ -334,6 +340,8 @@
                     @if (!row.known) { <span class="ein-unknown-badge">inconnu</span> }
                   </td>
                   <td class="td-metric">{{ formatNum(row.quantite_colis, 0) }}</td>
+                  <td class="td-metric">{{ row.nb_palettes != null ? formatNum(row.nb_palettes, 2) : '—' }}</td>
+                  <td class="td-metric td-tonne">{{ row.tonnes != null ? formatNum(row.tonnes, 3) : '—' }}</td>
                 </tr>
               }
             }

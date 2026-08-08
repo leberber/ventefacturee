@@ -84,13 +84,19 @@ async def parse_entrees(
     preview = []
     for code, entry_date, qty in entries:
         p = produit_map.get(code)
+        col_pal = p.colisage_palette if p else None
+        poids   = p.poids_unite_vente if p else None
+        nb_pal  = round(qty / col_pal, 2) if col_pal else None
+        tonnes  = round(qty * poids, 3)   if poids   else None
         preview.append({
-            "code_produit": code,
-            "nom_produit": (p.description_produit or p.nom_produit or code) if p else code,
-            "famille":     (p.famille or "").strip() if p else "",
-            "date":        str(entry_date),
+            "code_produit":   code,
+            "nom_produit":    (p.description_produit or p.nom_produit or code) if p else code,
+            "famille":        (p.famille or "").strip() if p else "",
+            "date":           str(entry_date),
             "quantite_colis": qty,
-            "known": p is not None,
+            "nb_palettes":    nb_pal,
+            "tonnes":         tonnes,
+            "known":          p is not None,
         })
 
     return {
