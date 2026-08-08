@@ -659,7 +659,9 @@
 // =============================================================================
 
 // Print-only utility — hidden on screen, shown in print media
-.print-only { display: none; }
+@media screen {
+  .print-only { display: none !important; }
+}
 
 // Summary header
 .rapport-summary {
@@ -793,6 +795,8 @@
     text-transform: uppercase;
     letter-spacing: 0.07em;
     color: #8a99b8;
+
+    &::after { content: ' :'; }
   }
 
   &__tag-value {
@@ -1102,6 +1106,100 @@
 // PRINT
 // =============================================================================
 
+// =============================================================================
+// MOBILE (≤768px)
+// =============================================================================
+
+@media (max-width: 768px) {
+  // Remove fixed height — page scrolls naturally
+  :host {
+    height: auto;
+    gap: 0.5rem;
+  }
+
+  // Remove overflow clipping from container so content expands
+  .rf-container {
+    flex: none;
+    overflow: visible;
+  }
+
+  .rf-main {
+    flex: none;
+    overflow-y: visible;
+  }
+
+  // Stack header: back+title on top, filters below
+  .page-header__top {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+  }
+
+  .page-header__filters {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+    flex-shrink: 1;
+  }
+
+  .filter-card {
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  app-date-range-picker {
+    display: block;
+    width: 100%;
+  }
+
+  // Clients pill: full width
+  .rf-clients-pill {
+    width: 100%;
+    justify-content: center;
+  }
+
+  // Toolbar: stack meta info and actions
+  .rf-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+    padding: 0.65rem 1rem;
+    min-height: 0;
+  }
+
+  // Actions bar: wrap on small screens
+  .rf-actions-bar {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  // Action buttons grow equally
+  .rf-btn {
+    flex: 1;
+    justify-content: center;
+  }
+}
+
+// Popover: narrower on mobile, 2-column client grid
+::ng-deep {
+  @media (max-width: 768px) {
+    .rf-pop {
+      width: min(calc(100vw - 2rem), 420px) !important;
+    }
+    .rf-pop__list {
+      grid-template-columns: repeat(2, 1fr) !important;
+    }
+    // Date range picker full-width inside report header
+    .drp { display: block; width: 100%; }
+    .drp__trigger { width: 100%; box-sizing: border-box; }
+  }
+}
+
+// filter-card-select: no min-width on mobile
+::ng-deep .filter-card-select.p-select {
+  @media (max-width: 768px) { min-width: 0; }
+}
+
 @media print {
   * {
     -webkit-print-color-adjust: exact !important;
@@ -1141,7 +1239,35 @@
     page-break-after: always;
     break-after: page;
   }
-  .rc-header { flex-shrink: 0; }
+  .rc-header {
+    flex-shrink: 0;
+
+    // Ensure label : value are visually separated with a bigger gap
+    &__tag { gap: 0.4rem; }
+    &__tag-label { letter-spacing: 0.05em; }
+  }
+
+  // Narrow print (mobile browser print preview, typically uses screen viewport width)
+  @media (max-width: 500px) {
+    .rc-header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.75rem;
+    }
+
+    .rc-header__right {
+      align-items: flex-start;
+      flex-direction: row;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .rc-kpi-row {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
   .rc-kpi-row { flex-shrink: 0; }
   .rc-breakdown { flex: 1; }
   .rc-breakdown__list { border-color: #d0d8e8; }

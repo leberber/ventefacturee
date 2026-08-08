@@ -153,6 +153,8 @@
   padding: 0;
   min-width: 280px;
 
+  @media (max-width: 768px) { min-width: 0; }
+
   .p-select-label {
     padding: 0;
     font-size: var(--font-size-sm);
@@ -187,6 +189,12 @@
   height: 50px;
   min-width: 220px;
   width: 220px;
+
+  @media (max-width: 768px) {
+    width: 100% !important;
+    min-width: 0 !important;
+    height: 44px;
+  }
   border-radius: 9999px !important;
   border: 1.5px solid rgba(234, 143, 50, 0.35);
   background: linear-gradient(135deg, rgba(255, 183, 77, 0.08), rgba(255, 138, 0, 0.05));
@@ -380,6 +388,92 @@
 @keyframes bounce {
   0%, 100% { transform: translateY(0); }
   50%       { transform: translateY(4px); }
+}
+
+// =============================================================================
+// MOBILE (≤768px)
+// =============================================================================
+
+@media (max-width: 768px) {
+  // Remove fixed height — page scrolls naturally on mobile
+  :host {
+    height: auto;
+    gap: 0.5rem;
+  }
+
+  // Remove overflow clipping so table can expand freely
+  .table-container {
+    overflow: visible;
+    flex: none;
+
+    .table-wrapper {
+      flex: none;
+      height: auto !important;
+      overflow: auto;
+    }
+  }
+
+  // Stack title and filters vertically
+  .page-header__top {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+  }
+
+  .page-header__filters {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  // Each filter card fills the row
+  .filter-card {
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  // Date range picker host + inner trigger full width
+  app-date-range-picker {
+    display: block;
+    width: 100%;
+  }
+
+  // Tighter toolbar padding
+  .prod-toolbar {
+    padding: 0.75rem 1rem 0.5rem;
+  }
+
+  // Stack search + famille select
+  .prod-toolbar__top {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+
+    &-left {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 0.5rem;
+    }
+  }
+
+  // Full-width search
+  .prod-search {
+    width: 100%;
+    height: 44px;
+  }
+
+  // Row count next to action buttons
+  .table-actions {
+    justify-content: flex-end;
+  }
+}
+
+// Date range picker: full width trigger on mobile
+::ng-deep {
+  @media (max-width: 768px) {
+    app-date-range-picker .drp,
+    .drp { display: block; width: 100%; }
+    .drp__trigger { width: 100%; box-sizing: border-box; }
+  }
 }
 
 @keyframes pulse {

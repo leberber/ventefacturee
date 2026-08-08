@@ -472,3 +472,63 @@
   color: #2563eb;
   letter-spacing: 0.02em;
 }
+
+// =============================================================================
+// MOBILE (≤768px)
+// =============================================================================
+
+@media (max-width: 768px) {
+  :host {
+    height: auto;
+    gap: 0.5rem;
+  }
+
+  .table-container {
+    overflow: visible;
+    flex: none;
+
+    .table-wrapper {
+      flex: none;
+      height: auto !important;
+      overflow: auto;
+    }
+  }
+
+  .prod-toolbar {
+    padding: 0.75rem 1rem 0.5rem;
+  }
+
+  // Search fills available width, buttons stay right-aligned
+  .prod-toolbar__top-left {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .prod-search {
+    width: 100%;
+    height: 44px;
+    min-width: 0;
+    max-width: none;
+  }
+
+  // Prevent action buttons from shrinking into the search bar
+  .table-actions {
+    flex-shrink: 0;
+  }
+
+  // Famille pills: single scrollable row
+  .famille-pills {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    &::-webkit-scrollbar { display: none; }
+  }
+
+  // Sync dialog: tighter on small screens
+  .sync-dialog {
+    min-width: 0;
+    width: calc(100vw - 2rem);
+    padding: 1.25rem 1.25rem;
+  }
+}

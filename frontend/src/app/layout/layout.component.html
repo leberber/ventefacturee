@@ -119,20 +119,57 @@
         </div>
       </div>
 
-      @if (isAdminOrEmploye) {
-        <a class="mob-drawer__item" routerLink="/utilisateurs" (click)="drawerOpen.set(false)">
-          <i class="pi pi-shield"></i><span>Fonctionnaires</span>
-        </a>
-        <a class="mob-drawer__item" routerLink="/parametres" (click)="drawerOpen.set(false)">
-          <i class="pi pi-cog"></i><span>Paramètres</span>
-        </a>
-      }
+      <div class="mob-drawer__scroll">
+        @if (isAdminOrEmploye) {
+          <a class="mob-drawer__item" routerLink="/dashboard" routerLinkActive="mob-drawer__item--active" (click)="drawerOpen.set(false)">
+            <i class="pi pi-home"></i><span>Tableau de bord</span>
+          </a>
+          <a class="mob-drawer__item" routerLink="/ventes" routerLinkActive="mob-drawer__item--active" (click)="drawerOpen.set(false)">
+            <i class="pi pi-table"></i><span>Données ventes</span>
+          </a>
+          <a class="mob-drawer__item" routerLink="/produits" routerLinkActive="mob-drawer__item--active" (click)="drawerOpen.set(false)">
+            <i class="pi pi-box"></i><span>Produits</span>
+          </a>
+          <a class="mob-drawer__item" routerLink="/entrees-in" routerLinkActive="mob-drawer__item--active" (click)="drawerOpen.set(false)">
+            <i class="pi pi-inbox"></i><span>Entrées IN</span>
+          </a>
+          <a class="mob-drawer__item" routerLink="/objectifs" routerLinkActive="mob-drawer__item--active" (click)="drawerOpen.set(false)">
+            <i class="pi pi-bullseye"></i><span>Objectifs</span>
+          </a>
+          <a class="mob-drawer__item" routerLink="/objectifs-in" routerLinkActive="mob-drawer__item--active" (click)="drawerOpen.set(false)">
+            <i class="pi pi-chart-line"></i><span>Objectifs IN</span>
+          </a>
+          <a class="mob-drawer__item" routerLink="/prevendeurs" routerLinkActive="mob-drawer__item--active" (click)="drawerOpen.set(false)">
+            <i class="pi pi-id-card"></i><span>Prévendeurs</span>
+          </a>
 
-      <div class="mob-drawer__separator"></div>
+          <div class="mob-drawer__separator"></div>
 
-      <button class="mob-drawer__item mob-drawer__item--danger" (click)="logout()">
-        <i class="pi pi-sign-out"></i><span>Se déconnecter</span>
-      </button>
+          <a class="mob-drawer__item" routerLink="/clients" routerLinkActive="mob-drawer__item--active" (click)="drawerOpen.set(false)">
+            <i class="pi pi-users"></i><span>Clients</span>
+          </a>
+          <a class="mob-drawer__item" routerLink="/utilisateurs" routerLinkActive="mob-drawer__item--active" (click)="drawerOpen.set(false)">
+            <i class="pi pi-shield"></i><span>Fonctionnaires</span>
+          </a>
+          <a class="mob-drawer__item" routerLink="/upload" routerLinkActive="mob-drawer__item--active" (click)="drawerOpen.set(false)">
+            <i class="pi pi-upload"></i><span>Importer des données</span>
+          </a>
+          <a class="mob-drawer__item" routerLink="/parametres" routerLinkActive="mob-drawer__item--active" (click)="drawerOpen.set(false)">
+            <i class="pi pi-cog"></i><span>Paramètres</span>
+          </a>
+          @if (isAdmin) {
+            <a class="mob-drawer__item" routerLink="/logs" routerLinkActive="mob-drawer__item--active" (click)="drawerOpen.set(false)">
+              <i class="pi pi-list"></i><span>Logs</span>
+            </a>
+          }
+        }
+
+        <div class="mob-drawer__separator"></div>
+
+        <button class="mob-drawer__item mob-drawer__item--danger" (click)="logout()">
+          <i class="pi pi-sign-out"></i><span>Se déconnecter</span>
+        </button>
+      </div>
     </div>
   }
 
