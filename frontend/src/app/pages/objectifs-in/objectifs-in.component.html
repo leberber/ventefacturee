@@ -23,11 +23,7 @@
 
     <div class="obj-toolbar__left">
       @if (!editMode) {
-        <div class="obj-period-stepper">
-          <button class="obj-stepper-btn" (click)="stepMonth(-1)"><i class="pi pi-chevron-left"></i></button>
-          <span class="obj-stepper-label">{{ periodLabel }}</span>
-          <button class="obj-stepper-btn" (click)="stepMonth(1)"><i class="pi pi-chevron-right"></i></button>
-        </div>
+        <app-period-stepper [mois]="mois" [annee]="annee" (periodChange)="onPeriodChange($event)"></app-period-stepper>
       }
     </div>
 
@@ -203,11 +199,7 @@
       <div class="obj-import-period-banner">
         <i class="pi pi-calendar"></i>
         <span>Période&nbsp;:</span>
-        <select class="obj-period-sel obj-import-period-sel" [(ngModel)]="importMois">
-          @for (m of MONTHS; track m.v) { <option [value]="m.v">{{ m.l }}</option> }
-        </select>
-        <input class="obj-period-year obj-import-period-year" type="number"
-          [(ngModel)]="importAnnee" min="2020" max="2035">
+        <app-period-stepper [mois]="importMois" [annee]="importAnnee" (periodChange)="onImportPeriodChange($event)"></app-period-stepper>
       </div>
       <p class="obj-dialog__body">Fichier&nbsp;: <strong>{{ importFile?.name }}</strong></p>
       <div class="obj-dialog__actions">
