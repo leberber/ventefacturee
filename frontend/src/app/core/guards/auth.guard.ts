@@ -40,5 +40,5 @@ export const rootGuard: CanActivateFn = () => {
   const router = inject(Router);
   return auth.isPrevender
     ? router.createUrlTree(['/prevendeur'])
-    : router.createUrlTree(['/ventes']);
+    : router.createUrlTree(['/dashboard']);
 };

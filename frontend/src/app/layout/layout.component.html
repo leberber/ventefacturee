@@ -93,9 +93,13 @@
         <span>Accueil</span>
       </a>
       @if(isAdminOrEmploye) {
-        <a class="mob-nav__item" routerLink="/clients" routerLinkActive="mob-nav__item--active">
-          <i class="pi pi-users"></i>
-          <span>Clients</span>
+        <a class="mob-nav__item" routerLink="/objectifs-in" routerLinkActive="mob-nav__item--active">
+          <i class="pi pi-chart-line"></i>
+          <span>Objectifs IN</span>
+        </a>
+        <a class="mob-nav__item" routerLink="/prevendeurs" routerLinkActive="mob-nav__item--active">
+          <i class="pi pi-id-card"></i>
+          <span>Prévendeurs</span>
         </a>
       }
       <button class="mob-nav__item" (click)="drawerOpen.set(true)">
