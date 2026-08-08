@@ -97,6 +97,7 @@ export interface PrevAdminClientRow {
   code_client: string;
   nom_client: string;
   nom_sodichn: string | null;
+  updated_at: string | null;
 }
 
 export interface PrevAdminStat {
@@ -105,7 +106,11 @@ export interface PrevAdminStat {
   employe_code: string;
   total_clients: number;
   clients_with_sodichn: number;
+  remaining: number;
   completion_pct: number;
+  updated_today: number;
+  last_sodichn_date: string | null;
+  updated_on_last_day: number;
   last_activity: string | null;
   clients: PrevAdminClientRow[];
 }

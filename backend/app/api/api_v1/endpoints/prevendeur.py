@@ -189,13 +189,18 @@ def prevendeur_admin_stats(
     ).all()
     last_sale_map = {code_fdv: last_sale for code_fdv, last_sale in last_sale_rows}
 
-    # 1 query: all client records (for nom_sodichn)
-    sodichn_map: dict = {}
+    # 1 query: all client records (for nom_sodichn + updated_at)
+    sodichn_map: dict = {}   # customer_no -> {nom_sodichn, updated_at}
     if all_client_codes:
         clients_db = session.exec(
             select(Client).where(Client.customer_no.in_(all_client_codes))
         ).all()
-        sodichn_map = {c.customer_no: c.nom_sodichn for c in clients_db}
+        sodichn_map = {
+            c.customer_no: {"nom_sodichn": c.nom_sodichn, "updated_at": c.updated_at}
+            for c in clients_db
+        }
+
+    today = datetime.now(timezone.utc).date()
 
     result = []
     for pv in prevendeurs:
@@ -203,23 +208,52 @@ def prevendeur_admin_stats(
             continue
         clients = fdv_clients.get(pv.employe_code, [])
         total_clients = len(clients)
-        matched = sum(1 for code, _ in clients if sodichn_map.get(code))
-        last_sale = last_sale_map.get(pv.employe_code)
-        clients_detail = [
-            {
+
+        # Per-client stats
+        updated_today = 0
+        last_sodichn_date = None
+        matched = 0
+        clients_detail = []
+
+        for code, nom in sorted(clients, key=lambda x: x[1] or ''):
+            info = sodichn_map.get(code, {})
+            nom_sodichn = info.get("nom_sodichn")
+            updated_at = info.get("updated_at")
+            if nom_sodichn:
+                matched += 1
+            if updated_at and nom_sodichn:
+                updated_date = updated_at.date() if hasattr(updated_at, 'date') else updated_at
+                if updated_date == today:
+                    updated_today += 1
+                if last_sodichn_date is None or updated_date > last_sodichn_date:
+                    last_sodichn_date = updated_date
+            clients_detail.append({
                 "code_client": code,
                 "nom_client": nom,
-                "nom_sodichn": sodichn_map.get(code),
-            }
-            for code, nom in sorted(clients, key=lambda x: x[1] or '')
-        ]
+                "nom_sodichn": nom_sodichn,
+                "updated_at": updated_at.strftime('%Y-%m-%d') if updated_at else None,
+            })
+
+        # Count updated on last active day
+        updated_on_last_day = 0
+        if last_sodichn_date:
+            updated_on_last_day = sum(
+                1 for c in clients_detail
+                if c["updated_at"] and c["updated_at"][:10] == last_sodichn_date.strftime('%Y-%m-%d')
+            )
+
+        last_sale = last_sale_map.get(pv.employe_code)
         result.append({
             "id": pv.id,
             "full_name": pv.full_name,
             "employe_code": pv.employe_code,
             "total_clients": total_clients,
             "clients_with_sodichn": matched,
+            "remaining": total_clients - matched,
             "completion_pct": round(matched / total_clients * 100) if total_clients > 0 else 0,
+            "updated_today": updated_today,
+            "last_sodichn_date": last_sodichn_date.strftime('%Y-%m-%d') if last_sodichn_date else None,
+            "updated_on_last_day": updated_on_last_day,
             "last_activity": last_sale.strftime('%Y-%m-%d') if last_sale else None,
             "clients": clients_detail,
         })

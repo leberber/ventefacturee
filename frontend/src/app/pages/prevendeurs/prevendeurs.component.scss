@@ -72,6 +72,25 @@
     i { font-size: 0.65rem; }
 
     &--muted { opacity: 0.7; }
+
+    &--warn {
+      color: var(--color-error, #ef4444);
+      i { color: var(--color-error, #ef4444); }
+    }
+
+    &--done {
+      color: var(--color-success, #22c55e);
+      i { color: var(--color-success, #22c55e); }
+    }
+
+    &--today {
+      color: var(--primary-color);
+      font-weight: var(--font-weight-bold);
+      background: rgba(var(--primary-rgb), 0.08);
+      padding: 0.15rem 0.5rem;
+      border-radius: 999px;
+      i { color: var(--primary-color); }
+    }
   }
 
   &__clients {
@@ -161,6 +180,35 @@
   color: var(--text-secondary, #6b7280);
   min-width: 2.5rem;
   text-align: right;
+}
+
+.pv-remaining {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--color-error, #ef4444);
+
+  &--done { color: var(--color-success, #22c55e); }
+}
+
+.pv-day-count {
+  display: inline-block;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--text-color-secondary);
+
+  &--active {
+    color: var(--primary-color);
+    background: rgba(var(--primary-rgb), 0.08);
+    padding: 0.1rem 0.45rem;
+    border-radius: 999px;
+  }
+
+  &--last {
+    margin-left: 0.35rem;
+    color: var(--text-color-secondary);
+    font-size: 0.72rem;
+    font-weight: 600;
+  }
 }
 
 .td-muted {
