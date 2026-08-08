@@ -2,7 +2,7 @@ import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { PeriodStepperComponent } from '../../shared/period-stepper/period-stepper.component';
-import { getFamilyColor, getFamilyBg, getFamilyBgLight } from '../../core/constants/colors';
+import { getFamilyColor, getFamilyBg, getFamilyBgLight, getFamilyBgSolid } from '../../core/constants/colors';
 
 interface EntreeRow {
   code_produit:     string;
@@ -65,6 +65,7 @@ export class EntreesInComponent implements OnInit {
   parsing   = false;   // step 1: parsing file
   uploading = false;   // step 2: saving to DB
   deleting  = false;
+  daysExpanded = false;
   deleteConfirmDate: string | null = null;
   uploadResult: { imported: number; dates: string[] } | null = null;
   uploadError: string | null = null;
@@ -196,6 +197,30 @@ export class EntreesInComponent implements OnInit {
     });
   }
 
+  // ── Days expand / collapse ────────────────────────────────────────────────
+  toggleDays(): void { this.daysExpanded = !this.daysExpanded; }
+
+  dayPalVal(row: EntreeRow, day: number): number {
+    const colis = this.dayVal(row, day);
+    if (!row.colisage_palette) return 0;
+    return colis / row.colisage_palette;
+  }
+
+  rowMaxPalDay(row: EntreeRow): number {
+    if (!this.data || this.data.days.length === 0) return 0;
+    return Math.max(0, ...this.data.days.map(d => this.dayPalVal(row, d)));
+  }
+
+  sumPalDay(rows: EntreeRow[], day: number): number {
+    return rows.reduce((s, r) => s + this.dayPalVal(r, day), 0);
+  }
+
+  heatBg(val: number, max: number): string {
+    if (max <= 0 || val <= 0) return '';
+    const alpha = 0.07 + (val / max) * 0.48;
+    return `rgba(99,102,241,${alpha.toFixed(2)})`;
+  }
+
   // ── Famille collapsing ────────────────────────────────────────────────────
   toggleFamily(fam: string): void {
     if (this.collapsedFamilies.has(fam)) this.collapsedFamilies.delete(fam);
@@ -270,6 +295,7 @@ export class EntreesInComponent implements OnInit {
   famColor(fam: string): string   { return getFamilyColor(fam); }
   famBg(fam: string): string      { return getFamilyBg(fam); }
   famBgLight(fam: string): string { return getFamilyBgLight(fam); }
+  famBgSolid(fam: string): string { return getFamilyBgSolid(fam); }
 
   // ── Formatting ────────────────────────────────────────────────────────────
   formatNum(v: number | null | undefined, dec = 1): string {

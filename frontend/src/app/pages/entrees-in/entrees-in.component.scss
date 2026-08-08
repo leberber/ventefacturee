@@ -13,6 +13,97 @@
   min-width: max-content; // allows horizontal scroll when many days
 }
 
+// ── Sticky left/right columns ─────────────────────────────────────────────────
+// ein-sl = sticky-left, ein-sr = sticky-right
+.ein-sl, .ein-sr {
+  position: sticky;
+  z-index: 2;
+  background: var(--surface-card);
+}
+
+thead .ein-sl,
+thead .ein-sr { z-index: 3; }
+
+// Left offsets (fam 80 + code 90 + nom 180)
+.ein-sl0 { left: 0; min-width: 80px; }
+.ein-sl1 { left: 80px; min-width: 90px; }
+.ein-sl2 { left: 170px; min-width: 180px; }
+
+// Right offsets (% 64 + obj 80 + tonne 80)
+.ein-sr0 { right: 0; min-width: 64px; }
+.ein-sr1 { right: 64px; min-width: 80px; }
+.ein-sr2 { right: 144px; min-width: 80px; }
+
+// Shadow on last left-sticky and first right-sticky
+.ein-sl2, .ein-sl-span {
+  box-shadow: 4px 0 6px -3px rgba(0,0,0,0.10);
+}
+.ein-sr2 {
+  box-shadow: -4px 0 6px -3px rgba(0,0,0,0.10);
+}
+
+// ── Cumulative column (collapsed state) ───────────────────────────────────────
+.th-cumul {
+  cursor: pointer;
+  min-width: 90px;
+  text-align: right;
+  padding: 0.45rem 0.6rem;
+  white-space: nowrap;
+  font-size: 0.73rem;
+  user-select: none;
+  transition: background 0.15s;
+
+  em { font-style: normal; font-size: 0.68rem; color: var(--text-color-secondary); }
+  &:hover { background: var(--surface-100, #f1f5f9); }
+}
+
+.th-cumul-inner {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.35rem;
+  color: var(--primary-color);
+}
+
+.th-cumul-hint {
+  display: block;
+  text-align: right;
+  font-size: 0.66rem;
+  color: var(--text-color-secondary);
+  margin-top: 0.1rem;
+  font-weight: 400;
+}
+
+.td-cumul {
+  text-align: right;
+  font-size: 0.82rem;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  padding: 0.3rem 0.6rem;
+  min-width: 90px;
+}
+
+// ── Days expand/collapse control column ───────────────────────────────────────
+.th-days-ctrl {
+  cursor: pointer;
+  padding: 0.35rem 0.5rem;
+  color: var(--text-color-secondary);
+  font-size: 0.75rem;
+  text-align: center;
+  min-width: 28px;
+  width: 28px;
+  user-select: none;
+  transition: color 0.15s;
+
+  &:hover { color: var(--primary-color); }
+}
+
+.td-day-ctrl {
+  width: 28px;
+  min-width: 28px;
+  padding: 0;
+}
+
 // Day header
 .th-day {
   min-width: 62px;
