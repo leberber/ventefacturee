@@ -9,6 +9,7 @@ import { TooltipModule } from 'primeng/tooltip';
 import { MessageService, ConfirmationService } from 'primeng/api';
 
 import { ClientsService } from '../../core/services/clients.service';
+import { AuthService } from '../../core/services/auth.service';
 import { Client } from '../../core/models/client.model';
 import { sortItems, toggleSort } from '../../core/utils/sort.util';
 
@@ -34,12 +35,16 @@ export class ClientsComponent implements OnInit {
   @ViewChild('colMenu') colMenu!: Popover;
 
   private clientsService      = inject(ClientsService);
+  private auth                = inject(AuthService);
+
+  get isAdmin(): boolean { return this.auth.isAdmin; }
   private messageService      = inject(MessageService);
   private confirmationService = inject(ConfirmationService);
   private router              = inject(Router);
 
   clients: Client[] = [];
   loading = false;
+  exporting = false;
   searchQuery = '';
   sortCol = 'name';
   sortDir: 1 | -1 = 1;
@@ -147,6 +152,22 @@ export class ClientsComponent implements OnInit {
 
   openAdd() { this.router.navigate(['/clients/nouveau']); }
   openMap() { this.router.navigate(['/clients/carte']); }
+
+  exportExcel() {
+    this.exporting = true;
+    this.clientsService.exportExcel().subscribe({
+      next: (blob) => {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `clients_${new Date().toISOString().slice(0, 10)}.xlsx`;
+        a.click();
+        URL.revokeObjectURL(url);
+        this.exporting = false;
+      },
+      error: () => { this.exporting = false; },
+    });
+  }
 
   openEdit(c: Client) {
     this.router.navigate(['/clients', c.id, 'modifier'], { state: { client: c } });

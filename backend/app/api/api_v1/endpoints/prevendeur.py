@@ -1,8 +1,14 @@
 from typing import Any, List, Optional
 from collections import defaultdict
 from datetime import datetime, timezone
+from io import BytesIO
+
+import openpyxl
+from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
+from openpyxl.utils import get_column_letter
 
 from fastapi import APIRouter, Body, Depends, Query
+from fastapi.responses import StreamingResponse
 from sqlalchemy import func
 from sqlmodel import Session, select
 
@@ -259,6 +265,112 @@ def prevendeur_admin_stats(
         })
 
     return result
+
+
+@router.get("/admin/stats/export")
+def export_clients_excel(
+    current_user: User = Depends(get_current_user),
+    session: Session = Depends(get_session),
+):
+    prevendeurs = session.exec(
+        select(User)
+        .where(User.role == UserRole.PREVENDER)
+        .where(User.is_active == True)
+        .order_by(User.full_name)
+    ).all()
+
+    fdv_codes = [pv.employe_code for pv in prevendeurs if pv.employe_code]
+    if not fdv_codes:
+        return StreamingResponse(BytesIO(), media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+
+    vente_rows = session.exec(
+        select(Vente.code_fdv, Vente.code_client, Vente.nom_client)
+        .distinct()
+        .where(Vente.code_fdv.in_(fdv_codes), Vente.code_client.isnot(None))
+    ).all()
+
+    fdv_clients: dict = defaultdict(list)
+    all_client_codes: set = set()
+    for code_fdv, code_client, nom_client in vente_rows:
+        fdv_clients[code_fdv].append((code_client, nom_client))
+        all_client_codes.add(code_client)
+
+    sodichn_map: dict = {}
+    if all_client_codes:
+        clients_db = session.exec(
+            select(Client).where(Client.customer_no.in_(all_client_codes))
+        ).all()
+        sodichn_map = {
+            c.customer_no: {"nom_sodichn": c.nom_sodichn, "updated_at": c.updated_at}
+            for c in clients_db
+        }
+
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = "Clients RC"
+
+    # Styles
+    header_font = Font(bold=True, color="FFFFFF", size=10)
+    header_fill = PatternFill("solid", fgColor="2563EB")
+    fdv_font = Font(bold=True, size=10)
+    fdv_fill = PatternFill("solid", fgColor="DBEAFE")
+    thin = Side(style="thin", color="D1D5DB")
+    border = Border(left=thin, right=thin, top=thin, bottom=thin)
+    center = Alignment(horizontal="center", vertical="center")
+
+    headers = ["Prévendeur", "Code FDV", "Code Client", "Nom Client", "Nom RC (Sodichn)", "Statut", "Mis à jour le"]
+    col_widths = [28, 14, 14, 32, 32, 12, 16]
+
+    for col, (header, width) in enumerate(zip(headers, col_widths), 1):
+        cell = ws.cell(row=1, column=col, value=header)
+        cell.font = header_font
+        cell.fill = header_fill
+        cell.alignment = center
+        cell.border = border
+        ws.column_dimensions[get_column_letter(col)].width = width
+
+    ws.row_dimensions[1].height = 22
+
+    row_num = 2
+    today = datetime.now(timezone.utc).date()
+
+    for pv in prevendeurs:
+        if not pv.employe_code:
+            continue
+        clients = fdv_clients.get(pv.employe_code, [])
+        for code, nom in sorted(clients, key=lambda x: x[1] or ''):
+            info = sodichn_map.get(code, {})
+            nom_sodichn = info.get("nom_sodichn") or ""
+            updated_at = info.get("updated_at")
+            statut = "✓ Complété" if nom_sodichn else "— Vide"
+            updated_str = updated_at.strftime('%Y-%m-%d') if updated_at else ""
+
+            row_data = [pv.full_name, pv.employe_code, code, nom, nom_sodichn, statut, updated_str]
+            for col, value in enumerate(row_data, 1):
+                cell = ws.cell(row=row_num, column=col, value=value)
+                cell.border = border
+                cell.font = Font(size=9)
+                if col == 6:
+                    cell.alignment = center
+                    if nom_sodichn:
+                        cell.font = Font(size=9, color="16A34A", bold=True)
+                    else:
+                        cell.font = Font(size=9, color="9CA3AF")
+
+            row_num += 1
+
+    ws.freeze_panes = "A2"
+
+    buf = BytesIO()
+    wb.save(buf)
+    buf.seek(0)
+
+    filename = f"clients_rc_{datetime.now(timezone.utc).strftime('%Y%m%d')}.xlsx"
+    return StreamingResponse(
+        buf,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": f"attachment; filename={filename}"},
+    )
 
 
 @router.get("/admin/drilldown")

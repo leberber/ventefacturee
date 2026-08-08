@@ -16,7 +16,6 @@ class Client(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
     # BDD identifiers
     customer_no: Optional[str] = Field(default=None, max_length=50)
-    code: Optional[str] = Field(default=None, max_length=20, index=True)
     code_sodichn: Optional[str] = Field(default=None, max_length=50)
     nom_sodichn: Optional[str] = Field(default=None, max_length=200)
     # Identity
@@ -55,7 +54,6 @@ class Client(SQLModel, table=True):
 
 class ClientCreate(SQLModel):
     customer_no: Optional[str] = None
-    code: Optional[str] = None
     code_sodichn: Optional[str] = None
     nom_sodichn: Optional[str] = None
     name: str
@@ -86,7 +84,6 @@ class ClientCreate(SQLModel):
 
 class ClientUpdate(SQLModel):
     customer_no: Optional[str] = None
-    code: Optional[str] = None
     code_sodichn: Optional[str] = None
     nom_sodichn: Optional[str] = None
     name: Optional[str] = None
@@ -121,7 +118,6 @@ class ClientRead(SQLModel):
 
     id: int
     customer_no: Optional[str] = None
-    code: Optional[str] = None
     code_sodichn: Optional[str] = None
     nom_sodichn: Optional[str] = None
     name: str

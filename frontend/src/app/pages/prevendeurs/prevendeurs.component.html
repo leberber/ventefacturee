@@ -1,13 +1,17 @@
 <div class="page-content">
 
   <div class="page-header">
-    <div style="display:flex;align-items:center;gap:0.75rem">
+    <div style="display:flex;align-items:center;gap:0.75rem;flex:1">
       <div class="page-icon"><i class="pi pi-id-card"></i></div>
       <div>
         <h1 class="page-header__title">Prévendeurs</h1>
         <p class="page-header__sub">{{ stats.length }} prévendeurs actifs</p>
       </div>
     </div>
+    <button class="btn-export" (click)="exportExcel()" [disabled]="exporting || loading">
+      <i class="pi" [class.pi-download]="!exporting" [class.pi-spin]="exporting" [class.pi-spinner]="exporting"></i>
+      <span>{{ exporting ? 'Export…' : 'Excel' }}</span>
+    </button>
   </div>
 
   <div class="table-container">

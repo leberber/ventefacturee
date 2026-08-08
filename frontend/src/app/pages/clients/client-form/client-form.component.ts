@@ -47,7 +47,6 @@ export class ClientFormComponent implements OnInit {
 
   form = this.fb.group({
     // Identification
-    code:       [''],
     customer_no: [''],
     first_name: [''],
     last_name:  [''],
@@ -114,7 +113,7 @@ export class ClientFormComponent implements OnInit {
 
     const store_name = c.store_name ?? ((!c.first_name && !c.last_name) ? c.name : '') ?? '';
     this.form.patchValue({
-      code: c.code ?? '', customer_no: c.customer_no ?? '',
+      customer_no: c.customer_no ?? '',
       first_name: c.first_name ?? '', last_name: c.last_name ?? '',
       store_name, name: c.name, phone: c.phone ?? '',
       category, daira: dairaName,
@@ -161,7 +160,6 @@ export class ClientFormComponent implements OnInit {
     const v = this.form.value;
     const body: ClientCreate = {
       customer_no:      v.customer_no      || undefined,
-      code:             v.code             || undefined,
       code_sodichn:     v.code_sodichn     || undefined,
       nom_sodichn:      v.nom_sodichn      || undefined,
       first_name:       v.first_name       || undefined,

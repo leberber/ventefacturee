@@ -267,6 +267,28 @@
   to   { opacity: 1; }
 }
 
+// ── Mobile: keep toolbar on one line ──────────────────────────────────────────
+@media (max-width: 768px) {
+  .table-header {
+    flex-wrap: nowrap;
+    padding: 0.75rem 1rem 0.6rem;
+
+    &-left {
+      flex: 1;
+      min-width: 0;
+      flex-wrap: nowrap;
+    }
+  }
+
+  .table-search {
+    min-width: 0;
+    max-width: none;
+    width: 100%;
+  }
+
+  .table-actions { flex-shrink: 0; }
+}
+
 // ── Column picker popover ──────────────────────────────────────────────────────
 .table-options-menu {
   min-width: 220px;

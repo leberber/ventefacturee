@@ -10,4 +10,8 @@ export class ClientsService extends CrudService<Client, ClientCreate, ClientUpda
   getBalance(id: number): Observable<ClientBalance> {
     return this.http.get<ClientBalance>(`${this.base}/${id}/balance`);
   }
+
+  exportExcel() {
+    return this.http.get(`${this.base}/export`, { responseType: 'blob' });
+  }
 }

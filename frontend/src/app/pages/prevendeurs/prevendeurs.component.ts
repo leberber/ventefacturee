@@ -15,6 +15,7 @@ export class PrevendeursComponent implements OnInit {
 
   stats: PrevAdminStat[] = [];
   loading = false;
+  exporting = false;
   expandedId: number | null = null;
   editingKey: string | null = null;
   editingValue = '';
@@ -54,6 +55,22 @@ export class PrevendeursComponent implements OnInit {
     this.svc.getAdminStats().subscribe({
       next: d  => { this.stats = d; this.loading = false; },
       error: () => { this.loading = false; },
+    });
+  }
+
+  exportExcel() {
+    this.exporting = true;
+    this.svc.exportClientsExcel().subscribe({
+      next: (blob) => {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `clients_rc_${new Date().toISOString().slice(0, 10)}.xlsx`;
+        a.click();
+        URL.revokeObjectURL(url);
+        this.exporting = false;
+      },
+      error: () => { this.exporting = false; },
     });
   }
 

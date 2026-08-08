@@ -25,7 +25,7 @@
       <div class="table-actions">
         <button class="btn-add" (click)="openAdd()">
           <i class="pi pi-plus"></i>
-          <span>Ajouter</span>
+          <span class="mob-hide">Ajouter</span>
         </button>
       </div>
     </div>
@@ -69,19 +69,8 @@
                   </div>
                 </td>
                 <td><code class="font-mono text-muted">{{ u.employe_code ?? '—' }}</code></td>
-                <td (click)="startEditPhone(u)" style="cursor:pointer;min-width:140px">
-                  @if (editingPhoneId === u.id) {
-                    <input
-                      class="inline-input"
-                      [(ngModel)]="editingPhoneValue"
-                      (keydown.enter)="savePhone(u)"
-                      (keydown.escape)="cancelEditPhone()"
-                      (blur)="cancelEditPhone()"
-                      (click)="$event.stopPropagation()"
-                      autofocus />
-                  } @else {
-                    <code class="font-mono text-muted">{{ formatPhone(u.phone) }}</code>
-                  }
+                <td>
+                  <code class="font-mono text-muted">{{ formatPhone(u.phone) }}</code>
                 </td>
                 <td><span [class]="roleBadge[u.role]">{{ roleLabel[u.role] }}</span></td>
                 <td>

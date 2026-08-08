@@ -43,9 +43,15 @@
             </div>
           </div>
         </p-popover>
+        @if (isAdmin) {
+          <button class="btn-secondary" (click)="exportExcel()" [disabled]="exporting">
+            <i class="pi" [class.pi-download]="!exporting" [class.pi-spin]="exporting" [class.pi-spinner]="exporting"></i>
+            <span class="mob-hide">{{ exporting ? 'Export…' : 'Excel' }}</span>
+          </button>
+        }
         <button class="btn-secondary" (click)="openMap()">
           <i class="pi pi-map"></i>
-          <span>Carte</span>
+          <span class="mob-hide">Carte</span>
         </button>
         <button class="btn-add" (click)="openAdd()">
           <i class="pi pi-plus"></i>
@@ -109,9 +115,6 @@
                 @for (col of visibleColumns; track col.field) {
                   <td>
                     @switch (col.field) {
-                      @case ('code') {
-                        <code class="font-mono text-muted">{{ c.code || '—' }}</code>
-                      }
                       @case ('category') {
                         <span [class]="categoryBadge[c.category]">{{ categoryLabel[c.category] }}</span>
                       }

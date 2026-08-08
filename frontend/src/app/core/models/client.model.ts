@@ -4,7 +4,6 @@ export interface Client {
   id: number;
   // BDD identifiers
   customer_no?: string;
-  code?: string;
   code_sodichn?: string;
   nom_sodichn?: string;
   // Identity
@@ -53,7 +52,6 @@ export interface Client {
 
 export interface ClientCreate {
   customer_no?: string;
-  code?: string;
   code_sodichn?: string;
   nom_sodichn?: string;
   name: string;

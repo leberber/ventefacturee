@@ -154,6 +154,28 @@
 }
 
 
+.btn-export {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.45rem 1rem;
+  border-radius: var(--radius-lg);
+  border: none;
+  background: #16a34a;
+  color: #fff;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  font-family: inherit;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: filter 0.15s;
+  flex-shrink: 0;
+
+  i { font-size: 0.8rem; }
+  &:hover:not(:disabled) { filter: brightness(1.08); }
+  &:disabled { opacity: 0.55; cursor: not-allowed; }
+}
+
 .pv-progress {
   display: flex;
   align-items: center;

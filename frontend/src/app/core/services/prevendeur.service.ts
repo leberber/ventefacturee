@@ -142,6 +142,10 @@ export class PrevendeurService {
     return this.http.get<PrevAdminStat[]>('/api/v1/prevendeur/admin/stats');
   }
 
+  exportClientsExcel() {
+    return this.http.get('/api/v1/prevendeur/admin/stats/export', { responseType: 'blob' });
+  }
+
   getDrilldown(annee_mois: string, code_fdv?: string | null, canal?: string | null) {
     const key = `${annee_mois}|${code_fdv ?? ''}|${canal ?? ''}`;
     const cached = this.drilldownCache.get(key);
