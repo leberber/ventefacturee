@@ -381,6 +381,21 @@ th.th-day:hover .th-day-del {
   &:disabled { opacity: 0.4; cursor: default; }
 }
 
+// =============================================================================
+// MOBILE (≤768px)
+// =============================================================================
+@media (max-width: 768px) {
+  // Remove all sticky positioning — let the table scroll freely
+  .ein-sl, .ein-sr {
+    position: static;
+    box-shadow: none;
+    z-index: auto;
+  }
+  thead .ein-sl,
+  thead .ein-sr { z-index: auto; }
+
+}
+
 // ── Empty state
 .ein-empty {
   display: flex;
