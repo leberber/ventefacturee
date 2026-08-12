@@ -1,6 +1,6 @@
 import { Routes } from '@angular/router';
 import { LayoutComponent } from './layout/layout.component';
-import { authGuard, adminOrEmployeGuard, adminGuard, rootGuard, prevenderOnlyGuard } from './core/guards/auth.guard';
+import { authGuard, adminOrEmployeGuard, adminGuard, rootGuard, prevenderOnlyGuard, notPrevenderGuard } from './core/guards/auth.guard';
 
 export const routes: Routes = [
   { path: 'login', loadComponent: () => import('./pages/login/login.component').then(m => m.LoginComponent) },
@@ -10,7 +10,7 @@ export const routes: Routes = [
     canActivate: [authGuard],
     children: [
       { path: '', canActivate: [rootGuard], children: [] },
-      { path: 'dashboard', loadComponent: () => import('./pages/dashboard/dashboard.component').then(m => m.DashboardComponent) },
+      { path: 'dashboard', canActivate: [notPrevenderGuard], loadComponent: () => import('./pages/dashboard/dashboard.component').then(m => m.DashboardComponent) },
 
       { path: 'ventes',   canActivate: [adminOrEmployeGuard], loadComponent: () => import('./pages/ventes/ventes.component').then(m => m.VentesComponent) },
       { path: 'produits',              canActivate: [adminOrEmployeGuard], loadComponent: () => import('./pages/produits/produits.component').then(m => m.ProduitsComponent) },

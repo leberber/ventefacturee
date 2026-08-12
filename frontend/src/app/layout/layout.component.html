@@ -10,9 +10,11 @@
 
     <!-- Nav -->
     <nav class="admin-sidebar__nav">
-      <a class="nav-item" routerLink="/dashboard" routerLinkActive="active">
-        <i class="pi pi-home"></i><span>Tableau de bord</span>
-      </a>
+      @if(!isPrevender) {
+        <a class="nav-item" routerLink="/dashboard" routerLinkActive="active">
+          <i class="pi pi-home"></i><span>Tableau de bord</span>
+        </a>
+      }
       @if(isAdminOrEmploye) {
         <a class="nav-item" routerLink="/ventes" routerLinkActive="active">
           <i class="pi pi-table"></i><span>Données ventes</span>

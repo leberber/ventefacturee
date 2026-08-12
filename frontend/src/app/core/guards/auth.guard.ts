@@ -24,7 +24,7 @@ export const adminGuard: CanActivateFn = () => {
 export const notPrevenderGuard: CanActivateFn = () => {
   const auth   = inject(AuthService);
   const router = inject(Router);
-  return auth.isPrevender ? router.createUrlTree(['/dashboard']) : true;
+  return auth.isPrevender ? router.createUrlTree(['/prevendeur']) : true;
 };
 
 // Only prevenders can access
