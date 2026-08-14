@@ -93,6 +93,10 @@ def batch_upsert(
 ) -> Any:
     now = datetime.now(timezone.utc)
 
+    # Resolve code_dd aliases → canonical code_produit
+    dd_map = {p.code_dd: p.code_produit
+              for p in session.exec(select(Produit).where(Produit.code_dd.isnot(None))).all()}
+
     existing = session.exec(
         select(ObjectifIn).where(ObjectifIn.mois == mois, ObjectifIn.annee == annee)
     ).all()
@@ -102,6 +106,7 @@ def batch_upsert(
         code = item.get("code_produit")
         if not code:
             continue
+        code = dd_map.get(code, code)
         tonne = float(item["objectif_tonne"]) if item.get("objectif_tonne") is not None else None
 
         obj = obj_map.get(code)
@@ -125,9 +130,13 @@ def batch_upsert(
 @router.post("/parse-excel")
 async def parse_excel(
     file: UploadFile = File(...),
+    session: Session = Depends(get_session),
     current_user: User = Depends(get_current_user),
 ) -> Any:
     import openpyxl
+    dd_map = {p.code_dd: p.code_produit
+              for p in session.exec(select(Produit).where(Produit.code_dd.isnot(None))).all()}
+
     content = await file.read()
     wb = openpyxl.load_workbook(io.BytesIO(content), data_only=True)
     ws = wb.active
@@ -141,8 +150,10 @@ async def parse_excel(
         tonne = row[2] if len(row) > 2 else None
         if not code or not isinstance(code, str) or not code.strip():
             continue
+        code = code.strip()
+        code = dd_map.get(code, code)
         result.append({
-            "code_produit": code.strip(),
+            "code_produit": code,
             "tonne": float(tonne) if tonne is not None else None,
         })
     return result

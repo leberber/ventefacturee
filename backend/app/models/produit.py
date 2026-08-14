@@ -15,6 +15,7 @@ class Produit(SQLModel, table=True):
 
     # Enrichment
     nom_produit: Optional[str] = Field(default=None, max_length=200)
+    code_dd: Optional[str] = Field(default=None, max_length=30, index=True)
     colisage: Optional[float] = Field(default=None)
     colisage_palette: Optional[int] = Field(default=None)
     unite: Optional[str] = Field(default=None, max_length=10)
@@ -37,6 +38,7 @@ class ProduitRead(SQLModel):
     uom_vente: Optional[str] = None
     uom_principale: Optional[str] = None
     nom_produit: Optional[str] = None
+    code_dd: Optional[str] = None
     colisage: Optional[float] = None
     colisage_palette: Optional[int] = None
     unite: Optional[str] = None
@@ -50,6 +52,7 @@ class ProduitRead(SQLModel):
 
 class ProduitUpdate(SQLModel):
     nom_produit: Optional[str] = None
+    code_dd: Optional[str] = None
     colisage: Optional[float] = None
     colisage_palette: Optional[int] = None
     unite: Optional[str] = None

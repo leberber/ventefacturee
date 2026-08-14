@@ -93,6 +93,10 @@ def batch_upsert(
         v = item.get(key)
         return float(v) if v is not None else None
 
+    # Resolve code_dd aliases → canonical code_produit
+    dd_map = {p.code_dd: p.code_produit
+              for p in session.exec(select(Produit).where(Produit.code_dd.isnot(None))).all()}
+
     # Load all existing objectifs for this period in one query
     existing = session.exec(
         select(Objectif).where(Objectif.mois == mois, Objectif.annee == annee)
@@ -103,6 +107,7 @@ def batch_upsert(
         code = item.get("code_produit")
         if not code:
             continue
+        code = dd_map.get(code, code)
         tonne_vd = _f(item, "objectif_tonne_vd")
         packs_vd = _f(item, "objectif_packs_vd")
         packs_vd_t = _f(item, "objectif_packs_vd_tournee")
