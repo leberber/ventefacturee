@@ -233,12 +233,33 @@
                 }
 
                 @if (isColVisible('famille')) {
-                  <td>
-                    @if (p.famille) {
-                      <span class="famille-pill-badge" [style.background]="getFamilleStyle(p.famille).background" [style.color]="getFamilleStyle(p.famille).color">
-                        {{ p.famille }}
-                      </span>
-                    } @else { — }
+                  <td class="cell-editable"
+                    (click)="startEdit(p, 'famille', $event)"
+                    [class.cell-editing]="isEditing(p.code_produit, 'famille')">
+                    @if (isEditing(p.code_produit, 'famille')) {
+                      <select class="cell-select" autofocus
+                        [value]="editingValue() ?? ''"
+                        (change)="editingValue.set($any($event.target).value || null); saveEdit(p)"
+                        (keydown.escape)="cancelEdit()">
+                        <option value="">—</option>
+                        @for (f of familles(); track f) {
+                          <option [value]="f">{{ f }}</option>
+                        }
+                      </select>
+                    } @else {
+                      <div class="cell-display">
+                        @if (savingCell()?.code === p.code_produit && savingCell()?.field === 'famille') {
+                          <i class="pi pi-spin pi-spinner cell-spinner"></i>
+                        } @else if (p.famille) {
+                          <span class="famille-pill-badge" [style.background]="getFamilleStyle(p.famille).background" [style.color]="getFamilleStyle(p.famille).color">
+                            {{ p.famille }}
+                          </span>
+                        } @else {
+                          <span class="text-muted">—</span>
+                        }
+                        <i class="pi pi-pencil cell-pencil"></i>
+                      </div>
+                    }
                   </td>
                 }
 
