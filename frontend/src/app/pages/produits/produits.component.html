@@ -80,115 +80,83 @@
         <thead>
           <tr>
             @if (isColVisible('code_produit')) {
-              <th class="th-sort" (click)="sort('code_produit')"
-                [class.th-sort--asc]="sortCol()==='code_produit'&&sortDir()===1"
-                [class.th-sort--desc]="sortCol()==='code_produit'&&sortDir()===-1">
-                Code <i class="pi pi-sort-alt"></i>
+              <th class="th-sort prod-sl0" (click)="sort('code_produit')">
+                Code <i [class]="sortIcon('code_produit')"></i>
               </th>
             }
             @if (isColVisible('description_produit')) {
-              <th class="th-sort" (click)="sort('description_produit')"
-                [class.th-sort--asc]="sortCol()==='description_produit'&&sortDir()===1"
-                [class.th-sort--desc]="sortCol()==='description_produit'&&sortDir()===-1">
-                Désignation <i class="pi pi-sort-alt"></i>
+              <th class="th-sort prod-sl1" (click)="sort('description_produit')">
+                Désignation <i [class]="sortIcon('description_produit')"></i>
               </th>
             }
             @if (isColVisible('nom_produit')) {
-              <th class="th-sort" (click)="sort('nom_produit')"
-                [class.th-sort--asc]="sortCol()==='nom_produit'&&sortDir()===1"
-                [class.th-sort--desc]="sortCol()==='nom_produit'&&sortDir()===-1">
-                Désignation courte <i class="pi pi-sort-alt"></i>
+              <th class="th-sort" (click)="sort('nom_produit')">
+                Désignation courte <i [class]="sortIcon('nom_produit')"></i>
               </th>
             }
             @if (isColVisible('code_dd')) {
-              <th class="th-sort" (click)="sort('code_dd')"
-                [class.th-sort--asc]="sortCol()==='code_dd'&&sortDir()===1"
-                [class.th-sort--desc]="sortCol()==='code_dd'&&sortDir()===-1">
-                Code DD <i class="pi pi-sort-alt"></i>
+              <th class="th-sort" (click)="sort('code_dd')">
+                Code DD <i [class]="sortIcon('code_dd')"></i>
               </th>
             }
             @if (isColVisible('famille')) {
-              <th class="th-sort" (click)="sort('famille')"
-                [class.th-sort--asc]="sortCol()==='famille'&&sortDir()===1"
-                [class.th-sort--desc]="sortCol()==='famille'&&sortDir()===-1">
-                Famille <i class="pi pi-sort-alt"></i>
+              <th class="th-sort" (click)="sort('famille')">
+                Famille <i [class]="sortIcon('famille')"></i>
               </th>
             }
             @if (isColVisible('sous_famille')) {
-              <th class="th-sort" (click)="sort('sous_famille')"
-                [class.th-sort--asc]="sortCol()==='sous_famille'&&sortDir()===1"
-                [class.th-sort--desc]="sortCol()==='sous_famille'&&sortDir()===-1">
-                Sous-famille <i class="pi pi-sort-alt"></i>
+              <th class="th-sort" (click)="sort('sous_famille')">
+                Sous-famille <i [class]="sortIcon('sous_famille')"></i>
               </th>
             }
             @if (isColVisible('uom_vente')) {
-              <th class="th-sort" (click)="sort('uom_vente')"
-                [class.th-sort--asc]="sortCol()==='uom_vente'&&sortDir()===1"
-                [class.th-sort--desc]="sortCol()==='uom_vente'&&sortDir()===-1">
-                UOM Vente <i class="pi pi-sort-alt"></i>
+              <th class="th-sort" (click)="sort('uom_vente')">
+                UOM Vente <i [class]="sortIcon('uom_vente')"></i>
               </th>
             }
             @if (isColVisible('uom_principale')) {
-              <th class="th-sort" (click)="sort('uom_principale')"
-                [class.th-sort--asc]="sortCol()==='uom_principale'&&sortDir()===1"
-                [class.th-sort--desc]="sortCol()==='uom_principale'&&sortDir()===-1">
-                UOM P. <i class="pi pi-sort-alt"></i>
+              <th class="th-sort" (click)="sort('uom_principale')">
+                UOM P. <i [class]="sortIcon('uom_principale')"></i>
               </th>
             }
             @if (isColVisible('colisage')) {
-              <th class="th-sort col-center" (click)="sort('colisage')"
-                [class.th-sort--asc]="sortCol()==='colisage'&&sortDir()===1"
-                [class.th-sort--desc]="sortCol()==='colisage'&&sortDir()===-1">
-                Colisage <i class="pi pi-sort-alt"></i>
+              <th class="th-sort col-center" (click)="sort('colisage')">
+                Colisage <i [class]="sortIcon('colisage')"></i>
               </th>
             }
             @if (isColVisible('colisage_palette')) {
-              <th class="th-sort col-center" (click)="sort('colisage_palette')"
-                [class.th-sort--asc]="sortCol()==='colisage_palette'&&sortDir()===1"
-                [class.th-sort--desc]="sortCol()==='colisage_palette'&&sortDir()===-1">
-                Col./palette <i class="pi pi-sort-alt"></i>
+              <th class="th-sort col-center" (click)="sort('colisage_palette')">
+                Col./palette <i [class]="sortIcon('colisage_palette')"></i>
               </th>
             }
             @if (isColVisible('unite')) {
-              <th class="th-sort col-center" (click)="sort('unite')"
-                [class.th-sort--asc]="sortCol()==='unite'&&sortDir()===1"
-                [class.th-sort--desc]="sortCol()==='unite'&&sortDir()===-1">
-                Unité <i class="pi pi-sort-alt"></i>
+              <th class="th-sort col-center" (click)="sort('unite')">
+                Unité <i [class]="sortIcon('unite')"></i>
               </th>
             }
             @if (isColVisible('volume')) {
-              <th class="th-sort col-center" (click)="sort('volume')"
-                [class.th-sort--asc]="sortCol()==='volume'&&sortDir()===1"
-                [class.th-sort--desc]="sortCol()==='volume'&&sortDir()===-1">
-                Volume <i class="pi pi-sort-alt"></i>
+              <th class="th-sort col-center" (click)="sort('volume')">
+                Volume <i [class]="sortIcon('volume')"></i>
               </th>
             }
             @if (isColVisible('poids_unite_vente')) {
-              <th class="th-sort col-center" (click)="sort('poids_unite_vente')"
-                [class.th-sort--asc]="sortCol()==='poids_unite_vente'&&sortDir()===1"
-                [class.th-sort--desc]="sortCol()==='poids_unite_vente'&&sortDir()===-1">
-                Poids UV (T) <i class="pi pi-sort-alt"></i>
+              <th class="th-sort col-center" (click)="sort('poids_unite_vente')">
+                Poids UV (T) <i [class]="sortIcon('poids_unite_vente')"></i>
               </th>
             }
             @if (isColVisible('prix')) {
-              <th class="th-sort col-center" (click)="sort('prix')"
-                [class.th-sort--asc]="sortCol()==='prix'&&sortDir()===1"
-                [class.th-sort--desc]="sortCol()==='prix'&&sortDir()===-1">
-                Prix <i class="pi pi-sort-alt"></i>
+              <th class="th-sort col-center" (click)="sort('prix')">
+                Prix <i [class]="sortIcon('prix')"></i>
               </th>
             }
             @if (isColVisible('facturable')) {
-              <th class="th-sort col-center" (click)="sort('facturable')"
-                [class.th-sort--asc]="sortCol()==='facturable'&&sortDir()===1"
-                [class.th-sort--desc]="sortCol()==='facturable'&&sortDir()===-1">
-                Facturable <i class="pi pi-sort-alt"></i>
+              <th class="th-sort col-center" (click)="sort('facturable')">
+                Facturable <i [class]="sortIcon('facturable')"></i>
               </th>
             }
             @if (isColVisible('imported')) {
-              <th class="th-sort col-center" (click)="sort('imported')"
-                [class.th-sort--asc]="sortCol()==='imported'&&sortDir()===1"
-                [class.th-sort--desc]="sortCol()==='imported'&&sortDir()===-1">
-                Importé <i class="pi pi-sort-alt"></i>
+              <th class="th-sort col-center" (click)="sort('imported')">
+                Importé <i [class]="sortIcon('imported')"></i>
               </th>
             }
           </tr>
@@ -207,11 +175,11 @@
               <tr class="table-row-animate" [style.--row-delay]="i < 30 ? i * 15 + 'ms' : '0ms'">
 
                 @if (isColVisible('code_produit')) {
-                  <td><code class="code-chip">{{ p.code_produit }}</code></td>
+                  <td class="prod-sl0"><code class="code-chip">{{ p.code_produit }}</code></td>
                 }
 
                 @if (isColVisible('description_produit')) {
-                  <td class="td-designation">
+                  <td class="td-designation prod-sl1">
                     <span class="item-name item-name--truncate" [pTooltip]="p.description_produit ?? ''" tooltipPosition="top">{{ p.description_produit ?? '—' }}</span>
                   </td>
                 }
@@ -274,9 +242,71 @@
                   </td>
                 }
 
-                @if (isColVisible('sous_famille'))   { <td class="text-muted">{{ p.sous_famille ?? '—' }}</td> }
-                @if (isColVisible('uom_vente'))      { <td class="text-muted">{{ p.uom_vente ?? '—' }}</td> }
-                @if (isColVisible('uom_principale')) { <td class="text-muted">{{ p.uom_principale ?? '—' }}</td> }
+                @if (isColVisible('sous_famille')) {
+                  <td class="text-muted cell-editable"
+                    (click)="startEdit(p, 'sous_famille', $event)"
+                    [class.cell-editing]="isEditing(p.code_produit, 'sous_famille')">
+                    @if (isEditing(p.code_produit, 'sous_famille')) {
+                      <input type="text" class="cell-input" autofocus style="width:120px;text-align:left"
+                        [value]="editingValue() ?? ''"
+                        (input)="editingValue.set($any($event.target).value || null)"
+                        (blur)="saveEdit(p)" (keydown.enter)="saveEdit(p)" (keydown.escape)="cancelEdit()" />
+                    } @else {
+                      <div class="cell-display">
+                        @if (savingCell()?.code === p.code_produit && savingCell()?.field === 'sous_famille') {
+                          <i class="pi pi-spin pi-spinner cell-spinner"></i>
+                        } @else {
+                          <span [class.text-muted]="!p.sous_famille">{{ p.sous_famille ?? '—' }}</span>
+                        }
+                        <i class="pi pi-pencil cell-pencil"></i>
+                      </div>
+                    }
+                  </td>
+                }
+
+                @if (isColVisible('uom_vente')) {
+                  <td class="text-muted cell-editable"
+                    (click)="startEdit(p, 'uom_vente', $event)"
+                    [class.cell-editing]="isEditing(p.code_produit, 'uom_vente')">
+                    @if (isEditing(p.code_produit, 'uom_vente')) {
+                      <input type="text" class="cell-input" autofocus style="width:80px;text-align:left"
+                        [value]="editingValue() ?? ''"
+                        (input)="editingValue.set($any($event.target).value || null)"
+                        (blur)="saveEdit(p)" (keydown.enter)="saveEdit(p)" (keydown.escape)="cancelEdit()" />
+                    } @else {
+                      <div class="cell-display">
+                        @if (savingCell()?.code === p.code_produit && savingCell()?.field === 'uom_vente') {
+                          <i class="pi pi-spin pi-spinner cell-spinner"></i>
+                        } @else {
+                          <span [class.text-muted]="!p.uom_vente">{{ p.uom_vente ?? '—' }}</span>
+                        }
+                        <i class="pi pi-pencil cell-pencil"></i>
+                      </div>
+                    }
+                  </td>
+                }
+
+                @if (isColVisible('uom_principale')) {
+                  <td class="text-muted cell-editable"
+                    (click)="startEdit(p, 'uom_principale', $event)"
+                    [class.cell-editing]="isEditing(p.code_produit, 'uom_principale')">
+                    @if (isEditing(p.code_produit, 'uom_principale')) {
+                      <input type="text" class="cell-input" autofocus style="width:80px;text-align:left"
+                        [value]="editingValue() ?? ''"
+                        (input)="editingValue.set($any($event.target).value || null)"
+                        (blur)="saveEdit(p)" (keydown.enter)="saveEdit(p)" (keydown.escape)="cancelEdit()" />
+                    } @else {
+                      <div class="cell-display">
+                        @if (savingCell()?.code === p.code_produit && savingCell()?.field === 'uom_principale') {
+                          <i class="pi pi-spin pi-spinner cell-spinner"></i>
+                        } @else {
+                          <span [class.text-muted]="!p.uom_principale">{{ p.uom_principale ?? '—' }}</span>
+                        }
+                        <i class="pi pi-pencil cell-pencil"></i>
+                      </div>
+                    }
+                  </td>
+                }
 
                 @if (isColVisible('colisage')) {
                   <td class="col-center cell-editable"

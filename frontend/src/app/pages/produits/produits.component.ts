@@ -7,7 +7,7 @@ import { ProduitsService, ProduitRead } from '../../core/services/produits.servi
 const LS_KEY = 'ventefacturee_produits_columns';
 
 type SortCol = string;
-type EditField = 'nom_produit' | 'code_dd' | 'colisage' | 'colisage_palette' | 'unite' | 'volume' | 'poids_unite_vente' | 'prix';
+type EditField = 'nom_produit' | 'code_dd' | 'famille' | 'sous_famille' | 'uom_vente' | 'uom_principale' | 'colisage' | 'colisage_palette' | 'unite' | 'volume' | 'poids_unite_vente' | 'prix';
 
 interface ColDef {
   field: string;
@@ -139,6 +139,11 @@ export class ProduitsComponent implements OnInit {
       next: () => { this.syncing.set(false); this.load(); this.svc.getFamilles().subscribe(d => this.familles.set(d)); },
       error: () => this.syncing.set(false),
     });
+  }
+
+  sortIcon(col: string): string {
+    if (this.sortCol() !== col) return 'pi pi-sort-alt';
+    return this.sortDir() === 1 ? 'pi pi-sort-amount-up-alt' : 'pi pi-sort-amount-down-alt';
   }
 
   sort(col: SortCol): void {

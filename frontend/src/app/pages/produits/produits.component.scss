@@ -157,6 +157,26 @@
   max-width: 260px;
 }
 
+// ── Sticky left columns ────────────────────────────────────────────────────────
+.prod-sl0 {
+  position: sticky;
+  left: 0;
+  z-index: 2;
+  background: var(--surface-card);
+  min-width: 130px;
+}
+
+.prod-sl1 {
+  position: sticky;
+  left: 130px;
+  z-index: 2;
+  background: var(--surface-card);
+  box-shadow: 4px 0 6px -3px rgba(0,0,0,0.10);
+}
+
+thead .prod-sl0,
+thead .prod-sl1 { z-index: 3; }
+
 .famille-pill-badge {
   display: inline-block;
   padding: 0.2rem 0.6rem;
@@ -251,18 +271,16 @@
     margin-left: 0.3rem;
     color: var(--text-color-secondary);
     opacity: 0.4;
-    transition: opacity 0.15s;
+    transition: opacity 0.15s, color 0.15s;
   }
 
   &:hover i { opacity: 0.8; }
 
-  &--asc i, &--desc i {
+  i.pi-sort-amount-up-alt,
+  i.pi-sort-amount-down-alt {
     opacity: 1;
     color: var(--primary-color);
   }
-
-  &--asc i::before  { content: '\e91c'; }
-  &--desc i::before { content: '\e91d'; }
 }
 
 @keyframes pulse {

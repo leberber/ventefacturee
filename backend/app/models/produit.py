@@ -53,6 +53,10 @@ class ProduitRead(SQLModel):
 class ProduitUpdate(SQLModel):
     nom_produit: Optional[str] = None
     code_dd: Optional[str] = None
+    famille: Optional[str] = None
+    sous_famille: Optional[str] = None
+    uom_vente: Optional[str] = None
+    uom_principale: Optional[str] = None
     colisage: Optional[float] = None
     colisage_palette: Optional[int] = None
     unite: Optional[str] = None
