@@ -1,8 +1,9 @@
-from typing import Any, List
+from typing import Any, List, Optional
 from datetime import datetime, timezone
 import io
 
-from fastapi import APIRouter, Depends, File, Query, UploadFile, HTTPException
+from fastapi import APIRouter, Body, Depends, File, Query, UploadFile, HTTPException
+from pydantic import BaseModel
 from sqlmodel import Session, select, delete
 
 from app.api.deps import get_current_user
@@ -97,6 +98,7 @@ async def parse_entrees(
             "nb_palettes":    nb_pal,
             "tonnes":         tonnes,
             "known":          p is not None,
+            "source":         "CLR",
         })
 
     return {
@@ -140,6 +142,48 @@ async def upload_entrees(
     return {
         "imported": len(entries),
         "dates": sorted(str(d) for d in dates_found),
+    }
+
+
+class BatchEntreeItem(BaseModel):
+    code_produit:   str
+    date:           str
+    quantite_colis: float
+    source:         Optional[str] = None
+
+
+class BatchEntreeBody(BaseModel):
+    entries: List[BatchEntreeItem]
+
+
+@router.post("/batch")
+def batch_entrees(
+    body: BatchEntreeBody,
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user),
+) -> Any:
+    from datetime import date as date_type
+    date_objects = {date_type.fromisoformat(e.date) for e in body.entries}
+
+    for d in date_objects:
+        session.exec(delete(EntreeIn).where(EntreeIn.date == d))
+
+    now = datetime.now(timezone.utc)
+    for item in body.entries:
+        d = date_type.fromisoformat(item.date)
+        session.add(EntreeIn(
+            code_produit=item.code_produit.strip().upper(),
+            date=d,
+            quantite_colis=item.quantite_colis,
+            source=item.source,
+            created_by_id=current_user.id,
+            created_at=now,
+        ))
+
+    session.commit()
+    return {
+        "imported": len(body.entries),
+        "dates": sorted(str(d) for d in date_objects),
     }
 
 

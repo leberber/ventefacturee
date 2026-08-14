@@ -12,5 +12,6 @@ class EntreeIn(SQLModel, table=True):
     code_produit:       str           = Field(max_length=30, index=True)
     date:               date_type     = Field(index=True)
     quantite_colis:     float         = Field(default=0.0)
+    source:             Optional[str] = Field(default=None, max_length=10)
     created_by_id:      Optional[int] = Field(default=None, foreign_key="users.id")
     created_at:         datetime      = Field(default_factory=lambda: datetime.now(timezone.utc))

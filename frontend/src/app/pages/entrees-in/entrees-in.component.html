@@ -387,6 +387,7 @@
               <th class="th-metric">Nb Colis</th>
               <th class="th-metric">Palettes</th>
               <th class="th-metric th-tonne">Tonnes</th>
+              <th class="th-metric">Source</th>
             </tr>
           </thead>
           <tbody>
@@ -409,9 +410,10 @@
                 <td class="td-metric td-fam-num td-tonne" [style.background]="famBg(group.famille)" [style.color]="famColor(group.famille)">
                   {{ group.total_tonnes != null ? formatNum(group.total_tonnes, 3) : '—' }}
                 </td>
+                <td [style.background]="famBg(group.famille)"></td>
               </tr>
               @for (row of group.rows; track row.code_produit) {
-                <tr [class.ein-preview-unknown]="!row.known">
+                <tr [class.ein-preview-unknown]="!row.known" [class.ein-preview-lll]="row.source === 'LLL'">
                   <td>
                     <span class="famille-pill-badge"
                       [style.background]="famBg(row.famille)"
@@ -427,11 +429,47 @@
                   <td class="td-metric">{{ formatNum(row.quantite_colis, 0) }}</td>
                   <td class="td-metric">{{ row.nb_palettes != null ? formatNum(row.nb_palettes, 2) : '—' }}</td>
                   <td class="td-metric td-tonne">{{ row.tonnes != null ? formatNum(row.tonnes, 3) : '—' }}</td>
+                  <td class="td-metric">
+                    <span class="source-badge source-badge--{{ row.source | lowercase }}">{{ row.source }}</span>
+                    @if (row.source === 'LLL') {
+                      <button class="ein-lll-remove" (click)="removeLllRow(row)" title="Supprimer"><i class="pi pi-times"></i></button>
+                    }
+                  </td>
                 </tr>
               }
             }
           </tbody>
         </table>
+      </div>
+
+      <!-- Add LLL row form -->
+      <div class="ein-add-lll">
+        <span class="source-badge source-badge--lll">LLL</span>
+        <div class="ein-lll-search-wrap">
+          <input class="ein-add-lll__search" type="text" placeholder="Rechercher par désignation…"
+            [(ngModel)]="lllSearch" (ngModelChange)="onLllSearch($event)" autocomplete="off" />
+          @if (lllSuggestions.length > 0) {
+            <div class="ein-lll-dropdown">
+              @for (prod of lllSuggestions; track prod.code_produit) {
+                <div class="ein-lll-option" (mousedown)="selectLllProd(prod)">
+                  <span class="ein-lll-option__name">{{ prod.description_produit || prod.nom_produit }}</span>
+                  <span class="ein-lll-option__codes">
+                    <span class="ein-lll-option__code">{{ prod.code_produit }}</span>
+                    @if (prod.code_dd) {
+                      <span class="ein-lll-option__code ein-lll-option__code--dd">{{ prod.code_dd }}</span>
+                    }
+                  </span>
+                </div>
+              }
+            </div>
+          }
+        </div>
+        <input class="ein-add-lll__qty" type="number" placeholder="Nb colis" min="0"
+          [(ngModel)]="lllQty" (keydown.enter)="addLllRow()" />
+        <button class="btn-add-lll" (click)="addLllRow()" [disabled]="!lllSelectedProd || !lllQty">
+          <i class="pi pi-plus"></i> Ajouter LLL
+        </button>
+        @if (lllError) { <span class="ein-lll-error">{{ lllError }}</span> }
       </div>
 
       <div class="obj-dialog__actions">

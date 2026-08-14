@@ -1,5 +1,6 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { PeriodStepperComponent } from '../../shared/period-stepper/period-stepper.component';
 import { getFamilyColor, getFamilyBg, getFamilyBgLight, getFamilyBgSolid } from '../../core/constants/colors';
@@ -38,6 +39,7 @@ interface ParsePreviewRow {
   nb_palettes:     number | null;
   tonnes:          number | null;
   known:           boolean;
+  source:          string;
 }
 
 interface ParseResult {
@@ -51,7 +53,7 @@ interface ParseResult {
 @Component({
   selector: 'app-entrees-in',
   standalone: true,
-  imports: [CommonModule, PeriodStepperComponent],
+  imports: [CommonModule, FormsModule, PeriodStepperComponent],
   templateUrl: './entrees-in.component.html',
   styleUrl: './entrees-in.component.scss',
 })
@@ -77,6 +79,14 @@ export class EntreesInComponent implements OnInit {
   pendingFile:   File | null = null;
   parseResult:   ParseResult | null = null;
   showPreviewDialog = false;
+
+  // Manual LLL row form
+  lllSearch       = '';
+  lllSuggestions: any[] = [];
+  lllSelectedProd: any  = null;
+  lllQty:    number | null = null;
+  lllError   = '';
+  private lllSearchTimer: any = null;
 
   readonly MONTHS = [
     'Janvier','Février','Mars','Avril','Mai','Juin',
@@ -145,16 +155,26 @@ export class EntreesInComponent implements OnInit {
     this.showPreviewDialog = false;
     this.parseResult       = null;
     this.pendingFile       = null;
+    this.lllSearch         = '';
+    this.lllSuggestions    = [];
+    this.lllSelectedProd   = null;
+    this.lllQty            = null;
+    this.lllError          = '';
   }
 
   // ── Step 2: confirm & save ────────────────────────────────────────────────
   confirmUpload(): void {
-    if (!this.pendingFile) return;
+    if (!this.parseResult) return;
     this.uploading = true;
-    const fd = new FormData();
-    fd.append('file', this.pendingFile);
 
-    this.http.post<{ imported: number; dates: string[] }>('/api/v1/entrees-in/upload', fd).subscribe({
+    const entries = this.parseResult.preview.map(row => ({
+      code_produit:   row.code_produit,
+      date:           row.date,
+      quantite_colis: row.quantite_colis,
+      source:         row.source,
+    }));
+
+    this.http.post<{ imported: number; dates: string[] }>('/api/v1/entrees-in/batch', { entries }).subscribe({
       next: result => {
         this.uploading         = false;
         this.showPreviewDialog = false;
@@ -172,6 +192,61 @@ export class EntreesInComponent implements OnInit {
         this.uploadError = e.error?.detail ?? 'Erreur lors de l\'import';
       },
     });
+  }
+
+  // ── Add manual LLL row ────────────────────────────────────────────────────
+  onLllSearch(term: string): void {
+    this.lllSelectedProd = null;
+    this.lllError = '';
+    clearTimeout(this.lllSearchTimer);
+    if (term.length < 2) { this.lllSuggestions = []; return; }
+    this.lllSearchTimer = setTimeout(() => {
+      this.http.get<{ total: number; items: any[] }>(
+        `/api/v1/produits?search=${encodeURIComponent(term)}&per_page=8`
+      ).subscribe({
+        next: res => { this.lllSuggestions = res.items; },
+        error: ()  => { this.lllSuggestions = []; },
+      });
+    }, 250);
+  }
+
+  selectLllProd(prod: any): void {
+    this.lllSelectedProd = prod;
+    this.lllSearch       = prod.description_produit || prod.nom_produit || prod.code_produit;
+    this.lllSuggestions  = [];
+    this.lllError        = '';
+  }
+
+  addLllRow(): void {
+    if (!this.lllSelectedProd || !this.lllQty || !this.parseResult) return;
+    const prod   = this.lllSelectedProd;
+    const date   = this.parseResult.dates[0];
+    const qty    = this.lllQty;
+    const colPal = prod.colisage_palette;
+    const poids  = prod.poids_unite_vente;
+
+    this.parseResult.preview.push({
+      code_produit:   prod.code_produit,
+      nom_produit:    prod.description_produit || prod.nom_produit || prod.code_produit,
+      famille:        (prod.famille || '').trim(),
+      date,
+      quantite_colis: qty,
+      nb_palettes:    colPal ? Math.round(qty / colPal * 100) / 100 : null,
+      tonnes:         poids  ? Math.round(qty * poids * 1000) / 1000 : null,
+      known:          true,
+      source:         'LLL',
+    });
+    this.parseResult.total_entries++;
+    this.lllSearch       = '';
+    this.lllQty          = null;
+    this.lllSelectedProd = null;
+    this.lllSuggestions  = [];
+  }
+
+  removeLllRow(row: ParsePreviewRow): void {
+    if (!this.parseResult) return;
+    const idx = this.parseResult.preview.indexOf(row);
+    if (idx >= 0) { this.parseResult.preview.splice(idx, 1); this.parseResult.total_entries--; }
   }
 
   // Grouped preview for the dialog

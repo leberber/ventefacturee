@@ -27,7 +27,9 @@ def list_produits(
     if search:
         term = f"%{search}%"
         conditions.append(
-            Produit.description_produit.ilike(term) | Produit.code_produit.ilike(term)
+            Produit.description_produit.ilike(term) |
+            Produit.code_produit.ilike(term) |
+            Produit.code_dd.ilike(term)
         )
 
     count_q = select(func.count(Produit.code_produit))
