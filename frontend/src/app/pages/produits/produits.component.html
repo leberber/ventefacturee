@@ -93,8 +93,20 @@
                 Désignation <i class="pi pi-sort-alt"></i>
               </th>
             }
-            @if (isColVisible('nom_produit'))    { <th>Désignation courte</th> }
-            @if (isColVisible('code_dd'))        { <th>Code DD</th> }
+            @if (isColVisible('nom_produit')) {
+              <th class="th-sort" (click)="sort('nom_produit')"
+                [class.th-sort--asc]="sortCol()==='nom_produit'&&sortDir()===1"
+                [class.th-sort--desc]="sortCol()==='nom_produit'&&sortDir()===-1">
+                Désignation courte <i class="pi pi-sort-alt"></i>
+              </th>
+            }
+            @if (isColVisible('code_dd')) {
+              <th class="th-sort" (click)="sort('code_dd')"
+                [class.th-sort--asc]="sortCol()==='code_dd'&&sortDir()===1"
+                [class.th-sort--desc]="sortCol()==='code_dd'&&sortDir()===-1">
+                Code DD <i class="pi pi-sort-alt"></i>
+              </th>
+            }
             @if (isColVisible('famille')) {
               <th class="th-sort" (click)="sort('famille')"
                 [class.th-sort--asc]="sortCol()==='famille'&&sortDir()===1"
@@ -109,8 +121,20 @@
                 Sous-famille <i class="pi pi-sort-alt"></i>
               </th>
             }
-            @if (isColVisible('uom_vente'))      { <th>UOM Vente</th> }
-            @if (isColVisible('uom_principale')) { <th>UOM P.</th> }
+            @if (isColVisible('uom_vente')) {
+              <th class="th-sort" (click)="sort('uom_vente')"
+                [class.th-sort--asc]="sortCol()==='uom_vente'&&sortDir()===1"
+                [class.th-sort--desc]="sortCol()==='uom_vente'&&sortDir()===-1">
+                UOM Vente <i class="pi pi-sort-alt"></i>
+              </th>
+            }
+            @if (isColVisible('uom_principale')) {
+              <th class="th-sort" (click)="sort('uom_principale')"
+                [class.th-sort--asc]="sortCol()==='uom_principale'&&sortDir()===1"
+                [class.th-sort--desc]="sortCol()==='uom_principale'&&sortDir()===-1">
+                UOM P. <i class="pi pi-sort-alt"></i>
+              </th>
+            }
             @if (isColVisible('colisage')) {
               <th class="th-sort col-center" (click)="sort('colisage')"
                 [class.th-sort--asc]="sortCol()==='colisage'&&sortDir()===1"
@@ -118,12 +142,48 @@
                 Colisage <i class="pi pi-sort-alt"></i>
               </th>
             }
-            @if (isColVisible('colisage_palette')) { <th class="col-center">Col./palette</th> }
-            @if (isColVisible('unite'))      { <th class="col-center">Unité</th> }
-            @if (isColVisible('volume'))     { <th class="col-center">Volume</th> }
-            @if (isColVisible('poids_unite_vente')) { <th class="col-center">Poids UV (T)</th> }
-            @if (isColVisible('prix'))       { <th class="col-center">Prix</th> }
-            @if (isColVisible('facturable')) { <th class="col-center">Facturable</th> }
+            @if (isColVisible('colisage_palette')) {
+              <th class="th-sort col-center" (click)="sort('colisage_palette')"
+                [class.th-sort--asc]="sortCol()==='colisage_palette'&&sortDir()===1"
+                [class.th-sort--desc]="sortCol()==='colisage_palette'&&sortDir()===-1">
+                Col./palette <i class="pi pi-sort-alt"></i>
+              </th>
+            }
+            @if (isColVisible('unite')) {
+              <th class="th-sort col-center" (click)="sort('unite')"
+                [class.th-sort--asc]="sortCol()==='unite'&&sortDir()===1"
+                [class.th-sort--desc]="sortCol()==='unite'&&sortDir()===-1">
+                Unité <i class="pi pi-sort-alt"></i>
+              </th>
+            }
+            @if (isColVisible('volume')) {
+              <th class="th-sort col-center" (click)="sort('volume')"
+                [class.th-sort--asc]="sortCol()==='volume'&&sortDir()===1"
+                [class.th-sort--desc]="sortCol()==='volume'&&sortDir()===-1">
+                Volume <i class="pi pi-sort-alt"></i>
+              </th>
+            }
+            @if (isColVisible('poids_unite_vente')) {
+              <th class="th-sort col-center" (click)="sort('poids_unite_vente')"
+                [class.th-sort--asc]="sortCol()==='poids_unite_vente'&&sortDir()===1"
+                [class.th-sort--desc]="sortCol()==='poids_unite_vente'&&sortDir()===-1">
+                Poids UV (T) <i class="pi pi-sort-alt"></i>
+              </th>
+            }
+            @if (isColVisible('prix')) {
+              <th class="th-sort col-center" (click)="sort('prix')"
+                [class.th-sort--asc]="sortCol()==='prix'&&sortDir()===1"
+                [class.th-sort--desc]="sortCol()==='prix'&&sortDir()===-1">
+                Prix <i class="pi pi-sort-alt"></i>
+              </th>
+            }
+            @if (isColVisible('facturable')) {
+              <th class="th-sort col-center" (click)="sort('facturable')"
+                [class.th-sort--asc]="sortCol()==='facturable'&&sortDir()===1"
+                [class.th-sort--desc]="sortCol()==='facturable'&&sortDir()===-1">
+                Facturable <i class="pi pi-sort-alt"></i>
+              </th>
+            }
             @if (isColVisible('imported')) {
               <th class="th-sort col-center" (click)="sort('imported')"
                 [class.th-sort--asc]="sortCol()==='imported'&&sortDir()===1"

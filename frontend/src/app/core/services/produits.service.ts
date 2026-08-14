@@ -9,6 +9,7 @@ export interface ProduitRead {
   uom_vente: string | null;
   uom_principale: string | null;
   nom_produit: string | null;
+  code_dd: string | null;
   colisage: number | null;
   colisage_palette: number | null;
   unite: string | null;

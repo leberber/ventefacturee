@@ -6,7 +6,7 @@ import { ProduitsService, ProduitRead } from '../../core/services/produits.servi
 
 const LS_KEY = 'ventefacturee_produits_columns';
 
-type SortCol = 'code_produit' | 'description_produit' | 'famille' | 'sous_famille' | 'uom_vente' | 'colisage' | 'imported';
+type SortCol = string;
 type EditField = 'nom_produit' | 'code_dd' | 'colisage' | 'colisage_palette' | 'unite' | 'volume' | 'poids_unite_vente' | 'prix';
 
 interface ColDef {
