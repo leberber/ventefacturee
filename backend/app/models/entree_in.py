@@ -1,12 +1,10 @@
 from typing import Optional
 from datetime import datetime, timezone, date as date_type
 from sqlmodel import SQLModel, Field
-from sqlalchemy import UniqueConstraint
 
 
 class EntreeIn(SQLModel, table=True):
     __tablename__ = "entrees_in"
-    __table_args__ = (UniqueConstraint("code_produit", "date"),)
 
     id:                 Optional[int] = Field(default=None, primary_key=True)
     code_produit:       str           = Field(max_length=30, index=True)

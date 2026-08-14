@@ -230,12 +230,15 @@ def get_month(
     # key: code_produit -> {day: qty_colis}
     from collections import defaultdict
     product_days: dict[str, dict[int, float]] = defaultdict(lambda: defaultdict(float))
+    product_sources: dict[str, dict[str, float]] = defaultdict(lambda: defaultdict(float))
     days_set: set[int] = set()
 
     for e in entrees:
         day = e.date.day
         days_set.add(day)
         product_days[e.code_produit][day] += e.quantite_colis
+        if e.source:
+            product_sources[e.code_produit][e.source] += e.quantite_colis
 
     days = sorted(days_set)
 
@@ -271,6 +274,7 @@ def get_month(
             "total_colis": total_colis,
             "total_palettes": round(total_palettes, 2) if total_palettes is not None else None,
             "total_tonne": round(total_tonne, 3) if total_tonne is not None else None,
+            "source_colis": dict(product_sources[code]) if code in product_sources else None,
         })
 
     # Sort by famille, sous_famille, nom_produit

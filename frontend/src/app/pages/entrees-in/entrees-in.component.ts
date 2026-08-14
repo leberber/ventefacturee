@@ -18,6 +18,7 @@ interface EntreeRow {
   total_colis:      number;
   total_palettes:   number | null;
   total_tonne:      number | null;
+  source_colis:     Record<string, number> | null;
 }
 
 interface SfGroup  { nom: string; rows: EntreeRow[]; }
@@ -434,6 +435,15 @@ export class EntreesInComponent implements OnInit {
     if (p >= 100) return 'pct-ok';
     if (p >= 60) return 'pct-mid';
     return 'pct-low';
+  }
+
+  hasMixedSources(row: EntreeRow): boolean {
+    return !!row.source_colis && Object.keys(row.source_colis).length > 1;
+  }
+
+  srcPal(colis: number, row: EntreeRow): string {
+    if (row.colisage_palette) return this.formatNum(colis / row.colisage_palette, 1);
+    return this.formatNum(colis, 0) + ' col.';
   }
 
   // ── Colours ───────────────────────────────────────────────────────────────

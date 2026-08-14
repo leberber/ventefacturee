@@ -357,6 +357,26 @@ th.th-day:hover .th-day-del {
   }
 }
 
+// ── Source split (CLR / LLL) in cumul cell ───────────────────────────────────
+.ein-src-split {
+  display: flex;
+  gap: 0.2rem;
+  justify-content: flex-end;
+  margin-top: 0.2rem;
+}
+
+.ein-src-chip {
+  font-size: 0.62rem;
+  padding: 0.05rem 0.28rem;
+  border-radius: 3px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  font-variant-numeric: tabular-nums;
+
+  &--clr { background: rgba(99,102,241,0.1);   color: #4f46e5; }
+  &--lll { background: rgba(245,158,11,0.15);  color: #b45309; }
+}
+
 .ein-lll-remove {
   border: none;
   background: transparent;

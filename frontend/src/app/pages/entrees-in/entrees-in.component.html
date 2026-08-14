@@ -253,6 +253,16 @@
                     } @else {
                       <td class="td-cumul" [class.td-day--nonzero]="(row.total_palettes ?? 0) > 0">
                         {{ row.total_palettes != null ? formatNum(row.total_palettes, 1) : '—' }}
+                        @if (hasMixedSources(row)) {
+                          <div class="ein-src-split">
+                            @if (row.source_colis!['CLR']) {
+                              <span class="ein-src-chip ein-src-chip--clr">CLR {{ srcPal(row.source_colis!['CLR'], row) }}</span>
+                            }
+                            @if (row.source_colis!['LLL']) {
+                              <span class="ein-src-chip ein-src-chip--lll">LLL {{ srcPal(row.source_colis!['LLL'], row) }}</span>
+                            }
+                          </div>
+                        }
                       </td>
                     }
                     @if (!daysExpanded) {
