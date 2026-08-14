@@ -94,6 +94,7 @@
               </th>
             }
             @if (isColVisible('nom_produit'))    { <th>Désignation courte</th> }
+            @if (isColVisible('code_dd'))        { <th>Code DD</th> }
             @if (isColVisible('famille')) {
               <th class="th-sort" (click)="sort('famille')"
                 [class.th-sort--asc]="sortCol()==='famille'&&sortDir()===1"
@@ -172,6 +173,30 @@
                           <i class="pi pi-spin pi-spinner cell-spinner"></i>
                         } @else {
                           <span [class.text-muted]="!p.nom_produit">{{ p.nom_produit ?? '—' }}</span>
+                        }
+                        <i class="pi pi-pencil cell-pencil"></i>
+                      </div>
+                    }
+                  </td>
+                }
+
+                @if (isColVisible('code_dd')) {
+                  <td class="cell-editable"
+                    (click)="startEdit(p, 'code_dd', $event)"
+                    [class.cell-editing]="isEditing(p.code_produit, 'code_dd')">
+                    @if (isEditing(p.code_produit, 'code_dd')) {
+                      <input type="text" class="cell-input" autofocus
+                        [value]="editingValue() ?? ''"
+                        (input)="editingValue.set($any($event.target).value || null)"
+                        (blur)="saveEdit(p)"
+                        (keydown.enter)="saveEdit(p)"
+                        (keydown.escape)="cancelEdit()" />
+                    } @else {
+                      <div class="cell-display">
+                        @if (savingCell()?.code === p.code_produit && savingCell()?.field === 'code_dd') {
+                          <i class="pi pi-spin pi-spinner cell-spinner"></i>
+                        } @else {
+                          <span [class.text-muted]="!p.code_dd"><code>{{ p.code_dd ?? '—' }}</code></span>
                         }
                         <i class="pi pi-pencil cell-pencil"></i>
                       </div>

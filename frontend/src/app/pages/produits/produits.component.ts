@@ -7,7 +7,7 @@ import { ProduitsService, ProduitRead } from '../../core/services/produits.servi
 const LS_KEY = 'ventefacturee_produits_columns';
 
 type SortCol = 'code_produit' | 'description_produit' | 'famille' | 'sous_famille' | 'uom_vente' | 'colisage' | 'imported';
-type EditField = 'nom_produit' | 'colisage' | 'colisage_palette' | 'unite' | 'volume' | 'poids_unite_vente' | 'prix';
+type EditField = 'nom_produit' | 'code_dd' | 'colisage' | 'colisage_palette' | 'unite' | 'volume' | 'poids_unite_vente' | 'prix';
 
 interface ColDef {
   field: string;
@@ -29,6 +29,7 @@ export class ProduitsComponent implements OnInit {
     { field: 'code_produit',        header: 'Code',              visible: true  },
     { field: 'description_produit', header: 'Désignation',       visible: true  },
     { field: 'nom_produit',         header: 'Désignation courte',visible: true  },
+    { field: 'code_dd',             header: 'Code DD',           visible: false },
     { field: 'famille',             header: 'Famille',           visible: true  },
     { field: 'sous_famille',        header: 'Sous-famille',      visible: true  },
     { field: 'uom_vente',           header: 'UOM Vente',         visible: true  },
