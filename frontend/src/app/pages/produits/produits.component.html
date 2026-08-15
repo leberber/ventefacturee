@@ -191,9 +191,8 @@
                     @if (isEditing(p.code_produit, 'nom_produit')) {
                       <input type="text" class="cell-input" autofocus
                         [value]="editingValue() ?? ''"
-                        (input)="editingValue.set($any($event.target).value || null)"
-                        (blur)="saveEdit(p)"
-                        (keydown.enter)="saveEdit(p)"
+                        (blur)="editingValue.set($any($event.target).value || null); saveEdit(p)"
+                        (keydown.enter)="editingValue.set($any($event.target).value || null); saveEdit(p)"
                         (keydown.escape)="cancelEdit()" />
                     } @else {
                       <div class="cell-display">
@@ -215,9 +214,8 @@
                     @if (isEditing(p.code_produit, 'code_dd')) {
                       <input type="text" class="cell-input" autofocus
                         [value]="editingValue() ?? ''"
-                        (input)="editingValue.set($any($event.target).value || null)"
-                        (blur)="saveEdit(p)"
-                        (keydown.enter)="saveEdit(p)"
+                        (blur)="editingValue.set($any($event.target).value || null); saveEdit(p)"
+                        (keydown.enter)="editingValue.set($any($event.target).value || null); saveEdit(p)"
                         (keydown.escape)="cancelEdit()" />
                     } @else {
                       <div class="cell-display">
@@ -233,33 +231,19 @@
                 }
 
                 @if (isColVisible('famille')) {
-                  <td class="cell-editable"
-                    (click)="startEdit(p, 'famille', $event)"
-                    [class.cell-editing]="isEditing(p.code_produit, 'famille')">
-                    @if (isEditing(p.code_produit, 'famille')) {
-                      <select class="cell-select" autofocus
-                        [value]="editingValue() ?? ''"
-                        (change)="editingValue.set($any($event.target).value || null); saveEdit(p)"
-                        (keydown.escape)="cancelEdit()">
-                        <option value="">—</option>
-                        @for (f of familles(); track f) {
-                          <option [value]="f">{{ f }}</option>
-                        }
-                      </select>
-                    } @else {
-                      <div class="cell-display">
-                        @if (savingCell()?.code === p.code_produit && savingCell()?.field === 'famille') {
-                          <i class="pi pi-spin pi-spinner cell-spinner"></i>
-                        } @else if (p.famille) {
-                          <span class="famille-pill-badge" [style.background]="getFamilleStyle(p.famille).background" [style.color]="getFamilleStyle(p.famille).color">
-                            {{ p.famille }}
-                          </span>
-                        } @else {
-                          <span class="text-muted">—</span>
-                        }
-                        <i class="pi pi-pencil cell-pencil"></i>
-                      </div>
-                    }
+                  <td class="cell-editable" (click)="openFamillePopover(p, $event)">
+                    <div class="cell-display">
+                      @if (savingCell()?.code === p.code_produit && savingCell()?.field === 'famille') {
+                        <i class="pi pi-spin pi-spinner cell-spinner"></i>
+                      } @else if (p.famille) {
+                        <span class="famille-pill-badge" [style.background]="getFamilleStyle(p.famille).background" [style.color]="getFamilleStyle(p.famille).color">
+                          {{ p.famille }}
+                        </span>
+                      } @else {
+                        <span class="text-muted">—</span>
+                      }
+                      <i class="pi pi-pencil cell-pencil"></i>
+                    </div>
                   </td>
                 }
 
@@ -270,8 +254,9 @@
                     @if (isEditing(p.code_produit, 'sous_famille')) {
                       <input type="text" class="cell-input" autofocus style="width:120px;text-align:left"
                         [value]="editingValue() ?? ''"
-                        (input)="editingValue.set($any($event.target).value || null)"
-                        (blur)="saveEdit(p)" (keydown.enter)="saveEdit(p)" (keydown.escape)="cancelEdit()" />
+                        (blur)="editingValue.set($any($event.target).value || null); saveEdit(p)"
+                        (keydown.enter)="editingValue.set($any($event.target).value || null); saveEdit(p)"
+                        (keydown.escape)="cancelEdit()" />
                     } @else {
                       <div class="cell-display">
                         @if (savingCell()?.code === p.code_produit && savingCell()?.field === 'sous_famille') {
@@ -292,8 +277,9 @@
                     @if (isEditing(p.code_produit, 'uom_vente')) {
                       <input type="text" class="cell-input" autofocus style="width:80px;text-align:left"
                         [value]="editingValue() ?? ''"
-                        (input)="editingValue.set($any($event.target).value || null)"
-                        (blur)="saveEdit(p)" (keydown.enter)="saveEdit(p)" (keydown.escape)="cancelEdit()" />
+                        (blur)="editingValue.set($any($event.target).value || null); saveEdit(p)"
+                        (keydown.enter)="editingValue.set($any($event.target).value || null); saveEdit(p)"
+                        (keydown.escape)="cancelEdit()" />
                     } @else {
                       <div class="cell-display">
                         @if (savingCell()?.code === p.code_produit && savingCell()?.field === 'uom_vente') {
@@ -314,8 +300,9 @@
                     @if (isEditing(p.code_produit, 'uom_principale')) {
                       <input type="text" class="cell-input" autofocus style="width:80px;text-align:left"
                         [value]="editingValue() ?? ''"
-                        (input)="editingValue.set($any($event.target).value || null)"
-                        (blur)="saveEdit(p)" (keydown.enter)="saveEdit(p)" (keydown.escape)="cancelEdit()" />
+                        (blur)="editingValue.set($any($event.target).value || null); saveEdit(p)"
+                        (keydown.enter)="editingValue.set($any($event.target).value || null); saveEdit(p)"
+                        (keydown.escape)="cancelEdit()" />
                     } @else {
                       <div class="cell-display">
                         @if (savingCell()?.code === p.code_produit && savingCell()?.field === 'uom_principale') {
@@ -336,9 +323,8 @@
                     @if (isEditing(p.code_produit, 'colisage')) {
                       <input type="number" class="cell-input" autofocus min="0" step="1"
                         [value]="editingValue()"
-                        (input)="editingValue.set(+$any($event.target).value || null)"
-                        (blur)="saveEdit(p)"
-                        (keydown.enter)="saveEdit(p)"
+                        (blur)="editingValue.set(+$any($event.target).value || null); saveEdit(p)"
+                        (keydown.enter)="editingValue.set(+$any($event.target).value || null); saveEdit(p)"
                         (keydown.escape)="cancelEdit()" />
                     } @else {
                       <div class="cell-display cell-display--center">
@@ -362,9 +348,8 @@
                     @if (isEditing(p.code_produit, 'colisage_palette')) {
                       <input type="number" class="cell-input" autofocus min="0" step="1"
                         [value]="editingValue()"
-                        (input)="editingValue.set(+$any($event.target).value || null)"
-                        (blur)="saveEdit(p)"
-                        (keydown.enter)="saveEdit(p)"
+                        (blur)="editingValue.set(+$any($event.target).value || null); saveEdit(p)"
+                        (keydown.enter)="editingValue.set(+$any($event.target).value || null); saveEdit(p)"
                         (keydown.escape)="cancelEdit()" />
                     } @else {
                       <div class="cell-display cell-display--center">
@@ -414,9 +399,8 @@
                     @if (isEditing(p.code_produit, 'volume')) {
                       <input type="number" class="cell-input" autofocus min="0" step="0.01"
                         [value]="editingValue()"
-                        (input)="editingValue.set(+$any($event.target).value || null)"
-                        (blur)="saveEdit(p)"
-                        (keydown.enter)="saveEdit(p)"
+                        (blur)="editingValue.set(+$any($event.target).value || null); saveEdit(p)"
+                        (keydown.enter)="editingValue.set(+$any($event.target).value || null); saveEdit(p)"
                         (keydown.escape)="cancelEdit()" />
                     } @else {
                       <div class="cell-display cell-display--center">
@@ -438,9 +422,8 @@
                     @if (isEditing(p.code_produit, 'poids_unite_vente')) {
                       <input type="number" class="cell-input" autofocus min="0" step="0.0001"
                         [value]="editingValue()"
-                        (input)="editingValue.set(+$any($event.target).value || null)"
-                        (blur)="saveEdit(p)"
-                        (keydown.enter)="saveEdit(p)"
+                        (blur)="editingValue.set(+$any($event.target).value || null); saveEdit(p)"
+                        (keydown.enter)="editingValue.set(+$any($event.target).value || null); saveEdit(p)"
                         (keydown.escape)="cancelEdit()" />
                     } @else {
                       <div class="cell-display cell-display--center">
@@ -462,9 +445,8 @@
                     @if (isEditing(p.code_produit, 'prix')) {
                       <input type="number" class="cell-input" autofocus min="0" step="0.01"
                         [value]="editingValue()"
-                        (input)="editingValue.set(+$any($event.target).value || null)"
-                        (blur)="saveEdit(p)"
-                        (keydown.enter)="saveEdit(p)"
+                        (blur)="editingValue.set(+$any($event.target).value || null); saveEdit(p)"
+                        (keydown.enter)="editingValue.set(+$any($event.target).value || null); saveEdit(p)"
                         (keydown.escape)="cancelEdit()" />
                     } @else {
                       <div class="cell-display cell-display--center">
@@ -510,6 +492,27 @@
   </div>
 
 </div>
+
+<!-- Famille picker popover -->
+<p-popover #familleOv styleClass="famille-popover">
+  <div class="famille-popup">
+    <input #newFamilleInput type="text" class="famille-popup__new-input"
+      placeholder="Nouvelle famille…"
+      (keydown.enter)="saveFamille(newFamilleInput.value.trim().toUpperCase() || null); newFamilleInput.value = ''"
+      (keydown.escape)="familleOv.hide()" />
+    <div class="famille-popup__divider"></div>
+    <div class="famille-popup__option famille-popup__option--empty" (click)="saveFamille(null)">—</div>
+    @for (f of familles(); track f) {
+      <div class="famille-popup__option"
+        [class.famille-popup__option--active]="familleEditProd()?.famille === f"
+        [style.background]="getFamilleStyle(f).background"
+        [style.color]="getFamilleStyle(f).color"
+        (click)="saveFamille(f)">
+        {{ f }}
+      </div>
+    }
+  </div>
+</p-popover>
 
 @if (showSyncConfirm) {
   <div class="sync-backdrop" (click)="showSyncConfirm = false">

@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal, computed } from '@angular/core';
+import { Component, OnInit, inject, signal, computed, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { TooltipModule } from 'primeng/tooltip';
 import { Popover } from 'primeng/popover';
@@ -85,6 +85,8 @@ export class ProduitsComponent implements OnInit {
   readonly editingCell  = signal<{ code: string; field: EditField } | null>(null);
   readonly editingValue = signal<any>(null);
   readonly savingCell   = signal<{ code: string; field: EditField } | null>(null);
+  readonly familleEditProd = signal<ProduitRead | null>(null);
+  @ViewChild('familleOv') familleOv!: Popover;
 
   readonly filtered = computed(() => {
     let list = this.allProduits();
@@ -162,6 +164,7 @@ export class ProduitsComponent implements OnInit {
 
   startEdit(p: ProduitRead, field: EditField, event: Event): void {
     event.stopPropagation();
+    if (this.isEditing(p.code_produit, field)) return;
     this.editingCell.set({ code: p.code_produit, field });
     this.editingValue.set((p as any)[field] ?? null);
   }
@@ -202,6 +205,26 @@ export class ProduitsComponent implements OnInit {
     { background: 'rgba(234,88,12,0.12)',   color: '#c2410c' },
     { background: 'rgba(15,118,110,0.12)',  color: '#0f766e' },
   ];
+
+  openFamillePopover(p: ProduitRead, event: Event): void {
+    event.stopPropagation();
+    this.familleEditProd.set(p);
+    this.familleOv.toggle(event);
+  }
+
+  saveFamille(f: string | null): void {
+    const p = this.familleEditProd();
+    this.familleOv.hide();
+    if (!p || f === p.famille) return;
+    this.savingCell.set({ code: p.code_produit, field: 'famille' });
+    this.svc.update(p.code_produit, { famille: f }).subscribe({
+      next: updated => {
+        this.allProduits.update(list => list.map(x => x.code_produit === updated.code_produit ? updated : x));
+        this.savingCell.set(null);
+      },
+      error: () => this.savingCell.set(null),
+    });
+  }
 
   toggleFacturable(p: ProduitRead): void {
     const newVal = !p.facturable;
