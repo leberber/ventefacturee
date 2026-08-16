@@ -55,6 +55,27 @@ export interface VentePage {
   items: VenteRead[];
 }
 
+export interface RapprochementLigne {
+  code_produit: string;
+  libelle: string;
+  bl_qte_unites: number;
+  bl_nb_colis: number | null;
+  bl_prix_unitaire: number;
+  bl_montant_ttc: number;
+  ventes_qte_colis: number | null;
+  colisage: number | null;
+  ventes_qte_unites: number | null;
+  difference_unites: number | null;
+  match: boolean;
+}
+
+export interface RapprochementResult {
+  nom_fdv: string;
+  date: string;
+  net_a_payer: number;
+  lignes: RapprochementLigne[];
+}
+
 export interface UploadResponse {
   lignes: number;
   annee_mois: string;
@@ -159,5 +180,12 @@ export class VentesService {
     const form = new FormData();
     form.append('file', file);
     return this.http.post<UploadResponse>('/api/v1/ventes/upload', form);
+  }
+
+  rapprochementBL(file: File, nom_livreur: string) {
+    const form = new FormData();
+    form.append('file', file);
+    let p = new HttpParams().set('nom_livreur', nom_livreur);
+    return this.http.post<RapprochementResult>('/api/v1/ventes/rapprochement-bl', form, { params: p });
   }
 }

@@ -14,7 +14,7 @@ from sqlmodel import Session, select
 from app.api.deps import get_current_user
 from app.database import get_session
 from app.models.user import User
-from app.models.vente import Vente, VentePage, VenteRead
+from app.models.vente import Vente, VentePage, VenteRead, RapprochementLigne, RapprochementResult
 from app.utils.parse import parse_file
 
 router = APIRouter()
@@ -329,6 +329,108 @@ def list_clients(
     if nom_fdv:
         q = q.where(Vente.nom_fdv == nom_fdv)
     return [v for v in session.exec(q).all() if v]
+
+
+@router.post("/rapprochement-bl", response_model=RapprochementResult)
+async def rapprochement_bl(
+    file: UploadFile = File(...),
+    nom_livreur: str = Query(...),
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user),
+) -> Any:
+    from fastapi import HTTPException
+    from app.models.produit import Produit
+    import io
+
+    # Parse BL Excel — header row is row 0
+    contents = await file.read()
+    df = pd.read_excel(io.BytesIO(contents), header=0)
+
+    bl_rows = []
+    for _, row in df.iterrows():
+        code = _safe_str(row.get('Code produit'), 30)
+        if not code:
+            continue
+        bl_rows.append({
+            'code_produit': code,
+            'libelle': (_safe_str(row.get('Libellé'), 200) or '').replace('_x000d_', '').replace('\r', '').strip(),
+            'bl_qte_unites': _safe_float(row.get('Quantité')) or 0.0,
+            'bl_prix_unitaire': _safe_float(row.get('Prix unitaire')) or 0.0,
+            'bl_montant_ttc': _safe_float(row.get('Montant TTC')) or 0.0,
+        })
+
+    if not bl_rows:
+        raise HTTPException(status_code=400, detail="Aucune ligne valide trouvée dans le fichier")
+
+    net_a_payer = sum(r['bl_montant_ttc'] for r in bl_rows)
+
+    # Extract BL date from the Excel — use first non-null value in date column
+    date_col = df.get("Date d'insertion du détail")
+    if date_col is None or date_col.dropna().empty:
+        raise HTTPException(status_code=400, detail="Impossible de lire la date depuis le fichier Excel")
+    raw_date = pd.to_datetime(date_col.dropna().iloc[0], dayfirst=False)
+    date_obj = raw_date.date()
+    agg_stmt = (
+        select(Vente.code_produit, func.sum(Vente.qte_facturee).label('qte_colis'))
+        .where(Vente.nom_livreur == nom_livreur)
+        .where(Vente.date_facturation == date_obj)
+        .where(Vente.code_produit.isnot(None))
+        .group_by(Vente.code_produit)
+    )
+    ventes_map: dict = {
+        row.code_produit: (row.qte_colis or 0.0)
+        for row in session.execute(agg_stmt).all()
+    }
+
+    # Fetch colisage from produits table
+    codes = list({r['code_produit'] for r in bl_rows})
+    col_stmt = (
+        select(Produit.code_produit, Produit.colisage)
+        .where(Produit.code_produit.in_(codes))
+    )
+    colisage_map: dict = {
+        row.code_produit: row.colisage
+        for row in session.execute(col_stmt).all()
+    }
+
+    lignes = []
+    for r in bl_rows:
+        code = r['code_produit']
+        qte_colis = ventes_map.get(code)
+        colisage = colisage_map.get(code)
+        ventes_qte_unites = None
+        difference = None
+        is_match = False
+
+        bl_nb_colis = None
+        if colisage:
+            bl_nb_colis = round(r['bl_qte_unites'] / colisage, 4)
+
+        if qte_colis is not None and colisage:
+            ventes_qte_unites = round(qte_colis * colisage, 4)
+            difference = round(r['bl_qte_unites'] - ventes_qte_unites, 4)
+            is_match = abs(difference) < 0.01
+
+        lignes.append(RapprochementLigne(
+            code_produit=code,
+            libelle=r['libelle'],
+            bl_qte_unites=r['bl_qte_unites'],
+            bl_nb_colis=bl_nb_colis,
+            bl_prix_unitaire=r['bl_prix_unitaire'],
+            bl_montant_ttc=r['bl_montant_ttc'],
+            ventes_qte_colis=qte_colis,
+            colisage=colisage,
+            ventes_qte_unites=ventes_qte_unites,
+            difference_unites=difference,
+            match=is_match,
+        ))
+
+    return RapprochementResult(
+        nom_fdv=nom_livreur,
+        date=str(date_obj),
+        net_a_payer=round(net_a_payer, 2),
+        lignes=lignes,
+    )
 
 
 @router.post("/upload")

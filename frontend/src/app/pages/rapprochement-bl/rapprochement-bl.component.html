@@ -1,0 +1,151 @@
+<!-- Page header -->
+<div class="page-header">
+  <div class="page-header__top">
+    <div class="page-header__left">
+      <div class="page-icon"><i class="pi pi-file-check"></i></div>
+      <div>
+        <h1 class="page-header__title">Rapprochement BL</h1>
+        <p class="page-header__sub">Vérification bon de chargement vs bon de livraison</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Form -->
+<div class="rapp-card rapp-form">
+  <div class="rapp-form__row">
+    <div class="rapp-form__field">
+      <label class="rapp-form__label">Livreur</label>
+      <p-select
+        [options]="livreurs"
+        [(ngModel)]="selectedLivreur"
+        placeholder="Sélectionner un livreur…"
+        [filter]="true"
+        styleClass="rapp-select"
+        panelStyleClass="filter-card-panel"
+      />
+    </div>
+
+<div class="rapp-form__field">
+      <label class="rapp-form__label">Fichier BL (Excel)</label>
+      <input #fileInput type="file" accept=".xlsx,.xls" (change)="onFileSelect($event)" style="display:none" />
+      <button class="rapp-file-btn" (click)="fileInput.click()">
+        <i class="pi pi-paperclip"></i>
+        <span>{{ fileName || 'Choisir un fichier…' }}</span>
+      </button>
+    </div>
+
+    <button class="rapp-run-btn"
+      [disabled]="!canRun || loading"
+      (click)="runRapprochement()">
+      @if (loading) {
+        <i class="pi pi-spin pi-spinner"></i> Analyse…
+      } @else {
+        <i class="pi pi-search"></i> Analyser
+      }
+    </button>
+  </div>
+
+  @if (error) {
+    <div class="rapp-error">
+      <i class="pi pi-exclamation-triangle"></i> {{ error }}
+    </div>
+  }
+</div>
+
+<!-- Results -->
+@if (result) {
+  <!-- NET A PAYER card -->
+  <div class="rapp-net-card">
+    <div class="rapp-net-card__label">NET À PAYER</div>
+    <div class="rapp-net-card__amount">{{ result.net_a_payer | number:'1.2-2' }} DA</div>
+    <div class="rapp-net-card__meta">{{ result.nom_fdv }} — {{ result.date }}</div>
+  </div>
+
+  <!-- Stats row -->
+  <div class="rapp-stats">
+    <div class="rapp-stat rapp-stat--total">
+      <div class="rapp-stat__value">{{ result.lignes.length }}</div>
+      <div class="rapp-stat__label">Produits BL</div>
+    </div>
+    <div class="rapp-stat rapp-stat--ok">
+      <i class="pi pi-check-circle"></i>
+      <div class="rapp-stat__value">{{ matchCount }}</div>
+      <div class="rapp-stat__label">Concordants</div>
+    </div>
+    <div class="rapp-stat rapp-stat--warn">
+      <i class="pi pi-exclamation-circle"></i>
+      <div class="rapp-stat__value">{{ mismatchCount }}</div>
+      <div class="rapp-stat__label">Écarts</div>
+    </div>
+    <div class="rapp-stat rapp-stat--unknown">
+      <i class="pi pi-question-circle"></i>
+      <div class="rapp-stat__value">{{ notFoundCount }}</div>
+      <div class="rapp-stat__label">Non trouvés</div>
+    </div>
+  </div>
+
+  <!-- Table -->
+  <div class="rapp-card">
+    <div class="rapp-table-wrap">
+      <table class="rapp-table">
+        <thead>
+          <tr>
+            <th rowspan="2">Statut</th>
+            <th rowspan="2">Code</th>
+            <th rowspan="2">Désignation</th>
+            <th colspan="2" class="num group-header group-header--bl">Bon de Livraison (Excel)</th>
+            <th rowspan="2" class="num">Colisage</th>
+            <th colspan="2" class="num group-header group-header--db">Ventes (base de données)</th>
+            <th rowspan="2" class="num">Écart (unités)</th>
+            <th rowspan="2" class="num">Prix Unit. DA</th>
+            <th rowspan="2" class="num">Montant BL (DA)</th>
+          </tr>
+          <tr>
+            <th class="num sub-header sub-header--bl">Nb Colis</th>
+            <th class="num sub-header sub-header--bl">Qté (unités)</th>
+            <th class="num sub-header sub-header--db">Nb Colis</th>
+            <th class="num sub-header sub-header--db">Qté (unités)</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (ligne of result.lignes; track ligne.code_produit) {
+            <tr [ngClass]="rowClass(ligne)">
+              <td class="status-cell">
+                @if (ligne.ventes_qte_colis === null) {
+                  <span class="badge badge--unknown" pTooltip="Produit absent des ventes ce jour">?</span>
+                } @else if (ligne.match) {
+                  <span class="badge badge--ok"><i class="pi pi-check"></i></span>
+                } @else {
+                  <span class="badge badge--warn"><i class="pi pi-exclamation-triangle"></i></span>
+                }
+              </td>
+              <td class="code-cell">{{ ligne.code_produit }}</td>
+              <td class="desc-cell">{{ ligne.libelle }}</td>
+              <td class="num bl-cell">{{ ligne.bl_nb_colis !== null ? (ligne.bl_nb_colis | number) : '—' }}</td>
+              <td class="num bl-cell">{{ ligne.bl_qte_unites | number }}</td>
+              <td class="num">{{ ligne.colisage !== null ? ligne.colisage : '—' }}</td>
+              <td class="num db-cell">{{ ligne.ventes_qte_colis !== null ? (ligne.ventes_qte_colis | number) : '—' }}</td>
+              <td class="num db-cell">{{ ligne.ventes_qte_unites !== null ? (ligne.ventes_qte_unites | number) : '—' }}</td>
+              <td class="num diff-cell">
+                @if (ligne.difference_unites !== null) {
+                  <span [ngClass]="ligne.difference_unites === 0 ? 'diff--zero' : 'diff--nonzero'">
+                    {{ ligne.difference_unites > 0 ? '+' : '' }}{{ ligne.difference_unites | number }}
+                  </span>
+                } @else { — }
+              </td>
+              <td class="num">{{ ligne.bl_prix_unitaire | number:'1.2-2' }}</td>
+              <td class="num">{{ ligne.bl_montant_ttc | number:'1.2-2' }}</td>
+            </tr>
+          }
+        </tbody>
+        <tfoot>
+          <tr>
+            <td colspan="9" class="total-label">TOTAL</td>
+            <td class="num total-amount">{{ result.net_a_payer | number:'1.2-2' }} DA</td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+  </div>
+}

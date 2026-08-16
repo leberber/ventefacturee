@@ -1,6 +1,6 @@
 from sqlalchemy import Index
 from sqlmodel import SQLModel, Field
-from typing import Optional, List
+from typing import List, Optional
 from datetime import date, datetime, timezone
 
 
@@ -140,3 +140,24 @@ class UploadResponse(SQLModel):
     lignes: int
     annee_mois: str
     message: str
+
+
+class RapprochementLigne(SQLModel):
+    code_produit: str
+    libelle: str
+    bl_qte_unites: float
+    bl_nb_colis: Optional[float] = None
+    bl_prix_unitaire: float
+    bl_montant_ttc: float
+    ventes_qte_colis: Optional[float] = None
+    colisage: Optional[float] = None
+    ventes_qte_unites: Optional[float] = None
+    difference_unites: Optional[float] = None
+    match: bool
+
+
+class RapprochementResult(SQLModel):
+    nom_fdv: str
+    date: str
+    net_a_payer: float
+    lignes: List[RapprochementLigne]
