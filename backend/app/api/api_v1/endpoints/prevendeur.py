@@ -9,7 +9,7 @@ from openpyxl.utils import get_column_letter
 
 from fastapi import APIRouter, Body, Depends, Query
 from fastapi.responses import StreamingResponse
-from sqlalchemy import func
+from sqlalchemy import func, case as sa_case
 from sqlmodel import Session, select
 
 from app.api.deps import get_current_user
@@ -395,8 +395,18 @@ def prevendeur_admin_drilldown(
     ).all()
     fdv_name_map = {p.employe_code: p.full_name for p in prevendeurs_db if p.employe_code}
 
+    # Normalize qte_livree: UN rows → divide by colisage; pack rows (CARTON, FARDEAU, …) → keep as-is
+    _norm = sa_case(
+        (
+            (Vente.uom_vente == 'UN') & Produit.colisage.isnot(None),
+            Vente.qte_livree / Produit.colisage,
+        ),
+        else_=Vente.qte_livree,
+    )
+
     fdv_totals_q = (
-        select(Vente.code_fdv, func.sum(Vente.qte_livree))
+        select(Vente.code_fdv, func.sum(_norm))
+        .outerjoin(Produit, Vente.code_produit == Produit.code_produit)
         .where(Vente.annee_mois == annee_mois)
         .where(Vente.code_fdv.isnot(None))
         .group_by(Vente.code_fdv)
@@ -422,11 +432,11 @@ def prevendeur_admin_drilldown(
             Vente.sous_famille,
             Vente.code_produit,
             Vente.description_produit,
-            Vente.qte_livree,
+            _norm.label('qty_norm'),
             Vente.code_fdv,
             Vente.nom_fdv,
             Vente.source,
-        ).where(Vente.annee_mois == periode)
+        ).outerjoin(Produit, Vente.code_produit == Produit.code_produit).where(Vente.annee_mois == periode)
         if code_fdv:
             q = q.where(Vente.code_fdv == code_fdv)
         if canal:
@@ -439,7 +449,8 @@ def prevendeur_admin_drilldown(
     period_totals: dict = defaultdict(float)
     if trend_periods:
         q6 = (
-            select(Vente.annee_mois, func.sum(Vente.qte_livree))
+            select(Vente.annee_mois, func.sum(_norm))
+            .outerjoin(Produit, Vente.code_produit == Produit.code_produit)
             .where(Vente.annee_mois.in_(trend_periods))
         )
         if code_fdv:
@@ -484,27 +495,27 @@ def prevendeur_admin_drilldown(
     prod_label_to_code: dict = {}
 
     for r in rows:
-        if not r.date_commande or not r.qte_livree:
+        if not r.date_commande or not r.qty_norm:
             continue
         famille = (r.famille or "").strip().lower()
         sf = (r.sous_famille or "Autres").strip()
         prod = product_label(r)
         w = week_idx(r.date_commande)
-        hier[famille][sf][prod][w] += r.qte_livree
+        hier[famille][sf][prod][w] += r.qty_norm
         if r.code_produit and prod not in prod_label_to_code:
             prod_label_to_code[prod] = r.code_produit
         if r.code_fdv:
-            fdv_by_famille[famille][r.code_fdv] += r.qte_livree
-            fdv_by_sf_prod[famille][sf][prod][r.code_fdv] += r.qte_livree
+            fdv_by_famille[famille][r.code_fdv] += r.qty_norm
+            fdv_by_sf_prod[famille][sf][prod][r.code_fdv] += r.qty_norm
         # Supplement fdv name map from row data
         if r.code_fdv and r.nom_fdv and r.code_fdv not in fdv_name_map:
             fdv_name_map[r.code_fdv] = r.nom_fdv
 
     for r in prev_rows:
-        if not r.qte_livree:
+        if not r.qty_norm:
             continue
         famille = (r.famille or "").strip().lower()
-        prev_famille_total[famille] += r.qte_livree
+        prev_famille_total[famille] += r.qty_norm
 
     # Objective aggregation for this period
     annee_int, mois_int = int(annee_mois.split('-')[0]), int(annee_mois.split('-')[1])
@@ -556,7 +567,8 @@ def prevendeur_admin_drilldown(
 
     # Per-fdv per-product sales — queried without code_fdv filter so all pills stay accurate
     _fdv_prod_q = (
-        select(Vente.code_fdv, Vente.code_produit, func.sum(Vente.qte_livree))
+        select(Vente.code_fdv, Vente.code_produit, func.sum(_norm))
+        .outerjoin(Produit, Vente.code_produit == Produit.code_produit)
         .where(Vente.annee_mois == annee_mois, Vente.code_fdv.isnot(None), Vente.code_produit.isnot(None))
     )
     if canal:
