@@ -102,6 +102,7 @@ class VenteRead(SQLModel):
     type_client: Optional[str] = None
     code_fdv: Optional[str] = None
     nom_fdv: Optional[str] = None
+    canal: Optional[str] = None
     buid: Optional[str] = None
     depot_livraison: Optional[str] = None
     statut_commande: Optional[str] = None

@@ -65,6 +65,25 @@
   <!-- Toolbar -->
   <div class="prod-toolbar">
 
+    <!-- Active column filter chips -->
+    @if (activeFilterCount > 0) {
+      <div class="active-filters-bar">
+        @for (chip of getActiveFilterChips(); track chip.field) {
+          <span class="active-filter-chip">
+            <span class="active-filter-chip__label">{{ chip.label }}</span>
+            <span class="active-filter-chip__sep">:</span>
+            <span class="active-filter-chip__value">{{ chip.value }}</span>
+            <button class="active-filter-chip__remove" (click)="removeFilter(chip.field)">
+              <i class="pi pi-times"></i>
+            </button>
+          </span>
+        }
+        <button class="active-filters-clear" (click)="clearAllColumnFilters()">
+          <i class="pi pi-times"></i> Tout effacer
+        </button>
+      </div>
+    }
+
     <!-- Row 1: search + actions -->
     <div class="prod-toolbar__top">
       <div class="prod-toolbar__top-left">
@@ -130,7 +149,22 @@
         <thead>
           <tr>
             @for (col of visibleColumns; track col.field) {
-              <th [style.min-width]="col.width">{{ col.header }}</th>
+              <th [style.min-width]="col.width">
+                <div class="th-content">
+                  <span>{{ col.header }}</span>
+                  @if (col.filterable) {
+                    <button class="col-filter-btn"
+                      [class.col-filter-btn--active]="getColumnFilter(col.field)"
+                      (click)="openColumnFilter(col.field, $event)"
+                      [pTooltip]="getColumnFilter(col.field) || 'Filtrer'"
+                      tooltipPosition="top">
+                      <i class="pi"
+                        [class.pi-filter]="!getColumnFilter(col.field)"
+                        [class.pi-filter-fill]="!!getColumnFilter(col.field)"></i>
+                    </button>
+                  }
+                </div>
+              </th>
             }
           </tr>
         </thead>
@@ -166,6 +200,35 @@
       </table>
     }
   </div>
+
+  <!-- Column filter popover -->
+  <p-popover #filterPop>
+    <div class="col-filter-popup">
+      <input type="text" class="col-filter-search" placeholder="Rechercher…"
+        [(ngModel)]="filterSearchTerm" />
+      <div class="col-filter-list">
+        @if (filterOptionsLoading) {
+          <div class="col-filter-loading"><i class="pi pi-spin pi-spinner"></i></div>
+        } @else {
+          <div class="col-filter-option"
+            [class.col-filter-option--active]="!activeFilters[activeFilterField!]"
+            (click)="applyColumnFilter(null)">
+            <i class="pi pi-list"></i> Tous
+          </div>
+          @for (opt of filteredOptions; track opt) {
+            <div class="col-filter-option"
+              [class.col-filter-option--active]="activeFilters[activeFilterField!] === opt"
+              (click)="applyColumnFilter(opt)">
+              {{ opt }}
+            </div>
+          }
+          @if (filteredOptions.length === 0) {
+            <div class="col-filter-empty">Aucun résultat</div>
+          }
+        }
+      </div>
+    </div>
+  </p-popover>
 
   <!-- Footer -->
   <div class="table-footer">

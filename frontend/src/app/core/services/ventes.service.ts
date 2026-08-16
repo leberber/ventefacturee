@@ -7,6 +7,7 @@ export interface VenteRead {
   date_commande: string | null;
   num_commande: string | null;
   type_commande: string | null;
+  source: string | null;
   code_client: string | null;
   nom_client: string | null;
   categorie_client: string | null;
@@ -20,6 +21,7 @@ export interface VenteRead {
   type_client: string | null;
   code_fdv: string | null;
   nom_fdv: string | null;
+  canal: string | null;
   buid: string | null;
   depot_livraison: string | null;
   statut_commande: string | null;
@@ -71,7 +73,18 @@ export interface VenteListParams {
   date_from?: string;
   date_to?: string;
   famille?: string;
+  sous_famille?: string;
+  type_commande?: string;
+  categorie_client?: string;
+  statut_commande?: string;
+  wilaya?: string;
+  zone?: string;
+  region?: string;
+  source?: string;
+  canal?: string;
+  route?: string;
   nom_fdv?: string;
+  nom_livreur?: string;
   nom_client?: string;
   search?: string;
 }
@@ -87,10 +100,21 @@ export class VentesService {
     if (params.annee_mois)  p = p.set('annee_mois', params.annee_mois);
     if (params.date_from)   p = p.set('date_from', params.date_from);
     if (params.date_to)     p = p.set('date_to', params.date_to);
-    if (params.famille)     p = p.set('famille', params.famille);
-    if (params.nom_fdv)     p = p.set('nom_fdv', params.nom_fdv);
-    if (params.nom_client)  p = p.set('nom_client', params.nom_client);
-    if (params.search)      p = p.set('search', params.search);
+    if (params.famille)          p = p.set('famille', params.famille);
+    if (params.sous_famille)     p = p.set('sous_famille', params.sous_famille);
+    if (params.type_commande)    p = p.set('type_commande', params.type_commande);
+    if (params.categorie_client) p = p.set('categorie_client', params.categorie_client);
+    if (params.statut_commande)  p = p.set('statut_commande', params.statut_commande);
+    if (params.wilaya)           p = p.set('wilaya', params.wilaya);
+    if (params.zone)             p = p.set('zone', params.zone);
+    if (params.region)           p = p.set('region', params.region);
+    if (params.source)           p = p.set('source', params.source);
+    if (params.canal)            p = p.set('canal', params.canal);
+    if (params.route)            p = p.set('route', params.route);
+    if (params.nom_fdv)          p = p.set('nom_fdv', params.nom_fdv);
+    if (params.nom_livreur)      p = p.set('nom_livreur', params.nom_livreur);
+    if (params.nom_client)       p = p.set('nom_client', params.nom_client);
+    if (params.search)           p = p.set('search', params.search);
     return this.http.get<VentePage>('/api/v1/ventes', { params: p });
   }
 
@@ -122,6 +146,13 @@ export class VentesService {
     if (date_to)   p = p.set('date_to', date_to);
     if (nom_fdv)   p = p.set('nom_fdv', nom_fdv);
     return this.http.get<string[]>('/api/v1/ventes/clients', { params: p });
+  }
+
+  getDistinct(field: string, date_from?: string, date_to?: string) {
+    let p = new HttpParams();
+    if (date_from) p = p.set('date_from', date_from);
+    if (date_to)   p = p.set('date_to', date_to);
+    return this.http.get<string[]>(`/api/v1/ventes/distinct/${field}`, { params: p });
   }
 
   upload(file: File) {

@@ -148,6 +148,13 @@ def _row_to_vente(row: pd.Series, annee_mois: str, uploaded_by_id: int) -> Vente
     )
 
 
+_FILTERABLE_FIELDS = {
+    'sous_famille', 'type_commande', 'categorie_client', 'statut_commande',
+    'wilaya', 'zone', 'region', 'type_client',
+    'source', 'canal', 'route', 'nom_fdv', 'nom_livreur', 'famille',
+}
+
+
 @router.get("", response_model=VentePage)
 def list_ventes(
     page: int = Query(default=1, ge=1),
@@ -156,7 +163,18 @@ def list_ventes(
     date_from: Optional[str] = Query(default=None),
     date_to: Optional[str] = Query(default=None),
     famille: Optional[str] = Query(default=None),
+    sous_famille: Optional[str] = Query(default=None),
+    type_commande: Optional[str] = Query(default=None),
+    categorie_client: Optional[str] = Query(default=None),
+    statut_commande: Optional[str] = Query(default=None),
+    wilaya: Optional[str] = Query(default=None),
+    zone: Optional[str] = Query(default=None),
+    region: Optional[str] = Query(default=None),
+    source: Optional[str] = Query(default=None),
+    canal: Optional[str] = Query(default=None),
+    route: Optional[str] = Query(default=None),
     nom_fdv: Optional[str] = Query(default=None),
+    nom_livreur: Optional[str] = Query(default=None),
     nom_client: Optional[str] = Query(default=None),
     search: Optional[str] = Query(default=None),
     session: Session = Depends(get_session),
@@ -170,6 +188,28 @@ def list_ventes(
         conditions.append(Vente.date_commande <= date_type.fromisoformat(_normalize_date(date_to)))
     if famille:
         conditions.append(Vente.famille == famille)
+    if sous_famille:
+        conditions.append(Vente.sous_famille == sous_famille)
+    if type_commande:
+        conditions.append(Vente.type_commande == type_commande)
+    if categorie_client:
+        conditions.append(Vente.categorie_client == categorie_client)
+    if statut_commande:
+        conditions.append(Vente.statut_commande == statut_commande)
+    if wilaya:
+        conditions.append(Vente.wilaya == wilaya)
+    if zone:
+        conditions.append(Vente.zone == zone)
+    if region:
+        conditions.append(Vente.region == region)
+    if source:
+        conditions.append(Vente.source == source)
+    if canal:
+        conditions.append(Vente.canal == canal)
+    if route:
+        conditions.append(Vente.route == route)
+    if nom_livreur:
+        conditions.append(Vente.nom_livreur == nom_livreur)
     if nom_fdv:
         conditions.append(Vente.nom_fdv == nom_fdv)
     if nom_client:
@@ -245,6 +285,25 @@ def list_familles(
     q = select(Vente.famille).distinct().order_by(Vente.famille)
     if annee_mois:
         q = q.where(Vente.annee_mois == annee_mois)
+    if date_from:
+        q = q.where(Vente.date_commande >= date_type.fromisoformat(_normalize_date(date_from)))
+    if date_to:
+        q = q.where(Vente.date_commande <= date_type.fromisoformat(_normalize_date(date_to)))
+    return [v for v in session.exec(q).all() if v]
+
+
+@router.get("/distinct/{field}", response_model=List[str])
+def list_distinct(
+    field: str,
+    date_from: Optional[str] = Query(default=None),
+    date_to: Optional[str] = Query(default=None),
+    session: Session = Depends(get_session),
+) -> Any:
+    from fastapi import HTTPException
+    if field not in _FILTERABLE_FIELDS:
+        raise HTTPException(status_code=400, detail=f"Field '{field}' not filterable")
+    col = getattr(Vente, field)
+    q = select(col).distinct().order_by(col)
     if date_from:
         q = q.where(Vente.date_commande >= date_type.fromisoformat(_normalize_date(date_from)))
     if date_to:
