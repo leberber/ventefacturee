@@ -207,9 +207,13 @@ def list_objectifs(
 @router.post("/parse-excel")
 async def parse_excel(
     file: UploadFile = File(...),
+    session: Session = Depends(get_session),
     current_user: User = Depends(get_current_user),
 ) -> Any:
     import openpyxl
+    dd_map = {p.code_dd: p.code_produit
+              for p in session.exec(select(Produit).where(Produit.code_dd.isnot(None))).all()}
+
     content = await file.read()
     wb = openpyxl.load_workbook(io.BytesIO(content), data_only=True)
     ws = wb.active
@@ -226,10 +230,11 @@ async def parse_excel(
             code = row[0]
             if not code or str(code).startswith("⚠"):
                 continue
+            code = dd_map.get(str(code).strip(), str(code).strip())
             tonne   = float(row[2]) if len(row) > 2 and row[2] is not None else None
             packs   = float(row[3]) if len(row) > 3 and row[3] is not None else None
             packs_t = float(row[4]) if len(row) > 4 and row[4] is not None else None
-            result.append({"code_produit": str(code).strip(), "tonne": tonne, "packs": packs, "packs_tournee": packs_t})
+            result.append({"code_produit": code, "tonne": tonne, "packs": packs, "packs_tournee": packs_t})
         else:
             nom = row[0]
             if not nom:
