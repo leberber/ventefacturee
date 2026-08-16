@@ -11,6 +11,12 @@
           <i class="pi pi-chevron-right db-crumb-sep"></i>
           <span class="db-crumb db-crumb--leaf">{{ capitalize(selectedFamille.nom) }}</span>
         }
+        @if (totalObjectif) {
+          <div class="db-global-achieve">
+            <span class="db-global-achieve__num" [ngClass]="totalObjClass">{{ totalObjPct }}%</span>
+            <span class="db-global-achieve__sub">{{ formatNum(totalAll) }} / {{ formatNum(totalObjectif) }} obj.</span>
+          </div>
+        }
       </div>
       <div class="db-header-right">
         <div class="db-canal-seg">
@@ -35,17 +41,6 @@
         <button class="db-filter-pill" [class.db-filter-pill--active]="!selectedFdv" (click)="selectFdv(null)">
           <span class="db-filter-pill__name">Tous</span>
           <span class="db-filter-pill__total">{{ formatNum(totalAll) }}</span>
-          @if (totalObjectif) {
-            <div class="db-filter-pill__progress" [ngClass]="totalObjClass">
-              <div class="db-filter-pill__bar-track">
-                <div class="db-filter-pill__bar-fill" [style.width.%]="totalObjPct"></div>
-              </div>
-              <span class="db-filter-pill__pct">{{ totalObjPct }}%</span>
-            </div>
-            <span class="db-filter-pill__vs">
-              / obj. <span class="db-filter-pill__obj-val">{{ formatNum(totalObjectif) }}</span>
-            </span>
-          }
         </button>
         @for (pv of data!.prevendeurs; track pv.code) {
           @let rank = fdvRank(pv.code);

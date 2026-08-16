@@ -89,6 +89,12 @@ export class DashboardComponent implements OnInit, OnDestroy {
       .sort((a, b) => a.nom.localeCompare(b.nom))
       .map(f => ({ ...f, sous_familles: [...f.sous_familles].sort((a, b) => a.nom.localeCompare(b.nom)) }));
     if (this.selectedFdv) this.initOverviewCollapse(d.familles);
+
+    // Capture global totals only when no FDV filter is active
+    if (!this.selectedFdv) {
+      this._globalTotal = d.prevendeurs.reduce((s, p) => s + p.total, 0);
+      this._globalObjectif = d.familles.reduce((s, f) => s + (f.objectif_packs ?? 0), 0);
+    }
   }
 
   private initOverviewCollapse(familles: DrilldownFamille[]) {
@@ -368,18 +374,16 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
 
-  // ── Prevendeur total (for "Tous" pill) ───────────────────────────────────
-  get totalAll(): number {
-    return this.data?.prevendeurs.reduce((s, p) => s + p.total, 0) ?? 0;
-  }
+  // ── Global totals — fixed at page load, not reactive to FDV selection ────
+  private _globalTotal = 0;
+  private _globalObjectif = 0;
 
-  get totalObjectif(): number {
-    return this.data?.familles.reduce((s, f) => s + (f.objectif_packs ?? 0), 0) ?? 0;
-  }
+  get totalAll(): number { return this._globalTotal; }
+  get totalObjectif(): number { return this._globalObjectif; }
 
   get totalObjPct(): number {
-    if (!this.totalObjectif) return 0;
-    return Math.min(Math.round((this.totalAll / this.totalObjectif) * 100), 999);
+    if (!this._globalObjectif) return 0;
+    return Math.min(Math.round((this._globalTotal / this._globalObjectif) * 100), 999);
   }
 
   get totalObjClass(): string {

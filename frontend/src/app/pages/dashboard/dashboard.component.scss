@@ -67,6 +67,32 @@
   color: var(--text-color-muted);
 }
 
+.db-global-achieve {
+  display: flex;
+  align-items: baseline;
+  gap: 0.4rem;
+  margin-left: 0.75rem;
+  padding-left: 0.75rem;
+  border-left: 1px solid var(--surface-border);
+
+  &__num {
+    font-size: 1.1rem;
+    font-weight: 800;
+    line-height: 1;
+
+    &.pv-obj--green  { color: var(--color-success); }
+    &.pv-obj--amber  { color: var(--color-warning); }
+    &.pv-obj--orange { color: #f97316; }
+    &.pv-obj--red    { color: var(--color-error); }
+  }
+
+  &__sub {
+    font-size: 0.78rem;
+    color: var(--text-color-secondary);
+    white-space: nowrap;
+  }
+}
+
 .db-period {
   display: flex;
   align-items: center;
