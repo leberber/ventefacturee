@@ -408,6 +408,7 @@ def prevendeur_admin_drilldown(
         select(Vente.code_fdv, func.sum(_norm))
         .outerjoin(Produit, Vente.code_produit == Produit.code_produit)
         .where(Vente.annee_mois == annee_mois)
+        .where(Vente.statut_commande == 'Facturé')
         .where(Vente.code_fdv.isnot(None))
         .group_by(Vente.code_fdv)
     )
@@ -436,7 +437,9 @@ def prevendeur_admin_drilldown(
             Vente.code_fdv,
             Vente.nom_fdv,
             Vente.source,
-        ).outerjoin(Produit, Vente.code_produit == Produit.code_produit).where(Vente.annee_mois == periode)
+        ).outerjoin(Produit, Vente.code_produit == Produit.code_produit).where(
+            Vente.annee_mois == periode, Vente.statut_commande == 'Facturé'
+        )
         if code_fdv:
             q = q.where(Vente.code_fdv == code_fdv)
         if canal:
@@ -452,6 +455,7 @@ def prevendeur_admin_drilldown(
             select(Vente.annee_mois, func.sum(_norm))
             .outerjoin(Produit, Vente.code_produit == Produit.code_produit)
             .where(Vente.annee_mois.in_(trend_periods))
+            .where(Vente.statut_commande == 'Facturé')
         )
         if code_fdv:
             q6 = q6.where(Vente.code_fdv == code_fdv)
@@ -573,7 +577,7 @@ def prevendeur_admin_drilldown(
     _fdv_prod_q = (
         select(Vente.code_fdv, Vente.code_produit, func.sum(_norm))
         .outerjoin(Produit, Vente.code_produit == Produit.code_produit)
-        .where(Vente.annee_mois == annee_mois, Vente.code_fdv.isnot(None), Vente.code_produit.isnot(None))
+        .where(Vente.annee_mois == annee_mois, Vente.statut_commande == 'Facturé', Vente.code_fdv.isnot(None), Vente.code_produit.isnot(None))
     )
     if canal:
         _fdv_prod_q = _fdv_prod_q.where(Vente.canal == canal)
