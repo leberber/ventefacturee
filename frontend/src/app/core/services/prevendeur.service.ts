@@ -40,6 +40,7 @@ export interface DrilldownProduit {
   top_fdv: TopFdv[];
   objectif_packs: number | null;
   objectif_packs_tournee: number | null;
+  objectif_tonne: number | null;
 }
 
 export interface DrilldownSousFamille {
@@ -48,6 +49,7 @@ export interface DrilldownSousFamille {
   weeks: number[];
   produits: DrilldownProduit[];
   objectif_packs: number | null;
+  objectif_tonne: number | null;
 }
 
 export interface TopFdv {
@@ -72,6 +74,7 @@ export interface DrilldownFamille {
   sous_familles: DrilldownSousFamille[];
   top_fdv: TopFdv[];
   objectif_packs: number | null;
+  objectif_tonne: number | null;
 }
 
 export interface DrilldownData {

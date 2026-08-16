@@ -14,11 +14,15 @@
         @if (totalObjectif) {
           <div class="db-global-achieve">
             <span class="db-global-achieve__num" [ngClass]="totalObjClass">{{ totalObjPct }}%</span>
-            <span class="db-global-achieve__sub">{{ formatNum(totalAll) }} / {{ formatNum(totalObjectif) }} obj.</span>
+            <span class="db-global-achieve__sub">{{ totalDisplay }} / {{ totalObjDisplay }} obj.</span>
           </div>
         }
       </div>
       <div class="db-header-right">
+        <div class="db-canal-seg">
+          <button class="db-canal-btn" [class.db-canal-btn--active]="displayMode === 'packs'" (click)="setDisplayMode('packs')">Packs</button>
+          <button class="db-canal-btn" [class.db-canal-btn--active]="displayMode === 'tonnes'" (click)="setDisplayMode('tonnes')">Tonnes</button>
+        </div>
         <div class="db-canal-seg">
           <button class="db-canal-btn" [class.db-canal-btn--active]="selectedCanal === 'VD'" (click)="setCanal('VD')">Direct (VD)</button>
           <button class="db-canal-btn" [class.db-canal-btn--active]="selectedCanal === 'VH'" (click)="setCanal('VH')">Horeca (VH)</button>
@@ -40,7 +44,7 @@
       <div class="db-filter-row">
         <button class="db-filter-pill" [class.db-filter-pill--active]="!selectedFdv" (click)="selectFdv(null)">
           <span class="db-filter-pill__name">Tous</span>
-          <span class="db-filter-pill__total">{{ formatNum(totalAll) }}</span>
+          <span class="db-filter-pill__total">{{ totalDisplay }}</span>
         </button>
         @for (pv of data!.prevendeurs; track pv.code) {
           @let rank = fdvRank(pv.code);
@@ -54,7 +58,7 @@
             }
             <span class="db-filter-pill__route">{{ routeCode(pv.code) }}</span>
             <span class="db-filter-pill__name">{{ pv.nom }}</span>
-            <span class="db-filter-pill__total">{{ formatNum(pv.total) }}</span>
+            <span class="db-filter-pill__total">{{ displayVal(pv.total, _globalObjectif, _globalObjectifTonne) }}</span>
             @if (data!.objectif_packs_per_route) {
               <div class="db-filter-pill__progress" [ngClass]="pvObjClass(pv)">
                 <div class="db-filter-pill__bar-track">
@@ -121,8 +125,8 @@
           </div>
 
           <div class="db-kpi-card__body">
-            <span class="db-kpi-card__value">{{ formatNum(displayValues[f.nom]) }}</span>
-            <span class="db-kpi-card__unit">caisses</span>
+            <span class="db-kpi-card__value">{{ displayVal(displayValues[f.nom], f.objectif_packs, f.objectif_tonne) }}</span>
+            <span class="db-kpi-card__unit">{{ unitLabel }}</span>
           </div>
 
           <div class="db-kpi-card__prev">
@@ -137,7 +141,7 @@
                      [style.background]="familyColor(f.nom)"></div>
               </div>
               <span class="db-kpi-obj__label">
-                {{ objPct(f) }}% <span class="db-kpi-obj__sub">/ {{ formatNum(f.objectif_packs) }} obj.</span>
+                {{ objPct(f) }}% <span class="db-kpi-obj__sub">/ {{ displayObjVal(f.objectif_packs, f.objectif_tonne) }} obj.</span>
               </span>
             </div>
           }
@@ -189,9 +193,9 @@
                [class.pi-chevron-right]="collapsedSfs.has(sf.nom)"></i>
             <span class="db-tree-sf-name">{{ sf.nom }}</span>
             <span class="db-tree-sf-total">
-              {{ formatNum(sf.total) }}
+              {{ displayVal(sf.total, sf.objectif_packs, sf.objectif_tonne) }}
               @if (sf.objectif_packs) {
-                <span class="db-tree-sf-total__obj">/ {{ formatNum(sf.objectif_packs) }} obj.</span>
+                <span class="db-tree-sf-total__obj">/ {{ displayObjVal(sf.objectif_packs, sf.objectif_tonne) }} obj.</span>
               }
             </span>
             @if (sf.objectif_packs) {
@@ -213,9 +217,9 @@
                        [style.transition-delay.ms]="i * 40"></div>
                 </div>
                 <span class="db-bar-num">
-                  {{ formatNum(p.total) }}
+                  {{ displayVal(p.total, p.objectif_packs, p.objectif_tonne) }}
                   @if (p.objectif_packs) {
-                    <span class="db-bar-num__obj">/ {{ formatNum(p.objectif_packs) }}</span>
+                    <span class="db-bar-num__obj">/ {{ displayObjVal(p.objectif_packs, p.objectif_tonne) }}</span>
                   }
                 </span>
                 @if (p.objectif_packs) {

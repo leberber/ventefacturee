@@ -526,18 +526,22 @@ def prevendeur_admin_drilldown(
             Objectif.code_produit,
             Objectif.objectif_packs_vd, Objectif.objectif_packs_vh,
             Objectif.objectif_packs_vd_tournee, Objectif.objectif_packs_vh_tournee,
+            Objectif.objectif_tonne_vd, Objectif.objectif_tonne_vh,
         )
         .where(Objectif.mois == mois_int, Objectif.annee == annee_int)
     ).all()
     if canal == 'VD':
         obj_by_prod       = {r.code_produit: r.objectif_packs_vd_tournee for r in obj_prod_rows}
         obj_by_prod_total = {r.code_produit: r.objectif_packs_vd for r in obj_prod_rows}
+        obj_tonne_by_prod = {r.code_produit: r.objectif_tonne_vd for r in obj_prod_rows}
     elif canal == 'VH':
         obj_by_prod       = {r.code_produit: r.objectif_packs_vh_tournee for r in obj_prod_rows}
         obj_by_prod_total = {r.code_produit: r.objectif_packs_vh for r in obj_prod_rows}
+        obj_tonne_by_prod = {r.code_produit: r.objectif_tonne_vh for r in obj_prod_rows}
     else:
         obj_by_prod       = {r.code_produit: (r.objectif_packs_vd_tournee or 0) + (r.objectif_packs_vh_tournee or 0) for r in obj_prod_rows}
         obj_by_prod_total = {r.code_produit: (r.objectif_packs_vd or 0) + (r.objectif_packs_vh or 0) for r in obj_prod_rows}
+        obj_tonne_by_prod = {r.code_produit: (r.objectif_tonne_vd or 0) + (r.objectif_tonne_vh or 0) for r in obj_prod_rows}
 
     # When a single FDV is selected, display per-route targets instead of global totals
     if code_fdv:
@@ -624,6 +628,7 @@ def prevendeur_admin_drilldown(
                 prod_code = prod_label_to_code.get(prod)
                 prod_obj_t = obj_by_prod.get(prod_code) if prod_code else None
                 prod_obj   = obj_by_prod_total.get(prod_code) if prod_code else None
+                prod_tonne = obj_tonne_by_prod.get(prod_code) if prod_code else None
                 prods_out.append({
                     "nom": prod,
                     "total": round(sum(wks)),
@@ -631,6 +636,7 @@ def prevendeur_admin_drilldown(
                     "top_fdv": prod_top_fdv,
                     "objectif_packs": round(prod_obj) if prod_obj else None,
                     "objectif_packs_tournee": round(prod_obj_t) if prod_obj_t else None,
+                    "objectif_tonne": round(prod_tonne, 3) if prod_tonne else None,
                 })
             for i in range(4):
                 f_weeks[i] += sf_weeks[i]
@@ -641,12 +647,20 @@ def prevendeur_admin_drilldown(
                 and obj_by_prod_total[prod_label_to_code[p["nom"]]]
             ]
             sf_obj = round(sum(sf_obj_vals)) if sf_obj_vals else None
+            sf_tonne_vals = [
+                obj_tonne_by_prod[prod_label_to_code[p["nom"]]]
+                for p in prods_out
+                if p["nom"] in prod_label_to_code and prod_label_to_code[p["nom"]] in obj_tonne_by_prod
+                and obj_tonne_by_prod[prod_label_to_code[p["nom"]]]
+            ]
+            sf_tonne = round(sum(sf_tonne_vals), 3) if sf_tonne_vals else None
             sfs_out.append({
                 "nom": sf,
                 "total": round(sum(sf_weeks)),
                 "weeks": [round(v) for v in sf_weeks],
                 "produits": sorted(prods_out, key=lambda x: -x["total"]),
                 "objectif_packs": sf_obj,
+                "objectif_tonne": sf_tonne,
             })
 
         f_total = round(sum(f_weeks))
@@ -661,6 +675,8 @@ def prevendeur_admin_drilldown(
         # Derive family objective from SF objectives so hierarchy is consistent
         f_obj_vals = [sf["objectif_packs"] for sf in sfs_out if sf["objectif_packs"]]
         f_obj = round(sum(f_obj_vals)) if f_obj_vals else None
+        f_tonne_vals = [sf["objectif_tonne"] for sf in sfs_out if sf["objectif_tonne"]]
+        f_tonne = round(sum(f_tonne_vals), 3) if f_tonne_vals else None
 
         familles_out.append({
             "nom": famille,
@@ -671,6 +687,7 @@ def prevendeur_admin_drilldown(
             "sous_familles": sorted(sfs_out, key=lambda x: -x["total"]),
             "top_fdv": top_fdv,
             "objectif_packs": f_obj,
+            "objectif_tonne": f_tonne,
         })
 
     return {

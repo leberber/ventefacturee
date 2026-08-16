@@ -30,6 +30,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   collapsedOverviewFamilles = new Set<string>();
   selectedFdv: string | null = null;
   selectedCanal: 'VD' | 'VH' = 'VD';
+  displayMode: 'packs' | 'tonnes' = 'packs';
 
   // Pre-computed lists (updated in applyData to avoid re-sorting on every CD cycle)
   overviewFamilles: DrilldownFamille[] = [];
@@ -94,6 +95,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     if (!this.selectedFdv) {
       this._globalTotal = d.prevendeurs.reduce((s, p) => s + p.total, 0);
       this._globalObjectif = d.familles.reduce((s, f) => s + (f.objectif_packs ?? 0), 0);
+      this._globalObjectifTonne = d.familles.reduce((s, f) => s + (f.objectif_tonne ?? 0), 0);
     }
   }
 
@@ -209,6 +211,43 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.load(true); // preserve famille selection
   }
 
+  setDisplayMode(m: 'packs' | 'tonnes') { this.displayMode = m; }
+
+  // Convert packs → tonnes using the objectif ratio as the conversion factor
+  inTonnes(total: number, objPacks?: number | null, objTonne?: number | null): number | null {
+    if (!objPacks || !objTonne) return null;
+    return (total / objPacks) * objTonne;
+  }
+
+  displayVal(total: number, objPacks?: number | null, objTonne?: number | null): string {
+    if (this.displayMode === 'tonnes') {
+      const t = this.inTonnes(total, objPacks, objTonne);
+      return t != null ? t.toFixed(2) : '—';
+    }
+    return this.formatNum(total);
+  }
+
+  displayObjVal(objPacks?: number | null, objTonne?: number | null): string {
+    if (this.displayMode === 'tonnes') return objTonne != null ? objTonne.toFixed(2) : '—';
+    return objPacks != null ? this.formatNum(objPacks) : '—';
+  }
+
+  displayObjPct(total: number, objPacks?: number | null, objTonne?: number | null): number {
+    if (this.displayMode === 'tonnes') {
+      const t = this.inTonnes(total, objPacks, objTonne);
+      if (t == null || !objTonne) return 0;
+      return Math.min(Math.round((t / objTonne) * 100), 999);
+    }
+    return this.objPctRaw(total, objPacks);
+  }
+
+  private objPctRaw(total: number, obj?: number | null): number {
+    if (!obj) return 0;
+    return Math.min(Math.round((total / obj) * 100), 999);
+  }
+
+  get unitLabel(): string { return this.displayMode === 'tonnes' ? 't' : 'caisses'; }
+
   selectFamille(f: DrilldownFamille) {
     this.selectedFamille = this.selectedFamille?.nom === f.nom ? null : f;
     this.compactCards = !!this.selectedFamille;
@@ -276,8 +315,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   // ── Objective helpers ─────────────────────────────────────────────────────
   objPct(f: DrilldownFamille): number {
-    if (!f.objectif_packs) return 0;
-    return Math.min(Math.round((f.total / f.objectif_packs) * 100), 999);
+    return this.displayObjPct(f.total, f.objectif_packs, f.objectif_tonne);
   }
 
   sfObjPct(sf: { total: number; objectif_packs: number | null }): number {
@@ -375,11 +413,20 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
 
   // ── Global totals — fixed at page load, not reactive to FDV selection ────
-  private _globalTotal = 0;
-  private _globalObjectif = 0;
+  _globalTotal = 0;
+  _globalObjectif = 0;
+  _globalObjectifTonne = 0;
 
   get totalAll(): number { return this._globalTotal; }
   get totalObjectif(): number { return this._globalObjectif; }
+  get totalObjectifTonne(): number { return this._globalObjectifTonne; }
+
+  get totalDisplay(): string {
+    return this.displayVal(this._globalTotal, this._globalObjectif, this._globalObjectifTonne);
+  }
+  get totalObjDisplay(): string {
+    return this.displayObjVal(this._globalObjectif, this._globalObjectifTonne);
+  }
 
   get totalObjPct(): number {
     if (!this._globalObjectif) return 0;
