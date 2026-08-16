@@ -188,6 +188,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   selectFdv(code: string | null) {
     this.selectedFdv = this.selectedFdv === code ? null : code;
+    this.compactCards = false;
     this.load(true);
   }
 
@@ -204,6 +205,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   selectFamille(f: DrilldownFamille) {
     this.selectedFamille = this.selectedFamille?.nom === f.nom ? null : f;
+    this.compactCards = !!this.selectedFamille;
     this.selectedProduct = null;
     this.collapsedSfs = new Set();
     this.barsReady = false;
@@ -369,6 +371,23 @@ export class DashboardComponent implements OnInit, OnDestroy {
   // ── Prevendeur total (for "Tous" pill) ───────────────────────────────────
   get totalAll(): number {
     return this.data?.prevendeurs.reduce((s, p) => s + p.total, 0) ?? 0;
+  }
+
+  get totalObjectif(): number {
+    return this.data?.familles.reduce((s, f) => s + (f.objectif_packs ?? 0), 0) ?? 0;
+  }
+
+  get totalObjPct(): number {
+    if (!this.totalObjectif) return 0;
+    return Math.min(Math.round((this.totalAll / this.totalObjectif) * 100), 999);
+  }
+
+  get totalObjClass(): string {
+    const pct = this.totalObjPct;
+    if (pct >= 90) return 'pv-obj--green';
+    if (pct >= 70) return 'pv-obj--amber';
+    if (pct >= 50) return 'pv-obj--orange';
+    return 'pv-obj--red';
   }
 
   // ── FDV performance panel ─────────────────────────────────────────────────
