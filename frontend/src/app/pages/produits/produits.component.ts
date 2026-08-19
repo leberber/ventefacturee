@@ -7,7 +7,7 @@ import { ProduitsService, ProduitRead } from '../../core/services/produits.servi
 const LS_KEY = 'ventefacturee_produits_columns';
 
 type SortCol = string;
-type EditField = 'nom_produit' | 'code_dd' | 'famille' | 'sous_famille' | 'uom_vente' | 'uom_principale' | 'colisage' | 'colisage_palette' | 'unite' | 'volume' | 'poids_unite_vente' | 'prix';
+type EditField = 'nom_produit' | 'code_dd' | 'famille' | 'sous_famille' | 'uom_vente' | 'uom_principale' | 'colisage' | 'colisage_palette' | 'unite' | 'volume' | 'poids_unite_vente' | 'prix_dd' | 'prix_promotion' | 'prix_gros';
 
 interface ColDef {
   field: string;
@@ -39,7 +39,9 @@ export class ProduitsComponent implements OnInit {
     { field: 'unite',               header: 'Unité',             visible: true  },
     { field: 'volume',              header: 'Volume',            visible: false },
     { field: 'poids_unite_vente',   header: 'Poids UV (T)',      visible: false },
-    { field: 'prix',                header: 'Prix',              visible: true  },
+    { field: 'prix_dd',             header: 'Prix DD',           visible: true  },
+    { field: 'prix_promotion',      header: 'Prix Promo',        visible: false },
+    { field: 'prix_gros',           header: 'Prix Gros',         visible: false },
     { field: 'facturable',          header: 'Facturable',        visible: true  },
     { field: 'imported',            header: 'Importé',           visible: true  },
   ];

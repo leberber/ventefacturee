@@ -232,7 +232,7 @@ def export_clients_zip(
 
     def get_prix(key: str) -> Optional[float]:
         p = code_to_produit.get(key)
-        return p.prix if p else None
+        return p.prix_dd if p else None
 
     def get_colisage(key: str) -> Optional[float]:
         p = code_to_produit.get(key)

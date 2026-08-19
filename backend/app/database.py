@@ -51,6 +51,23 @@ def create_db_and_tables() -> None:
             "WHERE canal IS NULL AND code_fdv IS NOT NULL"
         ))
 
+        # Rename prix → prix_dd on produits (idempotent)
+        conn.execute(text(
+            "DO $$ BEGIN "
+            "  IF EXISTS (SELECT 1 FROM information_schema.columns "
+            "             WHERE table_name='produits' AND column_name='prix') THEN "
+            "    ALTER TABLE produits RENAME COLUMN prix TO prix_dd; "
+            "  END IF; "
+            "END $$"
+        ))
+        # Add prix_promotion and prix_gros columns if not present
+        conn.execute(text(
+            "ALTER TABLE produits ADD COLUMN IF NOT EXISTS prix_promotion FLOAT"
+        ))
+        conn.execute(text(
+            "ALTER TABLE produits ADD COLUMN IF NOT EXISTS prix_gros FLOAT"
+        ))
+
         conn.commit()
 
 

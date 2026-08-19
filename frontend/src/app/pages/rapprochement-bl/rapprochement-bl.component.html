@@ -8,46 +8,51 @@
         <p class="page-header__sub">Vérification bon de chargement vs bon de livraison</p>
       </div>
     </div>
-  </div>
-</div>
 
-<!-- Form -->
-<div class="rapp-card rapp-form">
-  <div class="rapp-form__row">
-    <div class="rapp-form__field">
-      <label class="rapp-form__label">Livreur</label>
-      <p-select
-        [options]="livreurs"
-        [(ngModel)]="selectedLivreur"
-        placeholder="Sélectionner un livreur…"
-        [filter]="true"
-        styleClass="rapp-select"
-        panelStyleClass="filter-card-panel"
-      />
-    </div>
+    <div class="page-header__filters">
+      <!-- Livreur -->
+      <div class="filter-card">
+        <div class="filter-card__icon"><i class="pi pi-truck"></i></div>
+        <div class="filter-card__body">
+          <span class="filter-card__label">Livreur</span>
+          <p-select
+            [options]="livreurs"
+            [(ngModel)]="selectedLivreur"
+            placeholder="Sélectionner…"
+            [filter]="true"
+            styleClass="rapp-select"
+            panelStyleClass="filter-card-panel"
+          />
+        </div>
+      </div>
 
-<div class="rapp-form__field">
-      <label class="rapp-form__label">Fichier BL (Excel)</label>
+      <!-- File picker -->
       <input #fileInput type="file" accept=".xlsx,.xls" (change)="onFileSelect($event)" style="display:none" />
-      <button class="rapp-file-btn" (click)="fileInput.click()">
-        <i class="pi pi-paperclip"></i>
-        <span>{{ fileName || 'Choisir un fichier…' }}</span>
+      <button class="filter-card rapp-file-card" (click)="fileInput.click()">
+        <div class="filter-card__icon" [class.filter-card__icon--active]="!!fileName">
+          <i class="pi" [class.pi-file-excel]="!!fileName" [class.pi-upload]="!fileName"></i>
+        </div>
+        <div class="filter-card__body">
+          <span class="filter-card__label">Fichier BL</span>
+          <span class="rapp-file-name" [class.rapp-file-name--set]="!!fileName">
+            {{ fileName || 'Choisir un fichier…' }}
+          </span>
+        </div>
+      </button>
+
+      <!-- Run -->
+      <button class="rapp-run-btn" [disabled]="!canRun || loading" (click)="runRapprochement()">
+        @if (loading) {
+          <i class="pi pi-spin pi-spinner"></i> Analyse en cours…
+        } @else {
+          <i class="pi pi-play-circle"></i> Analyser
+        }
       </button>
     </div>
-
-    <button class="rapp-run-btn"
-      [disabled]="!canRun || loading"
-      (click)="runRapprochement()">
-      @if (loading) {
-        <i class="pi pi-spin pi-spinner"></i> Analyse…
-      } @else {
-        <i class="pi pi-search"></i> Analyser
-      }
-    </button>
   </div>
 
   @if (error) {
-    <div class="rapp-error">
+    <div class="rapp-error" style="margin-top:0.75rem">
       <i class="pi pi-exclamation-triangle"></i> {{ error }}
     </div>
   }
@@ -55,57 +60,50 @@
 
 <!-- Results -->
 @if (result) {
-  <!-- NET A PAYER card -->
-  <div class="rapp-net-card">
-    <div class="rapp-net-card__label">NET À PAYER</div>
-    <div class="rapp-net-card__amount">{{ result.net_a_payer | number:'1.2-2' }} DA</div>
-    <div class="rapp-net-card__meta">{{ result.nom_fdv }} — {{ result.date }}</div>
-  </div>
-
-  <!-- Stats row -->
-  <div class="rapp-stats">
-    <div class="rapp-stat rapp-stat--total">
-      <div class="rapp-stat__value">{{ result.lignes.length }}</div>
-      <div class="rapp-stat__label">Produits BL</div>
+  <!-- Summary bar -->
+  <div class="rapp-summary">
+    <div class="rapp-summary__net">
+      <span class="rapp-summary__label">NET À PAYER</span>
+      <span class="rapp-summary__amount">{{ (hasAjustements ? netAPayerAjuste : result.net_a_payer) | number:'1.2-2' }} DA</span>
+      @if (hasAjustements) {
+        <span class="rapp-summary__original">(BL : {{ result.net_a_payer | number:'1.2-2' }} DA)</span>
+      }
+      <span class="rapp-summary__meta">{{ result.nom_fdv }} — {{ result.date }}</span>
     </div>
-    <div class="rapp-stat rapp-stat--ok">
-      <i class="pi pi-check-circle"></i>
-      <div class="rapp-stat__value">{{ matchCount }}</div>
-      <div class="rapp-stat__label">Concordants</div>
-    </div>
-    <div class="rapp-stat rapp-stat--warn">
-      <i class="pi pi-exclamation-circle"></i>
-      <div class="rapp-stat__value">{{ mismatchCount }}</div>
-      <div class="rapp-stat__label">Écarts</div>
-    </div>
-    <div class="rapp-stat rapp-stat--unknown">
-      <i class="pi pi-question-circle"></i>
-      <div class="rapp-stat__value">{{ notFoundCount }}</div>
-      <div class="rapp-stat__label">Non trouvés</div>
+    <div class="rapp-summary__stats">
+      <span class="rapp-stat-pill rapp-stat-pill--total">
+        <strong>{{ result.lignes.length }}</strong> produits
+      </span>
+      <span class="rapp-stat-pill rapp-stat-pill--ok">
+        <i class="pi pi-check"></i> <strong>{{ matchCount }}</strong> concordants
+      </span>
+      <span class="rapp-stat-pill rapp-stat-pill--warn">
+        <i class="pi pi-exclamation-triangle"></i> <strong>{{ mismatchCount }}</strong> écarts
+      </span>
+      <span class="rapp-stat-pill rapp-stat-pill--unknown">
+        <i class="pi pi-question"></i> <strong>{{ notFoundCount }}</strong> non trouvés
+      </span>
     </div>
   </div>
 
   <!-- Table -->
-  <div class="rapp-card">
-    <div class="rapp-table-wrap">
-      <table class="rapp-table">
+  <div class="table-container">
+    <div class="table-wrapper">
+      <table class="table">
         <thead>
           <tr>
-            <th rowspan="2">Statut</th>
-            <th rowspan="2">Code</th>
-            <th rowspan="2">Désignation</th>
-            <th colspan="2" class="num group-header group-header--bl">Bon de Livraison (Excel)</th>
-            <th rowspan="2" class="num">Colisage</th>
-            <th colspan="2" class="num group-header group-header--db">Ventes (base de données)</th>
-            <th rowspan="2" class="num">Écart (unités)</th>
-            <th rowspan="2" class="num">Prix Unit. DA</th>
-            <th rowspan="2" class="num">Montant BL (DA)</th>
-          </tr>
-          <tr>
-            <th class="num sub-header sub-header--bl">Nb Colis</th>
-            <th class="num sub-header sub-header--bl">Qté (unités)</th>
-            <th class="num sub-header sub-header--db">Nb Colis</th>
-            <th class="num sub-header sub-header--db">Qté (unités)</th>
+            <th>Statut</th>
+            <th>Code</th>
+            <th>Désignation</th>
+            <th class="num group-header group-header--db">Ventes (col.)</th>
+            <th class="num group-header group-header--bl">Livraison (col.)</th>
+            <th class="num">Colisage</th>
+            <th class="num">Écart (unités)</th>
+            <th class="num col-prix">Prix Unit.</th>
+            <th class="num">Montant BL</th>
+            <th class="num group-header group-header--gros">Gros (col.)</th>
+            <th class="num group-header group-header--promo">Promo (col.)</th>
+            <th class="num">NET Ajusté</th>
           </tr>
         </thead>
         <tbody>
@@ -122,11 +120,9 @@
               </td>
               <td class="code-cell">{{ ligne.code_produit }}</td>
               <td class="desc-cell">{{ ligne.libelle }}</td>
-              <td class="num bl-cell">{{ ligne.bl_nb_colis !== null ? (ligne.bl_nb_colis | number) : '—' }}</td>
-              <td class="num bl-cell">{{ ligne.bl_qte_unites | number }}</td>
-              <td class="num">{{ ligne.colisage !== null ? ligne.colisage : '—' }}</td>
               <td class="num db-cell">{{ ligne.ventes_qte_colis !== null ? (ligne.ventes_qte_colis | number) : '—' }}</td>
-              <td class="num db-cell">{{ ligne.ventes_qte_unites !== null ? (ligne.ventes_qte_unites | number) : '—' }}</td>
+              <td class="num bl-cell">{{ ligne.bl_nb_colis !== null ? (ligne.bl_nb_colis | number) : '—' }}</td>
+              <td class="num">{{ ligne.colisage !== null ? ligne.colisage : '—' }}</td>
               <td class="num diff-cell">
                 @if (ligne.difference_unites !== null) {
                   <span [ngClass]="ligne.difference_unites === 0 ? 'diff--zero' : 'diff--nonzero'">
@@ -134,15 +130,53 @@
                   </span>
                 } @else { — }
               </td>
-              <td class="num">{{ ligne.bl_prix_unitaire | number:'1.2-2' }}</td>
+              <td class="num col-prix">
+                @if (ligne.colisage) {
+                  <div>{{ ligne.bl_prix_unitaire * ligne.colisage | number:'1.0-0' }} /c</div>
+                }
+                <div class="prix-colis">{{ ligne.bl_prix_unitaire | number:'1.2-2' }} /u</div>
+              </td>
               <td class="num">{{ ligne.bl_montant_ttc | number:'1.2-2' }}</td>
+              <td class="promo-cell promo-cell--gros">
+                <div class="promo-input-wrap">
+                  <input
+                    type="number" min="0" class="promo-input promo-input--gros"
+                    [value]="getQtyGros(ligne.code_produit) || null"
+                    (input)="setQtyGros(ligne.code_produit, +($any($event.target).value))"
+                    placeholder="—"
+                  />
+                  @if (ligne.prix_dd) {
+                    <span class="promo-prix promo-prix--gros">{{ ligne.prix_dd | number:'1.0-0' }}</span>
+                  }
+                </div>
+              </td>
+              <td class="promo-cell">
+                <div class="promo-input-wrap">
+                  <input
+                    type="number" min="0" class="promo-input"
+                    [value]="getQtyPromo(ligne.code_produit) || null"
+                    (input)="setQtyPromo(ligne.code_produit, +($any($event.target).value))"
+                    placeholder="—"
+                  />
+                  @if (ligne.prix_promotion) {
+                    <span class="promo-prix">{{ ligne.prix_promotion | number:'1.0-0' }}</span>
+                  }
+                </div>
+              </td>
+              <td class="num net-ajuste-cell">
+                {{ getNetLigne(ligne) | number:'1.2-2' }}
+              </td>
             </tr>
           }
         </tbody>
         <tfoot>
           <tr>
-            <td colspan="9" class="total-label">TOTAL</td>
+            <td colspan="8" class="total-label">TOTAL BL</td>
             <td class="num total-amount">{{ result.net_a_payer | number:'1.2-2' }} DA</td>
+            <td colspan="2"></td>
+            <td class="num total-amount" [class.total-ajuste]="hasAjustements">
+              {{ netAPayerAjuste | number:'1.2-2' }} DA
+            </td>
           </tr>
         </tfoot>
       </table>

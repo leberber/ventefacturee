@@ -154,6 +154,8 @@ class RapprochementLigne(SQLModel):
     ventes_qte_unites: Optional[float] = None
     difference_unites: Optional[float] = None
     match: bool
+    prix_dd: Optional[float] = None
+    prix_promotion: Optional[float] = None
 
 
 class RapprochementResult(SQLModel):

@@ -67,6 +67,8 @@ export interface RapprochementLigne {
   ventes_qte_unites: number | null;
   difference_unites: number | null;
   match: boolean;
+  prix_dd: number | null;
+  prix_promotion: number | null;
 }
 
 export interface RapprochementResult {

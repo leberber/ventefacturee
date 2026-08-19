@@ -8,7 +8,7 @@ from fastapi import APIRouter, Depends, File, Query, UploadFile
 
 logger = logging.getLogger("app.upload")
 from fastapi.responses import StreamingResponse
-from sqlalchemy import func, delete as sa_delete
+from sqlalchemy import func, delete as sa_delete, case as sa_case
 from sqlmodel import Session, select
 
 from app.api.deps import get_current_user
@@ -370,8 +370,16 @@ async def rapprochement_bl(
         raise HTTPException(status_code=400, detail="Impossible de lire la date depuis le fichier Excel")
     raw_date = pd.to_datetime(date_col.dropna().iloc[0], dayfirst=False)
     date_obj = raw_date.date()
+    _norm_fact = sa_case(
+        (
+            (Vente.uom_vente == 'UN') & Produit.colisage.isnot(None),
+            Vente.qte_facturee / Produit.colisage,
+        ),
+        else_=Vente.qte_facturee,
+    )
     agg_stmt = (
-        select(Vente.code_produit, func.sum(Vente.qte_facturee).label('qte_colis'))
+        select(Vente.code_produit, func.sum(_norm_fact).label('qte_colis'))
+        .outerjoin(Produit, Vente.code_produit == Produit.code_produit)
         .where(Vente.nom_livreur == nom_livreur)
         .where(Vente.date_facturation == date_obj)
         .where(Vente.code_produit.isnot(None))
@@ -382,16 +390,17 @@ async def rapprochement_bl(
         for row in session.execute(agg_stmt).all()
     }
 
-    # Fetch colisage from produits table
+    # Fetch colisage + prix spéciaux from produits table
     codes = list({r['code_produit'] for r in bl_rows})
     col_stmt = (
-        select(Produit.code_produit, Produit.colisage)
+        select(Produit.code_produit, Produit.colisage, Produit.prix_dd, Produit.prix_promotion)
         .where(Produit.code_produit.in_(codes))
     )
-    colisage_map: dict = {
-        row.code_produit: row.colisage
+    prod_info_map: dict = {
+        row.code_produit: row
         for row in session.execute(col_stmt).all()
     }
+    colisage_map: dict = {code: row.colisage for code, row in prod_info_map.items()}
 
     lignes = []
     for r in bl_rows:
@@ -411,6 +420,7 @@ async def rapprochement_bl(
             difference = round(r['bl_qte_unites'] - ventes_qte_unites, 4)
             is_match = abs(difference) < 0.01
 
+        prod_row = prod_info_map.get(code)
         lignes.append(RapprochementLigne(
             code_produit=code,
             libelle=r['libelle'],
@@ -423,6 +433,8 @@ async def rapprochement_bl(
             ventes_qte_unites=ventes_qte_unites,
             difference_unites=difference,
             match=is_match,
+            prix_dd=prod_row.prix_dd if prod_row else None,
+            prix_promotion=prod_row.prix_promotion if prod_row else None,
         ))
 
     return RapprochementResult(

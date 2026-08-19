@@ -25,6 +25,10 @@ export class RapprochementBlComponent implements OnInit {
   result: RapprochementResult | null = null;
   error = '';
 
+  // Per-row editable qty (in colis) for gros and promo pricing
+  qtyGrosMap = new Map<string, number>();
+  qtyPromoMap = new Map<string, number>();
+
   get canRun(): boolean {
     return !!this.selectedLivreur && !!this.selectedFile;
   }
@@ -39,6 +43,34 @@ export class RapprochementBlComponent implements OnInit {
 
   get notFoundCount(): number {
     return this.result?.lignes.filter(l => l.ventes_qte_colis === null).length ?? 0;
+  }
+
+  getQtyGros(code: string): number { return this.qtyGrosMap.get(code) ?? 0; }
+  getQtyPromo(code: string): number { return this.qtyPromoMap.get(code) ?? 0; }
+
+  setQtyGros(code: string, val: number) { this.qtyGrosMap.set(code, val >= 0 ? val : 0); }
+  setQtyPromo(code: string, val: number) { this.qtyPromoMap.set(code, val >= 0 ? val : 0); }
+
+  /** NET ajusté par ligne (en DA) — prix_dd/prix_promo sont par colis */
+  getNetLigne(ligne: RapprochementLigne): number {
+    const qg = this.getQtyGros(ligne.code_produit);
+    const qp = this.getQtyPromo(ligne.code_produit);
+    if ((qg === 0 && qp === 0) || !ligne.colisage) return ligne.bl_montant_ttc;
+    const prixColisRegulier = ligne.bl_prix_unitaire * ligne.colisage;
+    const colisReguliers = (ligne.bl_nb_colis ?? 0) - qg - qp;
+    const netRegulier = Math.max(colisReguliers, 0) * prixColisRegulier;
+    const netGros = ligne.prix_dd != null ? qg * ligne.prix_dd : qg * prixColisRegulier;
+    const netPromo = ligne.prix_promotion != null ? qp * ligne.prix_promotion : qp * prixColisRegulier;
+    return netRegulier + netGros + netPromo;
+  }
+
+  get hasAjustements(): boolean {
+    return [...this.qtyGrosMap.values(), ...this.qtyPromoMap.values()].some(v => v > 0);
+  }
+
+  get netAPayerAjuste(): number {
+    if (!this.result) return 0;
+    return this.result.lignes.reduce((sum, l) => sum + this.getNetLigne(l), 0);
   }
 
   ngOnInit() {
@@ -58,6 +90,8 @@ export class RapprochementBlComponent implements OnInit {
     this.loading = true;
     this.result = null;
     this.error = '';
+    this.qtyGrosMap.clear();
+    this.qtyPromoMap.clear();
     this.ventesService.rapprochementBL(this.selectedFile!, this.selectedLivreur)
       .subscribe({
         next: res => { this.result = res; this.loading = false; },
