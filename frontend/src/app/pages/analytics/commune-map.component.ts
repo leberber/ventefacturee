@@ -1,6 +1,6 @@
 import {
   Component, input, output, effect, ElementRef, ViewChild, signal,
-  AfterViewInit, OnDestroy, inject,
+  AfterViewInit, OnDestroy, inject, HostListener,
 } from '@angular/core';
 import * as L from 'leaflet';
 import { HttpClient } from '@angular/common/http';
@@ -36,6 +36,21 @@ interface GeoFeatureCollection {
         </svg>
       </button>
     </div>
+
+    <!-- Fullscreen button -->
+    <button class="map-fs-btn" (click)="toggleFullscreen()"
+            [class.active]="isFullscreen()"
+            [title]="isFullscreen() ? 'Quitter le plein écran' : 'Plein écran'">
+      @if (isFullscreen()) {
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+          <path d="M4 1v3H1M8 1v3h3M8 11V8h3M4 11V8H1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      } @else {
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+          <path d="M1 4V1h3M8 1h3v3M11 8v3H8M4 11H1V8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      }
+    </button>
 
     <div class="map-legend">
       <span class="map-legend__label">0</span>
@@ -103,6 +118,22 @@ interface GeoFeatureCollection {
       &__label { white-space:nowrap; }
     }
 
+    .map-fs-btn {
+      position:absolute; top:10px; left:76px; z-index:500;
+      display:flex; align-items:center; justify-content:center;
+      width:30px; height:28px;
+      background:rgba(255,255,255,.92); color:#64748b;
+      border:1px solid #e2e8f0; border-radius:8px; cursor:pointer;
+      box-shadow:0 1px 4px rgba(0,0,0,.08);
+      transition:background .15s, color .15s;
+
+      &:hover { background:#f1f5f9; color:#1e293b; }
+      &.active { background:#2563eb; color:#fff; border-color:#2563eb; }
+    }
+
+    :host:fullscreen { border-radius:0; }
+    :host:fullscreen .map-card { bottom:24px; left:20px; }
+
     .map-sk {
       position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
       background:rgba(248,250,252,.88); color:#94a3b8; font-size:13px; z-index:600;
@@ -118,12 +149,14 @@ export class CommuneMapComponent implements AfterViewInit, OnDestroy {
   readonly selectedCode  = input<number | null>(null);
   readonly communeSelect = output<{ code: number; name: string } | null>();
 
-  readonly geoLoading = signal(true);
-  readonly geoError   = signal(false);
-  readonly maxStr     = signal('');
-  readonly mapMode    = signal<MapMode>('choropleth');
+  readonly geoLoading   = signal(true);
+  readonly geoError     = signal(false);
+  readonly maxStr       = signal('');
+  readonly mapMode      = signal<MapMode>('choropleth');
+  readonly isFullscreen = signal(false);
 
   private http      = inject(HttpClient);
+  private el        = inject(ElementRef<HTMLElement>);
   private geoData   = signal<GeoFeatureCollection | null>(null);
   private mapReady  = signal(false);
   private map: L.Map | null = null;
@@ -136,6 +169,26 @@ export class CommuneMapComponent implements AfterViewInit, OnDestroy {
   private boundsFitted = false;
 
   setMapMode(m: MapMode): void { this.mapMode.set(m); }
+
+  toggleFullscreen(): void {
+    if (!document.fullscreenElement) {
+      this.el.nativeElement.requestFullscreen();
+    } else {
+      document.exitFullscreen();
+    }
+  }
+
+  @HostListener('document:fullscreenchange')
+  onFullscreenChange(): void {
+    const isFull = !!document.fullscreenElement;
+    this.isFullscreen.set(isFull);
+    setTimeout(() => {
+      this.map?.invalidateSize();
+      if (this.geoLayer) {
+        this.map?.fitBounds(this.geoLayer.getBounds(), { padding: [30, 30] });
+      }
+    }, 150);
+  }
 
   constructor() {
     // Fetch GeoJSON when data (commune codes) changes
