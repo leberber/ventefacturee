@@ -32,14 +32,6 @@
       }
     </div>
 
-    <!-- Famille filter -->
-    <select class="an-select" (change)="setFamille($any($event.target).value)">
-      <option value="">Toutes familles</option>
-      @for (f of familles(); track f) {
-        <option [value]="f" [selected]="famille() === f">{{ f }}</option>
-      }
-    </select>
-
     <!-- Période -->
     <select class="an-select" (change)="setPeriode($any($event.target).value)">
       @for (p of periodes(); track p) {

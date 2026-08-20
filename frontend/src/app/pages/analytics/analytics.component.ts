@@ -19,7 +19,7 @@ interface AnalyticsData {
   by_produit:  { nom: string; code: string; total: number }[];
   by_fdv:      { nom: string; code: string; total: number }[];
   by_location: { code: number; name: string; total: number }[];
-  familles:    string[];
+
   periodes:    string[];
 }
 
@@ -51,7 +51,7 @@ export class AnalyticsComponent implements OnInit, OnDestroy {
   readonly fdv      = signal<{ nom: string; code: string } | null>(null);
   readonly canal    = signal<Canal>('VD');
   readonly unite    = signal<Unite>('tonnes');
-  readonly familles = signal<string[]>([]);
+
   readonly periodes = signal<string[]>([]);
 
   readonly canals: { value: Canal; label: string }[] = [
@@ -165,7 +165,7 @@ export class AnalyticsComponent implements OnInit, OnDestroy {
         this.prodBarData.set(d.by_produit.map((x, i) => ({ id: i, name: x.nom, value: x.total })));
         this.mapData.set(d.by_location.map(r => ({ code: r.code, total: r.total })));
 
-        if (d.familles.length) this.familles.set(d.familles);
+
         if (d.periodes.length) {
           this.periodes.set(d.periodes);
           if (!d.periodes.includes(this.periode())) {

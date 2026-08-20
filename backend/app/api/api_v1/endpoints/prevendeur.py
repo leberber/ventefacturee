@@ -924,12 +924,6 @@ def prevendeur_admin_analytics(
         )).all()
     ]
 
-    familles_list = sorted(set(
-        r[0] for r in session.exec(
-            select(Vente.famille).where(Vente.famille.isnot(None)).distinct()
-        ).all()
-    ))
-
     # By location — join ventes with location_communes by commune name
     loc_params: dict = {"loc_annee_mois": annee_mois}
     loc_conditions = [
@@ -985,7 +979,6 @@ def prevendeur_admin_analytics(
         "by_produit": by_produit,
         "by_fdv": by_fdv,
         "by_location": by_location,
-        "familles": familles_list,
         "periodes": all_periods_list,
     }
 
