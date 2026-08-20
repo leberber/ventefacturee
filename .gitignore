@@ -45,3 +45,4 @@ Thumbs.db
 *.swo
 backend/logs/app.log
 backend/logs/
+backend/logs/app.log
