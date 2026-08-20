@@ -30,7 +30,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   collapsedOverviewFamilles = new Set<string>();
   selectedFdv: string | null = null;
   selectedCanal: 'VD' | 'VH' = 'VD';
-  displayMode: 'packs' | 'tonnes' = 'packs';
+  displayMode: 'packs' | 'tonnes' = 'tonnes';
 
   // Pre-computed lists (updated in applyData to avoid re-sorting on every CD cycle)
   overviewFamilles: DrilldownFamille[] = [];

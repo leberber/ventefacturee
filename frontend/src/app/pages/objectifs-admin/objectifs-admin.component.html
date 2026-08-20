@@ -275,6 +275,21 @@
           }
         }
       </tbody>
+      @if (!loading) {
+        @let totalTonne = sumTonne(rows);
+        @let totalPacks = sumPacks(rows);
+        @let totalPacksTournee = sumPacksTournee(rows);
+        <tfoot class="obj-tfoot">
+          <tr>
+            <td colspan="3" class="obj-tfoot__label">TOTAL</td>
+            <td class="td-num obj-tfoot__val td-tonne">{{ totalTonne != null ? (totalTonne | number:'1.0-2') : '—' }}</td>
+            <td class="td-num td-per-route obj-tfoot__val td-tonne">{{ perRouteTonne(totalTonne) }}</td>
+            <td class="td-num obj-tfoot__val td-packs">{{ totalPacks != null ? (totalPacks | number:'1.0-0') : '—' }}</td>
+            <td class="td-num td-per-route obj-tfoot__val td-packs">{{ totalPacksTournee != null ? (totalPacksTournee | number:'1.0-0') : '—' }}</td>
+            <td colspan="2"></td>
+          </tr>
+        </tfoot>
+      }
     </table>
   </div>
 

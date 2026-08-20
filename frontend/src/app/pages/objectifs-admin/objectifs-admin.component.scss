@@ -138,6 +138,30 @@
   white-space: nowrap;
 }
 
+// ── Grand total footer ─────────────────────────────────────────────────────────
+.obj-tfoot tr {
+  position: sticky;
+  bottom: 0;
+  z-index: 2;
+  background: var(--surface-card);
+  border-top: 2px solid var(--surface-border);
+  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.obj-tfoot__label {
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-xs);
+  letter-spacing: 0.06em;
+  color: var(--text-color-secondary);
+  text-transform: uppercase;
+  padding: 0.55rem 0.75rem;
+}
+
+.obj-tfoot__val {
+  font-weight: var(--font-weight-semibold);
+  padding: 0.55rem 0.75rem;
+}
+
 // ── Mobile ─────────────────────────────────────────────────────────────────────
 @media (max-width: 768px) {
   .dash-filter {

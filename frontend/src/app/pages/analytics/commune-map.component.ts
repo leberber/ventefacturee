@@ -133,6 +133,7 @@ export class CommuneMapComponent implements AfterViewInit, OnDestroy {
 
   private top1Code: number | undefined;
   private showTop1: (() => void) | null = null;
+  private boundsFitted = false;
 
   setMapMode(m: MapMode): void { this.mapMode.set(m); }
 
@@ -145,6 +146,7 @@ export class CommuneMapComponent implements AfterViewInit, OnDestroy {
       this.geoLoading.set(true);
       this.geoError.set(false);
       this.geoData.set(null);
+      this.boundsFitted = false;
       this.http.get<GeoFeatureCollection>(`/api/v1/prevendeur/admin/communes-geojson?codes=${codes}`).subscribe({
         next: geo => { this.geoData.set(geo); this.geoLoading.set(false); },
         error: err => {
@@ -343,9 +345,12 @@ export class CommuneMapComponent implements AfterViewInit, OnDestroy {
       this.renderChoropleth(geo, dataMap, maxTotal, totalAll, rankMap, sorted);
     }
 
-    const bounds = this.geoLayer!.getBounds();
-    this.map.fitBounds(bounds, { padding: [12, 12] });
-    this.map.setZoom(this.map.getZoom() + 0.5);
+    if (!this.boundsFitted) {
+      const bounds = this.geoLayer!.getBounds();
+      const zoom   = this.map.getBoundsZoom(bounds, false, L.point(12, 12)) + 0.5;
+      this.map.setView(bounds.getCenter(), zoom, { animate: false });
+      this.boundsFitted = true;
+    }
 
     // Show top-1 card
     const top1Layer = this.findLayerByCode(this.top1Code!);
