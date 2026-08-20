@@ -1,6 +1,6 @@
 import { Component, OnInit, AfterViewInit, OnDestroy, inject, ViewChild, ElementRef, ChangeDetectorRef } from '@angular/core';
 import { Router } from '@angular/router';
-import { DecimalPipe, NgStyle, KeyValuePipe } from '@angular/common';
+import { DecimalPipe, NgStyle } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { TooltipModule } from 'primeng/tooltip';
 import { Select } from 'primeng/select';
@@ -22,7 +22,7 @@ interface ColDef {
 @Component({
   selector: 'app-ventes',
   standalone: true,
-  imports: [DecimalPipe, NgStyle, KeyValuePipe, FormsModule, TooltipModule, Select, Popover, DateRangePickerComponent],
+  imports: [DecimalPipe, NgStyle, FormsModule, TooltipModule, Select, Popover, DateRangePickerComponent],
   templateUrl: './ventes.component.html',
   styleUrl: './ventes.component.scss',
 })

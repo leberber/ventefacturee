@@ -9,7 +9,7 @@ from openpyxl.utils import get_column_letter
 
 from fastapi import APIRouter, Body, Depends, Query
 from fastapi.responses import StreamingResponse
-from sqlalchemy import func, case as sa_case
+from sqlalchemy import func, case as sa_case, text
 from sqlmodel import Session, select
 
 from app.api.deps import get_current_user
@@ -21,6 +21,76 @@ from app.models.objectif import Objectif
 from app.models.produit import Produit
 
 router = APIRouter()
+
+
+# ── WKT → GeoJSON helpers ─────────────────────────────────────────────────────
+
+def _find_paren(s: str, start: int) -> int:
+    depth = 0
+    for i in range(start, len(s)):
+        if s[i] == '(':
+            depth += 1
+        elif s[i] == ')':
+            depth -= 1
+            if depth == 0:
+                return i
+    return -1
+
+
+def _parse_ring(s: str) -> list:
+    s = s.strip().strip('()')
+    result = []
+    for pair in s.split(','):
+        parts = pair.strip().split()
+        if len(parts) >= 2:
+            result.append([float(parts[0]), float(parts[1])])
+    return result
+
+
+def _parse_polygon(s: str) -> list:
+    s = s.strip().strip('()')
+    rings, i = [], 0
+    while i < len(s):
+        if s[i] == '(':
+            end = _find_paren(s, i)
+            if end == -1:
+                break
+            rings.append(_parse_ring(s[i:end + 1]))
+            i = end + 1
+        else:
+            i += 1
+    return rings
+
+
+def _wkt_to_coords(wkt: str) -> list:
+    s = wkt.strip()
+    is_multi = s.upper().startswith('MULTIPOLYGON')
+    if is_multi:
+        s = s[len('MULTIPOLYGON'):].strip()
+    elif s.upper().startswith('POLYGON'):
+        s = s[len('POLYGON'):].strip()
+    else:
+        return []
+
+    s = s.strip().strip('()')
+    polygons, i = [], 0
+    while i < len(s):
+        if s[i] == '(':
+            end = _find_paren(s, i)
+            if end == -1:
+                break
+            polygons.append(_parse_polygon(s[i:end + 1]))
+            i = end + 1
+        else:
+            i += 1
+
+    if not is_multi and len(polygons) == 1:
+        # POLYGON → wrap as MultiPolygon
+        return polygons
+    return polygons
+
+
+# ─────────────────────────────────────────────────────────────────────────────
 
 
 @router.get("/periodes", response_model=List[str])
@@ -703,6 +773,244 @@ def prevendeur_admin_drilldown(
         "familles": sorted(familles_out, key=lambda x: -x["total"]),
         "objectif_packs_per_route": objectif_per_route or None,
     }
+
+
+@router.get("/admin/analytics")
+def prevendeur_admin_analytics(
+    annee_mois: str = Query(...),
+    famille: Optional[str] = Query(None),
+    fdv: Optional[str] = Query(None),
+    canal: Optional[str] = Query(None),
+    commune: Optional[str] = Query(None),
+    unite: str = Query('caisses'),
+    current_user: User = Depends(get_current_user),
+    session: Session = Depends(get_session),
+) -> Any:
+    all_periods = session.exec(
+        select(Vente.annee_mois).distinct().order_by(Vente.annee_mois.desc())
+    ).all()
+    all_periods_list = list(all_periods)
+
+    if unite == 'tonnes':
+        _norm = sa_case(
+            (Produit.poids_unite_vente.isnot(None), Vente.qte_livree * Produit.poids_unite_vente),
+            else_=0,
+        )
+    else:  # packs (default)
+        _norm = sa_case(
+            (
+                (Vente.uom_vente == 'UN') & Produit.colisage.isnot(None),
+                Vente.qte_livree / Produit.colisage,
+            ),
+            else_=Vente.qte_livree,
+        )
+
+    def apply_filters(q, include_famille=True, include_commune=True):
+        q = q.outerjoin(Produit, Vente.code_produit == Produit.code_produit)
+        q = q.where(Vente.annee_mois == annee_mois, Vente.statut_commande == 'Facturé')
+        if include_famille and famille:
+            q = q.where(Vente.famille.ilike(famille))
+        if fdv:
+            q = q.where(Vente.code_fdv == fdv)
+        if canal:
+            q = q.where(Vente.canal == canal)
+        if include_commune and commune:
+            q = q.where(Vente.commune == commune)
+        return q
+
+    # KPIs
+    kpi_row = session.exec(apply_filters(
+        select(func.coalesce(func.sum(_norm), 0))
+    )).one()
+    total_ventes = round(kpi_row or 0)
+
+    nb_fdvs = len(session.exec(apply_filters(
+        select(Vente.code_fdv).distinct().where(Vente.code_fdv.isnot(None))
+    )).all())
+
+    top_famille_row = session.exec(apply_filters(
+        select(Vente.famille, func.coalesce(func.sum(_norm), 0))
+        .where(Vente.famille.isnot(None))
+        .group_by(Vente.famille)
+        .order_by(func.sum(_norm).desc())
+        .limit(1),
+        include_famille=False,
+    )).first()
+
+    fdv_name_map = {
+        p.employe_code: p.full_name
+        for p in session.exec(
+            select(User).where(User.role == UserRole.PREVENDER, User.is_active == True)
+        ).all()
+        if p.employe_code
+    }
+
+    top_fdv_row = session.exec(apply_filters(
+        select(Vente.code_fdv, func.coalesce(func.sum(_norm), 0))
+        .where(Vente.code_fdv.isnot(None))
+        .group_by(Vente.code_fdv)
+        .order_by(func.sum(_norm).desc())
+        .limit(1)
+    )).first()
+
+    # Monthly trend (last 6 periods)
+    try:
+        cur_idx = all_periods_list.index(annee_mois)
+    except ValueError:
+        cur_idx = 0
+    trend_periods = list(reversed(all_periods_list[cur_idx:cur_idx + 6]))
+
+    monthly = []
+    if trend_periods:
+        def trend_q(q):
+            q = q.outerjoin(Produit, Vente.code_produit == Produit.code_produit)
+            q = q.where(Vente.annee_mois.in_(trend_periods), Vente.statut_commande == 'Facturé')
+            if famille:
+                q = q.where(Vente.famille.ilike(famille))
+            if fdv:
+                q = q.where(Vente.code_fdv == fdv)
+            if canal:
+                q = q.where(Vente.canal == canal)
+            return q
+
+        trend_rows = {
+            r[0]: (round(r[1] or 0), r[2] or 0)
+            for r in session.exec(trend_q(
+                select(
+                    Vente.annee_mois,
+                    func.coalesce(func.sum(_norm), 0),
+                    func.count(Vente.code_fdv),
+                ).group_by(Vente.annee_mois)
+            )).all()
+        }
+        monthly = [
+            {"month": p, "total": trend_rows.get(p, (0, 0))[0], "nb_fdvs": trend_rows.get(p, (0, 0))[1]}
+            for p in trend_periods
+        ]
+
+    # By famille (unfiltered by famille so bars always show)
+    by_famille = [
+        {"famille": r[0], "total": round(r[1] or 0)}
+        for r in session.exec(apply_filters(
+            select(Vente.famille, func.coalesce(func.sum(_norm), 0))
+            .where(Vente.famille.isnot(None))
+            .group_by(Vente.famille)
+            .order_by(func.sum(_norm).desc()),
+            include_famille=False,
+        )).all()
+    ]
+
+    # Top 10 produits (with famille filter)
+    by_produit = [
+        {"nom": r[0] or "?", "code": r[1], "total": round(r[2] or 0)}
+        for r in session.exec(apply_filters(
+            select(Vente.description_produit, Vente.code_produit, func.coalesce(func.sum(_norm), 0))
+            .where(Vente.description_produit.isnot(None))
+            .group_by(Vente.description_produit, Vente.code_produit)
+            .order_by(func.sum(_norm).desc())
+            .limit(10)
+        )).all()
+    ]
+
+    # Top 10 FDVs (with famille filter)
+    by_fdv = [
+        {"nom": fdv_name_map.get(r[0], r[0]), "code": r[0], "total": round(r[1] or 0)}
+        for r in session.exec(apply_filters(
+            select(Vente.code_fdv, func.coalesce(func.sum(_norm), 0))
+            .where(Vente.code_fdv.isnot(None))
+            .group_by(Vente.code_fdv)
+            .order_by(func.sum(_norm).desc())
+            .limit(10)
+        )).all()
+    ]
+
+    familles_list = sorted(set(
+        r[0] for r in session.exec(
+            select(Vente.famille).where(Vente.famille.isnot(None)).distinct()
+        ).all()
+    ))
+
+    # By location — join ventes with location_communes by commune name
+    loc_params: dict = {"loc_annee_mois": annee_mois}
+    loc_conditions = [
+        "v.annee_mois = :loc_annee_mois",
+        "v.statut_commande = 'Facturé'",
+        "v.commune IS NOT NULL",
+    ]
+    if famille:
+        loc_conditions.append("LOWER(v.famille) = LOWER(:loc_famille)")
+        loc_params["loc_famille"] = famille
+    if fdv:
+        loc_conditions.append("v.code_fdv = :loc_fdv")
+        loc_params["loc_fdv"] = fdv
+    if canal:
+        loc_conditions.append("v.canal = :loc_canal")
+        loc_params["loc_canal"] = canal
+
+    if unite == 'tonnes':
+        loc_norm = "CASE WHEN p.poids_unite_vente IS NOT NULL THEN v.qte_livree * p.poids_unite_vente ELSE 0 END"
+    else:
+        loc_norm = "CASE WHEN v.uom_vente = 'UN' AND p.colisage IS NOT NULL THEN v.qte_livree / p.colisage ELSE v.qte_livree END"
+    where_clause = " AND ".join(loc_conditions)
+    loc_sql = f"""
+        SELECT lc.commune_code, lc.commune_name,
+               COALESCE(SUM({loc_norm}), 0) AS total
+        FROM ventes v
+        LEFT JOIN produits p ON v.code_produit = p.code_produit
+        JOIN location_communes lc ON LOWER(v.commune) = LOWER(lc.commune_name)
+        WHERE {where_clause}
+        GROUP BY lc.commune_code, lc.commune_name
+        ORDER BY total DESC
+    """
+    loc_rows = session.execute(text(loc_sql), loc_params).all()
+    by_location = [
+        {"code": row[0], "name": row[1], "total": round(row[2] or 0)}
+        for row in loc_rows
+    ]
+
+    return {
+        "kpis": {
+            "total_ventes": total_ventes,
+            "nb_fdvs": nb_fdvs,
+            "top_famille": {"nom": top_famille_row[0], "total": round(top_famille_row[1])}
+                           if top_famille_row else None,
+            "top_fdv": {
+                "nom": fdv_name_map.get(top_fdv_row[0], top_fdv_row[0]),
+                "code": top_fdv_row[0],
+                "total": round(top_fdv_row[1]),
+            } if top_fdv_row else None,
+        },
+        "monthly": monthly,
+        "by_famille": by_famille,
+        "by_produit": by_produit,
+        "by_fdv": by_fdv,
+        "by_location": by_location,
+        "familles": familles_list,
+        "periodes": all_periods_list,
+    }
+
+
+@router.get("/admin/communes-geojson")
+def admin_communes_geojson(
+    codes: Optional[str] = Query(None),
+    current_user: User = Depends(get_current_user),
+    session: Session = Depends(get_session),
+) -> Any:
+    import json as _json
+    sql = "SELECT commune_code, commune_name, ST_AsGeoJSON(geom) FROM location_communes WHERE geom IS NOT NULL"
+    params: dict = {}
+    if codes:
+        code_list = [int(c) for c in codes.split(",") if c.strip().isdigit()]
+        if code_list:
+            sql += " AND commune_code = ANY(:codes)"
+            params["codes"] = code_list
+    sql += " ORDER BY commune_code"
+    rows = session.execute(text(sql), params).all()
+    features = [
+        {"type": "Feature", "properties": {"code": code, "name": name}, "geometry": _json.loads(geom_json)}
+        for code, name, geom_json in rows if geom_json
+    ]
+    return {"type": "FeatureCollection", "features": features}
 
 
 @router.get("/objectifs")

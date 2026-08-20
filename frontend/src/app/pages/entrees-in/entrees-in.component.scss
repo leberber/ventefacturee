@@ -1,9 +1,9 @@
+@use '../../../styles/objectifs-shared';
+
 :host {
   --obj-accent:     #6366f1;
   --obj-accent-rgb: 99 102 241;
 }
-
-@import '../../../styles/objectifs-shared';
 
 // Skeleton div variant
 .sk-row { padding: 0.6rem 1rem; }

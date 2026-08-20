@@ -1,0 +1,187 @@
+<!-- ── Header ── -->
+<div class="an-header">
+  <div class="an-header__title">
+    <i class="pi pi-chart-line"></i>
+    <span>Analytiques</span>
+    @if (famille()) {
+      <span class="an-tag">{{ famille() }} <button (click)="clearFamille()">×</button></span>
+    }
+    @if (fdv()) {
+      <span class="an-tag">{{ fdv()!.nom }} <button (click)="clearFdv()">×</button></span>
+    }
+    @if (commune()) {
+      <span class="an-tag">{{ commune()!.name }} <button (click)="clearCommune()">×</button></span>
+    }
+  </div>
+  <div class="an-header__controls">
+    <!-- Unite toggle -->
+    <div class="canal-btns">
+      @for (u of unites; track u.value) {
+        <button class="canal-btn" [class.active]="unite() === u.value" (click)="setUnite(u.value)">
+          {{ u.label }}
+        </button>
+      }
+    </div>
+
+    <!-- Canal toggle -->
+    <div class="canal-btns">
+      @for (c of canals; track c.value) {
+        <button class="canal-btn" [class.active]="canal() === c.value" (click)="setCanal(c.value)">
+          {{ c.label }}
+        </button>
+      }
+    </div>
+
+    <!-- Famille filter -->
+    <select class="an-select" (change)="setFamille($any($event.target).value)">
+      <option value="">Toutes familles</option>
+      @for (f of familles(); track f) {
+        <option [value]="f" [selected]="famille() === f">{{ f }}</option>
+      }
+    </select>
+
+    <!-- Période -->
+    <select class="an-select" (change)="setPeriode($any($event.target).value)">
+      @for (p of periodes(); track p) {
+        <option [value]="p" [selected]="periode() === p">{{ formatPeriode(p) }}</option>
+      }
+    </select>
+  </div>
+</div>
+
+<!-- ── KPI Strip ── -->
+<div class="an-kpis">
+
+  <div class="an-kpi">
+    <div class="an-kpi__icon an-kpi__icon--blue"><i class="pi pi-box"></i></div>
+    <div class="an-kpi__body">
+      <div class="an-kpi__label">Ventes ({{ uniteLabel }})</div>
+      @if (loading()) { <div class="sk-kpi"></div> }
+      @else { <div class="an-kpi__val">{{ displayKpis.total_ventes | number:(unite() === 'tonnes' ? '1.1-1' : '1.0-0') }}</div> }
+    </div>
+  </div>
+
+  <div class="an-kpi-sep"></div>
+
+  <div class="an-kpi">
+    <div class="an-kpi__icon an-kpi__icon--green"><i class="pi pi-users"></i></div>
+    <div class="an-kpi__body">
+      <div class="an-kpi__label">FDVs actifs</div>
+      @if (loading()) { <div class="sk-kpi"></div> }
+      @else { <div class="an-kpi__val">{{ displayKpis.nb_fdvs }}</div> }
+    </div>
+  </div>
+
+  <div class="an-kpi-sep"></div>
+
+  <div class="an-kpi">
+    <div class="an-kpi__icon an-kpi__icon--amber"><i class="pi pi-tag"></i></div>
+    <div class="an-kpi__body">
+      <div class="an-kpi__label">Top famille</div>
+      @if (loading()) { <div class="sk-kpi"></div> }
+      @else if (data()?.kpis?.top_famille) {
+        <div class="an-kpi__val an-kpi__val--name">{{ data()!.kpis.top_famille!.nom }}</div>
+      } @else {
+        <div class="an-kpi__val">—</div>
+      }
+    </div>
+  </div>
+
+  <div class="an-kpi-sep"></div>
+
+  <div class="an-kpi">
+    <div class="an-kpi__icon an-kpi__icon--purple"><i class="pi pi-star"></i></div>
+    <div class="an-kpi__body">
+      <div class="an-kpi__label">Top FDV</div>
+      @if (loading()) { <div class="sk-kpi"></div> }
+      @else if (data()?.kpis?.top_fdv) {
+        <div class="an-kpi__val an-kpi__val--name">
+          {{ data()!.kpis.top_fdv!.nom.split(' ').slice(0, 2).join(' ') }}
+        </div>
+      } @else {
+        <div class="an-kpi__val">—</div>
+      }
+    </div>
+  </div>
+
+</div>
+
+<!-- ── 2×2 Grid ── -->
+<div class="an-grid">
+
+  <!-- TL: Tendance mensuelle -->
+  <div class="an-panel">
+    <div class="panel__head">
+      <div class="panel__title"><span class="panel__dot panel__dot--blue"></span> Tendance mensuelle</div>
+      @if (fdv()) { <span class="an-badge">{{ fdv()!.nom }}</span> }
+      @if (famille()) { <span class="an-badge">{{ famille() }}</span> }
+    </div>
+    <div class="an-panel__body">
+      @if (areaData().length) {
+        <app-d3-area [data]="areaData()" [v1Label]="'Ventes (' + uniteLabel + ')'" v2Label="FDVs" />
+      } @else if (loading()) {
+        <div class="sk-chart"></div>
+      } @else {
+        <div class="panel__empty"><i class="pi pi-chart-line"></i><span>Aucune donnée</span></div>
+      }
+    </div>
+  </div>
+
+  <!-- TR: Carte des ventes par commune -->
+  <div class="an-panel">
+    <div class="panel__head">
+      <div class="panel__title"><span class="panel__dot panel__dot--green"></span> Ventes par commune</div>
+      <span class="panel__hint">Cliquer pour filtrer · molette pour zoomer</span>
+    </div>
+    <div class="an-panel__body an-panel__body--map">
+      <app-commune-map
+        [data]="mapData()"
+        [selectedCode]="commune()?.code ?? null"
+        (communeSelect)="setCommune($event)" />
+    </div>
+  </div>
+
+  <!-- BL: Ventes par famille -->
+  <div class="an-panel">
+    <div class="panel__head">
+      <div class="panel__title"><span class="panel__dot panel__dot--purple"></span> Ventes par famille</div>
+      @if (famille()) {
+        <button class="an-back-btn" (click)="clearFamille()">× Effacer</button>
+      }
+    </div>
+    <div class="an-panel__body">
+      @if (familleBarItems().length) {
+        <app-d3-hbar
+          [data]="familleBarItems()"
+          color="#7c3aed" label="{{ uniteLabel }}"
+          (itemSelect)="setFamille($event?.name ?? '')" />
+      } @else if (loading()) {
+        <div class="sk-chart"></div>
+      } @else {
+        <div class="panel__empty"><i class="pi pi-box"></i><span>Aucune donnée</span></div>
+      }
+    </div>
+  </div>
+
+  <!-- BR: Top produits -->
+  <div class="an-panel">
+    <div class="panel__head">
+      <div class="panel__title">
+        <span class="panel__dot panel__dot--amber"></span>
+        @if (famille()) { Top produits — {{ famille() }} } @else { Top produits }
+      </div>
+    </div>
+    <div class="an-panel__body">
+      @if (prodBarData().length) {
+        <app-d3-hbar
+          [data]="prodBarData()"
+          color="#2563eb" label="{{ uniteLabel }}" />
+      } @else if (loading()) {
+        <div class="sk-chart"></div>
+      } @else {
+        <div class="panel__empty"><i class="pi pi-box"></i><span>Aucune donnée</span></div>
+      }
+    </div>
+  </div>
+
+</div>
