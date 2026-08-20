@@ -119,6 +119,12 @@
                   {{ formatDelta(f.delta_pct) }}
                 </span>
               }
+              <button class="db-pin-btn"
+                      [class.db-pin-btn--active]="pinnedFamilies.has(f.nom)"
+                      (click)="togglePin(f.nom, $event)"
+                      [title]="pinnedFamilies.has(f.nom) ? 'Retirer de la comparaison' : 'Ajouter à la comparaison'">
+                <i class="pi" [class.pi-bookmark-fill]="pinnedFamilies.has(f.nom)" [class.pi-bookmark]="!pinnedFamilies.has(f.nom)"></i>
+              </button>
               <i class="pi pi-chevron-right db-kpi-card__arrow"
                  [class.db-kpi-card__arrow--open]="selectedFamille?.nom === f.nom"></i>
             </div>
@@ -165,6 +171,30 @@
         </button>
       }
     }
+  </div>
+
+  <!-- ── Pin bar (combined totals for pinned families) ───────────────────── -->
+  <div class="db-pin-bar" [style.display]="hasPinned ? 'flex' : 'none'">
+    <div class="db-pin-bar__families">
+      @for (nom of pinnedFamiliesArray; track nom) {
+        <span class="db-pin-bar__tag" [style.color]="familyColor(nom)" [style.background]="familyBg(nom)">
+          {{ capitalize(nom) }}
+          <button class="db-pin-bar__tag-rm" (click)="togglePin(nom, $event)"><i class="pi pi-times"></i></button>
+        </span>
+      }
+    </div>
+    <div class="db-pin-bar__totals">
+      <span class="db-pin-bar__value">{{ pinnedTotalDisplay }}</span>
+      <span class="db-pin-bar__unit">{{ unitLabel }}</span>
+      @if (pinnedHasObjectif) {
+        <span class="db-pin-bar__sep">|</span>
+        <span class="db-pin-bar__pct" [ngClass]="pinnedObjClass">{{ pinnedObjPct }}%</span>
+        <span class="db-pin-bar__obj-sub">/ {{ pinnedObjDisplay }} obj.</span>
+      }
+    </div>
+    <button class="db-pin-bar__clear" (click)="clearPinned()" title="Effacer la sélection">
+      <i class="pi pi-times"></i>
+    </button>
   </div>
 
   <!-- ── Collapse handle ──────────────────────────────────────────────────── -->

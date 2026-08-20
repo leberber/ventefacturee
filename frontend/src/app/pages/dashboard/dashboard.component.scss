@@ -4,7 +4,7 @@
 
 .db-root {
   display: grid;
-  grid-template-rows: auto auto auto 1fr;
+  grid-template-rows: auto auto auto auto 1fr;
   gap: 0.5rem;
   height: calc(100vh - 3rem);
   overflow: hidden;
@@ -101,6 +101,128 @@
   border: 1px solid var(--surface-border);
   border-radius: 999px;
   padding: 0.3rem 0.75rem;
+}
+
+// ── Pin button (on KPI card) ──────────────────────────────────────────────────
+.db-pin-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  padding: 0.1rem 0.2rem;
+  border-radius: 0.3rem;
+  color: var(--text-color-muted);
+  font-size: 0.7rem;
+  font-family: inherit;
+  transition: color 0.15s, background 0.15s;
+
+  &:hover { color: var(--primary-color); background: rgba(var(--primary-rgb), 0.08); }
+  &--active { color: var(--primary-color); }
+}
+
+// ── Pin bar (combined totals for pinned families) ─────────────────────────────
+.db-pin-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.45rem 0.85rem;
+  background: var(--surface-card);
+  border: 1px solid var(--surface-border);
+  border-radius: 0.75rem;
+  min-width: 0;
+
+  &__families {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    flex: 1;
+    flex-wrap: wrap;
+    min-width: 0;
+  }
+
+  &__tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.18rem 0.5rem;
+    border-radius: 999px;
+    font-size: 0.62rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+  }
+
+  &__tag-rm {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    color: inherit;
+    opacity: 0.6;
+    font-size: 0.5rem;
+    font-family: inherit;
+    &:hover { opacity: 1; }
+  }
+
+  &__totals {
+    display: flex;
+    align-items: baseline;
+    gap: 0.35rem;
+    flex-shrink: 0;
+  }
+
+  &__value {
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: var(--text-color);
+    letter-spacing: -0.02em;
+  }
+
+  &__unit {
+    font-size: 0.65rem;
+    color: var(--text-color-secondary);
+  }
+
+  &__sep {
+    color: var(--surface-border);
+    font-weight: 300;
+    font-size: 0.9rem;
+  }
+
+  &__pct {
+    font-size: 0.85rem;
+    font-weight: 800;
+    &.pv-obj--green  { color: var(--color-success); }
+    &.pv-obj--amber  { color: var(--color-warning); }
+    &.pv-obj--orange { color: #f97316; }
+    &.pv-obj--red    { color: var(--color-error); }
+  }
+
+  &__obj-sub {
+    font-size: 0.72rem;
+    color: var(--text-color-muted);
+  }
+
+  &__clear {
+    background: none;
+    border: 1px solid var(--surface-border);
+    border-radius: 50%;
+    width: 1.5rem;
+    height: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: var(--text-color-secondary);
+    font-size: 0.5rem;
+    font-family: inherit;
+    flex-shrink: 0;
+    transition: all 0.15s;
+    &:hover { border-color: var(--color-error); color: var(--color-error); background: rgba(239,68,68,0.08); }
+  }
 }
 
 .db-collapse-handle {

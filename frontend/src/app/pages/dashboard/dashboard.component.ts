@@ -512,4 +512,48 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   readonly skeletonRows = Array(5).fill(0);
+
+  // ── Pin mechanism (multi-family combined totals) ───────────────────────────
+  pinnedFamilies = new Set<string>();
+
+  togglePin(nom: string, event: MouseEvent) {
+    event.stopPropagation();
+    if (this.pinnedFamilies.has(nom)) this.pinnedFamilies.delete(nom);
+    else this.pinnedFamilies.add(nom);
+  }
+
+  clearPinned() { this.pinnedFamilies.clear(); }
+
+  get pinnedFamiliesArray(): string[] { return [...this.pinnedFamilies]; }
+  get hasPinned(): boolean { return this.pinnedFamilies.size > 0; }
+
+  private get _pinnedData(): DrilldownFamille[] {
+    return this.data?.familles.filter(f => this.pinnedFamilies.has(f.nom)) ?? [];
+  }
+  private get _pinnedObjPacks(): number {
+    return this._pinnedData.reduce((s, f) => s + (f.objectif_packs ?? 0), 0);
+  }
+  private get _pinnedObjTonne(): number {
+    return this._pinnedData.reduce((s, f) => s + (f.objectif_tonne ?? 0), 0);
+  }
+
+  get pinnedTotal(): number { return this._pinnedData.reduce((s, f) => s + f.total, 0); }
+  get pinnedHasObjectif(): boolean { return this._pinnedObjPacks > 0; }
+
+  get pinnedTotalDisplay(): string {
+    return this.displayVal(this.pinnedTotal, this._pinnedObjPacks || null, this._pinnedObjTonne || null);
+  }
+  get pinnedObjDisplay(): string {
+    return this.displayObjVal(this._pinnedObjPacks || null, this._pinnedObjTonne || null);
+  }
+  get pinnedObjPct(): number {
+    return this.displayObjPct(this.pinnedTotal, this._pinnedObjPacks || null, this._pinnedObjTonne || null);
+  }
+  get pinnedObjClass(): string {
+    const pct = this.pinnedObjPct;
+    if (pct >= 90) return 'pv-obj--green';
+    if (pct >= 70) return 'pv-obj--amber';
+    if (pct >= 50) return 'pv-obj--orange';
+    return 'pv-obj--red';
+  }
 }
