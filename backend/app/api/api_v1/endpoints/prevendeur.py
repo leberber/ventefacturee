@@ -629,8 +629,12 @@ def prevendeur_admin_drilldown(
             code_to_produit[p.code_produit] = p
 
     # Add zero-sale objective products into hier so they appear in the tree with total=0
+    # Skip products that already appear in the hierarchy from ventes — vente famille is authoritative
+    codes_in_hier = set(prod_label_to_code.values())
     for code_prod, obj in obj_by_prod.items():
         if not obj or not code_prod or code_prod not in code_to_produit:
+            continue
+        if code_prod in codes_in_hier:
             continue
         produit = code_to_produit[code_prod]
         prod_name = produit.nom_produit or produit.description_produit or code_prod
@@ -683,6 +687,34 @@ def prevendeur_admin_drilldown(
         ],
         key=lambda x: x["nom"],
     )
+
+    # CA (chiffre d'affaires) per famille — SUM(qte_livree * prix_unitaire)
+    _ca_q = (
+        select(Vente.famille, func.sum(Vente.qte_livree * Vente.prix_unitaire))
+        .where(Vente.annee_mois == annee_mois, Vente.statut_commande == 'Facturé')
+        .where(Vente.prix_unitaire.isnot(None))
+        .group_by(Vente.famille)
+    )
+    if code_fdv:
+        _ca_q = _ca_q.where(Vente.code_fdv == code_fdv)
+    if canal:
+        _ca_q = _ca_q.where(Vente.canal == canal)
+    ca_by_famille = {(r[0] or '').strip().lower(): round(r[1] or 0) for r in session.exec(_ca_q).all()}
+
+    if prev_periode:
+        _ca_prev_q = (
+            select(Vente.famille, func.sum(Vente.qte_livree * Vente.prix_unitaire))
+            .where(Vente.annee_mois == prev_periode, Vente.statut_commande == 'Facturé')
+            .where(Vente.prix_unitaire.isnot(None))
+            .group_by(Vente.famille)
+        )
+        if code_fdv:
+            _ca_prev_q = _ca_prev_q.where(Vente.code_fdv == code_fdv)
+        if canal:
+            _ca_prev_q = _ca_prev_q.where(Vente.canal == canal)
+        ca_prev_by_famille = {(r[0] or '').strip().lower(): round(r[1] or 0) for r in session.exec(_ca_prev_q).all()}
+    else:
+        ca_prev_by_famille = {}
 
     familles_out = []
     for famille, sf_map in sorted(hier.items()):
@@ -762,7 +794,20 @@ def prevendeur_admin_drilldown(
             "top_fdv": top_fdv,
             "objectif_packs": f_obj,
             "objectif_tonne": f_tonne,
+            "ca": ca_by_famille.get(famille) or None,
+            "ca_prev": ca_prev_by_famille.get(famille) or None,
         })
+
+    # True global objective totals — summed directly from the objectifs table
+    if canal == 'VD':
+        global_obj_tonne = sum(r.objectif_tonne_vd or 0 for r in obj_prod_rows)
+        global_obj_packs = sum(r.objectif_packs_vd or 0 for r in obj_prod_rows)
+    elif canal == 'VH':
+        global_obj_tonne = sum(r.objectif_tonne_vh or 0 for r in obj_prod_rows)
+        global_obj_packs = sum(r.objectif_packs_vh or 0 for r in obj_prod_rows)
+    else:
+        global_obj_tonne = sum((r.objectif_tonne_vd or 0) + (r.objectif_tonne_vh or 0) for r in obj_prod_rows)
+        global_obj_packs = sum((r.objectif_packs_vd or 0) + (r.objectif_packs_vh or 0) for r in obj_prod_rows)
 
     return {
         "periode": annee_mois,
@@ -772,6 +817,9 @@ def prevendeur_admin_drilldown(
         "trend_6m_labels": trend_6m_labels,
         "familles": sorted(familles_out, key=lambda x: -x["total"]),
         "objectif_packs_per_route": objectif_per_route or None,
+        "global_objectif_tonne": round(global_obj_tonne, 3) if global_obj_tonne else None,
+        "global_objectif_packs": round(global_obj_packs) if global_obj_packs else None,
+        "global_ca": round(sum(ca_by_famille.values())) if ca_by_famille else None,
     }
 
 

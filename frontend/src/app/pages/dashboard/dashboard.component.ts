@@ -94,8 +94,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
     // Capture global totals only when no FDV filter is active
     if (!this.selectedFdv) {
       this._globalTotal = d.prevendeurs.reduce((s, p) => s + p.total, 0);
-      this._globalObjectif = d.familles.reduce((s, f) => s + (f.objectif_packs ?? 0), 0);
-      this._globalObjectifTonne = d.familles.reduce((s, f) => s + (f.objectif_tonne ?? 0), 0);
+      this._globalObjectif = d.global_objectif_packs ?? d.familles.reduce((s, f) => s + (f.objectif_packs ?? 0), 0);
+      this._globalObjectifTonne = d.global_objectif_tonne ?? d.familles.reduce((s, f) => s + (f.objectif_tonne ?? 0), 0);
+      this._globalCa = d.global_ca ?? 0;
     }
   }
 
@@ -294,6 +295,14 @@ export class DashboardComponent implements OnInit, OnDestroy {
     return String(Math.round(n));
   }
 
+  formatCa(n: number | null | undefined): string {
+    if (!n) return '—';
+    if (n >= 1_000_000_000) return `DA ${(n / 1_000_000_000).toFixed(1)}G`;
+    if (n >= 1_000_000)     return `DA ${(n / 1_000_000).toFixed(1)}M`;
+    if (n >= 1_000)         return `DA ${(n / 1_000).toFixed(0)}k`;
+    return `DA ${Math.round(n)}`;
+  }
+
   formatDelta(delta: number | null): string {
     if (delta === null) return '';
     return `${delta > 0 ? '+' : ''}${delta}%`;
@@ -416,6 +425,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   _globalTotal = 0;
   _globalObjectif = 0;
   _globalObjectifTonne = 0;
+  _globalCa = 0;
 
   get totalAll(): number { return this._globalTotal; }
   get totalObjectif(): number { return this._globalObjectif; }
@@ -538,6 +548,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   get pinnedTotal(): number { return this._pinnedData.reduce((s, f) => s + f.total, 0); }
+  get pinnedCa(): number { return this._pinnedData.reduce((s, f) => s + (f.ca ?? 0), 0); }
   get pinnedHasObjectif(): boolean { return this._pinnedObjPacks > 0; }
 
   get pinnedTotalDisplay(): string {

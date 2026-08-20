@@ -15,6 +15,9 @@
           <div class="db-global-achieve">
             <span class="db-global-achieve__num" [ngClass]="totalObjClass">{{ totalObjPct }}%</span>
             <span class="db-global-achieve__sub">{{ totalDisplay }} / {{ totalObjDisplay }} obj.</span>
+            @if (_globalCa) {
+              <span class="db-global-achieve__ca">{{ formatCa(_globalCa) }}</span>
+            }
           </div>
         }
       </div>
@@ -135,6 +138,10 @@
             <span class="db-kpi-card__unit">{{ unitLabel }}</span>
           </div>
 
+          @if (f.ca) {
+            <div class="db-kpi-card__ca">{{ formatCa(f.ca) }}</div>
+          }
+
           <div class="db-kpi-card__prev">
             vs {{ formatNum(f.total_prev) }} mois préc.
           </div>
@@ -190,6 +197,10 @@
         <span class="db-pin-bar__sep">|</span>
         <span class="db-pin-bar__pct" [ngClass]="pinnedObjClass">{{ pinnedObjPct }}%</span>
         <span class="db-pin-bar__obj-sub">/ {{ pinnedObjDisplay }} obj.</span>
+      }
+      @if (pinnedCa) {
+        <span class="db-pin-bar__sep">|</span>
+        <span class="db-pin-bar__ca">{{ formatCa(pinnedCa) }}</span>
       }
     </div>
     <button class="db-pin-bar__clear" (click)="clearPinned()" title="Effacer la sélection">

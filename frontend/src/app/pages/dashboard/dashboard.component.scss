@@ -91,6 +91,16 @@
     color: var(--text-color-secondary);
     white-space: nowrap;
   }
+
+  &__ca {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--text-color-secondary);
+    white-space: nowrap;
+    padding-left: 0.5rem;
+    border-left: 1px solid var(--surface-border);
+    margin-left: 0.25rem;
+  }
 }
 
 .db-period {
@@ -204,6 +214,12 @@
   &__obj-sub {
     font-size: 0.72rem;
     color: var(--text-color-muted);
+  }
+
+  &__ca {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--text-color-secondary);
   }
 
   &__clear {
@@ -715,6 +731,13 @@
     font-size: 0.65rem;
     color: var(--text-color-secondary);
     font-weight: 500;
+  }
+
+  &__ca {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--text-color-secondary);
+    margin-top: 0.1rem;
   }
 
   &__prev {
