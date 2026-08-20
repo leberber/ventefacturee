@@ -50,7 +50,7 @@ export class AnalyticsComponent implements OnInit, OnDestroy {
   readonly commune  = signal<{ code: number; name: string } | null>(null);
   readonly fdv      = signal<{ nom: string; code: string } | null>(null);
   readonly canal    = signal<Canal>('VD');
-  readonly unite    = signal<Unite>('packs');
+  readonly unite    = signal<Unite>('tonnes');
   readonly familles = signal<string[]>([]);
   readonly periodes = signal<string[]>([]);
 

@@ -782,7 +782,7 @@ def prevendeur_admin_analytics(
     fdv: Optional[str] = Query(None),
     canal: Optional[str] = Query(None),
     commune: Optional[str] = Query(None),
-    unite: str = Query('caisses'),
+    unite: str = Query('tonnes'),
     current_user: User = Depends(get_current_user),
     session: Session = Depends(get_session),
 ) -> Any:
