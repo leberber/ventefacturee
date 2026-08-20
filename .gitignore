@@ -43,6 +43,4 @@ Thumbs.db
 .idea/
 *.swp
 *.swo
-backend/logs/app.log
 backend/logs/
-backend/logs/app.log
