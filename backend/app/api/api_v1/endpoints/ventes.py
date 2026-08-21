@@ -378,7 +378,14 @@ async def rapprochement_bl(
         else_=Vente.qte_facturee,
     )
     agg_stmt = (
-        select(Vente.code_produit, func.sum(_norm_fact).label('qte_colis'))
+        select(
+            Vente.code_produit,
+            func.sum(_norm_fact).label('qte_colis'),
+            func.sum(Vente.qte_facturee).label('qte_facturee_raw'),
+            func.max(Vente.uom_vente).label('uom_vente'),
+            func.max(Vente.prix_unitaire).label('prix_unitaire'),
+            func.sum(Vente.total_facture).label('total_facture'),
+        )
         .outerjoin(Produit, Vente.code_produit == Produit.code_produit)
         .where(Vente.nom_livreur == nom_livreur)
         .where(Vente.date_facturation == date_obj)
@@ -386,7 +393,7 @@ async def rapprochement_bl(
         .group_by(Vente.code_produit)
     )
     ventes_map: dict = {
-        row.code_produit: (row.qte_colis or 0.0)
+        row.code_produit: row
         for row in session.execute(agg_stmt).all()
     }
 
@@ -405,7 +412,8 @@ async def rapprochement_bl(
     lignes = []
     for r in bl_rows:
         code = r['code_produit']
-        qte_colis = ventes_map.get(code)
+        vente_row = ventes_map.get(code)
+        qte_colis = vente_row.qte_colis if vente_row else None
         colisage = colisage_map.get(code)
         ventes_qte_unites = None
         difference = None
@@ -436,6 +444,10 @@ async def rapprochement_bl(
             prix_dd=prod_row.prix_dd if prod_row else None,
             prix_promotion=prod_row.prix_promotion if prod_row else None,
             prix_club=prod_row.prix_club if prod_row else None,
+            ventes_qte_facturee=vente_row.qte_facturee_raw if vente_row else None,
+            ventes_uom_vente=vente_row.uom_vente if vente_row else None,
+            ventes_prix_unitaire=vente_row.prix_unitaire if vente_row else None,
+            ventes_total_facture=vente_row.total_facture if vente_row else None,
         ))
 
     return RapprochementResult(

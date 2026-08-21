@@ -70,6 +70,10 @@ export interface RapprochementLigne {
   prix_dd: number | null;
   prix_promotion: number | null;
   prix_club: number | null;
+  ventes_qte_facturee: number | null;
+  ventes_uom_vente: string | null;
+  ventes_prix_unitaire: number | null;
+  ventes_total_facture: number | null;
 }
 
 export interface RapprochementResult {

@@ -313,6 +313,31 @@
 .table {
   th.num, td.num { text-align: right; }
 
+  th.th-rowspan {
+    vertical-align: middle;
+  }
+
+  th.sub-header {
+    font-size: 0.65rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    padding: 0.25rem 0.5rem;
+
+    &--db {
+      background: #eff6ff;
+      color: #2563eb;
+      border-left: 1px solid #93c5fd;
+      border-right: 1px solid #93c5fd;
+    }
+    &--bl {
+      background: #fef2f2;
+      color: #dc2626;
+      border-left: 1px solid #fca5a5;
+      border-right: 1px solid #fca5a5;
+    }
+  }
+
   th.group-header {
     text-align: center;
     font-size: 0.72rem;
@@ -351,20 +376,40 @@
   }
 
   tfoot td {
+    position: sticky;
+    bottom: 0;
+    z-index: 2;
     padding: 0.75rem 1rem;
     font-weight: 700;
     font-size: 0.9rem;
-    border-top: 2px solid var(--border-color-light);
+    background: var(--surface-card);
+    border-top: 2px solid var(--surface-border);
     border-bottom: none;
   }
 
   .total-label { text-align: right; color: var(--text-color-secondary); }
   .total-amount { color: #16a34a; font-size: 1rem; }
+  .total-amount--db { color: #2563eb; font-size: 0.9rem; }
+  .total-amount--bl { color: #dc2626; font-size: 0.9rem; }
 }
 
 .status-cell { width: 52px; text-align: center !important; }
-.bl-cell { border-left: 1px solid rgba(220, 38, 38, 0.12); border-right: 1px solid rgba(220, 38, 38, 0.12); }
-.db-cell { border-left: 1px solid rgba(37, 99, 235, 0.12); border-right: 1px solid rgba(37, 99, 235, 0.12); }
+.col-divider {
+  border-left: 2px solid rgba(37, 99, 235, 0.5) !important;
+}
+
+.bl-cell {
+  border-left: 1px solid rgba(220, 38, 38, 0.12);
+  border-right: 1px solid rgba(220, 38, 38, 0.12);
+  font-size: 0.75rem;
+  color: #dc2626;
+}
+.db-cell {
+  border-left: 1px solid rgba(37, 99, 235, 0.12);
+  border-right: 1px solid rgba(37, 99, 235, 0.12);
+  font-size: 0.75rem;
+  color: #2563eb;
+}
 .code-cell { font-family: monospace; font-size: 0.8rem; color: var(--text-color-secondary); }
 .desc-cell { max-width: 240px; overflow: hidden; text-overflow: ellipsis; }
 

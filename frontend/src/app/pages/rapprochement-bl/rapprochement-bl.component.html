@@ -113,19 +113,34 @@
     <div class="table-wrapper">
       <table class="table">
         <thead>
+          <!-- Row 1: group headers -->
           <tr>
-            @if (colVisible('statut')) { <th>Statut</th> }
-            @if (colVisible('code_produit')) { <th>Code</th> }
-            @if (colVisible('libelle')) { <th>Désignation</th> }
-            @if (colVisible('ventes_qte_colis')) { <th class="num group-header group-header--db">Ventes (col.)</th> }
-            @if (colVisible('bl_nb_colis')) { <th class="num group-header group-header--bl">Livraison (col.)</th> }
-            @if (colVisible('colisage')) { <th class="num">Colisage</th> }
-            @if (colVisible('difference_unites')) { <th class="num">Écart (unités)</th> }
-            @if (colVisible('bl_prix_unitaire')) { <th class="num col-prix">Prix Unit.</th> }
-            @if (colVisible('bl_montant_ttc')) { <th class="num">Montant BL</th> }
-            @if (colVisible('prix_dd')) { <th class="num group-header group-header--gros">Prix club</th> }
-            @if (colVisible('prix_promotion')) { <th class="num group-header group-header--promo">Prix promo</th> }
-            @if (colVisible('net_ajuste')) { <th class="num">NET Ajusté</th> }
+            @if (colVisible('statut'))        { <th rowspan="2" class="th-rowspan">Statut</th> }
+            @if (colVisible('code_produit'))  { <th rowspan="2" class="th-rowspan">Code</th> }
+            @if (colVisible('libelle'))       { <th rowspan="2" class="th-rowspan">Désignation</th> }
+            @if (salesbuzzColspan > 0) {
+              <th [attr.colspan]="salesbuzzColspan" class="group-header group-header--db">SalesBuzz</th>
+            }
+            @if (blColspan > 0) {
+              <th [attr.colspan]="blColspan" class="group-header group-header--bl col-divider">BL</th>
+            }
+            @if (colVisible('colisage'))          { <th rowspan="2" class="th-rowspan num">Col.</th> }
+            @if (colVisible('difference_unites')) { <th rowspan="2" class="th-rowspan num">Écart</th> }
+            @if (colVisible('prix_dd'))           { <th rowspan="2" class="th-rowspan num group-header group-header--gros">Prix club</th> }
+            @if (colVisible('prix_promotion'))    { <th rowspan="2" class="th-rowspan num group-header group-header--promo">Prix promo</th> }
+            @if (colVisible('net_ajuste'))        { <th rowspan="2" class="th-rowspan num">NET Ajusté</th> }
+          </tr>
+          <!-- Row 2: sub-headers -->
+          <tr>
+            @if (colVisible('ventes_qte_facturee')) { <th class="num sub-header sub-header--db" style="min-width:58px">u.</th> }
+            @if (colVisible('ventes_uom_vente'))    { <th class="sub-header sub-header--db" style="min-width:65px">UOM</th> }
+            @if (colVisible('ventes_qte_colis'))    { <th class="num sub-header sub-header--db" style="min-width:58px">col.</th> }
+            @if (colVisible('ventes_prix_unitaire')) { <th class="num sub-header sub-header--db" style="min-width:70px">Prix</th> }
+            @if (colVisible('ventes_total_facture')) { <th class="num sub-header sub-header--db" style="min-width:80px">Total</th> }
+            @if (colVisible('bl_qte_unites'))       { <th class="num sub-header sub-header--bl col-divider" style="min-width:58px">u.</th> }
+            @if (colVisible('bl_nb_colis'))         { <th class="num sub-header sub-header--bl" style="min-width:58px">col.</th> }
+            @if (colVisible('bl_prix_unitaire'))    { <th class="num sub-header sub-header--bl" style="min-width:70px">Prix</th> }
+            @if (colVisible('bl_montant_ttc'))      { <th class="num sub-header sub-header--bl" style="min-width:80px">Total</th> }
           </tr>
         </thead>
         <tbody>
@@ -144,11 +159,32 @@
               }
               @if (colVisible('code_produit')) { <td class="code-cell">{{ ligne.code_produit }}</td> }
               @if (colVisible('libelle')) { <td class="desc-cell">{{ ligne.libelle }}</td> }
+              @if (colVisible('ventes_qte_facturee')) {
+                <td class="num db-cell">{{ ligne.ventes_qte_facturee !== null ? (ligne.ventes_qte_facturee | number) : '—' }}</td>
+              }
+              @if (colVisible('ventes_uom_vente')) {
+                <td class="num db-cell">{{ ligne.ventes_uom_vente ?? '—' }}</td>
+              }
               @if (colVisible('ventes_qte_colis')) {
                 <td class="num db-cell">{{ ligne.ventes_qte_colis !== null ? (ligne.ventes_qte_colis | number) : '—' }}</td>
               }
+              @if (colVisible('ventes_prix_unitaire')) {
+                <td class="num db-cell">{{ ligne.ventes_prix_unitaire !== null ? (ligne.ventes_prix_unitaire | number:'1.2-2') : '—' }}</td>
+              }
+              @if (colVisible('ventes_total_facture')) {
+                <td class="num db-cell">{{ ligne.ventes_total_facture !== null ? (ligne.ventes_total_facture | number:'1.2-2') : '—' }}</td>
+              }
+              @if (colVisible('bl_qte_unites')) {
+                <td class="num bl-cell col-divider">{{ ligne.bl_qte_unites | number }}</td>
+              }
               @if (colVisible('bl_nb_colis')) {
                 <td class="num bl-cell">{{ ligne.bl_nb_colis !== null ? (ligne.bl_nb_colis | number) : '—' }}</td>
+              }
+              @if (colVisible('bl_prix_unitaire')) {
+                <td class="num bl-cell">{{ ligne.bl_prix_unitaire | number:'1.2-2' }}</td>
+              }
+              @if (colVisible('bl_montant_ttc')) {
+                <td class="num bl-cell">{{ ligne.bl_montant_ttc | number:'1.2-2' }}</td>
               }
               @if (colVisible('colisage')) {
                 <td class="num">{{ ligne.colisage !== null ? ligne.colisage : '—' }}</td>
@@ -161,17 +197,6 @@
                     </span>
                   } @else { — }
                 </td>
-              }
-              @if (colVisible('bl_prix_unitaire')) {
-                <td class="num col-prix">
-                  @if (ligne.colisage) {
-                    <div>{{ ligne.bl_prix_unitaire * ligne.colisage | number:'1.0-0' }} /c</div>
-                  }
-                  <div class="prix-colis">{{ ligne.bl_prix_unitaire | number:'1.2-2' }} /u</div>
-                </td>
-              }
-              @if (colVisible('bl_montant_ttc')) {
-                <td class="num">{{ ligne.bl_montant_ttc | number:'1.2-2' }}</td>
               }
               @if (colVisible('prix_dd')) {
                 <td class="promo-cell promo-cell--gros">
@@ -213,12 +238,18 @@
         </tbody>
         <tfoot>
           <tr>
-            <td [attr.colspan]="footerLabelColspan" class="total-label">TOTAL BL</td>
-            @if (colVisible('bl_montant_ttc')) {
-              <td class="num total-amount">{{ result.net_a_payer | number:'1.2-2' }} DA</td>
+            <td [attr.colspan]="footerLeftColspan" class="total-label">TOTAL</td>
+            @if (colVisible('ventes_total_facture')) {
+              <td class="num total-amount total-amount--db">{{ totalSalesBuzz | number:'1.2-2' }} DA</td>
             }
-            @if (footerPromoColspan > 0) {
-              <td [attr.colspan]="footerPromoColspan"></td>
+            @if (footerBlPrefixColspan > 0) {
+              <td [attr.colspan]="footerBlPrefixColspan"></td>
+            }
+            @if (colVisible('bl_montant_ttc')) {
+              <td class="num total-amount total-amount--bl">{{ totalBL | number:'1.2-2' }} DA</td>
+            }
+            @if (footerMiddleColspan > 0) {
+              <td [attr.colspan]="footerMiddleColspan"></td>
             }
             @if (colVisible('net_ajuste')) {
               <td class="num total-amount" [class.total-ajuste]="hasAjustements">

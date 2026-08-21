@@ -35,31 +35,65 @@ export class RapprochementBlComponent implements OnInit {
   error = '';
 
   readonly allColumns: ColDef[] = [
-    { field: 'statut',            header: 'Statut',           visible: true },
-    { field: 'code_produit',      header: 'Code',             visible: true },
-    { field: 'libelle',           header: 'Désignation',      visible: true },
-    { field: 'ventes_qte_colis',  header: 'Ventes (col.)',    visible: true },
-    { field: 'bl_nb_colis',       header: 'Livraison (col.)', visible: true },
-    { field: 'colisage',          header: 'Colisage',         visible: true },
-    { field: 'difference_unites', header: 'Écart (unités)',   visible: true },
-    { field: 'bl_prix_unitaire',  header: 'Prix Unit.',       visible: true },
-    { field: 'bl_montant_ttc',    header: 'Montant BL',       visible: true },
-    { field: 'prix_dd',           header: 'Prix club',        visible: true },
-    { field: 'prix_promotion',    header: 'Prix promo',       visible: true },
-    { field: 'net_ajuste',        header: 'NET Ajusté',       visible: true },
+    { field: 'statut',                header: 'Statut',              visible: true  },
+    { field: 'code_produit',          header: 'Code',                visible: true  },
+    { field: 'libelle',               header: 'Désignation',         visible: true  },
+    { field: 'ventes_qte_facturee',   header: 'SalesBuzz (unités)',  visible: true  },
+    { field: 'ventes_uom_vente',      header: 'SalesBuzz UOM',       visible: true  },
+    { field: 'ventes_qte_colis',      header: 'SalesBuzz (col.)',    visible: true  },
+    { field: 'ventes_prix_unitaire',  header: 'SalesBuzz Prix',      visible: true  },
+    { field: 'ventes_total_facture',  header: 'SalesBuzz Total',     visible: true  },
+    { field: 'bl_nb_colis',           header: 'BL (col.)',           visible: true  },
+    { field: 'bl_qte_unites',         header: 'BL (unités)',         visible: true  },
+    { field: 'bl_prix_unitaire',      header: 'BL Prix Unit.',       visible: true  },
+    { field: 'bl_montant_ttc',        header: 'BL Montant',          visible: true  },
+    { field: 'colisage',              header: 'Colisage',            visible: false },
+    { field: 'difference_unites',     header: 'Écart (unités)',      visible: true  },
+    { field: 'prix_dd',               header: 'Prix club',           visible: true  },
+    { field: 'prix_promotion',        header: 'Prix promo',          visible: true  },
+    { field: 'net_ajuste',            header: 'NET Ajusté',          visible: true  },
   ];
 
   colVisible(field: string): boolean {
     return this.allColumns.find(c => c.field === field)?.visible ?? true;
   }
 
-  get footerLabelColspan(): number {
-    const fields = ['statut', 'code_produit', 'libelle', 'ventes_qte_colis', 'bl_nb_colis', 'colisage', 'difference_unites', 'bl_prix_unitaire'];
+  // Footer colspan: identity columns + salesbuzz columns before "total"
+  get footerLeftColspan(): number {
+    const fields = ['statut', 'code_produit', 'libelle', 'ventes_qte_facturee', 'ventes_uom_vente', 'ventes_qte_colis', 'ventes_prix_unitaire'];
     return Math.max(1, fields.filter(f => this.colVisible(f)).length);
+  }
+
+  // BL columns before "total" (u, col, prix)
+  get footerBlPrefixColspan(): number {
+    return ['bl_qte_unites', 'bl_nb_colis', 'bl_prix_unitaire'].filter(f => this.colVisible(f)).length;
+  }
+
+  // Columns between BL total and NET Ajusté
+  get footerMiddleColspan(): number {
+    return ['colisage', 'difference_unites', 'prix_dd', 'prix_promotion'].filter(f => this.colVisible(f)).length;
   }
 
   get footerPromoColspan(): number {
     return ['prix_dd', 'prix_promotion'].filter(f => this.colVisible(f)).length;
+  }
+
+  get totalSalesBuzz(): number {
+    return this.result?.lignes.reduce((sum, l) => sum + (l.ventes_total_facture ?? 0), 0) ?? 0;
+  }
+
+  get totalBL(): number {
+    return this.result?.net_a_payer ?? 0;
+  }
+
+  get salesbuzzColspan(): number {
+    return ['ventes_qte_facturee', 'ventes_uom_vente', 'ventes_qte_colis', 'ventes_prix_unitaire', 'ventes_total_facture']
+      .filter(f => this.colVisible(f)).length;
+  }
+
+  get blColspan(): number {
+    return ['bl_qte_unites', 'bl_nb_colis', 'bl_prix_unitaire', 'bl_montant_ttc']
+      .filter(f => this.colVisible(f)).length;
   }
 
   // Per-row editable qty (in colis) for gros and promo pricing

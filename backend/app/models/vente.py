@@ -157,6 +157,10 @@ class RapprochementLigne(SQLModel):
     prix_dd: Optional[float] = None
     prix_promotion: Optional[float] = None
     prix_club: Optional[float] = None
+    ventes_qte_facturee: Optional[float] = None
+    ventes_uom_vente: Optional[str] = None
+    ventes_prix_unitaire: Optional[float] = None
+    ventes_total_facture: Optional[float] = None
 
 
 class RapprochementResult(SQLModel):
