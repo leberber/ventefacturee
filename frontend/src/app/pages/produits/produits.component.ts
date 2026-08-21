@@ -41,7 +41,7 @@ export class ProduitsComponent implements OnInit {
     { field: 'poids_unite_vente',   header: 'Poids UV (T)',      visible: false },
     { field: 'prix_dd',             header: 'Prix DD',           visible: true  },
     { field: 'prix_promotion',      header: 'Prix Promo',        visible: false },
-    { field: 'prix_gros',           header: 'Prix Gros',         visible: false },
+    { field: 'prix_gros',           header: 'Prix Club',         visible: false },
     { field: 'facturable',          header: 'Facturable',        visible: true  },
     { field: 'imported',            header: 'Importé',           visible: true  },
   ];
