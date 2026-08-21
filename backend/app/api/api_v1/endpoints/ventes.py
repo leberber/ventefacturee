@@ -336,6 +336,7 @@ def list_clients(
 async def rapprochement_bl(
     file: UploadFile = File(...),
     nom_livreur: str = Query(...),
+    source: Optional[str] = Query(None),
     session: Session = Depends(get_session),
     current_user: User = Depends(get_current_user),
 ) -> Any:
@@ -398,6 +399,7 @@ async def rapprochement_bl(
         .where(Vente.nom_livreur == nom_livreur)
         .where(Vente.date_facturation == date_obj)
         .where(Vente.code_produit.isnot(None))
+        .where(Vente.source == source if source else True)
         .group_by(Vente.code_produit)
     )
     ventes_map: dict = {

@@ -26,6 +26,8 @@ export class RapprochementBlComponent implements OnInit {
 
   @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
 
+  sources: { label: string; value: string }[] = [];
+  selectedSource = '';
   livreurs: string[] = [];
   selectedLivreur = '';
   selectedFile: File | null = null;
@@ -49,7 +51,7 @@ export class RapprochementBlComponent implements OnInit {
     { field: 'bl_montant_ttc',        header: 'BL Montant',          visible: true  },
     { field: 'colisage',              header: 'Colisage',            visible: false },
     { field: 'difference_unites',     header: 'Écart (unités)',      visible: true  },
-    { field: 'prix_dd',               header: 'Prix club',           visible: true  },
+    { field: 'prix_dd',               header: 'Prix club',           visible: false },
     { field: 'prix_promotion',        header: 'Prix promo',          visible: true  },
     { field: 'net_ajuste',            header: 'NET Ajusté',          visible: true  },
   ];
@@ -196,6 +198,9 @@ export class RapprochementBlComponent implements OnInit {
 
   ngOnInit() {
     this.loadColumnState();
+    this.ventesService.getDistinct('source').subscribe(d => {
+      this.sources = [{ label: 'Toutes sources', value: '' }, ...d.map(s => ({ label: s, value: s }))];
+    });
     this.ventesService.getDistinct('nom_livreur').subscribe(d => this.livreurs = d);
   }
 
@@ -214,7 +219,7 @@ export class RapprochementBlComponent implements OnInit {
     this.error = '';
     this.qtyGrosMap.clear();
     this.qtyPromoMap.clear();
-    this.ventesService.rapprochementBL(this.selectedFile!, this.selectedLivreur)
+    this.ventesService.rapprochementBL(this.selectedFile!, this.selectedLivreur, this.selectedSource || undefined)
       .subscribe({
         next: res => { this.result = res; this.loading = false; },
         error: err => { this.error = err.error?.detail || 'Erreur lors de l\'analyse'; this.loading = false; },

@@ -10,6 +10,22 @@
     </div>
 
     <div class="page-header__filters">
+      <!-- Source -->
+      <div class="filter-card">
+        <div class="filter-card__icon"><i class="pi pi-database"></i></div>
+        <div class="filter-card__body">
+          <span class="filter-card__label">Source</span>
+          <p-select
+            [options]="sources"
+            [(ngModel)]="selectedSource"
+            optionLabel="label"
+            optionValue="value"
+            styleClass="rapp-select"
+            panelStyleClass="filter-card-panel"
+          />
+        </div>
+      </div>
+
       <!-- Livreur -->
       <div class="filter-card">
         <div class="filter-card__icon"><i class="pi pi-truck"></i></div>
@@ -83,14 +99,7 @@
       <span class="rapp-stat-pill rapp-stat-pill--unknown">
         <i class="pi pi-question"></i> <strong>{{ notFoundCount }}</strong> non trouvés
       </span>
-    </div>
-  </div>
-
-  <!-- Table -->
-  <div class="table-container">
-    <!-- Column picker toolbar -->
-    <div class="rapp-toolbar">
-      <button class="table-action-btn" pTooltip="Colonnes visibles" (click)="colMenu.toggle($event)">
+      <button class="rapp-col-btn" pTooltip="Colonnes visibles" (click)="colMenu.toggle($event)">
         <i class="pi pi-sliders-h"></i>
       </button>
       <p-popover #colMenu>
@@ -109,7 +118,10 @@
         </div>
       </p-popover>
     </div>
+  </div>
 
+  <!-- Table -->
+  <div class="table-container">
     <div class="table-wrapper">
       <table class="table">
         <thead>

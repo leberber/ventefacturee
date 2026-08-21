@@ -196,10 +196,11 @@ export class VentesService {
     return this.http.post<UploadResponse>('/api/v1/ventes/upload', form);
   }
 
-  rapprochementBL(file: File, nom_livreur: string) {
+  rapprochementBL(file: File, nom_livreur: string, source?: string) {
     const form = new FormData();
     form.append('file', file);
     let p = new HttpParams().set('nom_livreur', nom_livreur);
+    if (source) p = p.set('source', source);
     return this.http.post<RapprochementResult>('/api/v1/ventes/rapprochement-bl', form, { params: p });
   }
 
