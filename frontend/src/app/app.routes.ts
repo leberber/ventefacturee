@@ -17,6 +17,7 @@ export const routes: Routes = [
       { path: 'produits',              canActivate: [adminOrEmployeGuard], loadComponent: () => import('./pages/produits/produits.component').then(m => m.ProduitsComponent) },
       { path: 'rapport-facturation',   canActivate: [adminOrEmployeGuard], loadComponent: () => import('./pages/rapport-facturation/rapport-facturation.component').then(m => m.RapportFacturationComponent) },
       { path: 'rapprochement-bl',      canActivate: [adminGuard],          loadComponent: () => import('./pages/rapprochement-bl/rapprochement-bl.component').then(m => m.RapprochementBlComponent) },
+      { path: 'historique-bl',         canActivate: [adminGuard],          loadComponent: () => import('./pages/historique-bl/historique-bl.component').then(m => m.HistoriqueBlComponent) },
       { path: 'upload',   canActivate: [adminOrEmployeGuard], loadComponent: () => import('./pages/upload/upload.component').then(m => m.UploadComponent) },
 
       { path: 'clients',              canActivate: [adminOrEmployeGuard], loadComponent: () => import('./pages/clients/clients.component').then(m => m.ClientsComponent) },

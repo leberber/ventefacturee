@@ -1,0 +1,219 @@
+<div class="page-header">
+  <div class="page-header__left">
+    <div class="page-icon"><i class="pi pi-history"></i></div>
+    <div>
+      <h1 class="page-header__title">Historique Rapprochement BL</h1>
+      <p class="page-header__sub">Toutes les sessions sauvegardées</p>
+    </div>
+  </div>
+  <a class="new-btn" routerLink="/rapprochement-bl">
+    <i class="pi pi-plus"></i> Nouveau rapprochement
+  </a>
+</div>
+
+@if (loading) {
+  <div class="hist-loading"><i class="pi pi-spin pi-spinner"></i> Chargement…</div>
+} @else if (sessions.length === 0) {
+  <div class="hist-empty">
+    <i class="pi pi-inbox"></i>
+    <p>Aucune session sauvegardée</p>
+    <a routerLink="/rapprochement-bl" class="new-btn">Faire un rapprochement</a>
+  </div>
+} @else if (filteredSessions.length === 0) {
+  <div class="hist-empty">
+    <i class="pi pi-search"></i>
+    <p>Aucun résultat pour « {{ searchQuery }} »</p>
+  </div>
+} @else {
+  <div class="sessions-table-wrap">
+    <!-- Toolbar -->
+    <div class="hist-toolbar">
+      <div class="hist-toolbar__left">
+        <div class="table-search hist-search">
+          <div class="search-icon"><i class="pi pi-search"></i></div>
+          <input
+            placeholder="Rechercher un livreur, source…"
+            [(ngModel)]="searchQuery"
+          />
+          @if (searchQuery) {
+            <button class="search-clear" (click)="searchQuery = ''"><i class="pi pi-times"></i></button>
+          }
+        </div>
+
+        <app-date-range-picker
+          [periodes]="sessionPeriodes"
+          [dateFrom]="dateFrom"
+          [dateTo]="dateTo"
+          (rangeChange)="onRangeChange($event)"
+        />
+      </div>
+
+      <span class="hist-count">{{ filteredSessions.length }} session{{ filteredSessions.length !== 1 ? 's' : '' }}</span>
+    </div>
+
+    <div class="sessions-table-scroll">
+    <table class="sessions-table">
+      <colgroup>
+        <col style="width:40px">
+        <col style="width:180px">
+        <col style="width:100px">
+        <col style="width:80px">
+        <col style="width:120px">
+        <col style="width:100px">
+        <col style="width:120px">
+        <col style="width:120px">
+        <col style="width:110px">
+        <col style="width:130px">
+        <col style="width:56px">
+      </colgroup>
+      <thead>
+        <tr>
+          <th class="col-expand"></th>
+          <th>Livreur</th>
+          <th>Date BL</th>
+          <th>Source</th>
+          <th class="num">BL Total</th>
+          <th class="num">Remise</th>
+          <th class="num">NET Ajusté</th>
+          <th class="num">Montant Reçu</th>
+          <th>Écart</th>
+          <th>Enregistré le</th>
+          <th class="col-actions"></th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (session of filteredSessions; track session.id) {
+          <tr
+            class="session-row"
+            [class.session-row--expanded]="expandedSessionId === session.id"
+            [class.session-row--highlighted]="highlightedId === session.id"
+            (click)="toggleSession(session)"
+          >
+            <td class="col-expand">
+              <i class="pi" [class.pi-chevron-right]="expandedSessionId !== session.id" [class.pi-chevron-down]="expandedSessionId === session.id"></i>
+            </td>
+            <td class="cell-livreur">{{ session.nom_livreur }}</td>
+            <td class="cell-date">{{ session.date_bl }}</td>
+            <td>
+              @if (session.source) {
+                <span class="source-badge">{{ session.source }}</span>
+              } @else {
+                <span class="cell-empty">—</span>
+              }
+            </td>
+            <td class="num cell-amount">{{ session.net_a_payer | number:'1.0-0' }} DA</td>
+            <td class="num cell-discount">
+              @if (session.total_discount > 0) {
+                - {{ session.total_discount | number:'1.0-0' }} DA
+              } @else {
+                <span class="cell-empty">—</span>
+              }
+            </td>
+            <td class="num cell-amount cell-net">{{ session.net_ajuste | number:'1.0-0' }} DA</td>
+            <td class="num cell-amount">
+              @if (session.montant_recu !== null) {
+                {{ session.montant_recu | number:'1.0-0' }} DA
+              } @else {
+                <span class="cell-empty">—</span>
+              }
+            </td>
+            <td>
+              @if (session.montant_recu !== null) {
+                <span class="diff-pill" [ngClass]="diffClass(session)">
+                  @if (session.difference === 0) {
+                    <i class="pi pi-check-circle"></i> Exact
+                  } @else if ((session.difference ?? 0) < 0) {
+                    <i class="pi pi-arrow-down"></i> {{ (session.difference ?? 0) * -1 | number:'1.0-0' }} DA
+                  } @else {
+                    <i class="pi pi-arrow-up"></i> +{{ session.difference | number:'1.0-0' }} DA
+                  }
+                </span>
+              } @else {
+                <span class="cell-empty">—</span>
+              }
+            </td>
+            <td class="cell-saved">{{ session.created_at | date:'dd/MM/yy HH:mm' }}</td>
+            <td class="col-actions">
+              <button class="hist-delete-btn" pTooltip="Supprimer" (click)="$event.stopPropagation(); deleteSession(session)">
+                <i class="pi pi-trash"></i>
+              </button>
+            </td>
+          </tr>
+
+          @if (expandedSessionId === session.id) {
+            <tr class="detail-row">
+              <td colspan="11" class="detail-cell" (click)="$event.stopPropagation()">
+                @if (!expandedSession) {
+                  <div class="hist-lines__loading"><i class="pi pi-spin pi-spinner"></i> Chargement des lignes…</div>
+                } @else {
+                  <div class="detail-header">
+                    <span class="detail-count"><strong>{{ expandedSession.lignes.length }}</strong> produits</span>
+                  </div>
+                  <div class="detail-table-wrap">
+                    <table class="detail-table">
+                      <thead>
+                        <tr>
+                          <th>St.</th>
+                          <th>Code</th>
+                          <th>Désignation</th>
+                          <th class="num">BL u.</th>
+                          <th class="num">BL col.</th>
+                          <th class="num">BL Prix</th>
+                          <th class="num">BL Total</th>
+                          <th class="num">Ventes col.</th>
+                          <th class="num">NET Ligne</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        @for (l of expandedSession.lignes; track l.id) {
+                          <tr [ngClass]="l.is_duplicate ? 'row--dup' : l.match ? 'row--match' : (l.ventes_qte_colis === null ? 'row--unknown' : 'row--mismatch')">
+                            <td class="status-cell">
+                              @if (l.is_duplicate) { <span class="badge badge--dup">+</span> }
+                              @else if (l.match) { <span class="badge badge--ok"><i class="pi pi-check"></i></span> }
+                              @else if (l.ventes_qte_colis === null) { <span class="badge badge--unknown">?</span> }
+                              @else { <span class="badge badge--warn"><i class="pi pi-exclamation-triangle"></i></span> }
+                            </td>
+                            <td class="code-cell">{{ l.code_produit }}</td>
+                            <td class="desc-cell">{{ l.libelle }}</td>
+                            <td class="num bl-cell">{{ l.bl_qte_unites | number }}</td>
+                            <td class="num bl-cell">{{ l.bl_nb_colis !== null ? (l.bl_nb_colis | number) : '—' }}</td>
+                            <td class="num bl-cell">{{ l.bl_prix_unitaire | number:'1.2-2' }}</td>
+                            <td class="num bl-cell">{{ l.bl_montant_ttc | number:'1.0-0' }}</td>
+                            <td class="num db-cell">{{ l.ventes_qte_colis !== null ? (l.ventes_qte_colis | number) : '—' }}</td>
+                            <td class="num net-ajuste-cell">
+                              @if (l.ref_price) {
+                                <div class="net-ref-line">
+                                  <span class="net-original">{{ (l.ref_price * l.bl_qte_unites) | number:'1.0-0' }}</span>
+                                  <span class="net-discount">- {{ ((l.ref_price - l.bl_prix_unitaire) * l.bl_qte_unites) | number:'1.0-0' }}</span>
+                                </div>
+                              } @else if (l.net_ligne !== l.bl_montant_ttc) {
+                                <div class="net-ref-line">
+                                  <span class="net-original">{{ l.bl_montant_ttc | number:'1.0-0' }}</span>
+                                  <span class="net-discount">- {{ (l.bl_montant_ttc - l.net_ligne) | number:'1.0-0' }}</span>
+                                </div>
+                              }
+                              {{ l.net_ligne | number:'1.0-0' }}
+                            </td>
+                          </tr>
+                        }
+                      </tbody>
+                      <tfoot>
+                        <tr>
+                          <td colspan="6" class="total-label">TOTAL</td>
+                          <td class="num total-amount total-amount--bl">{{ session.net_a_payer | number:'1.0-0' }} DA</td>
+                          <td></td>
+                          <td class="num total-amount">{{ session.net_ajuste | number:'1.0-0' }} DA</td>
+                        </tr>
+                      </tfoot>
+                    </table>
+                  </div>
+                }
+              </td>
+            </tr>
+          }
+        }
+      </tbody>
+    </table>
+    </div><!-- /sessions-table-scroll -->
+  </div>
+}

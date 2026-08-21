@@ -95,6 +95,7 @@ export interface DateRange { from: string; to: string; }
   align-items: center;
   gap: .65rem;
   padding: .5rem .85rem .5rem .6rem;
+  min-width: 220px;
   background: color-mix(in srgb, var(--primary-color) 4%, var(--surface-card));
   border: var(--border-width, 1px) solid color-mix(in srgb, var(--primary-color) 30%, transparent);
   border-radius: var(--radius-xl, 14px);
@@ -143,7 +144,7 @@ export interface DateRange { from: string; to: string; }
   top: calc(100% + 8px);
   left: 0;
   z-index: 1100;
-  width: 290px;
+  width: 360px;
   background: var(--surface-card);
   border: 1px solid var(--surface-border);
   border-radius: var(--radius-xl, 14px);

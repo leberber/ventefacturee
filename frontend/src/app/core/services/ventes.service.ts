@@ -91,6 +91,57 @@ export interface RapprochementResult {
   lignes: RapprochementLigne[];
 }
 
+export interface SessionLigneCreate {
+  code_produit: string;
+  libelle: string;
+  bl_qte_unites: number;
+  bl_nb_colis: number | null;
+  bl_prix_unitaire: number;
+  bl_montant_ttc: number;
+  net_ligne: number;
+  ventes_qte_colis: number | null;
+  match: boolean;
+  is_duplicate: boolean;
+  ref_price: number | null;
+  prix_promotion: number | null;
+  qty_promo: number;
+  qty_gros: number;
+  promo_prix_override: number | null;
+}
+
+export interface SessionCreate {
+  nom_livreur: string;
+  date_bl: string;
+  source: string | null;
+  net_a_payer: number;
+  net_ajuste: number;
+  total_discount: number;
+  montant_recu: number | null;
+  difference: number | null;
+  lignes: SessionLigneCreate[];
+}
+
+export interface SessionRead {
+  id: number;
+  nom_livreur: string;
+  date_bl: string;
+  source: string | null;
+  net_a_payer: number;
+  net_ajuste: number;
+  total_discount: number;
+  montant_recu: number | null;
+  difference: number | null;
+  created_at: string;
+}
+
+export interface SessionLigneRead extends SessionLigneCreate {
+  id: number;
+}
+
+export interface SessionReadDetail extends SessionRead {
+  lignes: SessionLigneRead[];
+}
+
 export interface UploadResponse {
   lignes: number;
   annee_mois: string;
@@ -215,5 +266,32 @@ export class VentesService {
 
   deleteMapping(bl_code: string) {
     return this.http.delete(`/api/v1/mappings/${encodeURIComponent(bl_code)}`);
+  }
+
+  checkSession(nom_livreur: string, date_bl: string) {
+    return this.http.get<{ exists: boolean; session: SessionRead | null }>(
+      `/api/v1/rapprochement-sessions/check`,
+      { params: { nom_livreur, date_bl } }
+    );
+  }
+
+  saveSession(payload: SessionCreate) {
+    return this.http.post<SessionRead>('/api/v1/rapprochement-sessions', payload);
+  }
+
+  updateSession(id: number, payload: SessionCreate) {
+    return this.http.put<SessionRead>(`/api/v1/rapprochement-sessions/${id}`, payload);
+  }
+
+  listSessions() {
+    return this.http.get<SessionRead[]>('/api/v1/rapprochement-sessions');
+  }
+
+  getSessionDetail(id: number) {
+    return this.http.get<SessionReadDetail>(`/api/v1/rapprochement-sessions/${id}`);
+  }
+
+  deleteSession(id: number) {
+    return this.http.delete(`/api/v1/rapprochement-sessions/${id}`);
   }
 }

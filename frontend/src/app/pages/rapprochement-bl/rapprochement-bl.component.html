@@ -145,6 +145,10 @@
       <span class="rapp-stat-pill rapp-stat-pill--unknown">
         <i class="pi pi-question"></i> <strong>{{ notFoundCount }}</strong> non trouvés
       </span>
+      <button class="rapp-save-btn" [disabled]="savingSession" (click)="saveSession()" pTooltip="Sauvegarder cette session">
+        @if (savingSession) { <i class="pi pi-spin pi-spinner"></i> } @else { <i class="pi pi-save"></i> }
+        Sauvegarder
+      </button>
       <button class="rapp-col-btn" pTooltip="Colonnes visibles" (click)="colMenu.toggle($event)">
         <i class="pi pi-sliders-h"></i>
       </button>
@@ -164,6 +168,30 @@
         </div>
       </p-popover>
     </div>
+
+    <!-- Null reçu warning -->
+    @if (nullRecuWarning) {
+      <div class="dup-warning">
+        <i class="pi pi-exclamation-triangle"></i>
+        <span>Le montant reçu n'a pas été saisi. Sauvegarder quand même sans montant reçu ?</span>
+        <button class="dup-confirm-btn" (click)="confirmNullRecu()">Confirmer</button>
+        <button class="dup-cancel-btn" (click)="cancelSave()">Annuler</button>
+      </div>
+    }
+
+    <!-- Duplicate warning -->
+    @if (duplicateWarning) {
+      <div class="dup-warning">
+        <i class="pi pi-exclamation-triangle"></i>
+        <span>
+          Une session pour <strong>{{ duplicateWarning.nom_livreur }}</strong> le <strong>{{ duplicateWarning.date_bl }}</strong>
+          a déjà été sauvegardée le {{ duplicateWarning.created_at | slice:0:10 }}.
+          Sauvegarder quand même ?
+        </span>
+        <button class="dup-confirm-btn" (click)="confirmSaveAnyway()">Confirmer</button>
+        <button class="dup-cancel-btn" (click)="cancelSave()">Annuler</button>
+      </div>
+    }
   </div>
 
   <!-- Table -->

@@ -746,3 +746,76 @@
 .total-ajuste {
   color: #d97706 !important;
 }
+
+// ── Duplicate warning ─────────────────────────────────────────────────────────
+.dup-warning {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  width: 100%;
+  margin-top: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  background: rgba(251, 191, 36, 0.15);
+  border: 1px solid rgba(251, 191, 36, 0.5);
+  border-radius: 0.5rem;
+  font-size: 0.8rem;
+  color: #fff;
+
+  > i { color: #fde68a; flex-shrink: 0; }
+  > span { flex: 1; }
+
+  strong { font-weight: 700; }
+}
+
+.dup-confirm-btn {
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  border: 1.5px solid #fde68a;
+  background: rgba(253, 230, 138, 0.2);
+  color: #fde68a;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s;
+
+  &:hover { background: rgba(253, 230, 138, 0.35); }
+}
+
+.dup-cancel-btn {
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  border: 1.5px solid rgba(255,255,255,0.3);
+  background: transparent;
+  color: rgba(255,255,255,0.7);
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s;
+
+  &:hover { background: rgba(255,255,255,0.1); }
+}
+
+// ── Save button ──────────────────────────────────────────────────────────────
+.rapp-save-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.3rem 0.85rem;
+  border-radius: 9999px;
+  border: 1.5px solid rgba(255,255,255,0.5);
+  background: rgba(255,255,255,0.15);
+  color: #fff;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s;
+
+  &:hover:not(:disabled) { background: rgba(255,255,255,0.28); }
+  &:disabled { opacity: 0.5; cursor: not-allowed; }
+  i { font-size: 0.78rem; }
+}
+

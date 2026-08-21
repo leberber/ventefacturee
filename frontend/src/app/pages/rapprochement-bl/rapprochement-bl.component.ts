@@ -1,10 +1,11 @@
 import { Component, OnInit, inject, ViewChild, ElementRef } from '@angular/core';
-import { DecimalPipe, NgClass } from '@angular/common';
+import { DecimalPipe, NgClass, SlicePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { TooltipModule } from 'primeng/tooltip';
 import { Select } from 'primeng/select';
 import { Popover } from 'primeng/popover';
-import { VentesService, RapprochementLigne, RapprochementResult } from '../../core/services/ventes.service';
+import { VentesService, RapprochementLigne, RapprochementResult, SessionRead } from '../../core/services/ventes.service';
 
 const LS_KEY = 'ventefacturee_rapprochement_columns';
 
@@ -17,12 +18,13 @@ interface ColDef {
 @Component({
   selector: 'app-rapprochement-bl',
   standalone: true,
-  imports: [DecimalPipe, NgClass, FormsModule, TooltipModule, Select, Popover],
+  imports: [DecimalPipe, NgClass, SlicePipe, FormsModule, TooltipModule, Select, Popover],
   templateUrl: './rapprochement-bl.component.html',
   styleUrl: './rapprochement-bl.component.scss',
 })
 export class RapprochementBlComponent implements OnInit {
   private ventesService = inject(VentesService);
+  private router = inject(Router);
 
   @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
 
@@ -185,6 +187,10 @@ export class RapprochementBlComponent implements OnInit {
   }
 
   montantRecu: number | null = null;
+  savingSession = false;
+  nullRecuWarning = false;
+  duplicateWarning: SessionRead | null = null; // existing session for same livreur+date
+  private duplicateSessionId: number | null = null; // preserved for PUT override
 
   get netRef(): number {
     return this.hasAjustements ? this.netAPayerAjuste : (this.result?.net_a_payer ?? 0);
@@ -260,7 +266,6 @@ export class RapprochementBlComponent implements OnInit {
     this.loading = true;
     this.result = null;
     this.error = '';
-    this.montantRecu = null;
     this.qtyGrosMap.clear();
     this.qtyPromoMap.clear();
     this.promoPrixMap.clear();
@@ -269,6 +274,90 @@ export class RapprochementBlComponent implements OnInit {
         next: res => { this.result = res; this.loading = false; },
         error: err => { this.error = err.error?.detail || 'Erreur lors de l\'analyse'; this.loading = false; },
       });
+  }
+
+  saveSession() {
+    if (!this.result) return;
+    if (this.montantRecu === null) { this.nullRecuWarning = true; return; }
+    this.runSaveChecks();
+  }
+
+  confirmNullRecu() {
+    this.nullRecuWarning = false;
+    this.runSaveChecks();
+  }
+
+  private runSaveChecks() {
+    if (!this.result) return;
+    // Check for existing session with same livreur + date
+    this.savingSession = true;
+    this.ventesService.checkSession(this.result.nom_fdv, this.result.date).subscribe({
+      next: res => {
+        if (res.exists && res.session) {
+          this.savingSession = false;
+          this.duplicateWarning = res.session;
+        } else {
+          this.doSave();
+        }
+      },
+      error: () => { this.savingSession = false; this.doSave(); },
+    });
+  }
+
+  confirmSaveAnyway() {
+    this.duplicateSessionId = this.duplicateWarning!.id;
+    this.duplicateWarning = null;
+    this.doSave();
+  }
+
+  cancelSave() {
+    this.nullRecuWarning = false;
+    this.duplicateWarning = null;
+    this.savingSession = false;
+  }
+
+  private doSave() {
+    if (!this.result) return;
+    this.savingSession = true;
+    const payload = {
+      nom_livreur: this.result.nom_fdv,
+      date_bl: this.result.date,
+      source: this.selectedSource || null,
+      net_a_payer: this.result.net_a_payer,
+      net_ajuste: this.netAPayerAjuste,
+      total_discount: this.totalDiscount,
+      montant_recu: this.montantRecu,
+      difference: this.recuDiff,
+      lignes: this.result.lignes.map(l => ({
+        code_produit: l.code_produit,
+        libelle: l.libelle,
+        bl_qte_unites: l.bl_qte_unites,
+        bl_nb_colis: l.bl_nb_colis,
+        bl_prix_unitaire: l.bl_prix_unitaire,
+        bl_montant_ttc: l.bl_montant_ttc,
+        net_ligne: this.getNetLigne(l),
+        ventes_qte_colis: l.ventes_qte_colis,
+        match: l.match,
+        is_duplicate: l.is_duplicate,
+        ref_price: l.ref_price,
+        prix_promotion: l.prix_promotion,
+        qty_promo: this.getQtyPromo(l.code_produit),
+        qty_gros: this.getQtyGros(l.code_produit),
+        promo_prix_override: this.promoPrixMap.get(l.code_produit) ?? null,
+      })),
+    };
+    const overrideId = this.duplicateSessionId;
+    this.duplicateSessionId = null;
+    const req = overrideId != null
+      ? this.ventesService.updateSession(overrideId, payload)
+      : this.ventesService.saveSession(payload);
+    req.subscribe({
+      next: saved => {
+        this.savingSession = false;
+        this.router.navigate(['/historique-bl'], { queryParams: { highlighted: saved.id } });
+      },
+      error: () => this.savingSession = false,
+    });
   }
 
   rowClass(ligne: RapprochementLigne, index = 0): string {
