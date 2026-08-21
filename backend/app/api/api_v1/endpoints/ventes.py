@@ -426,12 +426,15 @@ async def rapprochement_bl(
         for bl_c in original_codes
     }
 
-    # Pre-compute total BL units per mapped code so that when the same product
-    # appears at multiple prices, the écart uses the combined quantity vs SalesBuzz.
+    # Pre-compute total BL units and max price per mapped code.
+    # The max price is the reference (regular) price; rows below it are discounted.
     total_bl_units_by_code: dict[str, float] = {}
+    max_price_by_code: dict[str, float] = {}
     for r in bl_rows:
         c = code_map.get(r['code_produit'], r['code_produit'])
         total_bl_units_by_code[c] = total_bl_units_by_code.get(c, 0) + r['bl_qte_unites']
+        if r['bl_prix_unitaire'] > max_price_by_code.get(c, 0):
+            max_price_by_code[c] = r['bl_prix_unitaire']
 
     seen_codes: set[str] = set()
     lignes = []
@@ -482,6 +485,7 @@ async def rapprochement_bl(
                 ventes_total_facture=vente_row.total_facture if vente_row else None,
                 mapped_code=mapped,
                 is_duplicate=False,
+                ref_price=max_price_by_code.get(code) if r['bl_prix_unitaire'] < max_price_by_code.get(code, r['bl_prix_unitaire']) else None,
             ))
         else:
             # Same product at a different BL price — suppress SalesBuzz columns
@@ -506,6 +510,7 @@ async def rapprochement_bl(
                 ventes_total_facture=None,
                 mapped_code=mapped,
                 is_duplicate=True,
+                ref_price=max_price_by_code.get(code) if r['bl_prix_unitaire'] < max_price_by_code.get(code, r['bl_prix_unitaire']) else None,
             ))
 
     return RapprochementResult(

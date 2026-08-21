@@ -163,6 +163,7 @@ class RapprochementLigne(SQLModel):
     ventes_total_facture: Optional[float] = None
     mapped_code: Optional[str] = None  # DB code used for lookup when bl_code differs
     is_duplicate: bool = False  # True when same BL code appears >1 time (different price)
+    ref_price: Optional[float] = None  # Regular (max) price when this row is at a discount
 
 
 class RapprochementResult(SQLModel):

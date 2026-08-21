@@ -88,6 +88,13 @@ export class RapprochementBlComponent implements OnInit {
     return this.result?.net_a_payer ?? 0;
   }
 
+  get totalDiscount(): number {
+    return this.result?.lignes.reduce((sum, l) => {
+      if (!l.ref_price) return sum;
+      return sum + (l.ref_price - l.bl_prix_unitaire) * l.bl_qte_unites;
+    }, 0) ?? 0;
+  }
+
   get salesbuzzColspan(): number {
     return ['ventes_qte_facturee', 'ventes_uom_vente', 'ventes_qte_colis', 'ventes_prix_unitaire', 'ventes_total_facture']
       .filter(f => this.colVisible(f)).length;

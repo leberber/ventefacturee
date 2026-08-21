@@ -99,11 +99,11 @@
       <!-- Step 2: NET Ajusté -->
       <div class="rapp-step">
         <span class="rapp-step__label">NET AJUSTÉ</span>
-        <span class="rapp-step__value" [class.rapp-step__value--adjusted]="hasAjustements">
+        <span class="rapp-step__value" [class.rapp-step__value--adjusted]="hasAjustements || totalDiscount > 0">
           {{ netAPayerAjuste | number:'1.0-0' }} DA
         </span>
-        @if (hasAjustements) {
-          <span class="rapp-step__diff">- {{ (result.net_a_payer - netAPayerAjuste) | number:'1.0-0' }} DA</span>
+        @if (hasAjustements || totalDiscount > 0) {
+          <span class="rapp-step__diff">- {{ (totalDiscount + (result.net_a_payer - netAPayerAjuste)) | number:'1.0-0' }} DA</span>
         }
       </div>
 
@@ -321,10 +321,18 @@
               }
               @if (colVisible('net_ajuste')) {
                 <td class="num net-ajuste-cell">
-                  {{ getNetLigne(ligne) | number:'1.0-0' }}
-                  @if (isNetAjuste(ligne)) {
-                    <span class="net-diff">- {{ (ligne.bl_montant_ttc - getNetLigne(ligne)) | number:'1.0-0' }}</span>
+                  @if (ligne.ref_price) {
+                    <div class="net-ref-line">
+                      <span class="net-original">{{ (ligne.ref_price * ligne.bl_qte_unites) | number:'1.0-0' }}</span>
+                      <span class="net-discount">- {{ ((ligne.ref_price - ligne.bl_prix_unitaire) * ligne.bl_qte_unites) | number:'1.0-0' }}</span>
+                    </div>
+                  } @else if (isNetAjuste(ligne)) {
+                    <div class="net-ref-line">
+                      <span class="net-original">{{ ligne.bl_montant_ttc | number:'1.0-0' }}</span>
+                      <span class="net-discount">- {{ (ligne.bl_montant_ttc - getNetLigne(ligne)) | number:'1.0-0' }}</span>
+                    </div>
                   }
+                  {{ getNetLigne(ligne) | number:'1.0-0' }}
                 </td>
               }
             </tr>
@@ -340,16 +348,21 @@
               <td [attr.colspan]="footerBlPrefixColspan"></td>
             }
             @if (colVisible('bl_montant_ttc')) {
-              <td class="num total-amount total-amount--bl">{{ totalBL | number:'1.0-0' }} DA</td>
+              <td class="num total-amount total-amount--bl">
+                {{ totalBL | number:'1.0-0' }} DA
+                @if (totalDiscount > 0) {
+                  <span class="net-diff">- {{ totalDiscount | number:'1.0-0' }} DA</span>
+                }
+              </td>
             }
             @if (footerMiddleColspan > 0) {
               <td [attr.colspan]="footerMiddleColspan"></td>
             }
             @if (colVisible('net_ajuste')) {
-              <td class="num total-amount" [class.total-ajuste]="hasAjustements">
+              <td class="num total-amount" [class.total-ajuste]="hasAjustements || totalDiscount > 0">
                 {{ netAPayerAjuste | number:'1.0-0' }} DA
-                @if (hasAjustements) {
-                  <span class="net-diff net-diff--total">- {{ (result.net_a_payer - netAPayerAjuste) | number:'1.0-0' }} DA</span>
+                @if (hasAjustements || totalDiscount > 0) {
+                  <span class="net-diff net-diff--total">- {{ (totalDiscount + (result.net_a_payer - netAPayerAjuste)) | number:'1.0-0' }} DA</span>
                 }
               </td>
             }

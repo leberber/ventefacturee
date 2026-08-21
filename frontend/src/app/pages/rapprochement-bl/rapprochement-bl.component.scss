@@ -685,6 +685,35 @@
   }
 }
 
+.bl-prix-ref {
+  display: block;
+  font-size: 0.65rem;
+  color: #dc2626;
+  text-decoration: line-through;
+  opacity: 0.8;
+}
+
+.net-ref-line {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.3rem;
+}
+
+.net-original {
+  font-size: 0.65rem;
+  font-weight: 500;
+  color: #dc2626;
+  text-decoration: line-through;
+  opacity: 0.65;
+}
+
+.net-discount {
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: #dc2626;
+}
+
 .net-diff {
   display: block;
   font-size: 0.68rem;
