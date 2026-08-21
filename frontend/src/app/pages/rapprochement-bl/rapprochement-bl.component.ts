@@ -179,10 +179,25 @@ export class RapprochementBlComponent implements OnInit {
 
   montantRecu: number | null = null;
 
+  get netRef(): number {
+    return this.hasAjustements ? this.netAPayerAjuste : (this.result?.net_a_payer ?? 0);
+  }
+
+  get recuDiff(): number | null {
+    if (this.montantRecu === null) return null;
+    return Math.round(this.montantRecu - this.netRef);
+  }
+
   get isShortfall(): boolean {
-    if (this.montantRecu === null) return false;
-    const ref = this.hasAjustements ? this.netAPayerAjuste : (this.result?.net_a_payer ?? 0);
-    return this.montantRecu < ref;
+    return (this.recuDiff ?? 0) < 0;
+  }
+
+  get isOverpaid(): boolean {
+    return (this.recuDiff ?? 0) > 0;
+  }
+
+  get recuDiffAbs(): number {
+    return Math.abs(this.recuDiff ?? 0);
   }
 
   get hasAjustements(): boolean {

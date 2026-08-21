@@ -83,35 +83,55 @@
 <!-- Results -->
 @if (result) {
   <!-- Summary bar -->
-  <div class="rapp-summary" [class.rapp-summary--shortfall]="isShortfall">
-    <div class="rapp-summary__net">
-      <div class="rapp-summary__net-row">
-        <span class="rapp-summary__label">NET À PAYER</span>
-        <span class="rapp-summary__amount">{{ (hasAjustements ? netAPayerAjuste : result.net_a_payer) | number:'1.0-0' }} DA</span>
+  <div class="rapp-summary" [class.rapp-summary--shortfall]="isShortfall" [class.rapp-summary--overpaid]="isOverpaid">
+
+    <!-- 3-step progression -->
+    <div class="rapp-progress">
+
+      <!-- Step 1: BL Total -->
+      <div class="rapp-step">
+        <span class="rapp-step__label">BL TOTAL</span>
+        <span class="rapp-step__value">{{ result.net_a_payer | number:'1.0-0' }} DA</span>
+      </div>
+
+      <i class="pi pi-chevron-right rapp-progress__arrow"></i>
+
+      <!-- Step 2: NET Ajusté -->
+      <div class="rapp-step">
+        <span class="rapp-step__label">NET AJUSTÉ</span>
+        <span class="rapp-step__value" [class.rapp-step__value--adjusted]="hasAjustements">
+          {{ netAPayerAjuste | number:'1.0-0' }} DA
+        </span>
         @if (hasAjustements) {
-          <span class="rapp-summary__original">(BL : {{ result.net_a_payer | number:'1.0-0' }} DA)</span>
+          <span class="rapp-step__diff">- {{ (result.net_a_payer - netAPayerAjuste) | number:'1.0-0' }} DA</span>
+        }
+      </div>
+
+      <i class="pi pi-chevron-right rapp-progress__arrow"></i>
+
+      <!-- Step 3: Montant Reçu -->
+      <div class="rapp-step">
+        <span class="rapp-step__label">MONTANT REÇU</span>
+        <div class="rapp-recu-wrap">
+          <input
+            type="number" min="0"
+            class="rapp-recu-input"
+            [(ngModel)]="montantRecu"
+            placeholder="—"
+          />
+          <span class="rapp-recu-unit">DA</span>
+        </div>
+        @if (recuDiff !== null && recuDiff !== 0) {
+          <span class="rapp-step__diff" [class.rapp-step__diff--over]="isOverpaid">
+            {{ isOverpaid ? 'Surpayé' : 'Manque' }} {{ recuDiffAbs | number:'1.0-0' }} DA
+          </span>
+        } @else if (recuDiff === 0) {
+          <span class="rapp-step__diff rapp-step__diff--exact">Exact ✓</span>
         }
       </div>
     </div>
 
-    <div class="rapp-summary__recu">
-      <span class="rapp-summary__label">MONTANT REÇU</span>
-      <div class="rapp-recu-wrap">
-        <input
-          type="number" min="0"
-          class="rapp-recu-input"
-          [(ngModel)]="montantRecu"
-          placeholder="—"
-        />
-        <span class="rapp-recu-unit">DA</span>
-        @if (isShortfall) {
-          <span class="rapp-recu-diff">
-            <i class="pi pi-arrow-down"></i>
-            {{ (montantRecu! - (hasAjustements ? netAPayerAjuste : result.net_a_payer)) | number:'1.0-0' }} DA
-          </span>
-        }
-      </div>
-    </div>
+    <!-- Right: stat pills -->
     <div class="rapp-summary__stats">
       <span class="rapp-stat-pill rapp-stat-pill--total">
         <strong>{{ result.lignes.length }}</strong> produits
