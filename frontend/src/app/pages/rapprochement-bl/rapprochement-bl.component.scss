@@ -388,9 +388,9 @@
   }
 
   .total-label { text-align: right; color: var(--text-color-secondary); }
-  .total-amount { color: #16a34a; font-size: 1rem; }
-  .total-amount--db { color: #2563eb; font-size: 0.9rem; }
-  .total-amount--bl { color: #dc2626; font-size: 0.9rem; }
+  .total-amount { color: #16a34a; font-size: 0.875rem; white-space: nowrap; }
+  .total-amount--db { color: #2563eb; font-size: 0.8rem; white-space: nowrap; }
+  .total-amount--bl { color: #dc2626; font-size: 0.8rem; white-space: nowrap; }
 }
 
 .status-cell { width: 52px; text-align: center !important; }
@@ -470,7 +470,7 @@
   &:hover:not(:disabled) { background: rgba(37, 99, 235, 0.2); }
   &:disabled { opacity: 0.5; cursor: not-allowed; }
 }
-.desc-cell { max-width: 240px; overflow: hidden; text-overflow: ellipsis; }
+.desc-cell { max-width: 240px; overflow: hidden; text-overflow: ellipsis; font-size: 0.9rem; }
 
 .badge {
   display: inline-flex;

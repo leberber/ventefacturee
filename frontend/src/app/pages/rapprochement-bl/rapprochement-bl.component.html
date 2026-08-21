@@ -64,9 +64,9 @@
   <div class="rapp-summary">
     <div class="rapp-summary__net">
       <span class="rapp-summary__label">NET À PAYER</span>
-      <span class="rapp-summary__amount">{{ (hasAjustements ? netAPayerAjuste : result.net_a_payer) | number:'1.2-2' }} DA</span>
+      <span class="rapp-summary__amount">{{ (hasAjustements ? netAPayerAjuste : result.net_a_payer) | number:'1.0-0' }} DA</span>
       @if (hasAjustements) {
-        <span class="rapp-summary__original">(BL : {{ result.net_a_payer | number:'1.2-2' }} DA)</span>
+        <span class="rapp-summary__original">(BL : {{ result.net_a_payer | number:'1.0-0' }} DA)</span>
       }
       <span class="rapp-summary__meta">{{ result.nom_fdv }} — {{ result.date }}</span>
     </div>
@@ -196,10 +196,10 @@
                 <td class="num db-cell">{{ ligne.ventes_qte_colis !== null ? (ligne.ventes_qte_colis | number) : '—' }}</td>
               }
               @if (colVisible('ventes_prix_unitaire')) {
-                <td class="num db-cell">{{ ligne.ventes_prix_unitaire !== null ? (ligne.ventes_prix_unitaire | number:'1.2-2') : '—' }}</td>
+                <td class="num db-cell">{{ ligne.ventes_prix_unitaire !== null ? (ligne.ventes_prix_unitaire | number:'1.0-0') : '—' }}</td>
               }
               @if (colVisible('ventes_total_facture')) {
-                <td class="num db-cell">{{ ligne.ventes_total_facture !== null ? (ligne.ventes_total_facture | number:'1.2-2') : '—' }}</td>
+                <td class="num db-cell">{{ ligne.ventes_total_facture !== null ? (ligne.ventes_total_facture | number:'1.0-0') : '—' }}</td>
               }
               @if (colVisible('bl_qte_unites')) {
                 <td class="num bl-cell col-divider">{{ ligne.bl_qte_unites | number }}</td>
@@ -208,10 +208,10 @@
                 <td class="num bl-cell">{{ ligne.bl_nb_colis !== null ? (ligne.bl_nb_colis | number) : '—' }}</td>
               }
               @if (colVisible('bl_prix_unitaire')) {
-                <td class="num bl-cell">{{ ligne.bl_prix_unitaire | number:'1.2-2' }}</td>
+                <td class="num bl-cell">{{ ligne.bl_prix_unitaire | number:'1.0-0' }}</td>
               }
               @if (colVisible('bl_montant_ttc')) {
-                <td class="num bl-cell">{{ ligne.bl_montant_ttc | number:'1.2-2' }}</td>
+                <td class="num bl-cell">{{ ligne.bl_montant_ttc | number:'1.0-0' }}</td>
               }
               @if (colVisible('colisage')) {
                 <td class="num">{{ ligne.colisage !== null ? ligne.colisage : '—' }}</td>
@@ -257,7 +257,7 @@
               }
               @if (colVisible('net_ajuste')) {
                 <td class="num net-ajuste-cell">
-                  {{ getNetLigne(ligne) | number:'1.2-2' }}
+                  {{ getNetLigne(ligne) | number:'1.0-0' }}
                 </td>
               }
             </tr>
@@ -267,20 +267,20 @@
           <tr>
             <td [attr.colspan]="footerLeftColspan" class="total-label">TOTAL</td>
             @if (colVisible('ventes_total_facture')) {
-              <td class="num total-amount total-amount--db">{{ totalSalesBuzz | number:'1.2-2' }} DA</td>
+              <td class="num total-amount total-amount--db">{{ totalSalesBuzz | number:'1.0-0' }} DA</td>
             }
             @if (footerBlPrefixColspan > 0) {
               <td [attr.colspan]="footerBlPrefixColspan"></td>
             }
             @if (colVisible('bl_montant_ttc')) {
-              <td class="num total-amount total-amount--bl">{{ totalBL | number:'1.2-2' }} DA</td>
+              <td class="num total-amount total-amount--bl">{{ totalBL | number:'1.0-0' }} DA</td>
             }
             @if (footerMiddleColspan > 0) {
               <td [attr.colspan]="footerMiddleColspan"></td>
             }
             @if (colVisible('net_ajuste')) {
               <td class="num total-amount" [class.total-ajuste]="hasAjustements">
-                {{ netAPayerAjuste | number:'1.2-2' }} DA
+                {{ netAPayerAjuste | number:'1.0-0' }} DA
               </td>
             }
           </tr>
