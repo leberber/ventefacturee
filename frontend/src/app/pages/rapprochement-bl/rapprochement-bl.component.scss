@@ -693,6 +693,19 @@
   opacity: 0.8;
 }
 
+.split-qty {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 2px;
+  flex-wrap: nowrap;
+}
+
+.split-reg  { color: #dc2626; }
+.split-gros { color: #15803d; font-weight: 700; }
+.split-promo { color: #7e22ce; font-weight: 700; }
+.split-sep  { color: var(--text-color-secondary); opacity: 0.4; font-size: 0.6rem; }
+
 .net-ref-line {
   display: flex;
   align-items: center;

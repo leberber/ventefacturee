@@ -262,10 +262,42 @@
                 <td class="num db-cell">{{ ligne.ventes_total_facture !== null ? (ligne.ventes_total_facture | number:'1.0-0') : '—' }}</td>
               }
               @if (colVisible('bl_qte_unites')) {
-                <td class="num bl-cell col-divider">{{ ligne.bl_qte_unites | number }}</td>
+                <td class="num bl-cell col-divider">
+                  @if ((getQtyGros(ligne.code_produit) > 0 || getQtyPromo(ligne.code_produit) > 0) && ligne.colisage) {
+                    <div class="split-qty">
+                      <span class="split-reg">{{ ((ligne.bl_nb_colis ?? 0) - getQtyGros(ligne.code_produit) - getQtyPromo(ligne.code_produit)) * ligne.colisage | number }}</span>
+                      @if (getQtyGros(ligne.code_produit) > 0) {
+                        <span class="split-sep">+</span>
+                        <span class="split-gros">{{ getQtyGros(ligne.code_produit) * ligne.colisage | number }}</span>
+                      }
+                      @if (getQtyPromo(ligne.code_produit) > 0) {
+                        <span class="split-sep">+</span>
+                        <span class="split-promo">{{ getQtyPromo(ligne.code_produit) * ligne.colisage | number }}</span>
+                      }
+                    </div>
+                  } @else {
+                    {{ ligne.bl_qte_unites | number }}
+                  }
+                </td>
               }
               @if (colVisible('bl_nb_colis')) {
-                <td class="num bl-cell">{{ ligne.bl_nb_colis !== null ? (ligne.bl_nb_colis | number) : '—' }}</td>
+                <td class="num bl-cell">
+                  @if ((getQtyGros(ligne.code_produit) > 0 || getQtyPromo(ligne.code_produit) > 0) && ligne.bl_nb_colis !== null) {
+                    <div class="split-qty">
+                      <span class="split-reg">{{ ligne.bl_nb_colis - getQtyGros(ligne.code_produit) - getQtyPromo(ligne.code_produit) | number }}</span>
+                      @if (getQtyGros(ligne.code_produit) > 0) {
+                        <span class="split-sep">+</span>
+                        <span class="split-gros">{{ getQtyGros(ligne.code_produit) | number }}</span>
+                      }
+                      @if (getQtyPromo(ligne.code_produit) > 0) {
+                        <span class="split-sep">+</span>
+                        <span class="split-promo">{{ getQtyPromo(ligne.code_produit) | number }}</span>
+                      }
+                    </div>
+                  } @else {
+                    {{ ligne.bl_nb_colis !== null ? (ligne.bl_nb_colis | number) : '—' }}
+                  }
+                </td>
               }
               @if (colVisible('bl_prix_unitaire')) {
                 <td class="num bl-cell">{{ ligne.bl_prix_unitaire | number:'1.2-2' }}</td>
