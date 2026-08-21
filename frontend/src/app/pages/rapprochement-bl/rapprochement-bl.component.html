@@ -144,11 +144,13 @@
           </tr>
         </thead>
         <tbody>
-          @for (ligne of result.lignes; track ligne.code_produit) {
-            <tr [ngClass]="rowClass(ligne)">
+          @for (ligne of result.lignes; track $index; let i = $index) {
+            <tr [ngClass]="rowClass(ligne, i)">
               @if (colVisible('statut')) {
                 <td class="status-cell">
-                  @if (ligne.ventes_qte_colis === null) {
+                  @if (ligne.is_duplicate) {
+                    <span class="badge badge--dup" pTooltip="Prix différent — même produit">+</span>
+                  } @else if (ligne.ventes_qte_colis === null) {
                     <span class="badge badge--unknown" pTooltip="Produit absent des ventes ce jour">?</span>
                   } @else if (ligne.match) {
                     <span class="badge badge--ok"><i class="pi pi-check"></i></span>

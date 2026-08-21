@@ -373,6 +373,20 @@
     &.row--match td { background: rgba(22, 163, 74, 0.04); }
     &.row--mismatch td { background: rgba(217, 119, 6, 0.06); }
     &.row--unknown td { opacity: 0.7; }
+    &.row--dup-start td {
+      background: rgba(139, 92, 246, 0.07);
+      border-top: 2px solid rgba(139, 92, 246, 0.55) !important;
+    }
+    &.row--dup-start td:first-child {
+      border-left: 3px solid rgba(139, 92, 246, 0.65) !important;
+    }
+    &.row--dup td {
+      background: rgba(139, 92, 246, 0.07);
+      border-top: 2px dashed rgba(139, 92, 246, 0.55) !important;
+    }
+    &.row--dup td:first-child {
+      border-left: 3px solid rgba(139, 92, 246, 0.65) !important;
+    }
   }
 
   tfoot td {
@@ -485,6 +499,7 @@
   &--ok      { background: rgba(22,163,74,0.12); color: #16a34a; }
   &--warn    { background: rgba(217,119,6,0.12); color: #d97706; }
   &--unknown { background: var(--surface-200); color: var(--text-color-secondary); }
+  &--dup     { background: rgba(139,92,246,0.12); color: #7c3aed; }
 }
 
 .diff-cell {

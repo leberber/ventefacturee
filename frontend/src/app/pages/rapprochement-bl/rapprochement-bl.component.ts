@@ -136,11 +136,11 @@ export class RapprochementBlComponent implements OnInit {
   }
 
   get mismatchCount(): number {
-    return this.result?.lignes.filter(l => !l.match && l.ventes_qte_colis !== null).length ?? 0;
+    return this.result?.lignes.filter(l => !l.match && !l.is_duplicate && l.ventes_qte_colis !== null).length ?? 0;
   }
 
   get notFoundCount(): number {
-    return this.result?.lignes.filter(l => l.ventes_qte_colis === null).length ?? 0;
+    return this.result?.lignes.filter(l => l.ventes_qte_colis === null && !l.is_duplicate).length ?? 0;
   }
 
   getQtyGros(code: string): number { return this.qtyGrosMap.get(code) ?? 0; }
@@ -221,9 +221,13 @@ export class RapprochementBlComponent implements OnInit {
       });
   }
 
-  rowClass(ligne: RapprochementLigne): string {
-    if (ligne.ventes_qte_colis === null) return 'row--unknown';
-    if (ligne.match) return 'row--match';
-    return 'row--mismatch';
+  rowClass(ligne: RapprochementLigne, index = 0): string {
+    const next = this.result?.lignes[index + 1];
+    if (ligne.is_duplicate) return 'row--dup';
+    const startsGroup = next?.is_duplicate && next.code_produit === ligne.code_produit;
+    const base = startsGroup ? 'row--dup-start' : '';
+    if (ligne.ventes_qte_colis === null) return (base + ' row--unknown').trim();
+    if (ligne.match) return (base + ' row--match').trim();
+    return (base + ' row--mismatch').trim();
   }
 }

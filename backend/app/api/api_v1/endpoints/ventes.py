@@ -424,50 +424,87 @@ async def rapprochement_bl(
         for bl_c in original_codes
     }
 
+    # Pre-compute total BL units per mapped code so that when the same product
+    # appears at multiple prices, the écart uses the combined quantity vs SalesBuzz.
+    total_bl_units_by_code: dict[str, float] = {}
+    for r in bl_rows:
+        c = code_map.get(r['code_produit'], r['code_produit'])
+        total_bl_units_by_code[c] = total_bl_units_by_code.get(c, 0) + r['bl_qte_unites']
+
+    seen_codes: set[str] = set()
     lignes = []
     for r in bl_rows:
         bl_code = r['code_produit']
         code = code_map.get(bl_code, bl_code)  # translated code for DB lookups
         mapped = code if code != bl_code else None
-        vente_row = ventes_map.get(code)
-        qte_colis = vente_row.qte_colis if vente_row else None
+        is_first = code not in seen_codes
+        seen_codes.add(code)
+
         prod_entry = colisage_map.get(bl_code)
         colisage = prod_entry.colisage if prod_entry else None
-        ventes_qte_unites = None
-        difference = None
-        is_match = False
+        prod_row = prod_info_map.get(code)
 
         bl_nb_colis = None
         if colisage:
             bl_nb_colis = round(r['bl_qte_unites'] / colisage, 4)
 
-        if qte_colis is not None and colisage:
-            ventes_qte_unites = round(qte_colis * colisage, 4)
-            difference = round(r['bl_qte_unites'] - ventes_qte_unites, 4)
-            is_match = abs(difference) < 0.01
-
-        prod_row = prod_info_map.get(code)
-        lignes.append(RapprochementLigne(
-            code_produit=bl_code,
-            libelle=r['libelle'],
-            bl_qte_unites=r['bl_qte_unites'],
-            bl_nb_colis=bl_nb_colis,
-            bl_prix_unitaire=r['bl_prix_unitaire'],
-            bl_montant_ttc=r['bl_montant_ttc'],
-            ventes_qte_colis=qte_colis,
-            colisage=colisage,
-            ventes_qte_unites=ventes_qte_unites,
-            difference_unites=difference,
-            match=is_match,
-            prix_dd=prod_row.prix_dd if prod_row else None,
-            prix_promotion=prod_row.prix_promotion if prod_row else None,
-            prix_club=prod_row.prix_club if prod_row else None,
-            ventes_qte_facturee=vente_row.qte_facturee_raw if vente_row else None,
-            ventes_uom_vente=vente_row.uom_vente if vente_row else None,
-            ventes_prix_unitaire=vente_row.prix_unitaire if vente_row else None,
-            ventes_total_facture=vente_row.total_facture if vente_row else None,
-            mapped_code=mapped,
-        ))
+        if is_first:
+            vente_row = ventes_map.get(code)
+            qte_colis = vente_row.qte_colis if vente_row else None
+            ventes_qte_unites = None
+            difference = None
+            is_match = False
+            if qte_colis is not None and colisage:
+                ventes_qte_unites = round(qte_colis * colisage, 4)
+                total_bl = total_bl_units_by_code.get(code, 0)
+                difference = round(total_bl - ventes_qte_unites, 4)
+                is_match = abs(difference) < 0.01
+            lignes.append(RapprochementLigne(
+                code_produit=bl_code,
+                libelle=r['libelle'],
+                bl_qte_unites=r['bl_qte_unites'],
+                bl_nb_colis=bl_nb_colis,
+                bl_prix_unitaire=r['bl_prix_unitaire'],
+                bl_montant_ttc=r['bl_montant_ttc'],
+                ventes_qte_colis=qte_colis,
+                colisage=colisage,
+                ventes_qte_unites=ventes_qte_unites,
+                difference_unites=difference,
+                match=is_match,
+                prix_dd=prod_row.prix_dd if prod_row else None,
+                prix_promotion=prod_row.prix_promotion if prod_row else None,
+                prix_club=prod_row.prix_club if prod_row else None,
+                ventes_qte_facturee=vente_row.qte_facturee_raw if vente_row else None,
+                ventes_uom_vente=vente_row.uom_vente if vente_row else None,
+                ventes_prix_unitaire=vente_row.prix_unitaire if vente_row else None,
+                ventes_total_facture=vente_row.total_facture if vente_row else None,
+                mapped_code=mapped,
+                is_duplicate=False,
+            ))
+        else:
+            # Same product at a different BL price — suppress SalesBuzz columns
+            lignes.append(RapprochementLigne(
+                code_produit=bl_code,
+                libelle=r['libelle'],
+                bl_qte_unites=r['bl_qte_unites'],
+                bl_nb_colis=bl_nb_colis,
+                bl_prix_unitaire=r['bl_prix_unitaire'],
+                bl_montant_ttc=r['bl_montant_ttc'],
+                ventes_qte_colis=None,
+                colisage=colisage,
+                ventes_qte_unites=None,
+                difference_unites=None,
+                match=False,
+                prix_dd=prod_row.prix_dd if prod_row else None,
+                prix_promotion=prod_row.prix_promotion if prod_row else None,
+                prix_club=prod_row.prix_club if prod_row else None,
+                ventes_qte_facturee=None,
+                ventes_uom_vente=None,
+                ventes_prix_unitaire=None,
+                ventes_total_facture=None,
+                mapped_code=mapped,
+                is_duplicate=True,
+            ))
 
     return RapprochementResult(
         nom_fdv=nom_livreur,

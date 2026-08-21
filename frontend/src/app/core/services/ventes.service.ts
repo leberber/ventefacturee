@@ -75,6 +75,7 @@ export interface RapprochementLigne {
   ventes_prix_unitaire: number | null;
   ventes_total_facture: number | null;
   mapped_code: string | null;
+  is_duplicate: boolean;
 }
 
 export interface BlMapping {
