@@ -6,6 +6,11 @@
   gap: 0;
 }
 
+.page-header__sub-meta {
+  font-weight: 600;
+  color: var(--primary-color);
+}
+
 .page-header {
   flex-shrink: 0;
   margin-bottom: 1rem;
@@ -174,6 +179,12 @@
 
   &__net {
     display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+  }
+
+  &__net-row {
+    display: flex;
     align-items: baseline;
     gap: 0.75rem;
     flex-wrap: wrap;
@@ -211,6 +222,59 @@
     gap: 0.5rem;
     flex-wrap: wrap;
   }
+
+  &__recu {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+  }
+
+  &--shortfall {
+    background: linear-gradient(135deg, #b91c1c 0%, #991b1b 100%);
+  }
+}
+
+.rapp-recu-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.rapp-recu-input {
+  width: 9rem;
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 0.5rem;
+  color: #fff;
+  font-size: 1.1rem;
+  font-weight: 700;
+  padding: 0.25rem 0.6rem;
+  outline: none;
+  text-align: right;
+
+  &::placeholder { color: rgba(255,255,255,0.45); font-weight: 400; }
+  &:focus { border-color: rgba(255,255,255,0.7); background: rgba(255,255,255,0.2); }
+
+  /* hide number spinners */
+  &::-webkit-outer-spin-button,
+  &::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+}
+
+.rapp-recu-unit {
+  font-size: 0.85rem;
+  font-weight: 600;
+  opacity: 0.8;
+  color: #fff;
+}
+
+.rapp-recu-diff {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #fca5a5;
+  i { font-size: 0.7rem; }
 }
 
 .rapp-stat-pill {
@@ -594,9 +658,26 @@
     color: #15803d;
     background: rgba(34, 197, 94, 0.15);
   }
-  &:not(.promo-prix--gros) {
+  &:not(.promo-prix--gros):not(.promo-prix--input) {
     color: #7e22ce;
     background: rgba(168, 85, 247, 0.12);
+  }
+
+  &--input {
+    width: 60px;
+    height: 1.75rem;
+    padding: 0 0.4rem;
+    border-radius: 9999px;
+    border: 1.5px solid #d8b4fe;
+    background: #faf5ff;
+    color: #7e22ce;
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-align: center;
+    outline: none;
+    &:focus { border-color: #a855f7; box-shadow: 0 0 0 2px rgba(168,85,247,0.18); }
+    &::-webkit-outer-spin-button,
+    &::-webkit-inner-spin-button { -webkit-appearance: none; }
   }
 }
 

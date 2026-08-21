@@ -5,7 +5,13 @@
       <div class="page-icon"><i class="pi pi-file-check"></i></div>
       <div>
         <h1 class="page-header__title">Rapprochement BL</h1>
-        <p class="page-header__sub">Vérification bon de chargement vs bon de livraison</p>
+        <p class="page-header__sub">
+          @if (result) {
+            <span class="page-header__sub-meta">{{ result.nom_fdv }} · {{ result.date }}</span>
+          } @else {
+            Vérification bon de chargement vs bon de livraison
+          }
+        </p>
       </div>
     </div>
 
@@ -77,14 +83,34 @@
 <!-- Results -->
 @if (result) {
   <!-- Summary bar -->
-  <div class="rapp-summary">
+  <div class="rapp-summary" [class.rapp-summary--shortfall]="isShortfall">
     <div class="rapp-summary__net">
-      <span class="rapp-summary__label">NET À PAYER</span>
-      <span class="rapp-summary__amount">{{ (hasAjustements ? netAPayerAjuste : result.net_a_payer) | number:'1.0-0' }} DA</span>
-      @if (hasAjustements) {
-        <span class="rapp-summary__original">(BL : {{ result.net_a_payer | number:'1.0-0' }} DA)</span>
-      }
-      <span class="rapp-summary__meta">{{ result.nom_fdv }} — {{ result.date }}</span>
+      <div class="rapp-summary__net-row">
+        <span class="rapp-summary__label">NET À PAYER</span>
+        <span class="rapp-summary__amount">{{ (hasAjustements ? netAPayerAjuste : result.net_a_payer) | number:'1.0-0' }} DA</span>
+        @if (hasAjustements) {
+          <span class="rapp-summary__original">(BL : {{ result.net_a_payer | number:'1.0-0' }} DA)</span>
+        }
+      </div>
+    </div>
+
+    <div class="rapp-summary__recu">
+      <span class="rapp-summary__label">MONTANT REÇU</span>
+      <div class="rapp-recu-wrap">
+        <input
+          type="number" min="0"
+          class="rapp-recu-input"
+          [(ngModel)]="montantRecu"
+          placeholder="—"
+        />
+        <span class="rapp-recu-unit">DA</span>
+        @if (isShortfall) {
+          <span class="rapp-recu-diff">
+            <i class="pi pi-arrow-down"></i>
+            {{ (montantRecu! - (hasAjustements ? netAPayerAjuste : result.net_a_payer)) | number:'1.0-0' }} DA
+          </span>
+        }
+      </div>
     </div>
     <div class="rapp-summary__stats">
       <span class="rapp-stat-pill rapp-stat-pill--total">
@@ -262,10 +288,14 @@
                       [value]="getQtyPromo(ligne.code_produit) || null"
                       (input)="setQtyPromo(ligne.code_produit, +($any($event.target).value))"
                       placeholder="—"
+                      [disabled]="!getPromoPrice(ligne.code_produit, ligne.prix_promotion)"
                     />
-                    @if (ligne.prix_promotion) {
-                      <span class="promo-prix">{{ ligne.prix_promotion | number:'1.0-0' }}</span>
-                    }
+                    <input
+                      type="number" min="0" class="promo-prix promo-prix--input"
+                      [value]="getPromoPrice(ligne.code_produit, ligne.prix_promotion) || null"
+                      (input)="setPromoPrice(ligne.code_produit, +($any($event.target).value))"
+                      placeholder="prix…"
+                    />
                   </div>
                 </td>
               }

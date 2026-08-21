@@ -102,6 +102,14 @@ export class RapprochementBlComponent implements OnInit {
   qtyGrosMap = new Map<string, number>();
   qtyPromoMap = new Map<string, number>();
 
+  // Editable promo price override (per colis)
+  promoPrixMap = new Map<string, number>();
+  getPromoPrice(code: string, fallback: number | null): number | null {
+    const v = this.promoPrixMap.get(code);
+    return (v !== undefined && v > 0) ? v : fallback;
+  }
+  setPromoPrice(code: string, val: number) { this.promoPrixMap.set(code, val >= 0 ? val : 0); }
+
   // Code mapping drafts: bl_code → code_produit draft input
   mappingDrafts = new Map<string, string>();
   mappingSaving = new Set<string>();
@@ -160,8 +168,17 @@ export class RapprochementBlComponent implements OnInit {
     const colisReguliers = (ligne.bl_nb_colis ?? 0) - qg - qp;
     const netRegulier = Math.max(colisReguliers, 0) * prixColisRegulier;
     const netGros = ligne.prix_club != null ? qg * ligne.prix_club : qg * prixColisRegulier;
-    const netPromo = ligne.prix_promotion != null ? qp * ligne.prix_promotion : qp * prixColisRegulier;
+    const effectivePromoPrice = this.getPromoPrice(ligne.code_produit, ligne.prix_promotion);
+    const netPromo = effectivePromoPrice != null ? qp * effectivePromoPrice : qp * prixColisRegulier;
     return netRegulier + netGros + netPromo;
+  }
+
+  montantRecu: number | null = null;
+
+  get isShortfall(): boolean {
+    if (this.montantRecu === null) return false;
+    const ref = this.hasAjustements ? this.netAPayerAjuste : (this.result?.net_a_payer ?? 0);
+    return this.montantRecu < ref;
   }
 
   get hasAjustements(): boolean {
@@ -217,8 +234,10 @@ export class RapprochementBlComponent implements OnInit {
     this.loading = true;
     this.result = null;
     this.error = '';
+    this.montantRecu = null;
     this.qtyGrosMap.clear();
     this.qtyPromoMap.clear();
+    this.promoPrixMap.clear();
     this.ventesService.rapprochementBL(this.selectedFile!, this.selectedLivreur, this.selectedSource || undefined)
       .subscribe({
         next: res => { this.result = res; this.loading = false; },
