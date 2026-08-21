@@ -248,7 +248,7 @@
                 <td class="num bl-cell">{{ ligne.bl_nb_colis !== null ? (ligne.bl_nb_colis | number) : '—' }}</td>
               }
               @if (colVisible('bl_prix_unitaire')) {
-                <td class="num bl-cell">{{ ligne.bl_prix_unitaire | number:'1.0-0' }}</td>
+                <td class="num bl-cell">{{ ligne.bl_prix_unitaire | number:'1.2-2' }}</td>
               }
               @if (colVisible('bl_montant_ttc')) {
                 <td class="num bl-cell">{{ ligne.bl_montant_ttc | number:'1.0-0' }}</td>
@@ -302,6 +302,9 @@
               @if (colVisible('net_ajuste')) {
                 <td class="num net-ajuste-cell">
                   {{ getNetLigne(ligne) | number:'1.0-0' }}
+                  @if (isNetAjuste(ligne)) {
+                    <span class="net-diff">- {{ (ligne.bl_montant_ttc - getNetLigne(ligne)) | number:'1.0-0' }}</span>
+                  }
                 </td>
               }
             </tr>
@@ -325,6 +328,9 @@
             @if (colVisible('net_ajuste')) {
               <td class="num total-amount" [class.total-ajuste]="hasAjustements">
                 {{ netAPayerAjuste | number:'1.0-0' }} DA
+                @if (hasAjustements) {
+                  <span class="net-diff net-diff--total">- {{ (result.net_a_payer - netAPayerAjuste) | number:'1.0-0' }} DA</span>
+                }
               </td>
             }
           </tr>

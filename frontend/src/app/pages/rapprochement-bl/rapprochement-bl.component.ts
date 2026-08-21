@@ -159,6 +159,10 @@ export class RapprochementBlComponent implements OnInit {
   setQtyGros(code: string, val: number) { this.qtyGrosMap.set(code, val >= 0 ? val : 0); }
   setQtyPromo(code: string, val: number) { this.qtyPromoMap.set(code, val >= 0 ? val : 0); }
 
+  isNetAjuste(ligne: RapprochementLigne): boolean {
+    return Math.round(this.getNetLigne(ligne)) !== Math.round(ligne.bl_montant_ttc);
+  }
+
   /** NET ajusté par ligne (en DA) — prix_club/prix_promo sont par colis */
   getNetLigne(ligne: RapprochementLigne): number {
     const qg = this.getQtyGros(ligne.code_produit);

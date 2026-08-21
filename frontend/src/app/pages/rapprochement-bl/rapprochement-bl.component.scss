@@ -681,6 +681,17 @@
   }
 }
 
+.net-diff {
+  display: block;
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: #dc2626;
+
+  &--total {
+    font-size: 0.72rem;
+  }
+}
+
 .net-ajuste-cell {
   font-weight: 600;
   color: var(--text-color);
