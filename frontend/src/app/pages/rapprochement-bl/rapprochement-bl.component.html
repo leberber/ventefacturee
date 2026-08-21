@@ -88,95 +88,143 @@
 
   <!-- Table -->
   <div class="table-container">
+    <!-- Column picker toolbar -->
+    <div class="rapp-toolbar">
+      <button class="table-action-btn" pTooltip="Colonnes visibles" (click)="colMenu.toggle($event)">
+        <i class="pi pi-sliders-h"></i>
+      </button>
+      <p-popover #colMenu>
+        <div class="table-options-menu">
+          <div class="table-options-section">
+            <span class="table-options-label">Colonnes visibles</span>
+            <div class="table-options-columns">
+              @for (col of allColumns; track col.field) {
+                <label class="column-toggle">
+                  <input type="checkbox" [checked]="col.visible" (change)="toggleColumn(col.field)" />
+                  <span>{{ col.header }}</span>
+                </label>
+              }
+            </div>
+          </div>
+        </div>
+      </p-popover>
+    </div>
+
     <div class="table-wrapper">
       <table class="table">
         <thead>
           <tr>
-            <th>Statut</th>
-            <th>Code</th>
-            <th>Désignation</th>
-            <th class="num group-header group-header--db">Ventes (col.)</th>
-            <th class="num group-header group-header--bl">Livraison (col.)</th>
-            <th class="num">Colisage</th>
-            <th class="num">Écart (unités)</th>
-            <th class="num col-prix">Prix Unit.</th>
-            <th class="num">Montant BL</th>
-            <th class="num group-header group-header--gros">Club (col.)</th>
-            <th class="num group-header group-header--promo">Promo (col.)</th>
-            <th class="num">NET Ajusté</th>
+            @if (colVisible('statut')) { <th>Statut</th> }
+            @if (colVisible('code_produit')) { <th>Code</th> }
+            @if (colVisible('libelle')) { <th>Désignation</th> }
+            @if (colVisible('ventes_qte_colis')) { <th class="num group-header group-header--db">Ventes (col.)</th> }
+            @if (colVisible('bl_nb_colis')) { <th class="num group-header group-header--bl">Livraison (col.)</th> }
+            @if (colVisible('colisage')) { <th class="num">Colisage</th> }
+            @if (colVisible('difference_unites')) { <th class="num">Écart (unités)</th> }
+            @if (colVisible('bl_prix_unitaire')) { <th class="num col-prix">Prix Unit.</th> }
+            @if (colVisible('bl_montant_ttc')) { <th class="num">Montant BL</th> }
+            @if (colVisible('prix_dd')) { <th class="num group-header group-header--gros">Prix club</th> }
+            @if (colVisible('prix_promotion')) { <th class="num group-header group-header--promo">Prix promo</th> }
+            @if (colVisible('net_ajuste')) { <th class="num">NET Ajusté</th> }
           </tr>
         </thead>
         <tbody>
           @for (ligne of result.lignes; track ligne.code_produit) {
             <tr [ngClass]="rowClass(ligne)">
-              <td class="status-cell">
-                @if (ligne.ventes_qte_colis === null) {
-                  <span class="badge badge--unknown" pTooltip="Produit absent des ventes ce jour">?</span>
-                } @else if (ligne.match) {
-                  <span class="badge badge--ok"><i class="pi pi-check"></i></span>
-                } @else {
-                  <span class="badge badge--warn"><i class="pi pi-exclamation-triangle"></i></span>
-                }
-              </td>
-              <td class="code-cell">{{ ligne.code_produit }}</td>
-              <td class="desc-cell">{{ ligne.libelle }}</td>
-              <td class="num db-cell">{{ ligne.ventes_qte_colis !== null ? (ligne.ventes_qte_colis | number) : '—' }}</td>
-              <td class="num bl-cell">{{ ligne.bl_nb_colis !== null ? (ligne.bl_nb_colis | number) : '—' }}</td>
-              <td class="num">{{ ligne.colisage !== null ? ligne.colisage : '—' }}</td>
-              <td class="num diff-cell">
-                @if (ligne.difference_unites !== null) {
-                  <span [ngClass]="ligne.difference_unites === 0 ? 'diff--zero' : 'diff--nonzero'">
-                    {{ ligne.difference_unites > 0 ? '+' : '' }}{{ ligne.difference_unites | number }}
-                  </span>
-                } @else { — }
-              </td>
-              <td class="num col-prix">
-                @if (ligne.colisage) {
-                  <div>{{ ligne.bl_prix_unitaire * ligne.colisage | number:'1.0-0' }} /c</div>
-                }
-                <div class="prix-colis">{{ ligne.bl_prix_unitaire | number:'1.2-2' }} /u</div>
-              </td>
-              <td class="num">{{ ligne.bl_montant_ttc | number:'1.2-2' }}</td>
-              <td class="promo-cell promo-cell--gros">
-                <div class="promo-input-wrap">
-                  <input
-                    type="number" min="0" class="promo-input promo-input--gros"
-                    [value]="getQtyGros(ligne.code_produit) || null"
-                    (input)="setQtyGros(ligne.code_produit, +($any($event.target).value))"
-                    placeholder="—"
-                  />
-                  @if (ligne.prix_dd) {
-                    <span class="promo-prix promo-prix--gros">{{ ligne.prix_dd | number:'1.0-0' }}</span>
+              @if (colVisible('statut')) {
+                <td class="status-cell">
+                  @if (ligne.ventes_qte_colis === null) {
+                    <span class="badge badge--unknown" pTooltip="Produit absent des ventes ce jour">?</span>
+                  } @else if (ligne.match) {
+                    <span class="badge badge--ok"><i class="pi pi-check"></i></span>
+                  } @else {
+                    <span class="badge badge--warn"><i class="pi pi-exclamation-triangle"></i></span>
                   }
-                </div>
-              </td>
-              <td class="promo-cell">
-                <div class="promo-input-wrap">
-                  <input
-                    type="number" min="0" class="promo-input"
-                    [value]="getQtyPromo(ligne.code_produit) || null"
-                    (input)="setQtyPromo(ligne.code_produit, +($any($event.target).value))"
-                    placeholder="—"
-                  />
-                  @if (ligne.prix_promotion) {
-                    <span class="promo-prix">{{ ligne.prix_promotion | number:'1.0-0' }}</span>
+                </td>
+              }
+              @if (colVisible('code_produit')) { <td class="code-cell">{{ ligne.code_produit }}</td> }
+              @if (colVisible('libelle')) { <td class="desc-cell">{{ ligne.libelle }}</td> }
+              @if (colVisible('ventes_qte_colis')) {
+                <td class="num db-cell">{{ ligne.ventes_qte_colis !== null ? (ligne.ventes_qte_colis | number) : '—' }}</td>
+              }
+              @if (colVisible('bl_nb_colis')) {
+                <td class="num bl-cell">{{ ligne.bl_nb_colis !== null ? (ligne.bl_nb_colis | number) : '—' }}</td>
+              }
+              @if (colVisible('colisage')) {
+                <td class="num">{{ ligne.colisage !== null ? ligne.colisage : '—' }}</td>
+              }
+              @if (colVisible('difference_unites')) {
+                <td class="num diff-cell">
+                  @if (ligne.difference_unites !== null) {
+                    <span [ngClass]="ligne.difference_unites === 0 ? 'diff--zero' : 'diff--nonzero'">
+                      {{ ligne.difference_unites > 0 ? '+' : '' }}{{ ligne.difference_unites | number }}
+                    </span>
+                  } @else { — }
+                </td>
+              }
+              @if (colVisible('bl_prix_unitaire')) {
+                <td class="num col-prix">
+                  @if (ligne.colisage) {
+                    <div>{{ ligne.bl_prix_unitaire * ligne.colisage | number:'1.0-0' }} /c</div>
                   }
-                </div>
-              </td>
-              <td class="num net-ajuste-cell">
-                {{ getNetLigne(ligne) | number:'1.2-2' }}
-              </td>
+                  <div class="prix-colis">{{ ligne.bl_prix_unitaire | number:'1.2-2' }} /u</div>
+                </td>
+              }
+              @if (colVisible('bl_montant_ttc')) {
+                <td class="num">{{ ligne.bl_montant_ttc | number:'1.2-2' }}</td>
+              }
+              @if (colVisible('prix_dd')) {
+                <td class="promo-cell promo-cell--gros">
+                  <div class="promo-input-wrap">
+                    <input
+                      type="number" min="0" class="promo-input promo-input--gros"
+                      [value]="getQtyGros(ligne.code_produit) || null"
+                      (input)="setQtyGros(ligne.code_produit, +($any($event.target).value))"
+                      placeholder="—"
+                    />
+                    @if (ligne.prix_dd) {
+                      <span class="promo-prix promo-prix--gros">{{ ligne.prix_dd | number:'1.0-0' }}</span>
+                    }
+                  </div>
+                </td>
+              }
+              @if (colVisible('prix_promotion')) {
+                <td class="promo-cell">
+                  <div class="promo-input-wrap">
+                    <input
+                      type="number" min="0" class="promo-input"
+                      [value]="getQtyPromo(ligne.code_produit) || null"
+                      (input)="setQtyPromo(ligne.code_produit, +($any($event.target).value))"
+                      placeholder="—"
+                    />
+                    @if (ligne.prix_promotion) {
+                      <span class="promo-prix">{{ ligne.prix_promotion | number:'1.0-0' }}</span>
+                    }
+                  </div>
+                </td>
+              }
+              @if (colVisible('net_ajuste')) {
+                <td class="num net-ajuste-cell">
+                  {{ getNetLigne(ligne) | number:'1.2-2' }}
+                </td>
+              }
             </tr>
           }
         </tbody>
         <tfoot>
           <tr>
-            <td colspan="8" class="total-label">TOTAL BL</td>
-            <td class="num total-amount">{{ result.net_a_payer | number:'1.2-2' }} DA</td>
-            <td colspan="2"></td>
-            <td class="num total-amount" [class.total-ajuste]="hasAjustements">
-              {{ netAPayerAjuste | number:'1.2-2' }} DA
-            </td>
+            <td [attr.colspan]="footerLabelColspan" class="total-label">TOTAL BL</td>
+            @if (colVisible('bl_montant_ttc')) {
+              <td class="num total-amount">{{ result.net_a_payer | number:'1.2-2' }} DA</td>
+            }
+            @if (footerPromoColspan > 0) {
+              <td [attr.colspan]="footerPromoColspan"></td>
+            }
+            @if (colVisible('net_ajuste')) {
+              <td class="num total-amount" [class.total-ajuste]="hasAjustements">
+                {{ netAPayerAjuste | number:'1.2-2' }} DA
+              </td>
+            }
           </tr>
         </tfoot>
       </table>
