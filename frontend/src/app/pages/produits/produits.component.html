@@ -154,9 +154,9 @@
                 Prix Promo <i [class]="sortIcon('prix_promotion')"></i>
               </th>
             }
-            @if (isColVisible('prix_gros')) {
-              <th class="th-sort col-center" (click)="sort('prix_gros')">
-                Prix Club <i [class]="sortIcon('prix_gros')"></i>
+            @if (isColVisible('prix_club')) {
+              <th class="th-sort col-center" (click)="sort('prix_club')">
+                Prix Club <i [class]="sortIcon('prix_club')"></i>
               </th>
             }
             @if (isColVisible('facturable')) {
@@ -494,11 +494,11 @@
                   </td>
                 }
 
-                @if (isColVisible('prix_gros')) {
+                @if (isColVisible('prix_club')) {
                   <td class="col-center cell-editable"
-                    (click)="startEdit(p, 'prix_gros', $event)"
-                    [class.cell-editing]="isEditing(p.code_produit, 'prix_gros')">
-                    @if (isEditing(p.code_produit, 'prix_gros')) {
+                    (click)="startEdit(p, 'prix_club', $event)"
+                    [class.cell-editing]="isEditing(p.code_produit, 'prix_club')">
+                    @if (isEditing(p.code_produit, 'prix_club')) {
                       <input type="number" class="cell-input" autofocus min="0" step="0.01"
                         [value]="editingValue()"
                         (blur)="editingValue.set(+$any($event.target).value || null); saveEdit(p)"
@@ -506,10 +506,10 @@
                         (keydown.escape)="cancelEdit()" />
                     } @else {
                       <div class="cell-display cell-display--center">
-                        @if (savingCell()?.code === p.code_produit && savingCell()?.field === 'prix_gros') {
+                        @if (savingCell()?.code === p.code_produit && savingCell()?.field === 'prix_club') {
                           <i class="pi pi-spin pi-spinner cell-spinner"></i>
                         } @else {
-                          <span [class.text-muted]="p.prix_gros == null">{{ p.prix_gros != null ? p.prix_gros : '—' }}</span>
+                          <span [class.text-muted]="p.prix_club == null">{{ p.prix_club != null ? p.prix_club : '—' }}</span>
                         }
                         <i class="pi pi-pencil cell-pencil"></i>
                       </div>

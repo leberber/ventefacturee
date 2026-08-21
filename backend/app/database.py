@@ -65,7 +65,7 @@ def create_db_and_tables() -> None:
             "ALTER TABLE produits ADD COLUMN IF NOT EXISTS prix_promotion FLOAT"
         ))
         conn.execute(text(
-            "ALTER TABLE produits ADD COLUMN IF NOT EXISTS prix_gros FLOAT"
+            "ALTER TABLE produits ADD COLUMN IF NOT EXISTS prix_club FLOAT"
         ))
 
         conn.commit()

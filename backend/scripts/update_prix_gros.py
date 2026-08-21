@@ -1,8 +1,8 @@
 """
-One-time script: update prix_gros on produits from PRIX GROS.xlsx
+One-time script: update prix_club on produits from PRIX GROS.xlsx
 
 Usage (from the backend/ directory):
-    python -m scripts.update_prix_gros
+    python -m scripts.update_prix_club
 """
 
 import sys
@@ -22,7 +22,7 @@ def run():
     wb = openpyxl.load_workbook(XLSX_PATH)
     ws = wb.active
 
-    # Build map: code_produit -> prix_gros (skip header row)
+    # Build map: code_produit -> prix_club (skip header row)
     prix_map: dict[str, float] = {}
     for row in ws.iter_rows(min_row=2, values_only=True):
         code, _, prix = row[0], row[1], row[2]
@@ -38,7 +38,7 @@ def run():
         for code, prix in prix_map.items():
             produit = session.get(Produit, code)
             if produit:
-                produit.prix_gros = prix
+                produit.prix_club = prix
                 session.add(produit)
                 updated += 1
             else:

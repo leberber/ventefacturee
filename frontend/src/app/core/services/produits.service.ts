@@ -17,7 +17,7 @@ export interface ProduitRead {
   poids_unite_vente: number | null;
   prix_dd: number | null;
   prix_promotion: number | null;
-  prix_gros: number | null;
+  prix_club: number | null;
   facturable: boolean;
   imported: boolean;
   updated_at: string;
@@ -45,7 +45,7 @@ export class ProduitsService {
     return this.http.get<string[]>('/api/v1/produits/familles');
   }
 
-  update(code: string, body: { nom_produit?: string | null; famille?: string | null; sous_famille?: string | null; uom_vente?: string | null; uom_principale?: string | null; code_dd?: string | null; colisage?: number | null; colisage_palette?: number | null; unite?: string | null; volume?: number | null; poids_unite_vente?: number | null; prix_dd?: number | null; prix_promotion?: number | null; prix_gros?: number | null; facturable?: boolean; imported?: boolean }) {
+  update(code: string, body: { nom_produit?: string | null; famille?: string | null; sous_famille?: string | null; uom_vente?: string | null; uom_principale?: string | null; code_dd?: string | null; colisage?: number | null; colisage_palette?: number | null; unite?: string | null; volume?: number | null; poids_unite_vente?: number | null; prix_dd?: number | null; prix_promotion?: number | null; prix_club?: number | null; facturable?: boolean; imported?: boolean }) {
     return this.http.patch<ProduitRead>(`/api/v1/produits/${encodeURIComponent(code)}`, body);
   }
 

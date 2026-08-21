@@ -23,7 +23,7 @@ class Produit(SQLModel, table=True):
     poids_unite_vente: Optional[float] = Field(default=None)
     prix_dd: Optional[float] = Field(default=None)
     prix_promotion: Optional[float] = Field(default=None)
-    prix_gros: Optional[float] = Field(default=None)
+    prix_club: Optional[float] = Field(default=None)
     facturable: bool = Field(default=True)
     imported: bool = Field(default=False)
 
@@ -48,7 +48,7 @@ class ProduitRead(SQLModel):
     poids_unite_vente: Optional[float] = None
     prix_dd: Optional[float] = None
     prix_promotion: Optional[float] = None
-    prix_gros: Optional[float] = None
+    prix_club: Optional[float] = None
     facturable: bool = True
     imported: bool = False
     updated_at: datetime
@@ -68,7 +68,7 @@ class ProduitUpdate(SQLModel):
     poids_unite_vente: Optional[float] = None
     prix_dd: Optional[float] = None
     prix_promotion: Optional[float] = None
-    prix_gros: Optional[float] = None
+    prix_club: Optional[float] = None
     facturable: Optional[bool] = None
     imported: Optional[bool] = None
 
