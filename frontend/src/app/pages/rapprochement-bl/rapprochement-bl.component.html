@@ -182,8 +182,8 @@
                       (input)="setQtyGros(ligne.code_produit, +($any($event.target).value))"
                       placeholder="—"
                     />
-                    @if (ligne.prix_dd) {
-                      <span class="promo-prix promo-prix--gros">{{ ligne.prix_dd | number:'1.0-0' }}</span>
+                    @if (ligne.prix_club) {
+                      <span class="promo-prix promo-prix--gros">{{ ligne.prix_club | number:'1.0-0' }}</span>
                     }
                   </div>
                 </td>

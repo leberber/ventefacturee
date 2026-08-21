@@ -88,7 +88,7 @@ export class RapprochementBlComponent implements OnInit {
   setQtyGros(code: string, val: number) { this.qtyGrosMap.set(code, val >= 0 ? val : 0); }
   setQtyPromo(code: string, val: number) { this.qtyPromoMap.set(code, val >= 0 ? val : 0); }
 
-  /** NET ajusté par ligne (en DA) — prix_dd/prix_promo sont par colis */
+  /** NET ajusté par ligne (en DA) — prix_club/prix_promo sont par colis */
   getNetLigne(ligne: RapprochementLigne): number {
     const qg = this.getQtyGros(ligne.code_produit);
     const qp = this.getQtyPromo(ligne.code_produit);
@@ -96,7 +96,7 @@ export class RapprochementBlComponent implements OnInit {
     const prixColisRegulier = ligne.bl_prix_unitaire * ligne.colisage;
     const colisReguliers = (ligne.bl_nb_colis ?? 0) - qg - qp;
     const netRegulier = Math.max(colisReguliers, 0) * prixColisRegulier;
-    const netGros = ligne.prix_dd != null ? qg * ligne.prix_dd : qg * prixColisRegulier;
+    const netGros = ligne.prix_club != null ? qg * ligne.prix_club : qg * prixColisRegulier;
     const netPromo = ligne.prix_promotion != null ? qp * ligne.prix_promotion : qp * prixColisRegulier;
     return netRegulier + netGros + netPromo;
   }

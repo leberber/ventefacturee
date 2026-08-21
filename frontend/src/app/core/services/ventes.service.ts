@@ -69,6 +69,7 @@ export interface RapprochementLigne {
   match: boolean;
   prix_dd: number | null;
   prix_promotion: number | null;
+  prix_club: number | null;
 }
 
 export interface RapprochementResult {

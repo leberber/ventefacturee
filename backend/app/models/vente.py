@@ -156,6 +156,7 @@ class RapprochementLigne(SQLModel):
     match: bool
     prix_dd: Optional[float] = None
     prix_promotion: Optional[float] = None
+    prix_club: Optional[float] = None
 
 
 class RapprochementResult(SQLModel):

@@ -393,7 +393,7 @@ async def rapprochement_bl(
     # Fetch colisage + prix spéciaux from produits table
     codes = list({r['code_produit'] for r in bl_rows})
     col_stmt = (
-        select(Produit.code_produit, Produit.colisage, Produit.prix_dd, Produit.prix_promotion)
+        select(Produit.code_produit, Produit.colisage, Produit.prix_dd, Produit.prix_promotion, Produit.prix_club)
         .where(Produit.code_produit.in_(codes))
     )
     prod_info_map: dict = {
@@ -435,6 +435,7 @@ async def rapprochement_bl(
             match=is_match,
             prix_dd=prod_row.prix_dd if prod_row else None,
             prix_promotion=prod_row.prix_promotion if prod_row else None,
+            prix_club=prod_row.prix_club if prod_row else None,
         ))
 
     return RapprochementResult(
