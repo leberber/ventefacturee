@@ -161,6 +161,7 @@ class RapprochementLigne(SQLModel):
     ventes_uom_vente: Optional[str] = None
     ventes_prix_unitaire: Optional[float] = None
     ventes_total_facture: Optional[float] = None
+    mapped_code: Optional[str] = None  # DB code used for lookup when bl_code differs
 
 
 class RapprochementResult(SQLModel):

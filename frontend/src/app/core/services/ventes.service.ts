@@ -74,6 +74,12 @@ export interface RapprochementLigne {
   ventes_uom_vente: string | null;
   ventes_prix_unitaire: number | null;
   ventes_total_facture: number | null;
+  mapped_code: string | null;
+}
+
+export interface BlMapping {
+  bl_code: string;
+  code_produit: string;
 }
 
 export interface RapprochementResult {
@@ -194,5 +200,17 @@ export class VentesService {
     form.append('file', file);
     let p = new HttpParams().set('nom_livreur', nom_livreur);
     return this.http.post<RapprochementResult>('/api/v1/ventes/rapprochement-bl', form, { params: p });
+  }
+
+  getMappings() {
+    return this.http.get<BlMapping[]>('/api/v1/mappings');
+  }
+
+  createMapping(bl_code: string, code_produit: string) {
+    return this.http.post<BlMapping>('/api/v1/mappings', { bl_code, code_produit });
+  }
+
+  deleteMapping(bl_code: string) {
+    return this.http.delete(`/api/v1/mappings/${encodeURIComponent(bl_code)}`);
   }
 }

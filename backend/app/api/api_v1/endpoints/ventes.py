@@ -15,6 +15,7 @@ from app.api.deps import get_current_user
 from app.database import get_session
 from app.models.user import User
 from app.models.vente import Vente, VentePage, VenteRead, RapprochementLigne, RapprochementResult
+from app.models.produit_bl_mapping import ProduitBlMapping
 from app.utils.parse import parse_file
 
 router = APIRouter()
@@ -362,6 +363,13 @@ async def rapprochement_bl(
     if not bl_rows:
         raise HTTPException(status_code=400, detail="Aucune ligne valide trouvée dans le fichier")
 
+    # Load code mappings for all BL codes found
+    bl_codes = list({r['code_produit'] for r in bl_rows})
+    mapping_rows = session.exec(
+        select(ProduitBlMapping).where(ProduitBlMapping.bl_code.in_(bl_codes))
+    ).all()
+    code_map: dict[str, str] = {m.bl_code: m.code_produit for m in mapping_rows}
+
     net_a_payer = sum(r['bl_montant_ttc'] for r in bl_rows)
 
     # Extract BL date from the Excel — use first non-null value in date column
@@ -397,24 +405,34 @@ async def rapprochement_bl(
         for row in session.execute(agg_stmt).all()
     }
 
-    # Fetch colisage + prix spéciaux from produits table
-    codes = list({r['code_produit'] for r in bl_rows})
+    # Fetch colisage + prix spéciaux — include both original BL codes and mapped codes
+    # so that e.g. HLLI001B (colisage=12) takes priority over HLLI001 (colisage=10)
+    original_codes = list({r['code_produit'] for r in bl_rows})
+    mapped_codes = list({code_map.get(c, c) for c in original_codes})
+    all_codes = list(set(original_codes + mapped_codes))
     col_stmt = (
         select(Produit.code_produit, Produit.colisage, Produit.prix_dd, Produit.prix_promotion, Produit.prix_club)
-        .where(Produit.code_produit.in_(codes))
+        .where(Produit.code_produit.in_(all_codes))
     )
     prod_info_map: dict = {
         row.code_produit: row
         for row in session.execute(col_stmt).all()
     }
-    colisage_map: dict = {code: row.colisage for code, row in prod_info_map.items()}
+    # colisage: prefer the original BL code entry, fall back to the mapped code entry
+    colisage_map: dict = {
+        bl_c: (prod_info_map.get(bl_c) or prod_info_map.get(code_map.get(bl_c, bl_c)))
+        for bl_c in original_codes
+    }
 
     lignes = []
     for r in bl_rows:
-        code = r['code_produit']
+        bl_code = r['code_produit']
+        code = code_map.get(bl_code, bl_code)  # translated code for DB lookups
+        mapped = code if code != bl_code else None
         vente_row = ventes_map.get(code)
         qte_colis = vente_row.qte_colis if vente_row else None
-        colisage = colisage_map.get(code)
+        prod_entry = colisage_map.get(bl_code)
+        colisage = prod_entry.colisage if prod_entry else None
         ventes_qte_unites = None
         difference = None
         is_match = False
@@ -430,7 +448,7 @@ async def rapprochement_bl(
 
         prod_row = prod_info_map.get(code)
         lignes.append(RapprochementLigne(
-            code_produit=code,
+            code_produit=bl_code,
             libelle=r['libelle'],
             bl_qte_unites=r['bl_qte_unites'],
             bl_nb_colis=bl_nb_colis,
@@ -448,6 +466,7 @@ async def rapprochement_bl(
             ventes_uom_vente=vente_row.uom_vente if vente_row else None,
             ventes_prix_unitaire=vente_row.prix_unitaire if vente_row else None,
             ventes_total_facture=vente_row.total_facture if vente_row else None,
+            mapped_code=mapped,
         ))
 
     return RapprochementResult(

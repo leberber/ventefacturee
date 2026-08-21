@@ -100,6 +100,33 @@ export class RapprochementBlComponent implements OnInit {
   qtyGrosMap = new Map<string, number>();
   qtyPromoMap = new Map<string, number>();
 
+  // Code mapping drafts: bl_code → code_produit draft input
+  mappingDrafts = new Map<string, string>();
+  mappingSaving = new Set<string>();
+
+  getMappingDraft(blCode: string): string { return this.mappingDrafts.get(blCode) ?? ''; }
+  setMappingDraft(blCode: string, val: string) { this.mappingDrafts.set(blCode, val); }
+
+  saveMapping(blCode: string) {
+    const codeProduit = this.getMappingDraft(blCode).trim();
+    if (!codeProduit) return;
+    this.mappingSaving.add(blCode);
+    this.ventesService.createMapping(blCode, codeProduit).subscribe({
+      next: () => {
+        this.mappingSaving.delete(blCode);
+        this.mappingDrafts.delete(blCode);
+        this.runRapprochement(); // re-run with the new mapping applied
+      },
+      error: () => this.mappingSaving.delete(blCode),
+    });
+  }
+
+  isMappingSaving(blCode: string): boolean { return this.mappingSaving.has(blCode); }
+
+  isUnmapped(ligne: RapprochementLigne): boolean {
+    return ligne.colisage === null && !ligne.mapped_code;
+  }
+
   get canRun(): boolean {
     return !!this.selectedLivreur && !!this.selectedFile;
   }

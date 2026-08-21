@@ -410,7 +410,66 @@
   font-size: 0.75rem;
   color: #2563eb;
 }
-.code-cell { font-family: monospace; font-size: 0.8rem; color: var(--text-color-secondary); }
+.code-cell {
+  font-family: monospace;
+  font-size: 0.8rem;
+  color: var(--text-color-secondary);
+
+  &__top { display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap; }
+}
+
+.mapped-badge {
+  font-size: 0.65rem;
+  font-weight: 600;
+  background: rgba(37, 99, 235, 0.1);
+  color: #2563eb;
+  padding: 0.1rem 0.4rem;
+  border-radius: 9999px;
+}
+
+.map-input-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  margin-top: 0.3rem;
+}
+
+.map-input {
+  width: 100px;
+  height: 1.6rem;
+  padding: 0 0.4rem;
+  border: 1.5px solid var(--surface-border);
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-family: monospace;
+  background: var(--surface-card);
+  color: var(--text-color);
+
+  &:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(var(--primary-rgb), 0.15);
+  }
+}
+
+.map-save-btn {
+  width: 1.6rem;
+  height: 1.6rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 6px;
+  background: rgba(37, 99, 235, 0.1);
+  color: #2563eb;
+  cursor: pointer;
+  font-size: 0.7rem;
+  flex-shrink: 0;
+  transition: background 0.15s;
+
+  &:hover:not(:disabled) { background: rgba(37, 99, 235, 0.2); }
+  &:disabled { opacity: 0.5; cursor: not-allowed; }
+}
 .desc-cell { max-width: 240px; overflow: hidden; text-overflow: ellipsis; }
 
 .badge {

@@ -157,7 +157,34 @@
                   }
                 </td>
               }
-              @if (colVisible('code_produit')) { <td class="code-cell">{{ ligne.code_produit }}</td> }
+              @if (colVisible('code_produit')) {
+                <td class="code-cell">
+                  <div class="code-cell__top">
+                    {{ ligne.code_produit }}
+                    @if (ligne.mapped_code) {
+                      <span class="mapped-badge">→ {{ ligne.mapped_code }}</span>
+                    }
+                  </div>
+                  @if (isUnmapped(ligne)) {
+                    <div class="map-input-wrap">
+                      <input
+                        class="map-input"
+                        placeholder="Code DB…"
+                        [value]="getMappingDraft(ligne.code_produit)"
+                        (input)="setMappingDraft(ligne.code_produit, $any($event.target).value)"
+                        (keydown.enter)="saveMapping(ligne.code_produit)"
+                      />
+                      <button class="map-save-btn" [disabled]="isMappingSaving(ligne.code_produit)" (click)="saveMapping(ligne.code_produit)">
+                        @if (isMappingSaving(ligne.code_produit)) {
+                          <i class="pi pi-spin pi-spinner"></i>
+                        } @else {
+                          <i class="pi pi-check"></i>
+                        }
+                      </button>
+                    </div>
+                  }
+                </td>
+              }
               @if (colVisible('libelle')) { <td class="desc-cell">{{ ligne.libelle }}</td> }
               @if (colVisible('ventes_qte_facturee')) {
                 <td class="num db-cell">{{ ligne.ventes_qte_facturee !== null ? (ligne.ventes_qte_facturee | number) : '—' }}</td>
