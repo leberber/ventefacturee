@@ -370,7 +370,7 @@
 
 
   tbody tr {
-    &.row--match td { background: rgba(22, 163, 74, 0.04); }
+    &.row--match td { background: transparent; }
     &.row--mismatch td { background: rgba(217, 119, 6, 0.06); }
     &.row--unknown td { opacity: 0.7; }
     &.row--dup-start td {
