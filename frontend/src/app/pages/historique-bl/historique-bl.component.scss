@@ -213,6 +213,83 @@
   border-radius: 9999px;
 }
 
+.montant-edit {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+
+  &__wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+  }
+
+  &__label {
+    font-size: 0.58rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--primary-color);
+  }
+}
+
+.montant-input {
+  width: 100px;
+  height: 1.75rem;
+  padding: 0 0.5rem;
+  border: 1.5px solid var(--primary-color);
+  border-radius: 0.5rem;
+  font-size: 0.8rem;
+  background: var(--surface-card);
+  color: var(--text-color);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.1);
+  -moz-appearance: textfield;
+  &::-webkit-outer-spin-button,
+  &::-webkit-inner-spin-button { -webkit-appearance: none; }
+}
+
+.montant-save,
+.montant-cancel {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 0.65rem;
+  padding: 0;
+  flex-shrink: 0;
+}
+
+.montant-save { background: rgba(34,197,94,0.12); color: #16a34a; &:hover { background: rgba(34,197,94,0.25); } }
+.montant-cancel { background: rgba(239,68,68,0.08); color: #dc2626; &:hover { background: rgba(239,68,68,0.18); } }
+
+.diff-edit-icon {
+  font-size: 0.55rem;
+  opacity: 0;
+  margin-left: 0.1rem;
+  transition: opacity 0.15s;
+}
+
+.diff-pill-add {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.2rem 0.6rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-color-secondary);
+  border: 1px dashed var(--surface-border);
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+  white-space: nowrap;
+  &:hover { border-color: var(--primary-color); color: var(--primary-color); }
+}
+
 .diff-pill {
   display: inline-flex;
   align-items: center;
@@ -222,6 +299,9 @@
   font-size: 0.75rem;
   font-weight: 700;
   white-space: nowrap;
+  cursor: pointer;
+
+  &:hover .diff-edit-icon { opacity: 0.7; }
 
   &.diff--exact     { background: rgba(34,197,94,0.12); color: #16a34a; }
   &.diff--shortfall { background: rgba(239,68,68,0.1);  color: #dc2626; }

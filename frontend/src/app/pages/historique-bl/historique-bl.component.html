@@ -111,15 +111,27 @@
             </td>
             <td class="num cell-amount cell-net">{{ session.net_ajuste | number:'1.0-0' }} DA</td>
             <td class="num cell-amount">
-              @if (session.montant_recu !== null) {
-                {{ session.montant_recu | number:'1.0-0' }} DA
-              } @else {
-                <span class="cell-empty">—</span>
-              }
+              {{ session.montant_recu !== null ? ((session.montant_recu | number:'1.0-0') + ' DA') : '—' }}
             </td>
             <td>
-              @if (session.montant_recu !== null) {
-                <span class="diff-pill" [ngClass]="diffClass(session)">
+              @if (editingMontantId === session.id) {
+                <div class="montant-edit" (click)="$event.stopPropagation()">
+                  <div class="montant-edit__wrap">
+                    <span class="montant-edit__label">Versement (DA)</span>
+                    <input
+                      type="number"
+                      class="montant-input"
+                      [(ngModel)]="editingMontantValue"
+                      (keydown.enter)="saveMontant(session)"
+                      (keydown.escape)="cancelEditMontant()"
+                      autofocus
+                    />
+                  </div>
+                  <button class="montant-save" (click)="saveMontant(session)"><i class="pi pi-check"></i></button>
+                  <button class="montant-cancel" (click)="cancelEditMontant()"><i class="pi pi-times"></i></button>
+                </div>
+              } @else if (session.montant_recu !== null) {
+                <span class="diff-pill" [ngClass]="diffClass(session)" (click)="$event.stopPropagation(); startEditMontant(session)" pTooltip="Modifier le montant reçu">
                   @if (session.difference === 0) {
                     <i class="pi pi-check-circle"></i> Exact
                   } @else if ((session.difference ?? 0) < 0) {
@@ -127,9 +139,12 @@
                   } @else {
                     <i class="pi pi-arrow-up"></i> +{{ session.difference | number:'1.0-0' }} DA
                   }
+                  <i class="pi pi-pencil diff-edit-icon"></i>
                 </span>
               } @else {
-                <span class="cell-empty">—</span>
+                <span class="diff-pill-add" (click)="$event.stopPropagation(); startEditMontant(session)" pTooltip="Saisir le montant reçu">
+                  <i class="pi pi-plus"></i> Montant reçu
+                </span>
               }
             </td>
             <td class="cell-saved">{{ session.created_at | date:'dd/MM/yy HH:mm' }}</td>

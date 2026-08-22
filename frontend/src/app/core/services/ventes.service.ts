@@ -283,6 +283,10 @@ export class VentesService {
     return this.http.put<SessionRead>(`/api/v1/rapprochement-sessions/${id}`, payload);
   }
 
+  patchSessionMontant(id: number, versement: number) {
+    return this.http.patch<SessionRead>(`/api/v1/rapprochement-sessions/${id}/montant`, { versement });
+  }
+
   listSessions() {
     return this.http.get<SessionRead[]>('/api/v1/rapprochement-sessions');
   }

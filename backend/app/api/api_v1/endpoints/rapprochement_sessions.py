@@ -19,6 +19,9 @@ class CheckResponse(BaseModel):
     exists: bool
     session: Optional[SessionRead] = None
 
+class VersementPatch(BaseModel):
+    versement: float
+
 router = APIRouter()
 
 
@@ -106,6 +109,18 @@ def update_session(session_id: int, payload: SessionCreate, db: Session = Depend
     for l in payload.lignes:
         db.add(RapprochementSessionLigne(session_id=session_id, **l.model_dump()))
 
+    db.commit()
+    db.refresh(session)
+    return session
+
+
+@router.patch("/{session_id}/montant", response_model=SessionRead)
+def patch_montant(session_id: int, payload: VersementPatch, db: Session = Depends(get_session)):
+    session = db.get(RapprochementSession, session_id)
+    if not session:
+        raise HTTPException(status_code=404, detail="Session not found")
+    session.montant_recu = (session.montant_recu or 0) + payload.versement
+    session.difference = round(session.montant_recu - session.net_ajuste)
     db.commit()
     db.refresh(session)
     return session

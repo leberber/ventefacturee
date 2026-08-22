@@ -100,6 +100,31 @@ export class HistoriqueBlComponent implements OnInit {
     });
   }
 
+  editingMontantId: number | null = null;
+  editingMontantValue: number | null = null;
+
+  startEditMontant(session: SessionRead) {
+    this.editingMontantId = session.id;
+    // Pre-fill with the shortfall (positive) so livreur just confirms the balance due
+    const diff = session.difference ?? 0;
+    this.editingMontantValue = diff < 0 ? Math.abs(diff) : 0;
+  }
+
+  saveMontant(session: SessionRead) {
+    const versement = this.editingMontantValue ?? 0;
+    this.editingMontantId = null;
+    this.editingMontantValue = null;
+    if (versement === 0) return;
+    this.ventesService.patchSessionMontant(session.id, versement).subscribe(() => {
+      this.loadSessions();
+    });
+  }
+
+  cancelEditMontant() {
+    this.editingMontantId = null;
+    this.editingMontantValue = null;
+  }
+
   diffClass(session: SessionRead): string {
     if (session.difference === null) return '';
     if (session.difference < 0) return 'diff--shortfall';
